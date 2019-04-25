@@ -1,22 +1,200 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
-  "main": "main.js",
+  "name": "Boda-Lite-CE",
+  "version": "0.0.1",
+  "description": "Boda-lite-ce is a telecommunication network management application",
+  "main": "./src/electron-start.js",
+  "private": true,
+  "homepage": "./",
   "scripts": {
-    "start": "electron ."
+    "electron": "electron .",
+    "electron-dev-unix": "ELECTRON_START_URL=http://localhost:3000 electron .",
+    "electron-dev": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+    "start": "set PORT=3000 && react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "nf start",
+	"pack": "build --dir -c.extraMetadata.main=src/electron-start.js",
+    "dist": "build -c.extraMetadata.main=src/electron-start.js"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/bodastage/bts-ce-lite",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "Boda Telecom Suite",
+    "telecommunication",
+    "bodastage-solutions",
+    "bts-ce-lite",
+    "boda-ce-lite"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "author": "Bodastage Solutions",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@blueprintjs/core": "^3.3.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.0-14",
+    "@fortawesome/free-solid-svg-icons": "^5.2.0",
+    "@fortawesome/react-fontawesome": "0.1.0-11",
+    "@svgr/webpack": "4.1.0",
+    "ag-grid-community": "^20.0.0",
+    "ag-grid-react": "^20.0.0",
+    "ajv": "^6.5.2",
+    "axios": "^0.18.0",
+    "bfj": "6.1.1",
+    "bootstrap": "^4.1.2",
+    "case-sensitive-paths-webpack-plugin": "2.2.0",
+    "css-loader": "1.0.0",
+    "dotenv": "6.0.0",
+    "dotenv-expand": "4.2.0",
+    "file-loader": "2.0.0",
+    "fork-ts-checker-webpack-plugin-alt": "0.4.14",
+    "fs-extra": "7.0.1",
+    "glyphicons": "^0.2.0",
+    "i": "^0.3.6",
+    "identity-obj-proxy": "3.0.0",
+    "immutable": "^3.8.2",
+    "leaflet": "^1.3.3",
+    "leaflet-semicircle": "^2.0.2",
+    "mini-css-extract-plugin": "0.5.0",
+    "optimize-css-assets-webpack-plugin": "5.0.1",
+    "plotly.js": "^1.41.3",
+    "pnp-webpack-plugin": "1.2.1",
+    "popper": "^1.0.1",
+    "popper.js": "^1.14.3",
+    "react": "^16.8.6",
+    "react-ace": "^6.4.0",
+    "react-app-polyfill": "^0.2.1",
+    "react-color": "^2.17.0",
+    "react-container-dimensions": "^1.3.4",
+    "react-dom": "^16.8.6",
+    "react-dom-factories": "^1.0.2",
+    "react-fontawesome": "^1.6.1",
+    "react-grid-layout": "^0.16.6",
+    "react-leaflet": "^2.0.0",
+    "react-mosaic-component": "^2.1.0",
+    "react-plotly.js": "^2.2.0",
+    "react-redux": "^5.0.7",
+    "react-resizable": "^1.7.5",
+    "react-scripts": "3.0.0",
+    "react-splitter-layout": "^4.0.0",
+    "redux": "^3.7.2",
+    "redux-logger": "^3.0.6",
+    "redux-persist": "^5.10.0",
+    "redux-thunk": "^2.3.0",
+    "terser-webpack-plugin": "1.2.2",
+    "url-loader": "1.1.2",
+    "url-search-params": "^1.0.2",
+    "url-search-params-polyfill": "^4.0.1",
+    "whatwg-fetch": "^2.0.4",
+    "workbox-webpack-plugin": "3.6.3"
+  },
   "devDependencies": {
-    "electron": "^4.1.3"
-  }
+    "@babel/core": "^7.0.0-rc.1",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-rc.3",
+    "@babel/plugin-proposal-decorators": "^7.0.0",
+    "@babel/preset-env": "^7.0.0-rc.1",
+    "@babel/preset-react": "^7.0.0-rc.1",
+    "@blueprintjs/select": "^3.1.0",
+    "babel-7-jest": "^21.3.3",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "10.0.1",
+    "babel-jest": "24.7.1",
+    "babel-loader": "8.0.5",
+    "babel-plugin-named-asset-import": "^0.3.1",
+    "babel-plugin-syntax-decorators": "^6.13.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.5",
+    "babel-preset-react-app": "^7.0.1",
+    "chai": "^4.1.2",
+    "chai-immutable": "^1.6.0",
+    "electron": "^4.1.3",
+    "electron-builder": "^20.39.0",
+    "enzyme": "^3.5.0",
+    "enzyme-adapter-react-16": "^1.3.0",
+    "eslint": "^5.16.0",
+    "eslint-config-react-app": "^3.0.7",
+    "eslint-loader": "2.1.1",
+    "eslint-plugin-flowtype": "2.50.1",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-jsx-a11y": "6.1.2",
+    "eslint-plugin-react": "7.12.4",
+    "expect": "^23.5.0",
+    "fetch-mock": "^6.5.2",
+    "foreman": "^3.0.1",
+    "html-webpack-plugin": "4.0.0-alpha.2",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "24.7.1",
+    "jest-pnp-resolver": "1.0.2",
+    "jest-resolve": "23.6.0",
+    "jest-watch-typeahead": "^0.2.1",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
+    "mocha": "^5.2.0",
+    "moxios": "^0.4.0",
+    "npm": "^6.2.0",
+    "plotly": "^1.0.6",
+    "postcss-flexbugs-fixes": "4.1.0",
+    "postcss-loader": "3.0.0",
+    "postcss-preset-env": "6.5.0",
+    "postcss-safe-parser": "4.0.1",
+    "react-dev-utils": "^7.0.3",
+    "redux-devtools": "^3.4.1",
+    "redux-mock-store": "^1.5.3",
+    "regenerator-runtime": "^0.12.1",
+    "resolve": "1.10.0",
+    "sass-loader": "7.1.0",
+    "style-loader": "0.23.1",
+    "url-polyfill": "^1.0.14",
+    "webpack": "4.29.6",
+    "webpack-dev-server": "3.2.1",
+    "webpack-manifest-plugin": "2.0.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+	"build": {
+		"appId": "com.bodastage.btscelite",
+		"productName": "BTS-CE-Lite",
+		"copyright": "Copyright © 2019 ${author}",
+		"files": [
+			  "./build/**/*",
+			  "./src/electron-start.js",
+			  "package.json"
+		],
+		"dmg": {
+		  "contents": [
+			{
+			  "x": 110,
+			  "y": 150
+			},
+			{
+			  "x": 240,
+			  "y": 150,
+			  "type": "link",
+			  "path": "/Applications"
+			}
+		  ]
+		},
+		"linux": {
+		  "target": [
+			"AppImage",
+			"deb"
+		  ]
+		},
+		"win": {
+		  "target": "NSIS",
+		  "icon": "build/icon.ico"
+		},
+		"directories": {
+		  "buildResources": "assets"
+		}
+   }
 }

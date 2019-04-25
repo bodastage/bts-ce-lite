@@ -1,0 +1,57 @@
+#layout-container{
+    width: 100%;
+    height:100vh;
+    min-width: 840px;
+}
+
+#header{
+    
+}
+/*Tab drop styles
+Taken from tabdrop.css to create custom styles
+//'stefanpetre-bootstrap-tabdrop/css/tabdrop.css';
+*/
+.nav-tabs,
+.nav-pills {
+  position: relative;
+}
+
+/* adjust as needed so the tab text displays */
+.tabdrop{
+  width: 10px;
+}
+
+/* hide any icons found in tabs not on first line */
+.nav-tabs li li i{
+  visibility: hidden;
+}
+
+
+/*Tab drop*/
+.nav-tabs .bp3-popover-wrapper{
+    margin-left: 5px !important;
+}
+
+
+.split-panel .layout-pane{
+    margin-top: 4px;
+    padding: 2px;
+}
+
+
+.splitter-layout>div.layout-pane:first-child{
+    padding:10px
+}
+
+.splitter-layout>div.layout-pane-primary{
+    padding: 10px;
+}
+
+
+/*.layout-pane.layout-pane-primary .card {
+    margin-bottom: 50px;
+}*/
+
+.tab-pane {
+    margin-bottom: 50px;
+}
