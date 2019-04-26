@@ -14,7 +14,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "nf start",
-	"pack": "build --dir -c.extraMetadata.main=src/electron-start.js",
+    "pack": "build --dir -c.extraMetadata.main=src/electron-start.js",
     "dist": "build -c.extraMetadata.main=src/electron-start.js"
   },
   "repository": "https://github.com/bodastage/bts-ce-lite",
@@ -81,6 +81,7 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
+    "sqlite3": "^4.0.6",
     "terser-webpack-plugin": "1.2.2",
     "url-loader": "1.1.2",
     "url-search-params": "^1.0.2",
@@ -160,41 +161,41 @@
       "last 1 safari version"
     ]
   },
-	"build": {
-		"appId": "com.bodastage.btscelite",
-		"productName": "BTS-CE-Lite",
-		"copyright": "Copyright © 2019 ${author}",
-		"files": [
-			  "./build/**/*",
-			  "./src/electron-start.js",
-			  "package.json"
-		],
-		"dmg": {
-		  "contents": [
-			{
-			  "x": 110,
-			  "y": 150
-			},
-			{
-			  "x": 240,
-			  "y": 150,
-			  "type": "link",
-			  "path": "/Applications"
-			}
-		  ]
-		},
-		"linux": {
-		  "target": [
-			"AppImage",
-			"deb"
-		  ]
-		},
-		"win": {
-		  "target": "NSIS",
-		  "icon": "build/icon.ico"
-		},
-		"directories": {
-		  "buildResources": "assets"
-		}
-   }
+  "build": {
+    "appId": "com.bodastage.btscelite",
+    "productName": "BTS-CE-Lite",
+    "copyright": "Copyright © 2019 ${author}",
+    "files": [
+      "./build/**/*",
+      "./src/electron-start.js",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.ico"
+    },
+    "directories": {
+      "buildResources": "assets"
+    }
+  }
 }
