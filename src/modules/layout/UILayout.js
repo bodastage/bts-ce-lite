@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Classes } from '@blueprintjs/core';
 import classNames from 'classnames';
 import logo from '../../images/logo-no-text-white.svg';
-import { Button, Alignment, Menu, MenuDivider, MenuItem, Popover, Position } from "@blueprintjs/core";
+import { Button, Alignment, Menu, MenuDivider, MenuItem, Popover, Position, Navbar } from "@blueprintjs/core";
 import { addTab } from '../layout/uilayout-actions';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
@@ -41,51 +41,20 @@ class UILayout extends React.Component {
             
             const moduleMenu = (
             <Menu>
-                <MenuItem icon="wrench" text="Network Audit" 
+                <MenuItem icon="asterisk" text="Process CM dumps" 
                     onClick={this.addTab({
-                    component: 'NetworkAudit',
-                    title: 'Network Audit'
-                })}/>
+                        component: 'Reports',
+                        title: 'Process CM dumps'
+                    })}
+                />
+				
                 <MenuItem icon="th" text="Reports" 
                     onClick={this.addTab({
                         component: 'Reports',
                         title: 'Reports'
                     })}
                 />
-                <MenuItem icon="graph" text="Network Browser" 
-                    onClick={this.addTab({
-                    component: 'NetworkBrowser',
-                    title: 'Network Browser'
-                })}/>
-                <MenuItem icon={<FontAwesomeIcon icon="puzzle-piece"/>} text="MO Browser" 
-                    onClick={this.addTab({
-                            component: 'MOBrowser',
-                            title: 'MO Browser'})}
-                />
-                <MenuItem icon={<FontAwesomeIcon icon="university"/>} text="Telecom Library" 
-                    onClick={this.addTab({
-                        component: 'TelecomLib',
-                        title: 'Telecom Library'
-                    })}
-                />
-
-                <MenuDivider />
-                <MenuItem icon="cube" text="Performance" disabled={true} />
-                <MenuItem icon="cube" text="SON" disabled={true} />
-                <MenuItem icon="cube" text="CEx" disabled={true} />
-                <MenuItem icon="cube" text="Faults" disabled={true} />
-                <MenuItem icon="cube" text="Geo-Location" disabled={true} />
-                <MenuItem icon="cube" text="Work Orders" disabled={true} />
-                <MenuDivider />
-                <MenuItem icon={<FontAwesomeIcon icon="cogs"/>} text="Processes"
-                    onClick={this.addTab({
-                        component: 'Processes', 
-                        title: 'Processes'
-                    })}
-                />
-                <MenuItem icon="cog" text="Settings...">
-                    <MenuItem icon="cog" text="Configuration" disabled={true} />
-                </MenuItem>
+				
             </Menu>
             );
     
@@ -100,20 +69,14 @@ class UILayout extends React.Component {
             );
 
             return (
-                <div className={classNames(Classes.NAVBAR, Classes.DARK)}>
-                    <div className={Classes.NAVBAR_GROUP}>
-
-                        <img src={logo} width="50px" alt="Boda-CE-Lite" />  
-                        &nbsp;&nbsp;&nbsp;
-                            <div className={Classes.NAVBAR_HEADING}> 
-                                <div> 
-                                  Boda-CE-Lite <span className="version bp3-text-muted">v{"0.0.1"}</span>
-                                </div>
-                            </div>
-                    </div>
-                    
-                    <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)} align={Alignment.RIGHT}>
-                        <Button className={Classes.MINIMAL} icon="home" text="Home" 
+				<Navbar className={classNames(Classes.DARK)}>
+				
+					<Navbar.Group align={Alignment.LEFT}>
+						<img src={logo} width="50px" alt="BTS-CE-Lite" />  &nbsp;&nbsp;&nbsp;
+						<Navbar.Heading>BTS-CE-Lite <span className="version bp3-text-muted">v{"0.0.1"}</span></Navbar.Heading>
+					</Navbar.Group>
+					<Navbar.Group align={Alignment.RIGHT}>
+						<Button className={Classes.MINIMAL} icon="home" text="Home" 
                             onClick={this.addTab({component: 'dashboard', title: 'Home'})}/>
                         <Popover content={moduleMenu} position={Position.BOTTOM}>
                             <Button className={Classes.MINIMAL} icon="cube" text="Modules" />
@@ -124,8 +87,8 @@ class UILayout extends React.Component {
                         <Popover content={sessionMenu} position={Position.BOTTOM}>
                             <Button className={Classes.MINIMAL} icon="user" text={"Username"} />
                         </Popover>
-                    </div>
-                </div>   
+					</Navbar.Group>
+				</Navbar>
             );
         }
         

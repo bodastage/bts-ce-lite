@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dashboard from '../dashboard/Dashboard';
+import ProcessCMDumps from '../cm/ProcessCMDumps';
 import { closeTab, setActiveTab } from './uilayout-actions';
 import { Breadcrumb, OverflowList, Boundary, Position, Classes, MenuItem, 
     Popover, Menu, Icon } from "@blueprintjs/core";
@@ -10,6 +11,7 @@ import Help from '../help/Help';
 const Components = {
     "Help": Help,
     "Dashboard": Dashboard,
+	"ProcessCMDumps": ProcessCMDumps,
     };
 
 class Tabs extends React.Component {

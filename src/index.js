@@ -20,21 +20,23 @@ import '@blueprintjs/core/lib/css/blueprint.css'
 
 // Icons
 import { library } from '@fortawesome/fontawesome-svg-core'
-        import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-        import { faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
-            faQuestionCircle, faUser, faSitemap, faWrench, faPuzzlePiece,faSync,
-            faStopCircle, faUniversity, faCogs, faPowerOff, faArrowRight, faList,
-            faChartArea, faBrain, faGem, faUserMd, faGlobeAfrica, faPeopleCarry,
-            faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen,
-            faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle
-        } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
+	faQuestionCircle, faUser, faSitemap, faWrench, faPuzzlePiece,faSync,
+	faStopCircle, faUniversity, faCogs, faPowerOff, faArrowRight, faList,
+	faChartArea, faBrain, faGem, faUserMd, faGlobeAfrica, faPeopleCarry,
+	faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen,
+	faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle
+	,faAsterisk
+} from '@fortawesome/free-solid-svg-icons'
 
-        library.add(faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
-        faQuestionCircle, faUser, faSitemap, faWrench, faPuzzlePiece,faSync,
-        faStopCircle, faUniversity, faCogs, faPowerOff, faArrowRight, faList,
-        faChartArea, faBrain, faGem, faUserMd, faGlobeAfrica, faPeopleCarry,
-        faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen, 
-        faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle);
+library.add(faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
+faQuestionCircle, faUser, faSitemap, faWrench, faPuzzlePiece,faSync,
+faStopCircle, faUniversity, faCogs, faPowerOff, faArrowRight, faList,
+faChartArea, faBrain, faGem, faUserMd, faGlobeAfrica, faPeopleCarry,
+faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen, 
+faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle,
+faAsterisk);
 
 const store = configureStore();
 

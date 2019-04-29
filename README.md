@@ -1,9 +1,10 @@
 # BTS-CE-Lite
 
-BTS-CE-lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce)
+BTS-CE-lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
+platform desktop app develop with electron.
 
 ## Features
-* Parsing configuration management dumps
+* Parsing telecommunication configuration management dumps for various vendors
 
 ## License
 

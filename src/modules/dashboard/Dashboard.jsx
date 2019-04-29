@@ -33,46 +33,30 @@ class Dashboard extends React.Component {
                     
                         <div className="row dashboard-icon">
                             <div className="col-md-2">
-                                <div className="icon-display"><a title="Network Browser" href="#/netmgt" 
+                            <div className="icon-display"><a title="Process CM dumps" href="#/parsecmdumps" 
                                 onClick={this.addTab({
-                                component: 'NetworkBrowser',
-                                title: 'Network Browser'
-                                })}> <FontAwesomeIcon icon="sitemap" /></a></div>
-                                <div className="icon-label">Network Browser</div>
+                                component: 'ProcessCMDumps',
+                                title: 'Process CM dumps'
+                                })}> <FontAwesomeIcon icon="asterisk"/></a></div>
+                                <div className="icon-label">Process CM dumps</div>
                             </div>
 
                             <div className="col-md-2">
-                                <div className="icon-display" title="Network Audit Module"><a title="Network Audit" href="#/netaudit" 
-                                onClick={this.addTab({
-                                    component: 'NetworkAudit',
-                                    title: 'Network Audit'
-                                })}><FontAwesomeIcon icon="wrench"/></a></div>
-                                <div className="icon-label">Network Audit</div>
-                            </div>
-                            <div className="col-md-2">
-                                <div className="icon-display"><a href="#/mobrowser" title="Managed Object Browser" 
-                                onClick={this.addTab({
-                                    component: 'MOBrowser',
-                                    title: 'MO Browser'})}> <FontAwesomeIcon icon="puzzle-piece"/></a></div>
-                                <div className="icon-label">MO Browser</div>
-                            </div>
-
-                            <div className="col-md-2">
-                            <div className="icon-display"><a title="Telecom Library" href="#/telecomlib" 
-                                onClick={this.addTab({
-                                component: 'TelecomLib',
-                                title: 'Telecom Library'
-                                })}> <FontAwesomeIcon icon="university"/></a></div>
-                                <div className="icon-label">Telecom Library</div>
-                            </div>
-
-                            <div className="col-md-2">
-                            <div className="icon-display"><a title="Reports" href="#/reports" 
-                                onClick={this.addTab({
-                                component: 'Reports',
-                                title: 'Reports'
-                                })}> <FontAwesomeIcon icon="table"/></a></div>
+								<div className="icon-display"><a title="Reports" href="#/reports" 
+									onClick={this.addTab({
+									component: 'Reports',
+									title: 'Reports'
+									})}> <FontAwesomeIcon icon="table"/></a></div>
                                 <div className="icon-label">Reports</div>
+                            </div>
+							
+                            <div className="col-md-2">
+                            </div>
+
+                            <div className="col-md-2">
+                            </div>
+
+                            <div className="col-md-2">
                             </div>
                             
                             <div className="col-md-2">
@@ -81,54 +65,10 @@ class Dashboard extends React.Component {
 
                 </fieldset>		
                
-                
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend">Service Assurance</legend>
-                    
-                    <div className="row dashboard-icon">
-                        <div className="col-md-2">
-                            <div className="icon-display"><a title="Performance" href="#" className="text-muted"><FontAwesomeIcon icon="chart-line"/></a></div>
-                            <div className="icon-label">Performance</div>
-                        </div>
-
-                        <div className="col-md-2">
-                            <div className="icon-display "><a title="Self Optimization Network Functions" href="#" className="text-muted" ><FontAwesomeIcon icon="brain"/></a></div>
-                            <div className="icon-label">SON</div>
-                        </div>
-
-                        <div className="col-md-2">
-                            <div className="icon-display "><a title="Customer Experience Managemenet" href="#" className="text-muted" ><FontAwesomeIcon icon="gem"/></a></div>
-                            <div className="icon-label">CEM</div>
-                        </div>
-
-                        <div className="col-md-2">
-                            <div className="icon-display "><a title="Fault Managemenet" href="#" className="text-muted" ><FontAwesomeIcon icon="user-md"/></a></div>
-                            <div className="icon-label">Faults</div>
-                        </div>
-
-                        <div className="col-md-2">
-                            <div className="icon-display "><a title="Geo-Location" href="#" className="text-muted" ><FontAwesomeIcon icon="globe-africa"/></a></div>
-                            <div className="icon-label">Geo-Location</div>
-                        </div>
-                        
-
-                        <div className="col-md-2">
-                            <div className="icon-display "><a title="Works Authorisation" href="#" className="text-muted" ><FontAwesomeIcon icon="people-carry"/></a></div>
-                            <div className="icon-label">WorkOrders</div>
-                        </div>
-                    </div>
- 
-                </fieldset>
-                
                 <fieldset className="col-md-12 fieldset">    	
                     <legend className="legend">System</legend>
                     
                     <div className="row dashboard-icon">
-                        <div className="col-md-2">
-                            <div className="icon-display"><a title="Processes" href="#/processes" onClick={this.addTab({
-                                component: 'Processes', title: 'Processes'})}><FontAwesomeIcon icon="cogs"/></a></div>
-                            <div className="icon-label">Processes</div>
-                        </div>
 
                         <div className="col-md-2">
                             <div className="icon-display"><a title="Profile" href="#/profile" onClick={this.addTab({
@@ -146,6 +86,8 @@ class Dashboard extends React.Component {
                             <div className="icon-display"><a title="Help" href="#/help" onClick={this.addTab({
                                 component: 'Help', title: 'Help'})}><FontAwesomeIcon icon="question-circle"/></a></div>
                             <div className="icon-label">Help</div>
+                        </div>
+                        <div className="col-md-2">
                         </div>
                     </div>
                 </fieldset>
