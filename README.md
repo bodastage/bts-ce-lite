@@ -6,6 +6,14 @@ platform desktop app develop with electron.
 ## Features
 * Parsing telecommunication configuration management dumps for various vendors
 
+## Running in dev mode
+```
+> git clone repo_url
+> bts-ce-lite
+> npm install
+> npm run dev
+```
+
 ## License
 
 [Apache 2.0](LICENSE.md)
