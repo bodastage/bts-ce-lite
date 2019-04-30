@@ -31,6 +31,8 @@ export default class ProcessCMDumps extends React.Component {
 		this.vendorFormats = VENDOR_CM_FORMSTS
 		
 		this.processDumps.bind(this)
+		this.dismissErrorMessage.bind(this)
+		this.dismissSuccessMessage.bind(this)
 		
 	}
 	
@@ -78,6 +80,10 @@ export default class ProcessCMDumps extends React.Component {
 		});
 		
 	}
+	
+	dismissErrorMessage = () => { this.setState({errorMessage: null})}
+	dismissSuccessMessage = () => { this.setState({successMessage: null})}
+	
     render(){
         return (
             <div>
@@ -86,8 +92,23 @@ export default class ProcessCMDumps extends React.Component {
                 <div className="card mb-2">
 				{ this.state.processing ? <ProgressBar intent={Intent.PRIMARY}/> : ""}
 				
-				{this.state.errorMessage !== null ? <div className="alert alert-danger m-1 p-2" role="alert">{this.state.errorMessage}</div> : ""}  
-				{this.state.successMessage !== null ? <div className="alert alert-success m-1 p-2" role="alert">{this.state.successMessage}</div> : ""}  
+				{this.state.errorMessage !== null ? 
+					<div className="alert alert-danger m-1 p-2" role="alert">
+						{this.state.errorMessage}
+						<button type="button" className="close"  aria-label="Close" onClick={this.dismissErrorMessage}>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+					</div> 
+					: ""}  
+				{this.state.successMessage !== null ? 
+					<div className="alert alert-success m-1 p-2" role="alert">
+						{this.state.successMessage}
+							<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+					</div> 
+				: ""}  
+				
                   <div className="card-body">
                    
 					<FormGroup
@@ -115,7 +136,7 @@ export default class ProcessCMDumps extends React.Component {
 						labelInfo="(required)"
 						inline={true}
 					>
-						<FileInput text={this.state.inputFileText} onInputChange={this.onInputFileChange} />
+						<FileInput text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}}/>
 					</FormGroup>
 
 					<FormGroup
