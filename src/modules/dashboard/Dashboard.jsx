@@ -77,15 +77,12 @@ class Dashboard extends React.Component {
                         </div>
 
                         <div className="col-md-2">
-                        <div className="icon-display"><a title="Settings" href="#" onClick={this.addTab({
-                            component: 'Settings', title: 'Settings'})}><FontAwesomeIcon icon="cog"/></a></div>
-                            <div className="icon-label">Settings</div>
-                        </div>
-
-                        <div className="col-md-2">
                             <div className="icon-display"><a title="Help" href="#/help" onClick={this.addTab({
                                 component: 'Help', title: 'Help'})}><FontAwesomeIcon icon="question-circle"/></a></div>
                             <div className="icon-label">Help</div>
+                        </div>
+
+                        <div className="col-md-2">
                         </div>
                         <div className="col-md-2">
                         </div>

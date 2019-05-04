@@ -15,7 +15,8 @@
     "eject": "react-scripts eject",
     "dev": "nf start",
     "pack": "build --dir -c.extraMetadata.main=src/electron-start.js",
-    "dist": "build -c.extraMetadata.main=src/electron-start.js"
+    "dist": "build -c.extraMetadata.main=src/electron-start.js",
+    "postinstall": "install-app-deps"
   },
   "repository": "https://github.com/bodastage/bts-ce-lite",
   "keywords": [
@@ -37,6 +38,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.8.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@svgr/webpack": "4.1.0",
+    "@types/node": "^11.13.8",
     "ag-grid-community": "^20.0.0",
     "ag-grid-react": "^20.0.0",
     "ajv": "^6.5.2",
@@ -82,8 +84,10 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
+    "reflect-metadata": "^0.1.13",
     "sqlite3": "^4.0.6",
     "terser-webpack-plugin": "1.2.2",
+    "typeorm": "^0.2.16",
     "url-loader": "1.1.2",
     "url-search-params": "^1.0.2",
     "url-search-params-polyfill": "^4.0.1",
@@ -198,12 +202,12 @@
     "directories": {
       "buildResources": "assets"
     },
-	"publish":{
-		"provider":"github",
-		"owner":"bodastage",
-		"repo":"bts-ce-lite",
-		"private":false
-	}
+    "publish": {
+      "provider": "github",
+      "owner": "bodastage",
+      "repo": "bts-ce-lite",
+      "private": false
+    }
   },
   "contributors": [
     {

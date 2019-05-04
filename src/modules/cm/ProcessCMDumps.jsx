@@ -1,7 +1,7 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar  } from "@blueprintjs/core";
-import { VENDOR_CM_FORMSTS } from './VendorCMFormats.js'
+import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes   } from "@blueprintjs/core";
+import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 //import Electron from 'electron';
 
 const { remote } = window.require("electron")
@@ -59,10 +59,14 @@ export default class ProcessCMDumps extends React.Component {
 		console.log("Processing CM dumps...")
 		
 		const basepath = app.getAppPath();
-		const parser = path.join(basepath,'public','bin','boda-bulkcmparser.jar')
+		
+		const parser = VENDOR_PARSERS[this.state.currentVendor][this.state.currentFormat]
+		
+		console.log(parser)
+		const parser_path = path.join(basepath,'public','bin',parser)
 		
 		//const parser = ''
-		const child = spawn('java', ['-jar', parser, '-i',this.state.inputFileText,'-o',this.state.outputFolderText]);
+		const child = spawn('java', ['-jar', parser_path, '-i',this.state.inputFileText,'-o',this.state.outputFolderText]);
 		
 		child.stdout.on('data', (data) => {
 		  console.log(data.toString());
@@ -111,50 +115,40 @@ export default class ProcessCMDumps extends React.Component {
 				
                   <div className="card-body">
                    
-					<FormGroup
-						label="Select vendor"
-						labelFor="text-input"
-						labelInfo="(required)"
-						inline={true}
-					>
-						<HTMLSelect options={this.state.vendors} value={this.state.currentVendor} onChange={this.onVendorSelectChange}/>
-					</FormGroup>
+					<form>
+					  <div className="form-group row">
+						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vedndor</label>
+						<div className="col-sm-10">
+						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange}/>
+						</div>
+					  </div>
+					  <div className="form-group row">
+						<label htmlFor="select_file_format" className="col-sm-2 col-form-label">Password</label>
+						<div className="col-sm-10">
+						  <HTMLSelect id="select_file_format"options={VENDOR_CM_FORMSTS[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange}/>
+						</div>
+					  </div>
+					  <div className="form-group row">
+						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
+						<div className="col-sm-10">
+						  <FileInput className="form-control" text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}}/>
+						</div>
+					  </div>
+					  <div className="form-group row">
+						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
+						<div className="col-sm-10">
+						  <FileInput className="form-control" text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange}/>
+						</div>
+					  </div>
+					</form>
 					
-                   
-					<FormGroup
-						label="Select file format"
-						labelFor="text-input"
-						labelInfo="(required)"
-						inline={true}
-					>
-						<HTMLSelect options={VENDOR_CM_FORMSTS[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange}/>
-					</FormGroup>
-
-					<FormGroup
-						label="Input File/folder"
-						labelFor="text-input"
-						labelInfo="(required)"
-						inline={true}
-					>
-						<FileInput text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}}/>
-					</FormGroup>
-
-					<FormGroup
-						label="Output folder"
-						labelFor="text-input"
-						labelInfo="(required)"
-						inline={true}
-					>
-						<FileInput text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange}/>
-					</FormGroup>
 					
                   </div>
 				  
                 </div>
 				
+				<Button icon="play" text="Process" className={Classes.INTENT_PRIMARY}  onClick={this.processDumps}/> &nbsp;
 				<Button icon="add" text="Add file/folder"  /> &nbsp;
-				<Button icon="refresh" text="Process" className={Intent.SUCCESS}  onClick={this.processDumps}/> &nbsp;
-				<Button icon="add" text="Cancel"  /> &nbsp;
             </div>    
         );
     }
