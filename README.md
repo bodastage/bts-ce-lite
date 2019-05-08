@@ -9,7 +9,7 @@ platform desktop app develop with electron.
 ## Running in dev mode
 ```
 > git clone repo_url
-> bts-ce-lite
+> cd bts-ce-lite
 > npm install
 > npm run dev
 ```

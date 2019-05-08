@@ -5,9 +5,10 @@ import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 //import Electron from 'electron';
 
 const { remote } = window.require("electron")
-const { app } = window.require('electron').remote;
+const { app, process } = window.require('electron').remote;
 const { spawn } = window.require('child_process') 
 const path = window.require('path')
+const isDev = window.require('electron-is-dev');
 
 export default class ProcessCMDumps extends React.Component {
         
@@ -18,8 +19,8 @@ export default class ProcessCMDumps extends React.Component {
 		super(props);
 		
 		this.state = {
-			outputFolderText: "Choose output folder...",
-			inputFileText: "Choose file...",
+			outputFolderText: "Choose folder...",
+			inputFileText: "Choose folder...",
 			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA'],
 			currentVendor: 'ERICSSON',
 			currentFormat: 'BULKCM',
@@ -33,6 +34,7 @@ export default class ProcessCMDumps extends React.Component {
 		this.processDumps.bind(this)
 		this.dismissErrorMessage.bind(this)
 		this.dismissSuccessMessage.bind(this)
+		this.areFormInputsValid.bind(this)
 		
 	}
 	
@@ -55,18 +57,44 @@ export default class ProcessCMDumps extends React.Component {
 		)
 	}
 	
-	processDumps = () => {
-		console.log("Processing CM dumps...")
+	/**
+	* Validate the inputs from the form
+	*/
+	areFormInputsValid = () => {
+		if(this.state.inputFileText === null || this.state.inputFileText === "Choose folder..."){
+			this.setState({errorMessage: "Input folder is required"})
+			return false
+		}
+
+		if(this.state.outputFolderText === null || this.state.outputFolderText === "Choose folder..."){
+			this.setState({errorMessage: "Output folder is required"})
+			return false
+		}
 		
-		const basepath = app.getAppPath();
+		
+		return true
+	}
+	
+	processDumps = () => {
+		
+		//Validate inputs 
+		if(!this.areFormInputsValid()) return
+		
+		//Clear error and success messages when processing starts
+		this.setState({processing: true, errorMessage: null, successMessage: null})
+		
+		let basepath = app.getAppPath();
+		
+		console.log("isDev:",isDev)
+		
+		if (!isDev) {
+		  basepath = process.resourcesPath
+		} 
 		
 		const parser = VENDOR_PARSERS[this.state.currentVendor][this.state.currentFormat]
+		const parserPath = path.join(basepath,'libraries',parser)
 		
-		console.log(parser)
-		const parser_path = path.join(basepath,'public','bin',parser)
-		
-		//const parser = ''
-		const child = spawn('java', ['-jar', parser_path, '-i',this.state.inputFileText,'-o',this.state.outputFolderText]);
+		const child = spawn('java', ['-jar', parserPath, '-i',this.state.inputFileText,'-o',this.state.outputFolderText]);
 		
 		child.stdout.on('data', (data) => {
 		  console.log(data.toString());
@@ -74,12 +102,12 @@ export default class ProcessCMDumps extends React.Component {
 		});
 
 		child.stderr.on('data', (data) => {
-		  this.setState({errorMessage: data.toString()})
+		  this.setState({errorMessage: data.toString(), processing: false})
 		});
 		
 		child.on('exit', code => {
 			if(code === 0 ){
-				this.setState({errorMessage: null, successMessage: `Dump successfully parsed. Find csv files in ${this.state.outputFolderText}`})
+				this.setState({errorMessage: null, successMessage: `Dump successfully parsed. Find csv files in ${this.state.outputFolderText}`, processing: false})
 			}
 		});
 		
@@ -147,8 +175,7 @@ export default class ProcessCMDumps extends React.Component {
 				  
                 </div>
 				
-				<Button icon="play" text="Process" className={Classes.INTENT_PRIMARY}  onClick={this.processDumps}/> &nbsp;
-				<Button icon="add" text="Add file/folder"  /> &nbsp;
+                    <Button icon="play" text="Process" className={Classes.INTENT_PRIMARY}  onClick={this.processDumps}/> &nbsp;
             </div>    
         );
     }
