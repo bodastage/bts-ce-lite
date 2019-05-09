@@ -26,11 +26,6 @@ export default class Help extends React.Component {
                         <li>Issues with the application should be logged at the project's <b><a href="https://github.com/bodastage/bts-ce-lite/issues" target="_blank" rel="noopener noreferrer"> github issue tracker</a></b></li>
                     </ul>    
 
-
-                    <p>
-                        For commercial inquiries visit <a href="http://www.bodastage.com" target="_blank">http://www.bodastage.com</a> or send an email to info@bodastage.com.
-                    </p>
-
                   </div>
                 </div>
             </div>    

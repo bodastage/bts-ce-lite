@@ -2,13 +2,13 @@ import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes   } from "@blueprintjs/core";
 import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
-//import Electron from 'electron';
 
 const { remote } = window.require("electron")
 const { app, process } = window.require('electron').remote;
 const { spawn } = window.require('child_process') 
 const path = window.require('path')
 const isDev = window.require('electron-is-dev');
+const replace = window.require('replace-in-file');
 
 export default class ProcessCMDumps extends React.Component {
         
@@ -35,6 +35,7 @@ export default class ProcessCMDumps extends React.Component {
 		this.dismissErrorMessage.bind(this)
 		this.dismissSuccessMessage.bind(this)
 		this.areFormInputsValid.bind(this)
+		this.cleanHuaweiGexportFiles.bind(this)
 		
 	}
 	
@@ -75,17 +76,65 @@ export default class ProcessCMDumps extends React.Component {
 		return true
 	}
 	
+	
+	//@TODO: This should be added to a separated file
+	/**
+	* Clean Huawei GExport files.
+	*
+	*	sed -i -r "
+	*	s/_(BSC6900GSM|BSC6900UMTS|BSC6900GU|BSC6910GSM|BSC6910UMTS|BSC6910GU)//ig;
+	*	s/_(BTS3900|PICOBTS3900|BTS3911B|PICOBTS3911B|MICROBTS3900|MICROBTS3911B)//ig;
+	*	s/BSC(6910|6900)(UMTS|GSM)Function/FUNCTION/ig;
+	*	s/BSC(6910|6900)Equipment/EQUIPMENT/ig;
+	*	s/<class name=\"(.*)\"/<class name=\"\U\1\"/ig;
+	*	s/<class name=\"(.*)_MSCSERVER/<class name=\"\1/ig;
+	*	s/<class name=\"(.*)_ENODEB\"/<class name=\"\1\"/ig;
+	*	s/<class name=\"(.*)3900/<class name=\"\1/ig;
+	*	" /mediation/data/cm/huawei/raw/gexport/*.xml
+	*
+	* @exportFolder String Folder with the GExport dump XML files to be cleaned
+	*/
+	cleanHuaweiGexportFiles = (exportFolder) => {
+		const replaceOptions = {
+		  files: path.join(exportFolder,'*'),
+		  from: [
+			/_(BSC6900GSM|BSC6900UMTS|BSC6900GU|BSC6910GSM|BSC6910UMTS|BSC6910GU)/ig,
+			/_(BTS3900|PICOBTS3900|BTS3911B|PICOBTS3911B|MICROBTS3900|MICROBTS3911B)/ig,
+			/BSC(6910|6900)(UMTS|GSM)Function/ig,
+			/BSC(6910|6900)Equipment/ig,
+			/<class name=\"(.*)\"/ig,
+			/<class name=\"(.*)_MSCSERVER/ig,
+			/<class name=\"(.*)_ENODEB\"/ig,
+			/<class name=\"(.*)3900/
+		  ],
+		  to: [
+			"",
+			"",
+			"FUNCTION",
+			"EQUIPMENT",
+			(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)\"/)[1].toUpperCase() + "\"",
+			(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)_MSCSERVER/)[1],
+			(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)_ENODEB\"/)[1] + "\"",
+			(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)3900/)[1]
+		  ],
+		};
+		
+		const results = replace.sync(replaceOptions);
+		
+	}
+	
 	processDumps = () => {
 		
 		//Validate inputs 
 		if(!this.areFormInputsValid()) return
 		
+		const inputFolder = this.state.inputFileText
+		
 		//Clear error and success messages when processing starts
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		
 		let basepath = app.getAppPath();
-		
-		console.log("isDev:",isDev)
+
 		
 		if (!isDev) {
 		  basepath = process.resourcesPath
@@ -93,6 +142,11 @@ export default class ProcessCMDumps extends React.Component {
 		
 		const parser = VENDOR_PARSERS[this.state.currentVendor][this.state.currentFormat]
 		const parserPath = path.join(basepath,'libraries',parser)
+		
+		//Clean Huawei GExport files 
+		if(this.state.currentVendor === 'HUAWEI' && this.state.currentFormat === 'GEXPORT_XML'){
+			this.cleanHuaweiGexportFiles(inputFolder)
+		}
 		
 		const child = spawn('java', ['-jar', parserPath, '-i',this.state.inputFileText,'-o',this.state.outputFolderText]);
 		
@@ -122,7 +176,7 @@ export default class ProcessCMDumps extends React.Component {
                 <h3><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</h3>
 
                 <div className="card mb-2">
-				{ this.state.processing ? <ProgressBar intent={Intent.PRIMARY}/> : ""}
+				{ this.state.processing ? <ProgressBar intent={Intent.PRIMARY} className="mt-1"/> : ""}
 				
 				{this.state.errorMessage !== null ? 
 					<div className="alert alert-danger m-1 p-2" role="alert">
@@ -145,13 +199,13 @@ export default class ProcessCMDumps extends React.Component {
                    
 					<form>
 					  <div className="form-group row">
-						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vedndor</label>
+						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vendor</label>
 						<div className="col-sm-10">
 						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange}/>
 						</div>
 					  </div>
 					  <div className="form-group row">
-						<label htmlFor="select_file_format" className="col-sm-2 col-form-label">Password</label>
+						<label htmlFor="select_file_format" className="col-sm-2 col-form-label">Format</label>
 						<div className="col-sm-10">
 						  <HTMLSelect id="select_file_format"options={VENDOR_CM_FORMSTS[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange}/>
 						</div>

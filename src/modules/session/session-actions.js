@@ -1,5 +1,11 @@
 import axios from '../../api/config';
 import 'url-search-params-polyfill';
+//import * as sqlite3 from 'sqlite3';
+import { createConnection, Connection, ConnectionOptions } from "typeorm";
+
+//const sqlite3 = window.require('sqlite3').sqlite3;
+//const sqlite3 = window.require('sqlite3').verbose()
+
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
@@ -78,55 +84,52 @@ export function waitForDatabaseSetup(notice){
 export function checkDBSetupStatus(){
     return (dispatch, getState) => {
         
-        return axios.get("/authenticate")
-        .then( response => {
-            
-            if(response.status === 204){
-                dispatch(waitForDatabaseSetup("Database is still being setup..."));
-        
-                //Check every minute 1000*60
-                setTimeout(() => dispatch(checkDBSetupStatus()), 60000);
-            }else{
-                dispatch(confirmDBReady());
-            }           
-        })
-        .catch(function(error){
-            try{
-                if(error.response.status === 405){
-                    dispatch(confirmDBReady());
-                }else{
-                    dispatch(markLoginAsFailed("Request error!"));
-                }
-            }catch(e){
-                dispatch(markLoginAsFailed("Request error! Check connection."));
-            }
-        })
+		/*
+		const connection = createConnection({
+			  "type": "sqlite",
+			  "synchronize": true,
+			  "logging": true,
+			  "logger": "simple-console",
+			  "database": "bts.sqlite",
+			  "entities": [
+				"../../entities/*.js"
+			  ]
+		});
+		*/
+		dispatch(waitForDatabaseSetup("Loading preferences..."));
+
+		//Check every minute 1000*60
+		//setTimeout(() => dispatch(checkDBSetupStatus()), 60000);
+				
+	
     }
 }
 
 export function attemptAuthentication(loginDetails){
     return (dispatch, getState) => {
         dispatch(authenticateUser(loginDetails));
-        
+        /*
         const params = new URLSearchParams();
         params.append('username', loginDetails.username);
         params.append('password', loginDetails.password);
     
-        return axios.post("/authenticate", params, {
-            header: {'Content-Type': 'application/x-www-form-urlencoded'}
-        })
-        .then(response => {
-                if(response.status === 200){
-                  dispatch(logIntoApp(response.data));
-                }else if(response.status === 204){
-                  dispatch(checkDBSetupStatus());
-                }else{
-                   dispatch(markLoginAsFailed());
-                }
-        })
-        .catch(function (response) {
-            dispatch(markLoginAsFailed("Login attempt failed! Check connection."));
-        });
+		const connection = createConnection({
+			  "type": "sqlite",
+			  "synchronize": true,
+			  "logging": true,
+			  "logger": "simple-console",
+			  "database": "bts.sqlite",
+			  "entities": [
+				"../../entities/*.js"
+			  ]
+		});
+		*/
+		//connection.runMigrations()
+		
+		
+		dispatch(logIntoApp({first_name: "btsuser", email: "btsusr@bodastage.org"}));
+	
+	
     }
 }
 export default { logIntoApp, logOutOfApp, authenticateUser, attemptAuthentication };
