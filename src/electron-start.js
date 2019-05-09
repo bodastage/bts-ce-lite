@@ -28,7 +28,7 @@ function createWindow () {
 
     // and load the index.html of the app.
     mainWindow.loadURL(startUrl);
-
+	
 	if(typeof process.env.ELECTRON_START_URL !== 'undefined'){
 		// Open the DevTools.
 		mainWindow.webContents.openDevTools();				

@@ -96,7 +96,8 @@ export function checkDBSetupStatus(){
 			  ]
 		});
 		*/
-		dispatch(waitForDatabaseSetup("Loading preferences..."));
+		
+		//dispatch(waitForDatabaseSetup("Loading preferences..."));
 
 		//Check every minute 1000*60
 		//setTimeout(() => dispatch(checkDBSetupStatus()), 60000);

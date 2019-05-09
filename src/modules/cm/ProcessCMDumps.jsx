@@ -35,7 +35,10 @@ export default class ProcessCMDumps extends React.Component {
 		this.dismissErrorMessage.bind(this)
 		this.dismissSuccessMessage.bind(this)
 		this.areFormInputsValid.bind(this)
+		
+		//Move this logic to separate file 
 		this.cleanHuaweiGexportFiles.bind(this)
+		this.removeDublicateHuaweiGExportFiles.bind(this)
 		
 	}
 	
@@ -123,6 +126,46 @@ export default class ProcessCMDumps extends React.Component {
 		
 	}
 	
+	/*
+	* Take the latest file when there is more than one file from the same node .
+	*
+	8 @param pathToFolder The name of the folder containing the GExport XML CM dumps
+	*/
+	removeDublicateHuaweiGExportFiles = (pathToFolder) => {
+		const fs = window.require('fs');
+		
+		//Key - value pair of node and the most recent file
+		let nodeAndRecentFile = {}
+		
+		fs.readdir(pathToFolder, function(err, items) {
+			
+			for (var i=0; i<items.length; i++) {
+				const gexportFilename = items[i];
+				const matches = gexportFilename.match(/(.*)_(\d+)\.xml/)
+				const node = matches[1]
+				const timestamp = matches[2]
+				
+				if( typeof nodeAndRecentFile[node] === 'undefined'){
+					nodeAndRecentFile[node] = gexportFilename
+				}else{
+					//Get timestamp on file in nodeAndRecentFile
+					const mostRecentTimestamp = nodeAndRecentFile[node].match(/(.*)_(\d+)\.xml/)[2]
+					
+					if(parseInt(timestamp) > parseInt(mostRecentTimestamp)){
+						
+						//Delete the oldfile 
+						fs.unlinkSync(path.join(pathToFolder, nodeAndRecentFile[node]))
+						
+						nodeAndRecentFile[node] = gexportFilename
+
+					}
+					
+				}
+			}
+		});
+		
+	}
+	
 	processDumps = () => {
 		
 		//Validate inputs 
@@ -146,6 +189,8 @@ export default class ProcessCMDumps extends React.Component {
 		//Clean Huawei GExport files 
 		if(this.state.currentVendor === 'HUAWEI' && this.state.currentFormat === 'GEXPORT_XML'){
 			this.cleanHuaweiGexportFiles(inputFolder)
+			
+			this.removeDublicateHuaweiGExportFiles(inputFolder)
 		}
 		
 		const child = spawn('java', ['-jar', parserPath, '-i',this.state.inputFileText,'-o',this.state.outputFolderText]);

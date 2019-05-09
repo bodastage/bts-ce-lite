@@ -87,6 +87,7 @@
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "reflect-metadata": "^0.1.13",
+    "replace-in-file": "^4.0.0",
     "sqlite3": "^4.0.6",
     "terser-webpack-plugin": "1.2.2",
     "typeorm": "^0.2.16",
@@ -94,6 +95,7 @@
     "url-search-params-polyfill": "^4.0.1",
     "uws": "^100.0.1",
     "whatwg-fetch": "^2.0.4",
+    "winston-electron": "^0.2.0",
     "workbox-webpack-plugin": "3.6.3"
   },
   "devDependencies": {
@@ -225,5 +227,12 @@
       "url": "https://github.com/erssebagala"
     }
   ],
-  "browser": { "http": false, "https": false, "net": false, "path": false, "stream": false, "tls": false }
+  "browser": {
+    "http": false,
+    "https": false,
+    "net": false,
+    "path": false,
+    "stream": false,
+    "tls": false
+  }
 }
