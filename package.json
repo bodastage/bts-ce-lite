@@ -82,6 +82,7 @@
     "react-resizable": "^1.7.5",
     "react-scripts": "3.0.0",
     "react-splitter-layout": "^4.0.0",
+    "react-stopwatch": "^2.0.3",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "redux-persist": "^5.10.0",
@@ -178,6 +179,7 @@
     "files": [
       "./build/**/*",
       "./src/electron-start.js",
+	  "./background/parse_cm_dumps.html",
       "package.json"
     ],
     "extraResources": [
