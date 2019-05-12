@@ -17,6 +17,7 @@ import icons from 'glyphicons'
 import 'normalize.css/normalize.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
+import 'reflect-metadata';
 
 // Icons
 import { library } from '@fortawesome/fontawesome-svg-core'

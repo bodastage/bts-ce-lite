@@ -1,0 +1,10 @@
+{
+  "type": "sqlite",
+  "synchronize": true,
+  "logging": true,
+  "logger": "simple-console",
+  "database": "bts.sqlite",
+  "entities": [
+    "src/entities/*.js"
+  ]
+}

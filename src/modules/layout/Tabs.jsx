@@ -65,7 +65,7 @@ class Tabs extends React.Component {
         );
     };
     
-    renderBreadcrumb(props: IMenuItemProps, index: number) {
+    renderBreadcrumb(props, index) {
         const tabId = props.tabid;
         const Tag = Components[ this.props.tabs[tabId].component];
         const options = this.props.tabs[tabId].options;

@@ -28,10 +28,7 @@ class DashboardSidePanel extends React.Component {
                                             title: 'Process CM dumps'
                                 })}> <FontAwesomeIcon icon="asterisk" /> Process CM dumps</a>  
 
-            <a title="Reports" className="dropdown-item" href="#" onClick={this.addTab({
-                                                component: 'NetworkAudit',
-                                                title: 'Reports'
-                                })}><FontAwesomeIcon icon="table"/> Reports</a>
+            <a title="Reports" className="dropdown-item" href="#" ><FontAwesomeIcon icon="table"/> Reports</a>
 
 
 
@@ -39,7 +36,7 @@ class DashboardSidePanel extends React.Component {
                 <span className="dropdown-item-text legend w-100">System</span>
 
                 <a className="dropdown-item" title="Profile" href="#" 
-                    onClick={this.addTab({ component: 'UserProfile', title:'Profile'})}>
+                    >
                     <FontAwesomeIcon icon="user"/> Profile</a>
                                 
                 <a className="dropdown-item" href="#" title="Help" onClick={this.addTab({
