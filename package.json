@@ -22,12 +22,11 @@
     "electron:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l",
     "electron:win": "npm run react:build && npx electron-builder build --windows",
     "electron:mac": "npm run react:build && npx electron-builder build --mac",
-	"release": "npm run react:build && npx electron-builder build",
-	"release:all": "npm run react:build && npx electron-builder build -mwl -p always",
-	"electron:win": "npm run react:build && npx electron-builder build --windows",
-	"release:mac": "npm run react:build && npx electron-builder build --mac -p always",
-	"release:linux": "npm run react:build && npx electron-builder build --linux -p always",
-	"release:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l -p always"
+    "release": "npm run react:build && npx electron-builder build",
+    "release:all": "npm run react:build && npx electron-builder build -mwl -p always",
+    "release:mac": "npm run react:build && npx electron-builder build --mac -p always",
+    "release:linux": "npm run react:build && npx electron-builder build --linux -p always",
+    "release:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l -p always"
   },
   "main": "src/electron-start.js",
   "repository": "https://github.com/bodastage/bts-ce-lite",
@@ -41,10 +40,10 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "author": { 
-	"name":"Bodastage Solutions",
-	"email":"info@bodastage.com",
-	"url": "https://www.bodastage.com"
+  "author": {
+    "name": "Bodastage Solutions",
+    "email": "info@bodastage.com",
+    "url": "https://www.bodastage.com"
   },
   "license": "Apache-2.0",
   "dependencies": {
@@ -170,6 +169,7 @@
     "resolve": "1.10.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
+    "typescript": "^3.4.5",
     "url-polyfill": "^1.0.14",
     "webpack": "4.29.6",
     "webpack-dev-server": "3.2.1",
@@ -194,7 +194,7 @@
     "files": [
       "./build/**/*",
       "./src/electron-start.js",
-	  "./background/parse_cm_dumps.html",
+      "./background/parse_cm_dumps.html",
       "package.json"
     ],
     "extraResources": [
