@@ -1,6 +1,6 @@
 {
   "name": "BTS-CE-Lite",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "BTS-CE-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -9,14 +9,25 @@
     "electron-dev-unix": "ELECTRON_START_URL=http://localhost:3000 electron .",
     "electron-dev": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
     "start": "set PORT=3000 && react-scripts start",
-    "build": "react-scripts build",
+    "react:build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "nf start",
+    "electron:dev": "nf start",
     "pack": "npx electron-builder build --dir -c.extraMetadata.main=src/electron-start.js",
     "dist-all": "npx electron-builder build --x64 --macos --win --linux -c.extraMetadata.main=src/electron-start.js",
     "dist": "npx electron-builder",
-    "postinstall": "npx electron-builder install-app-deps"
+    "postinstall": "npx electron-builder install-app-deps",
+    "electron:local": "npm run react:build && electron .",
+    "electron:linux": "npm run react:build && npx electron-builder build --linux",
+    "electron:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l",
+    "electron:win": "npm run react:build && npx electron-builder build --windows",
+    "electron:mac": "npm run react:build && npx electron-builder build --mac",
+	"release": "npm run react:build && npx electron-builder build",
+	"release:all": "npm run react:build && npx electron-builder build -mwl -p always",
+	"electron:win": "npm run react:build && npx electron-builder build --windows",
+	"release:mac": "npm run react:build && npx electron-builder build --mac -p always",
+	"release:linux": "npm run react:build && npx electron-builder build --linux -p always",
+	"release:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l -p always"
   },
   "main": "src/electron-start.js",
   "repository": "https://github.com/bodastage/bts-ce-lite",
@@ -30,7 +41,11 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "author": "Bodastage Solutions",
+  "author": { 
+	"name":"Bodastage Solutions",
+	"email":"info@bodastage.com",
+	"url": "https://www.bodastage.com"
+  },
   "license": "Apache-2.0",
   "dependencies": {
     "@blueprintjs/core": "^3.3.0",
@@ -175,7 +190,7 @@
   "build": {
     "appId": "com.bodastage.btscelite",
     "productName": "BTS-CE-Lite",
-    "copyright": "Copyright © 2019 ${author}",
+    "copyright": "Copyright © 2019 $npm_package_author_name",
     "files": [
       "./build/**/*",
       "./src/electron-start.js",

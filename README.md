@@ -1,10 +1,10 @@
 # BTS-CE-Lite
 
 BTS-CE-lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
-platform desktop app develop with electron.
+platform desktop app.
 
 ## Features
-* Parsing telecommunication configuration management dumps for various vendors
+* Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
 
 ## Running in dev mode
 ```
@@ -14,6 +14,11 @@ platform desktop app develop with electron.
 > npm run dev
 ```
 
+## Getting help
+To report issues with the application or request new features use the issue tracker. For help and customizations send an email to info@bodastage.com.
+
 ## License
 
 [Apache 2.0](LICENSE.md)
+
+

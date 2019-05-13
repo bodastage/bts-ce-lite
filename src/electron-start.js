@@ -59,6 +59,7 @@ function createWindow () {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null
+	app.quit();
   })
 
 }
@@ -83,7 +84,6 @@ app.on('ready', ()  => {
 	
 	//Recieve messages from the background process to the UI renderer
 	ipcMain.on('parse-cm-request', (event, arg) => {
-		console.log("parse-cm-request:",arg)
 		
 		//forward requests to background process 
 		jobRenderer.webContents.send('parse-cm-job', arg);
@@ -91,7 +91,6 @@ app.on('ready', ()  => {
 	
 	//Forward UI renderer requests to backgroup process 
 	ipcMain.on('parse-cm-job', (event, arg) => {
-		console.log("parse-cm-job:",arg)
 		
 		//forware requests to ui renderer
 		mainWindow.webContents.send('parse-cm-request', arg);
