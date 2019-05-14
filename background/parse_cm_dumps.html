@@ -82,42 +82,42 @@ cleanHuaweiGexportFiles = (exportFolder) => {
 removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	const fs = window.require('fs');
 	
-	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: "Starting removal of duplicate gexport files..."}))
-	
+	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: "Starting removal of duplicate gexport files..."}));
 	//Key - value pair of node and the most recent file
-	let nodeAndRecentFile = {}
+	let nodeAndRecentFile = {};
 	
-	fs.readdirSync(pathToFolder, function(err, items) {
+	items = fs.readdirSync(pathToFolder);
+	
+	for (let i=0; i<items.length; i++) {
+		let gexportFilename = items[i];
+		let matches = gexportFilename.match(/(.*)_(\d+)\.xml/)
 		
-		for (var i=0; i<items.length; i++) {
-			const gexportFilename = items[i];
-			const matches = gexportFilename.match(/(.*)_(\d+)\.xml/)
+		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Checking whether ${gexportFilename} is a duplicate... `}));
+		
+		if(matches === null) continue;
+		
+		let node = matches[1];
+		let timestamp = matches[2];
+		
+		
+		if( typeof nodeAndRecentFile[node] === 'undefined'){
 			
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Checking whether ${gexportFilename} is a duplicate... `}))
-			
-			if(matches === null) return 
-			
-			const node = matches[1]
-			const timestamp = matches[2]
-			
-			if( typeof nodeAndRecentFile[node] === 'undefined'){
-				nodeAndRecentFile[node] = gexportFilename
-			}else{
-				//Get timestamp on file in nodeAndRecentFile
-				const mostRecentTimestamp = nodeAndRecentFile[node].match(/(.*)_(\d+)\.xml/)[2]
-				
-				if(parseInt(timestamp) > parseInt(mostRecentTimestamp)){
-					
-					//Delete the oldfile 
-					fs.unlinkSync(path.join(pathToFolder, nodeAndRecentFile[node]))
-					
-					nodeAndRecentFile[node] = gexportFilename
+			nodeAndRecentFile[node] = gexportFilename;
+		}else{
+			//Get timestamp on file in nodeAndRecentFile
+			const mostRecentTimestamp = nodeAndRecentFile[node].match(/(.*)_(\d+)\.xml/)[2];
 
-				}
+			if(parseInt(timestamp) > parseInt(mostRecentTimestamp)){
+				//Delete the oldfile 
+				fs.unlinkSync(path.join(pathToFolder, nodeAndRecentFile[node]));
 				
+				nodeAndRecentFile[node] = gexportFilename;
 			}
+			
 		}
-	});
+	}
+	
+	nodeAndRecentFile = {};
 	
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Duplicate file removal completed.`}))
 	

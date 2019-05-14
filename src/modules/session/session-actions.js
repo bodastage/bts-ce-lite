@@ -1,7 +1,7 @@
 import axios from '../../api/config';
 import 'url-search-params-polyfill';
 //import * as sqlite3 from 'sqlite3';
-import { createConnection, Connection, ConnectionOptions } from "typeorm";
+//import { createConnection, Connection, ConnectionOptions } from "typeorm";
 
 //const sqlite3 = window.require('sqlite3').sqlite3;
 //const sqlite3 = window.require('sqlite3').verbose()
