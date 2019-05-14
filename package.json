@@ -1,6 +1,6 @@
 {
   "name": "BTS-CE-Lite",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "BTS-CE-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -152,6 +152,7 @@
     "jest-pnp-resolver": "1.0.2",
     "jest-resolve": "23.6.0",
     "jest-watch-typeahead": "^0.2.1",
+    "jquery": "^3.4.1",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
     "mocha": "^5.2.0",
