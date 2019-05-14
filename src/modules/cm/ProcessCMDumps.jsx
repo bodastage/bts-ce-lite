@@ -78,7 +78,6 @@ export default class ProcessCMDumps extends React.Component {
 			return false
 		}
 		
-		
 		return true
 	}
 	
@@ -104,7 +103,7 @@ export default class ProcessCMDumps extends React.Component {
 			}
 			
 			if(obj.status === 'error'){
-				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})				
+				this.setState({errorMessage: obj.message, successMessage: null , infoMessage:null, processing: false})				
 			}
 			
 			if(obj.status === 'info'){
@@ -114,8 +113,7 @@ export default class ProcessCMDumps extends React.Component {
 		})
 		
 		return;
-		
-		
+
 	}
 	
 	dismissErrorMessage = () => { this.setState({errorMessage: null})}
@@ -136,39 +134,48 @@ export default class ProcessCMDumps extends React.Component {
 		
 	}
     render(){
+		
+		let successNotice = null;
+		if(this.state.successMessage !== null ){ 
+			successNotice = (<div className="alert alert-success m-1 p-2" role="alert">{this.state.successMessage}
+					<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>)
+		}
+		
+		
+		let errorNotice = null
+		if(this.state.errorMessage !== null){
+			errorNotice = (<div className="alert alert-danger m-1 p-2" role="alert">
+						{this.state.errorMessage}
+						<button type="button" className="close"  aria-label="Close" onClick={this.dismissErrorMessage}>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+					</div>)
+		}
+		
+		let infoNotice = null 
+		if(this.state.infoMessage !== null){
+			infoNotice = (<div className="alert alert-info m-1 p-2" role="alert">
+				{this.state.infoMessage}
+					<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>) 
+			
+		}
+		
         return (
             <div>
                 <h3><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</h3>
 
                 <div className="card mb-2">
-				{ this.state.processing ? <ProgressBar intent={Intent.PRIMARY} className="mt-1"/> : ""}
-				
-				{this.state.errorMessage !== null ? 
-					<div className="alert alert-danger m-1 p-2" role="alert">
-						{this.state.errorMessage}
-						<button type="button" className="close"  aria-label="Close" onClick={this.dismissErrorMessage}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-					</div> 
-					: ""}  
+				{ this.state.processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1"/>) : ""}
+				{errorNotice}
+				{successNotice}
+				{infoNotice}
 					
-				{this.state.successMessage !== null ? 
-					<div className="alert alert-success m-1 p-2" role="alert">
-						{this.state.successMessage}
-							<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-					</div> 
-				: ""}  
-					
-				{this.state.infoMessage !== null ? 
-					<div className="alert alert-info m-1 p-2" role="alert">
-						{this.state.infoMessage}
-							<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-					</div> 
-				: ""}  
                   <div className="card-body">
                    
 					<form>
