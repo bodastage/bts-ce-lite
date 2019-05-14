@@ -1,6 +1,6 @@
 # BTS-CE-Lite
 
-BTS-CE-lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
+BTS-CE-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
 platform telecommunication management desktop app.
 
 ## Features
