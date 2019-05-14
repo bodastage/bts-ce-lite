@@ -11,8 +11,8 @@ let mainWindow
 
 //Create parse cm background renderer
 function createParseCMBgWindow() {
-  //result = new BrowserWindow({"show": false, webPreferences: {nodeIntegration: true}})
-  result = new BrowserWindow({"show": true,width: 900, height: 600, webPreferences: {nodeIntegration: true}})
+  result = new BrowserWindow({"show": false, webPreferences: {nodeIntegration: true}})
+  //result = new BrowserWindow({"show": true,width: 900, height: 600, webPreferences: {nodeIntegration: true}})
   result.loadURL('file://' + __dirname + '/../background/parse_cm_dumps.html')
   result.on('closed', () => {
     console.log('background window closed')
