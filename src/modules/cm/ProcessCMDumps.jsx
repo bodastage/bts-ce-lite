@@ -1,8 +1,10 @@
 import React from 'react'
+import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes   } from "@blueprintjs/core";
 import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
+import { saveCMParsingFolders } from './cm-actions';
 
 const { remote, ipcRenderer } = window.require("electron")
 const { app, process } = window.require('electron').remote;
@@ -11,7 +13,7 @@ const path = window.require('path')
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
 
-export default class ProcessCMDumps extends React.Component {
+class ProcessCMDumps extends React.Component {
         
      static icon = "asterisk";
      static label = "Process CM Dumps"
@@ -20,8 +22,8 @@ export default class ProcessCMDumps extends React.Component {
 		super(props);
 		
 		this.state = {
-			outputFolderText: "Choose folder...",
-			inputFileText: "Choose folder...",
+			outputFolderText: this.props.inputFolder === null ? "Choose folder..." : this.props.inputFolder,
+			inputFileText: this.props.outputFolder === null ? "Choose folder..." : this.props.outputFolder,
 			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA'],
 			currentVendor: 'ERICSSON',
 			currentFormat: 'BULKCM',
@@ -83,6 +85,9 @@ export default class ProcessCMDumps extends React.Component {
 	
 	
 	processDumps = () => {
+		
+		//Save the input and output folders 
+		this.props.dispatch(saveCMParsingFolders(this.state.inputFileText, this.state.outputFolderText))
 		
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		const payload = {
@@ -224,3 +229,12 @@ export default class ProcessCMDumps extends React.Component {
         );
     }
 }
+
+function mapStateToProps(state) {
+  return {
+    inputFolder: state.cm.parse_cm.inputFolder,
+    outputFolder: state.cm.parse_cm.outputFolder
+  }
+}
+
+export default connect(mapStateToProps)(ProcessCMDumps);
