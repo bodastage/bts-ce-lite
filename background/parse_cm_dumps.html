@@ -82,6 +82,14 @@ cleanHuaweiGexportFiles = (exportFolder) => {
 removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	const fs = window.require('fs');
 	
+	//Create temp folder
+	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files')
+	
+	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Creating folder for duplicate files: ${repeatedFilesFolder} ... `}));
+	if (!fs.existsSync(repeatedFilesFolder)) {
+		fs.mkdirSync(repeatedFilesFolder)	
+	}
+
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: "Starting removal of duplicate gexport files..."}));
 	//Key - value pair of node and the most recent file
 	let nodeAndRecentFile = {};
@@ -99,7 +107,6 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 		let node = matches[1];
 		let timestamp = matches[2];
 		
-		
 		if( typeof nodeAndRecentFile[node] === 'undefined'){
 			
 			nodeAndRecentFile[node] = gexportFilename;
@@ -109,7 +116,11 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 
 			if(parseInt(timestamp) > parseInt(mostRecentTimestamp)){
 				//Delete the oldfile 
-				fs.unlinkSync(path.join(pathToFolder, nodeAndRecentFile[node]));
+				//fs.unlinkSync(path.join(pathToFolder, nodeAndRecentFile[node]));
+				
+				let oldPath = path.join(pathToFolder, nodeAndRecentFile[node])
+				let newPath = path.join(repeatedFilesFolder, gexportFilename)
+				fs.renameSync(oldPath, newPath)
 				
 				nodeAndRecentFile[node] = gexportFilename;
 			}

@@ -9,7 +9,8 @@ export default class Timer extends  React.Component  {
 	render(){
 		if(this.props.visible === false) return ""
 
-		return (<ReactStopwatch
+		return (
+			<ReactStopwatch
 			seconds={0}
 			minutes={0}
 			hours={0}
@@ -22,8 +23,7 @@ export default class Timer extends  React.Component  {
 			render={({ formatted, hours, minutes, seconds }) => {
 			  return ( <span className={this.props.className}>{ hours.toString().padStart(2, '0') }:{ minutes.toString().padStart(2, '0') }:{ seconds.toString().padStart(2, '0') }</span> );
 			}}
-		   />);
-		
+		   />);		
 	}
 	
 }
