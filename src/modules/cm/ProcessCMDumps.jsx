@@ -1,17 +1,18 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes   } from "@blueprintjs/core";
+import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes, Icon   } from "@blueprintjs/core";
 import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
 import { saveCMParsingFolders } from './cm-actions';
 
-const { remote, ipcRenderer } = window.require("electron")
-const { app, process } = window.require('electron').remote;
+const { remote, ipcRenderer} = window.require("electron")
+const { app, process, shell } = window.require('electron').remote;
 const { spawn } = window.require('child_process') 
 const path = window.require('path')
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
+const fs = window.require('fs');
 
 class ProcessCMDumps extends React.Component {
         
@@ -42,6 +43,7 @@ class ProcessCMDumps extends React.Component {
 		this.areFormInputsValid.bind(this)
 		
 		this.clearForm.bind(this)
+		this.launchFolderExplorer.bind(this)
 		
 		this.currentTimerValue = "00:00:00"
 		
@@ -125,6 +127,24 @@ class ProcessCMDumps extends React.Component {
 	
 	dismissSuccessMessage = () => { this.setState({successMessage: null})}
 	
+		
+	/**
+	* Launch given folder path in file explorer
+	*
+	* @param string folderName
+	*/	
+	launchFolderExplorer = (folderName) => {
+		console.log(folderName)
+		
+		if (!fs.existsSync(folderName)) {
+			this.setState({errorMessage: `${folderName} does not exist`})
+			return;
+		}
+		shell.openItem(folderName)
+		
+	}
+	
+	
 	updateTimerValue = (hours, minutes, seconds) => { 
 		this.currentTimerValue = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` 
 	} 
@@ -170,6 +190,7 @@ class ProcessCMDumps extends React.Component {
 			</div>) 
 			
 		}
+
 		
         return (
             <div>
@@ -198,14 +219,20 @@ class ProcessCMDumps extends React.Component {
 					  </div>
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
-						<div className="col-sm-10">
+						<div className="col-sm-8">
 						  <FileInput className="form-control" text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}}/>
+						</div>
+						<div className="col-sm-2">
+							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)}/>
 						</div>
 					  </div>
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
-						<div className="col-sm-10">
+						<div className="col-sm-8">
 						  <FileInput className="form-control" text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange}/>
+						</div>
+						<div className="col-sm-2">
+							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.outputFolderText)}/>
 						</div>
 					  </div>
 					  
