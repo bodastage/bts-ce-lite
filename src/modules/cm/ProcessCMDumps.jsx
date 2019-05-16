@@ -134,7 +134,6 @@ class ProcessCMDumps extends React.Component {
 	* @param string folderName
 	*/	
 	launchFolderExplorer = (folderName) => {
-		console.log(folderName)
 		
 		if (!fs.existsSync(folderName)) {
 			this.setState({errorMessage: `${folderName} does not exist`})

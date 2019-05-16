@@ -45,10 +45,11 @@ getFileType = (filename) => {
 * Uncompress files in given folder 
 * @param string folderName
 */
-uncompressFiles = (folderName) => {
+uncompressFiles = async (folderName) => {
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files in ${folderName} ... `}));
-	
 	let files = fs.readdirSync(folderName,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	
+	let promiseArray = []
 	
 	for (let i=0; i<files.length; i++) {
 		let filename = files[i];
@@ -56,15 +57,22 @@ uncompressFiles = (folderName) => {
 		let fType = getFileType(filePath);
 		
 		if(fType.ext === 'gz' && fType.mime === 'application/gzip') {
-			gunzip( filePath, filePath.replace('.gz',''), function() {
-				ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Un-compressed  ${filename}. `}));
-				
-				fs.unlinkSync(filePath)
-			});
+			promiseArray.push(
+				new Promise((resolve, reject) => {
+					gunzip( filePath, filePath.replace('.gz',''), function() {
+						ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressed  ${filename}. `}));
+						fs.unlinkSync(filePath)
+						resolve(`Uncompressed  ${filename}. `)
+					});
+				})
+			);
 		}
 		
-		
 	}
+	
+	let r = await Promise.all(promiseArray)
+	return r
+
 }
 
 /**
@@ -155,7 +163,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 
 			if(parseInt(timestamp) > parseInt(mostRecentTimestamp)){
 				let oldPath = path.join(pathToFolder, nodeAndRecentFile[node])
-				let newPath = path.join(repeatedFilesFolder, gexportFilename)
+				let newPath = path.join(repeatedFilesFolder, nodeAndRecentFile[node])
 				fs.renameSync(oldPath, newPath)
 				
 				nodeAndRecentFile[node] = gexportFilename;
@@ -171,7 +179,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 }
 
 
-processCMDumps = (vendor, format, inputFolder, outputFolder) => {
+processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	let basepath = app.getAppPath();
 
 	if (!isDev) {
@@ -194,15 +202,20 @@ processCMDumps = (vendor, format, inputFolder, outputFolder) => {
 		try{
 			removeDublicateHuaweiGExportFiles(inputFolder)
 			
-			uncompressFiles(inputFolder)
+			await new Promise((resolve, reject)=>{
+				try{
+					uncompressFiles(inputFolder).then(v=>resolve(v))
+				}catch(error){
+					reject(error)
+				}
+			});
 			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
 			cleanHuaweiGexportFiles(inputFolder)
-
-			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleanup of GExport XML files completed.`}))
 			
 		}catch(error){
+			console.error('Error occurred:', error);
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toStrong()}))
 			return;
 		}
