@@ -1,6 +1,6 @@
 {
   "name": "BTS-CE-Lite",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "BTS-CE-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -99,6 +99,7 @@
     "react-scripts": "3.0.0",
     "react-splitter-layout": "^4.0.0",
     "react-stopwatch": "^2.0.3",
+    "read-chunk": "^3.2.0",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "redux-persist": "^5.10.0",
