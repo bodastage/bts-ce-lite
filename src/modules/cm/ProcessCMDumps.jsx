@@ -110,7 +110,7 @@ class ProcessCMDumps extends React.Component {
 			}
 			
 			if(obj.status === 'error'){
-				this.setState({errorMessage: obj.message, successMessage: null , infoMessage:null, processing: false})				
+				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})				
 			}
 			
 			if(obj.status === 'info'){

@@ -7,7 +7,10 @@ const { spawn } = window.require('child_process')
 const path = window.require('path')
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
-
+const fs = window.require('fs');
+const readChunk = window.require('read-chunk');
+const fileType = window.require('file-type');
+const gunzip = window.require('gunzip-file')
 
 const VENDOR_PARSERS = {
 	'ERICSSON': {
@@ -25,6 +28,42 @@ const VENDOR_PARSERS = {
 	},
 	'NOKIA': {
 		'RAML': 'boda-nokiacmdataparser.jar'
+	}
+}
+
+/*
+* Retun the extension and mime type of a file
+*
+* @param string filename 
+*/
+getFileType = (filename) => {
+	let buffer = readChunk.sync(filename, 0, fileType.minimumBytes);
+	return fileType(buffer);
+}
+
+/**
+* Uncompress files in given folder 
+* @param string folderName
+*/
+uncompressFiles = (folderName) => {
+	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files in ${folderName} ... `}));
+	
+	let files = fs.readdirSync(folderName,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	
+	for (let i=0; i<files.length; i++) {
+		let filename = files[i];
+		let filePath = path.join(folderName,filename)
+		let fType = getFileType(filePath);
+		
+		if(fType.ext === 'gz' && fType.mime === 'application/gzip') {
+			gunzip( filePath, filePath.replace('.gz',''), function() {
+				ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Un-compressed  ${filename}. `}));
+				
+				fs.unlinkSync(filePath)
+			});
+		}
+		
+		
 	}
 }
 
@@ -80,7 +119,6 @@ cleanHuaweiGexportFiles = (exportFolder) => {
 8 @param pathToFolder The name of the folder containing the GExport XML CM dumps
 */
 removeDublicateHuaweiGExportFiles = (pathToFolder) => {
-	const fs = window.require('fs');
 	
 	//Create temp folder
 	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files')
@@ -94,11 +132,12 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	//Key - value pair of node and the most recent file
 	let nodeAndRecentFile = {};
 	
-	items = fs.readdirSync(pathToFolder);
+	//items = fs.readdirSync(pathToFolder);
+	items = fs.readdirSync(pathToFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
 	for (let i=0; i<items.length; i++) {
 		let gexportFilename = items[i];
-		let matches = gexportFilename.match(/(.*)_(\d+)\.xml/)
+		let matches = gexportFilename.match(/(.*)_(\d+)\.xml.*/)
 		
 		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Checking whether ${gexportFilename} is a duplicate... `}));
 		
@@ -112,12 +151,9 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 			nodeAndRecentFile[node] = gexportFilename;
 		}else{
 			//Get timestamp on file in nodeAndRecentFile
-			const mostRecentTimestamp = nodeAndRecentFile[node].match(/(.*)_(\d+)\.xml/)[2];
+			const mostRecentTimestamp = nodeAndRecentFile[node].match(/(.*)_(\d+)\.xml.*/)[2];
 
 			if(parseInt(timestamp) > parseInt(mostRecentTimestamp)){
-				//Delete the oldfile 
-				//fs.unlinkSync(path.join(pathToFolder, nodeAndRecentFile[node]));
-				
 				let oldPath = path.join(pathToFolder, nodeAndRecentFile[node])
 				let newPath = path.join(repeatedFilesFolder, gexportFilename)
 				fs.renameSync(oldPath, newPath)
@@ -145,18 +181,29 @@ processCMDumps = (vendor, format, inputFolder, outputFolder) => {
 	const parser = VENDOR_PARSERS[vendor][format]
 	const parserPath = path.join(basepath,'libraries',parser)
 	
+	//Uncompress files for other vendor format combinations except huawei gexport 
+	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
+	//uncompressing what does not need to be uncompressed 
+	if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
+		uncompressFiles(inputFolder)
+	}
+	
+	
 	//Clean Huawei GExport files 
 	if(vendor === 'HUAWEI' && format === 'GEXPORT_XML'){
 		try{
 			removeDublicateHuaweiGExportFiles(inputFolder)
 			
+			uncompressFiles(inputFolder)
+			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
 			cleanHuaweiGexportFiles(inputFolder)
 
+			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleanup of GExport XML files completed.`}))
 			
 		}catch(error){
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error}))
+			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toStrong()}))
 			return;
 		}
 		
