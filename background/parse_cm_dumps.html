@@ -11,6 +11,9 @@ const fs = window.require('fs');
 const readChunk = window.require('read-chunk');
 const fileType = window.require('file-type');
 const gunzip = window.require('gunzip-file')
+const log = window.require('electron-log');
+
+log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
 
 const VENDOR_PARSERS = {
 	'ERICSSON': {
@@ -47,6 +50,7 @@ getFileType = (filename) => {
 */
 uncompressFiles = async (folderName) => {
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files in ${folderName} ... `}));
+	log.info(`[parse_cm_job] Uncompressing files in ${folderName} ...`)
 	let files = fs.readdirSync(folderName,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
 	let promiseArray = []
@@ -61,11 +65,15 @@ uncompressFiles = async (folderName) => {
 				new Promise((resolve, reject) => {
 					gunzip( filePath, filePath.replace('.gz',''), function() {
 						ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressed  ${filename}. `}));
+						log.info(`[parse_cm_job] Uncompressed  ${filename} successfully.`)
+						
 						fs.unlinkSync(filePath)
 						resolve(`Uncompressed  ${filename}. `)
 					});
 				})
 			);
+		}else{
+			log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
 		}
 		
 	}
@@ -132,10 +140,13 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files')
 	
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Creating folder for duplicate files: ${repeatedFilesFolder} ... `}));
+	log.info(`[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `)
+	
 	if (!fs.existsSync(repeatedFilesFolder)) {
 		fs.mkdirSync(repeatedFilesFolder)	
 	}
 
+	log.info("[parse_cm_job] Starting removal of duplicate gexport files...")
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: "Starting removal of duplicate gexport files..."}));
 	//Key - value pair of node and the most recent file
 	let nodeAndRecentFile = {};
@@ -148,6 +159,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 		let matches = gexportFilename.match(/(.*)_(\d+)\.xml.*/)
 		
 		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Checking whether ${gexportFilename} is a duplicate... `}));
+		log.info(`[parse_cm_job] Checking whether ${gexportFilename} is a duplicate... `)
 		
 		if(matches === null) continue;
 		
@@ -175,6 +187,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	nodeAndRecentFile = {};
 	
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Duplicate file removal completed.`}))
+	log.info(`[parse_cm_job] Duplicate file removal completed.`)
 	
 }
 
@@ -211,11 +224,15 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			});
 			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
+			log.info(`[parse_cm_job] Cleaning GExport XML files...`)
+			
 			cleanHuaweiGexportFiles(inputFolder)
+			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleanup of GExport XML files completed.`}))
+			log.info(`[parse_cm_job] Cleanup of GExport XML files completed.`)
 			
 		}catch(error){
-			console.error('Error occurred:', error);
+			log.error('[parse_cm_job] Error occurred:${error.toString()}');
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toStrong()}))
 			return;
 		}
@@ -223,6 +240,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	}
 	
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Parsing files...`}))
+	log.info("[parse_cm_job] Parsing files...")
 	
 	const child = spawn('java', ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder]);
 	
@@ -232,22 +250,21 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 
 	child.stderr.on('data', (data) => {
 	  ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: data.toString()}))
+	  log.info(`[parse_cm_job] ${data.toString()}`)
 	});
 	
 	child.on('exit', code => {
 		if(code === 0 ){
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"success", message: `Dump successfully parsed. Find csv files in ${outputFolder}`}))
+			log.info(`[parse_cm_job] Dump successfully parsed. Find csv files in ${outputFolder}`)
 		}else{
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: "Something went wrong"}))
+			log.error(`Something went wrong. Error code : ${code}`)
 		}
 	});
 
 }
 	
-function log(value) {
-	ipcRenderer.send('to-main', process.pid + ': ' + value);
-}
-
 ipcRenderer.on('parse-cm-job', (event, args) => {
 	
 	const obj  = JSON.parse(args)

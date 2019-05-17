@@ -13,6 +13,7 @@ const path = window.require('path')
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
 const fs = window.require('fs');
+const log = window.require('electron-log');
 
 class ProcessCMDumps extends React.Component {
         
@@ -100,21 +101,25 @@ class ProcessCMDumps extends React.Component {
 			}
 
 		ipcRenderer.send('parse-cm-request', JSON.stringify(payload))
+		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
 		ipcRenderer.on('parse-cm-request', (event, args) => {
-
+			
+			log.info(`[process_cm_dumps] Received message from IPC channel "parse-cm-request with message ${args}"`)	
+			
 			const obj = JSON.parse(args)
 			if(obj.status === 'success'){
-				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})				
+				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
 			}
 			
 			if(obj.status === 'error'){
-				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})				
+				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
 			}
 			
 			if(obj.status === 'info'){
-				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})				
+				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})
+				
 			}
 
 		})

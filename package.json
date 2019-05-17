@@ -1,6 +1,6 @@
 {
   "name": "BTS-CE-Lite",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "BTS-CE-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -66,6 +66,7 @@
     "dotenv": "6.0.0",
     "dotenv-expand": "4.2.0",
     "electron-is-dev": "^1.1.0",
+    "electron-log": "^3.0.5",
     "file-loader": "2.0.0",
     "file-type": "^11.0.0",
     "fork-ts-checker-webpack-plugin-alt": "0.4.14",
