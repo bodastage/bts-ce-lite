@@ -60,22 +60,25 @@ uncompressFiles = async (folderName) => {
 		let filePath = path.join(folderName,filename)
 		let fType = getFileType(filePath);
 		
-		if(fType.ext === 'gz' && fType.mime === 'application/gzip') {
-			promiseArray.push(
-				new Promise((resolve, reject) => {
-					gunzip( filePath, filePath.replace('.gz',''), function() {
-						ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressed  ${filename}. `}));
-						log.info(`[parse_cm_job] Uncompressed  ${filename} successfully.`)
-						
-						fs.unlinkSync(filePath)
-						resolve(`Uncompressed  ${filename}. `)
-					});
-				})
-			);
-		}else{
-			log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
+		try{
+			if(fType.ext === 'gz' && fType.mime === 'application/gzip') {
+				promiseArray.push(
+					new Promise((resolve, reject) => {
+						gunzip( filePath, filePath.replace('.gz',''), function() {
+							ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressed  ${filename}. `}));
+							log.info(`[parse_cm_job] Uncompressed  ${filename} successfully.`)
+							
+							fs.unlinkSync(filePath)
+							resolve(`Uncompressed  ${filename}. `)
+						});
+					})
+				);
+			}else{
+				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
+			}
+		}catch(e){
+			log.info(`[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`)
 		}
-		
 	}
 	
 	let r = await Promise.all(promiseArray)

@@ -38,13 +38,13 @@ class ProcessCMDumps extends React.Component {
 		
 		this.vendorFormats = VENDOR_CM_FORMSTS
 		
-		this.processDumps.bind(this)
-		this.dismissErrorMessage.bind(this)
-		this.dismissSuccessMessage.bind(this)
-		this.areFormInputsValid.bind(this)
+		this.processDumps = this.processDumps.bind(this)
+		this.dismissErrorMessage = this.dismissErrorMessage.bind(this)
+		this.dismissSuccessMessage = this.dismissSuccessMessage.bind(this)
+		this.areFormInputsValid = this.areFormInputsValid.bind(this)
 		
-		this.clearForm.bind(this)
-		this.launchFolderExplorer.bind(this)
+		this.clearForm = this.clearForm.bind(this)
+		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
 		this.currentTimerValue = "00:00:00"
 		
