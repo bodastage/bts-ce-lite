@@ -3,7 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import  './dashboard.css';
 import { connect } from 'react-redux';
 import { addTab } from '../layout/uilayout-actions';
-import { Icon } from "@blueprintjs/core";
+import { Icon, Toaster, Intent } from "@blueprintjs/core";
+
+const { shell } = window.require('electron').remote;
+const log = window.require('electron-log');
+const fs = window.require('fs');
 
 class Dashboard extends React.Component {
     
@@ -14,6 +18,8 @@ class Dashboard extends React.Component {
         super(props);
         
         this.addTab = this.addTab.bind(this);
+		
+		this.toaster = new Toaster();
 
     }
     
@@ -23,6 +29,20 @@ class Dashboard extends React.Component {
         let tabId = options.component;
         this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
     }
+	
+	showLogFile = (e) => {
+		const logPath = log.transports.file.findLogPath()
+		if (!fs.existsSync(logPath)) {
+			log.warn(`[dashboard] ${logPath} does not exist.`)
+			this.toaster.show({
+                icon: "info-sign",
+                intent: Intent.WARNING,
+                message: "${logPath} does nit exist.",
+			});
+			return;
+		}
+		shell.openItem(logPath)
+	}
     
     render(){   
         return (
@@ -79,6 +99,8 @@ class Dashboard extends React.Component {
                         </div>
 
                         <div className="col-md-2">
+                            <div className="icon-display"><a title="Log file" href="#/" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/></a></div>
+                            <div className="icon-label">Log file</div>
                         </div>
                         <div className="col-md-2">
                         </div>

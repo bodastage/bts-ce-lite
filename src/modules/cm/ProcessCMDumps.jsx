@@ -13,6 +13,7 @@ const path = window.require('path')
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
 const fs = window.require('fs');
+const log = window.require('electron-log');
 
 class ProcessCMDumps extends React.Component {
         
@@ -37,13 +38,13 @@ class ProcessCMDumps extends React.Component {
 		
 		this.vendorFormats = VENDOR_CM_FORMSTS
 		
-		this.processDumps.bind(this)
-		this.dismissErrorMessage.bind(this)
-		this.dismissSuccessMessage.bind(this)
-		this.areFormInputsValid.bind(this)
+		this.processDumps = this.processDumps.bind(this)
+		this.dismissErrorMessage = this.dismissErrorMessage.bind(this)
+		this.dismissSuccessMessage = this.dismissSuccessMessage.bind(this)
+		this.areFormInputsValid = this.areFormInputsValid.bind(this)
 		
-		this.clearForm.bind(this)
-		this.launchFolderExplorer.bind(this)
+		this.clearForm = this.clearForm.bind(this)
+		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
 		this.currentTimerValue = "00:00:00"
 		
@@ -100,21 +101,25 @@ class ProcessCMDumps extends React.Component {
 			}
 
 		ipcRenderer.send('parse-cm-request', JSON.stringify(payload))
+		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
 		ipcRenderer.on('parse-cm-request', (event, args) => {
-
+			
+			log.info(`[process_cm_dumps] Received message from IPC channel "parse-cm-request with message ${args}"`)	
+			
 			const obj = JSON.parse(args)
 			if(obj.status === 'success'){
-				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})				
+				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
 			}
 			
 			if(obj.status === 'error'){
-				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})				
+				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
 			}
 			
 			if(obj.status === 'info'){
-				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})				
+				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})
+				
 			}
 
 		})
