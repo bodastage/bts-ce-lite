@@ -1,6 +1,6 @@
 {
   "name": "BTS-CE-Lite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "BTS-CE-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -106,7 +106,7 @@
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "reflect-metadata": "^0.1.13",
-    "replace-in-file": "^4.0.0",
+    "replace-in-file": "https://github.com/erssebaggala/replace-in-file.git",
     "sqlite3": "^4.0.6",
     "terser-webpack-plugin": "1.2.2",
     "typeorm": "^0.2.16",
