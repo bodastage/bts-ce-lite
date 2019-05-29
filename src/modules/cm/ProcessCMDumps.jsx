@@ -24,8 +24,8 @@ class ProcessCMDumps extends React.Component {
 		super(props);
 		
 		this.state = {
-			outputFolderText: this.props.inputFolder === null ? "Choose folder..." : this.props.inputFolder,
-			inputFileText: this.props.outputFolder === null ? "Choose folder..." : this.props.outputFolder,
+			inputFileText: this.props.inputFolder === null ? "Choose folder..." : this.props.inputFolder,
+			outputFolderText: this.props.outputFolder === null ? "Choose folder..." : this.props.outputFolder,
 			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA'],
 			currentVendor: 'ERICSSON',
 			currentFormat: 'BULKCM',
