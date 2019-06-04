@@ -102,7 +102,7 @@ uncompressFiles = async (folderName) => {
 *
 * @exportFolder String Folder with the GExport dump XML files to be cleaned
 */
-cleanHuaweiGexportFiles = (exportFolder) => {	
+cleanHuaweiGexportFiles = async (exportFolder) => {	
 	const replaceOptions = {
 	  files: path.join(exportFolder,'*'),
 	  from: [
@@ -127,7 +127,7 @@ cleanHuaweiGexportFiles = (exportFolder) => {
 	  ],
 	};
 	
-	return replace.sync(replaceOptions)
+	return await replace.stream(replaceOptions)
     
 }
 
@@ -229,13 +229,13 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
 			log.info(`[parse_cm_job] Cleaning GExport XML files...`)
 			
-			cleanHuaweiGexportFiles(inputFolder)
+			await cleanHuaweiGexportFiles(inputFolder)
 			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleanup of GExport XML files completed.`}))
 			log.info(`[parse_cm_job] Cleanup of GExport XML files completed.`)
 			
 		}catch(error){
-			log.error('[parse_cm_job] Error occurred:${error.toString()}');
+			log.error('[parse_cm_job] Error occurred:', error);
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toStrong()}))
 			return;
 		}
