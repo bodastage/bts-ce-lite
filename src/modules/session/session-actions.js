@@ -6,7 +6,6 @@ import 'url-search-params-polyfill';
 //const sqlite3 = window.require('sqlite3').sqlite3;
 //const sqlite3 = window.require('sqlite3').verbose()
 
-
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const AUTHENTICATE = 'AUTHENTICATE'; //login attemp
@@ -94,8 +93,8 @@ export function checkDBSetupStatus(){
 			  "entities": [
 				"../../entities/*.js"
 			  ]
-		});
-		*/
+		});*/
+		
 		
 		//dispatch(waitForDatabaseSetup("Loading preferences..."));
 
