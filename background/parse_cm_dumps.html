@@ -3,7 +3,7 @@
 	
 const {ipcRenderer} = window.require('electron');
 const { app, process } = window.require('electron').remote;
-const { spawn } = window.require('child_process') 
+const { spawn, spawnSync } = window.require('child_process') 
 const path = window.require('path')
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
@@ -127,10 +127,45 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 	  ],
 	};
 	
-	return await replace.stream(replaceOptions)
+	return await replace.sync(replaceOptions)
     
 }
 
+
+/*Use gnu sed.exe on windows
+* 
+*/
+cleanHuaweiGExportWithSed = (inputFolder) => {
+	let libPath = app.getAppPath();
+
+	if (!isDev) {
+	  libPath = process.resourcesPath;
+	} 
+	
+	let files = fs.readdirSync(inputFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+		
+	const sedScript = path.join(libPath,'libraries', 'gexport_cleanup.sed');
+	const sed = path.join(libPath,'libraries','sed.exe');
+		
+	for (let i=0; i<files.length; i++) {
+		f = files[i];
+		inputFile = path.join(inputFolder,f);
+		
+		log.info(`Cleaning ${f}...`);
+		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing  ${f}...`}));
+		
+		const child = spawnSync(sed, ['-i', '-r', '-f', sedScript, inputFile]);
+		log.info(`${sed} -i -r -f ${sedScript} ${inputFile}`);
+		log.info(child.output);
+
+		if(child.error){
+			log.info(`[parse_cm_job] error:${child.error.toString()}`);
+			//ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: child.stderr.toString()}));
+			throw child.error.toString();
+		}
+	}
+
+}
 
 /*
 * Take the latest file when there is more than one file from the same node .
@@ -229,14 +264,19 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
 			log.info(`[parse_cm_job] Cleaning GExport XML files...`)
 			
-			await cleanHuaweiGexportFiles(inputFolder)
+			if(process.platform === "win32"){
+				//If windows test, with sed.exe 
+				cleanHuaweiGExportWithSed(inputFolder);
+			}else{
+				await cleanHuaweiGexportFiles(inputFolder);
+			}
 			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleanup of GExport XML files completed.`}))
 			log.info(`[parse_cm_job] Cleanup of GExport XML files completed.`)
 			
 		}catch(error){
 			log.error('[parse_cm_job] Error occurred:', error);
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toStrong()}))
+			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toString()}))
 			return;
 		}
 		
