@@ -64,13 +64,14 @@ uncompressFiles = async (folderName) => {
 			if(fType.ext === 'gz' && fType.mime === 'application/gzip') {
 				promiseArray.push(
 					new Promise((resolve, reject) => {
+					
 						gunzip( filePath, filePath.replace('.gz',''), function() {
 							ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressed  ${filename}. `}));
 							log.info(`[parse_cm_job] Uncompressed  ${filename} successfully.`)
-							
-							fs.unlinkSync(filePath)
+
 							resolve(`Uncompressed  ${filename}. `)
 						});
+						
 					})
 				);
 			}else{
@@ -83,7 +84,115 @@ uncompressFiles = async (folderName) => {
 	
 	let r = await Promise.all(promiseArray)
 	return r
+}
 
+/*
+* Use gunzip on windows.
+* This is a work around to handle large files which are a problem for nodejs
+* 
+* @param string inputFile 
+*/
+winGunzipFile = (inputFile) => {
+	let libPath = app.getAppPath();
+
+	if (!isDev) {
+	  libPath = process.resourcesPath;
+	} 
+
+	const gzip = path.join(libPath,'libraries','gzip.exe');
+		
+	const child = spawnSync(gzip, ['-d', inputFile]);
+	log.info(`${gzip} -d ${inputFile}`);
+
+	if(child.error){
+		throw child.error.toString();
+	}
+}
+
+
+/*
+* Uncompress with 7z
+*
+*@param string fileName
+*@param string targetFolder
+*/
+unCompressFile = (fileName, targetFolder) => {
+	let libPath = app.getAppPath();
+	if (!isDev) {
+	  libPath = process.resourcesPath;
+	} 
+	
+	//On MacOs install Keka -- https://mas.keka.io/ or https://www.keka.io/en/
+	let  sevenZip = "7z"
+	
+	//Windows
+	if(process.platform === "win32"){
+		sevenZip = path.join(libPath,'libraries','7z.exe');
+	}
+	
+	const child = spawnSync(sevenZip, ['e', fileName,"-o"+targetFolder]);
+	
+	log.info(`${sevenZip} e ${fileName} -o${targetFolder}`);
+
+	log.info(`${child.stderr.toString()}`);
+	
+	if(child.error){
+		throw child.error.toString();
+	}else{
+		log.info(child.stdout.toString());	
+	}
+}
+
+/*
+* Uncompress gz files in a folder 
+*
+*@param string folderName
+*/
+winUncompressFolder = (folderName) => {
+
+
+	/**
+	*Create backup folder for originals
+	*/
+	log.info(`[parse_cm_job] Create folder for original version of modified files(originals)...`);
+	const originalsBackup = path.join(folderName,'originals');
+	if (!fs.existsSync(originalsBackup)) {
+		fs.mkdirSync(originalsBackup)	
+	}
+	
+	let files = fs.readdirSync(folderName,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	for (let i=0; i<files.length; i++) {
+		let filePath = path.join(folderName,files[i]);
+		let fType = getFileType(filePath);
+		
+		try{
+			if( fType.mime === 'application/gzip' || 
+			fType.mime === 'application/zip' || 
+			fType.mime === 'application/x-rar-compressed' || 
+			fType.mime === 'application/x-tar' ||
+			fType.mime === 'application/x-bzip2' ||
+			fType.mime === 'application/x-lzip' ||
+			fType.mime === 'application/x-lzma' ||
+			fType.mime === 'application/x-7z-compressed' ||
+			fType.mime === 'application/x-gtar'
+			
+			) {
+				log.info(`Uncompressing ${files[i]}...`);
+				ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing  ${files[i]}...`}));
+				unCompressFile(filePath,folderName);
+				
+				//Move
+				let oldPath = path.join(folderName, files[i]);
+				let newPath = path.join(originalsBackup, files[i]);
+				fs.renameSync(oldPath, newPath)
+				
+			}else{
+				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
+			}
+		}catch(e){
+			log.info(`[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`)
+		}
+	}
 }
 
 /**
@@ -152,11 +261,10 @@ cleanHuaweiGExportWithSed = (inputFolder) => {
 		inputFile = path.join(inputFolder,f);
 		
 		log.info(`Cleaning ${f}...`);
-		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing  ${f}...`}));
+		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning  ${f}...`}));
 		
 		const child = spawnSync(sed, ['-i', '-r', '-f', sedScript, inputFile]);
 		log.info(`${sed} -i -r -f ${sedScript} ${inputFile}`);
-		log.info(child.output);
 
 		if(child.error){
 			log.info(`[parse_cm_job] error:${child.error.toString()}`);
@@ -175,7 +283,7 @@ cleanHuaweiGExportWithSed = (inputFolder) => {
 removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	
 	//Create temp folder
-	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files')
+	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files');
 	
 	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Creating folder for duplicate files: ${repeatedFilesFolder} ... `}));
 	log.info(`[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `)
@@ -231,6 +339,9 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 
 
 processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
+
+
+	
 	let basepath = app.getAppPath();
 
 	if (!isDev) {
@@ -244,7 +355,9 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
 	//uncompressing what does not need to be uncompressed 
 	if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
-		uncompressFiles(inputFolder)
+		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files...`}))
+		log.info(`[parse_cm_job] Uncompressing files...`)
+		winUncompressFolder(inputFolder);
 	}
 	
 	
@@ -252,14 +365,11 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	if(vendor === 'HUAWEI' && format === 'GEXPORT_XML'){
 		try{
 			removeDublicateHuaweiGExportFiles(inputFolder)
+						
+			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files GExport XML files...`}))
+			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
 			
-			await new Promise((resolve, reject)=>{
-				try{
-					uncompressFiles(inputFolder).then(v=>resolve(v))
-				}catch(error){
-					reject(error)
-				}
-			});
+			winUncompressFolder(inputFolder);
 			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
 			log.info(`[parse_cm_job] Cleaning GExport XML files...`)
