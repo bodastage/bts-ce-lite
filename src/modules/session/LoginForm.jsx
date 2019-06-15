@@ -1,5 +1,6 @@
 import React from 'react'
-import logo from '../../images/logo.svg';
+//import logo from '../../images/logo.svg';
+import logo from '../../images/boda-lite-logo.png';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import * as sessionActions from './session-actions';
@@ -70,7 +71,7 @@ class LoginForm extends React.Component {
             return (
             <div className="login-mask">
                 <div className="login-logo">
-                    <img src={logo} width="320px" alt="Boda Telecom Suite - CE" />
+                    <img src={logo} width="100px" alt="Boda Lite - CE" /> <span><h2  className="bp3-heading bp3-ui-text">Boda Lite</h2></span>
                 </div>
                 
                 <form className="form-signin" onSubmit={this.handleSubmit}>

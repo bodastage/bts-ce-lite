@@ -9,7 +9,7 @@ import  './UILayout.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Classes } from '@blueprintjs/core';
 import classNames from 'classnames';
-import logo from '../../images/logo-no-text-white.svg';
+import logo from '../../images/boda-lite-logo-trimmed.png';
 import { Button, Alignment, Menu, MenuDivider, MenuItem, Popover, Position, Navbar } from "@blueprintjs/core";
 import { addTab } from '../layout/uilayout-actions';
 import SplitterLayout from 'react-splitter-layout';
@@ -60,12 +60,12 @@ class UILayout extends React.Component {
             </Menu>
             );
 
-            return (
+            return ( 
 				<Navbar className={classNames(Classes.DARK)}>
 				
 					<Navbar.Group align={Alignment.LEFT}>
 						<img src={logo} width="50px" alt="BTS-CE-Lite" />  &nbsp;&nbsp;&nbsp;
-						<Navbar.Heading>BTS-CE-Lite <span className="version bp3-text-muted">v{"0.1.4"}</span></Navbar.Heading>
+						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.1.5"}</span></Navbar.Heading>
 					</Navbar.Group>
 					<Navbar.Group align={Alignment.RIGHT}>
 						<Button className={Classes.MINIMAL} icon="home" text="Home" 
