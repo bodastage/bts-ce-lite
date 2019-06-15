@@ -15,6 +15,8 @@ const replace = window.require('replace-in-file');
 const fs = window.require('fs');
 const log = window.require('electron-log');
 
+
+
 class ProcessCMDumps extends React.Component {
         
      static icon = "asterisk";

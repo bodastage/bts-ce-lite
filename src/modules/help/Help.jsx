@@ -5,7 +5,10 @@ export default class Help extends React.Component {
         
      static icon = "question-circle";
      static label = "Help"
-        
+    
+	componentDidMount(){
+	}
+	
     render(){
         return (
             <div>
@@ -16,7 +19,7 @@ export default class Help extends React.Component {
                   <div className="card-body">
                     <h4 className="card-title">About</h4>
                     <p className="card-text"> 
-                        <b>Boda Telecom Suite - CE Lite</b> (BTS-CE-Lite) is an open source telecommunication network management desktop application.
+                        <b>Boda Lite</b> is an open source telecommunication network management desktop application.
                     </p>
 
                     <h4 className="card-title">Resources </h4>
