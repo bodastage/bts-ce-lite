@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes, Icon   } from "@blueprintjs/core";
 import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
-import { saveCMParsingFolders } from './cm-actions';
+import { saveCMParsingFolders, updateProcessCMTimer } from './cm-actions';
 
 const { remote, ipcRenderer} = window.require("electron")
 const { app, process, shell } = window.require('electron').remote;
@@ -15,6 +15,11 @@ const replace = window.require('replace-in-file');
 const fs = window.require('fs');
 const log = window.require('electron-log');
 
+
+/**
+* Process CM data dumps
+*
+*/
 class ProcessCMDumps extends React.Component {
         
      static icon = "asterisk";
@@ -33,7 +38,6 @@ class ProcessCMDumps extends React.Component {
 			errorMessage: null,
 			successMessage: null,
 			infoMessage: null
-			
 		}
 		
 		this.vendorFormats = VENDOR_CM_FORMSTS
@@ -46,22 +50,35 @@ class ProcessCMDumps extends React.Component {
 		this.clearForm = this.clearForm.bind(this)
 		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
-		this.currentTimerValue = "00:00:00"
+		this.currentTimerValue = "00:00:00";
 		
 	}
 	
+	/**
+	* Update the output folder state when the text field value changes
+	*/
 	onOutputFolderInputChange = (e) => {
 		this.setState({outputFolderText: e.target.files[0].path})
 	}
 	
+	/**
+	* Update the input folder state when the text field value changes
+	*/
 	onInputFileChange = (e) => {
 		this.setState({inputFileText: e.target.files[0].path})
 	}
 	
+	/**
+	* Update the vendor format in state when the vendor format is selected
+	*/
 	onVendorFormatSelectChange =(e) => {
 		this.setState({currentFormat: e.target.value })
 	}
 
+	
+	/**
+	* Update the vendor in state when the vendor is selected
+	*/
 	onVendorSelectChange =(e) => {
 		this.setState(
 		{	currentVendor: e.target.value, 
@@ -150,7 +167,11 @@ class ProcessCMDumps extends React.Component {
 	
 	
 	updateTimerValue = (hours, minutes, seconds) => { 
-		this.currentTimerValue = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` 
+		let timerValue  = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+		console.log(`timerValue: ${timerValue}`)
+		//this.props.dispatch(updateProcessCMTimer(timerValue));
+		this.currentTimerValue = timerValue;
+		console.log(`Processing: ${this.state.processing}`);
 	} 
 	
 	clearForm = () => {
@@ -159,9 +180,11 @@ class ProcessCMDumps extends React.Component {
 			outputFolderText: "Choose folder...",
 			inputFileText: "Choose folder...",
 		});
+		//this.props.dispatch(updateProcessCMTimer("00:00:00"));
 		this.currentTimerValue = "00:00:00"
 		
 	}
+	
     render(){
 		
 		let successNotice = null;
@@ -243,7 +266,7 @@ class ProcessCMDumps extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
 						<div className="col-sm-10">
-							<Timer className={"bp3-button"} visible={this.state.processing} onChange={this.updateTimerValue.bind(this)}/>  {this.state.processing? "" : <Button text={this.currentTimerValue}/>}
+						<Timer className={"bp3-button"} visible={this.state.processing} onChange={this.updateTimerValue.bind(this)}/>  {this.state.processing? "" : <Button text={this.currentTimerValue}/>}
 						</div>
 					  </div>
 					  
@@ -264,7 +287,8 @@ class ProcessCMDumps extends React.Component {
 function mapStateToProps(state) {
   return {
     inputFolder: state.cm.parse_cm.inputFolder,
-    outputFolder: state.cm.parse_cm.outputFolder
+    outputFolder: state.cm.parse_cm.outputFolder,
+	timerValue: state.cm.parse_cm.timerValue
   }
 }
 

@@ -4,7 +4,7 @@
 const {ipcRenderer} = window.require('electron');
 const { app, process } = window.require('electron').remote;
 const { spawn, spawnSync } = window.require('child_process') 
-const path = window.require('path')
+const path = window.require('path');
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
 const fs = window.require('fs');
@@ -12,6 +12,11 @@ const readChunk = window.require('read-chunk');
 const fileType = window.require('file-type');
 const gunzip = window.require('gunzip-file')
 const log = window.require('electron-log');
+const tar = window.require('tar');
+const unzip = window.require('unzipper');
+const unrar = window.require("node-unrar-js");
+const fstream = window.require("fstream");
+//const sync = window.require('sync');
 
 log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
 
@@ -32,6 +37,72 @@ const VENDOR_PARSERS = {
 	'NOKIA': {
 		'RAML': 'boda-nokiacmdataparser.jar'
 	}
+}
+
+/*
+* Extract rar file into targetFolder
+*
+* @param string fileName Name of file to extract 
+* @param string targetFolder Name of destination folder
+*/
+extractRar = (fileName, targetFolder) => {
+	try{
+		var extractor = unrar.createExtractorFromFile(fileName, targetFolder);
+		extractor.extractAll();
+	}catch(e){
+		log.error(e);
+	}
+}
+
+
+/*
+* Extract gz file into targetFolder
+*
+* @param string fileName Name of file to extract 
+* @param string targetFolder Name of destination folder
+*/
+extractGzip =  (fileName, targetFolder) => {
+	console.log("Running extractGzip ....")
+	const targetFile = path.join(targetFolder, path.basename(fileName).replace(".gz",""));
+	gunzip( fileName, targetFile);
+	
+}
+
+/*
+* Extract tar file into targetFolder
+*
+* @param string fileName Name of file to extract 
+* @param string targetFolder Name of destination folder
+*/
+extractTar = (fileName, targetFolder) => {
+	tar.x(  // or tar.extract(
+	  {
+		file: fileName,
+		cwd: targetFolder,
+		sync : true
+	  }
+	);
+}
+
+/*
+* Unzip file into targetFolder
+*
+* @param string fileName Name of file to unzip 
+* @param string targetFolder Name of destination folder
+*/
+extractZip = (fileName, targetFolder) => {
+	/*var readStream = fs.createReadStream(fileName);
+	let newFile = path.join(targetFolder, path.basename(fileName).replace(".zip", ""));
+	
+	log.info(`newFile: ${newFile}`);
+	var writeStream = fstream.Writer(newFile);
+	 
+	readStream
+	  .pipe(unzip.Parse())
+	  .pipe(writeStream);
+	  */
+	  
+	  fs.createReadStream(fileName).pipe(unzip.Extract({ path: targetFolder }));
 }
 
 /*
@@ -121,25 +192,47 @@ unCompressFile = (fileName, targetFolder) => {
 	if (!isDev) {
 	  libPath = process.resourcesPath;
 	} 
-	
-	//On MacOs install Keka -- https://mas.keka.io/ or https://www.keka.io/en/
-	let  sevenZip = "7z"
-	
+
 	//Windows
 	if(process.platform === "win32"){
-		sevenZip = path.join(libPath,'libraries','7z.exe');
-	}
-	
-	const child = spawnSync(sevenZip, ['e', fileName,"-o"+targetFolder]);
-	
-	log.info(`${sevenZip} e ${fileName} -o${targetFolder}`);
+		let sevenZip = path.join(libPath,'libraries','7z.exe');
 
-	log.info(`${child.stderr.toString()}`);
+		const child = spawnSync(sevenZip, ['e', fileName,"-o"+targetFolder]);
+		
+		log.info(`${sevenZip} e ${fileName} -o${targetFolder}`);
+
+		log.info(`${child.stderr.toString()}`);
+		
+		if(child.error){
+			throw child.error.toString();
+		}else{
+			log.info(child.stdout.toString());	
+		}
 	
-	if(child.error){
-		throw child.error.toString();
 	}else{
-		log.info(child.stdout.toString());	
+	
+		let mime = getFileType(fileName).mime;
+		
+		//zip
+		if(mime === 'application/zip'){
+			extractZip(fileName, targetFolder);
+		}
+	
+		//tar or tgz/tar.gz
+		if(mime === 'application/x-tar' || 'application/x-gtar'){
+			extractTar(fileName, targetFolder);
+		}
+		
+		//rar
+		if(mime === 'application/x-rar-compressed'){
+			extractRar(fileName, targetFolder);
+		}
+		
+		//gz
+		if(mime === 'application/gzip'){
+			extractGzip(fileName, targetFolder);
+		}
+
 	}
 }
 
@@ -148,8 +241,7 @@ unCompressFile = (fileName, targetFolder) => {
 *
 *@param string folderName
 */
-winUncompressFolder = (folderName) => {
-
+uncompressFolder = (folderName) => {
 
 	/**
 	*Create backup folder for originals
@@ -175,22 +267,21 @@ winUncompressFolder = (folderName) => {
 			fType.mime === 'application/x-lzma' ||
 			fType.mime === 'application/x-7z-compressed' ||
 			fType.mime === 'application/x-gtar'
-			
 			) {
 				log.info(`Uncompressing ${files[i]}...`);
 				ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing  ${files[i]}...`}));
 				unCompressFile(filePath,folderName);
 				
 				//Move
-				let oldPath = path.join(folderName, files[i]);
 				let newPath = path.join(originalsBackup, files[i]);
-				fs.renameSync(oldPath, newPath)
+				fs.renameSync(filePath, newPath)
 				
 			}else{
 				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
 			}
 		}catch(e){
-			log.info(`[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`)
+			log.info(`[parse_cm_job] file:${filePath} fType:${fType.toString()} error:${e.toString()}`);
+			log.error(`[parse_cm_job] file:${filePath} fType:${fType.toString()} error:${e.toString()}`);
 		}
 	}
 }
@@ -357,7 +448,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
 		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files...`}))
 		log.info(`[parse_cm_job] Uncompressing files...`)
-		winUncompressFolder(inputFolder);
+		uncompressFolder(inputFolder);
 	}
 	
 	
@@ -369,7 +460,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files GExport XML files...`}))
 			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
 			
-			winUncompressFolder(inputFolder);
+			uncompressFolder(inputFolder);
 			
 			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
 			log.info(`[parse_cm_job] Cleaning GExport XML files...`)

@@ -1,7 +1,7 @@
 {
-  "name": "BTS-CE-Lite",
-  "version": "0.1.4",
-  "description": "BTS-CE-Lite is a telecommunication network management application",
+  "name": "Boda-Lite",
+  "version": "0.1.5",
+  "description": "Boda-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
   "scripts": {
@@ -35,8 +35,8 @@
     "Boda Telecom Suite",
     "telecommunication",
     "bodastage-solutions",
-    "bts-ce-lite",
-    "boda-ce-lite"
+    "boda-ce-lite",
+    "boda-lite"
   ],
   "eslintConfig": {
     "extends": "react-app"
@@ -68,10 +68,12 @@
     "dotenv-expand": "4.2.0",
     "electron-is-dev": "^1.1.0",
     "electron-log": "^3.0.5",
+    "electron-unrar-js": "https://github.com/erssebaggala/node-unrar.js.git",
     "file-loader": "2.0.0",
     "file-type": "^11.0.0",
     "fork-ts-checker-webpack-plugin-alt": "0.4.14",
     "fs-extra": "7.0.1",
+    "fstream": "^1.0.12",
     "glyphicons": "^0.2.0",
     "gunzip-file": "^0.1.1",
     "i": "^0.3.6",
@@ -80,6 +82,7 @@
     "leaflet-semicircle": "^2.0.2",
     "mini-css-extract-plugin": "0.5.0",
     "node-stream-zip": "^1.8.0",
+    "node-unrar-js": "^0.8.1",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "plotly.js": "^1.41.3",
     "pnp-webpack-plugin": "1.2.1",
@@ -113,6 +116,7 @@
     "sqlite3": "^4.0.6",
     "terser-webpack-plugin": "1.2.2",
     "typeorm": "0.2.13",
+    "unzipper": "^0.10.0",
     "url-loader": "1.1.2",
     "url-search-params-polyfill": "^4.0.1",
     "whatwg-fetch": "^2.0.4",
@@ -164,6 +168,7 @@
     "less-loader": "^4.1.0",
     "mocha": "^5.2.0",
     "moxios": "^0.4.0",
+    "node-gyp": "^5.0.0",
     "npm": "^6.2.0",
     "plotly": "^1.0.6",
     "postcss-flexbugs-fixes": "4.1.0",
@@ -196,8 +201,8 @@
     ]
   },
   "build": {
-    "appId": "com.bodastage.btscelite",
-    "productName": "BTS-CE-Lite",
+    "appId": "com.bodastage.bodalite",
+    "productName": "Boda-Lite",
     "copyright": "Copyright © 2019 $npm_package_author_name",
     "files": [
       "./build/**/*",
