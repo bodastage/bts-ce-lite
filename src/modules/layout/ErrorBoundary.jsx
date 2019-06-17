@@ -36,8 +36,8 @@ export default  class ErrorBoundary extends React.Component {
 				</div>
 				
 				<div style={{"text-align":"center"}} className="p-2">
-				This is embarrasing! We appear to have run into an error.  
-						Please share the log file and a description of what you were doing  when it occured with the boda-lite team to help.
+				Oops! This is embarrasing. We appear to have run into an issue.  
+						Please share the log file and a description of what you were doing  when this occured with the boda-lite team to help us improve the app.
 				</div>
 				
 				<div style={{"text-align":"center"}} className="p-2">

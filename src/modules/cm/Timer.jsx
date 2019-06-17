@@ -6,11 +6,16 @@ export default class Timer extends  React.Component  {
 		super(props);
 	}
 	
+	componentWillUnmount(){
+		
+	}
+	
 	render(){
 		if(this.props.visible === false) return ""
-
+		
 		return (
 			<ReactStopwatch
+			autoStart={this.props.autoStart} 
 			seconds={0}
 			minutes={0}
 			hours={0}
