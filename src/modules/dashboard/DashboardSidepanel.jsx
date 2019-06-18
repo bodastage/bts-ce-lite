@@ -36,6 +36,9 @@ class DashboardSidePanel extends React.Component {
                 <span className="dropdown-item-text legend w-100">System</span>
 
                 <a className="dropdown-item" title="Profile" href="#" 
+				onClick={this.addTab({
+                        component: 'UserProfile', 
+                        title:'Profile'})}
                     >
                     <FontAwesomeIcon icon="user"/> Profile</a>
                                 

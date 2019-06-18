@@ -7,11 +7,13 @@ import { closeTab, setActiveTab } from './uilayout-actions';
 import { Breadcrumb, OverflowList, Boundary, Position, Classes, MenuItem, 
     Popover, Menu, Icon } from "@blueprintjs/core";
 import Help from '../help/Help';
+import UserProfile from '../profile/UserProfile';
 
 const Components = {
     "Help": Help,
     "Dashboard": Dashboard,
 	"ProcessCMDumps": ProcessCMDumps,
+	"UserProfile": UserProfile,
     };
 
 class Tabs extends React.Component {

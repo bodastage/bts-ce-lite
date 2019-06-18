@@ -15,6 +15,7 @@ import { addTab } from '../layout/uilayout-actions';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import './layout.less';
+import packageJson from '../../../package.json';
 
 class UILayout extends React.Component {
 	constructor(props){
@@ -55,7 +56,9 @@ class UILayout extends React.Component {
     
             const sessionMenu = (
             <Menu>
-                <MenuItem icon="user" text="Profile" />
+                <MenuItem icon="user" text="Profile" onClick={this.addTab({
+                        component: 'UserProfile', 
+                        title:'Profile'})}/>
                 <MenuItem icon="power" text="Logout" className={classNames(Classes.MINIMAL, Classes.INTENT_DANGER)} onClick={this.logout} />
             </Menu>
             );
@@ -65,7 +68,7 @@ class UILayout extends React.Component {
 				
 					<Navbar.Group align={Alignment.LEFT}>
 						<img src={logo} width="50px" alt="BTS-CE-Lite" />  &nbsp;&nbsp;&nbsp;
-						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.1.5"}</span></Navbar.Heading>
+						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{packageJson.version}</span></Navbar.Heading>
 					</Navbar.Group>
 					<Navbar.Group align={Alignment.RIGHT}>
 						<Button className={Classes.MINIMAL} icon="home" text="Home" 
@@ -77,7 +80,7 @@ class UILayout extends React.Component {
                             onClick={this.addTab({component: 'Help', title: 'Help'})}
                         />
                         <Popover content={sessionMenu} position={Position.BOTTOM}>
-                            <Button className={Classes.MINIMAL} icon="user" text={"Username"} />
+                            <Button className={Classes.MINIMAL} icon="user" text={this.props.userDetails.first_name} />
                         </Popover>
 					</Navbar.Group>
 				</Navbar>
