@@ -55,7 +55,9 @@ class UILayout extends React.Component {
     
             const sessionMenu = (
             <Menu>
-                <MenuItem icon="user" text="Profile" />
+                <MenuItem icon="user" text="Profile" onClick={this.addTab({
+                        component: 'UserProfile', 
+                        title:'Profile'})}/>
                 <MenuItem icon="power" text="Logout" className={classNames(Classes.MINIMAL, Classes.INTENT_DANGER)} onClick={this.logout} />
             </Menu>
             );

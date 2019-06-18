@@ -88,7 +88,9 @@ class Dashboard extends React.Component {
                     <div className="row dashboard-icon">
 
                         <div className="col-md-2">
-                            <div className="icon-display"><a title="Profile" href="#/profile"><FontAwesomeIcon icon="user"/></a></div>
+                            <div className="icon-display"><a title="Profile" href="#/profile" onClick={this.addTab({
+                        component: 'UserProfile', 
+                        title:'Profile'})}><FontAwesomeIcon icon="user"/></a></div>
                             <div className="icon-label">Profile</div>
                         </div>
 

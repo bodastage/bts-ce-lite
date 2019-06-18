@@ -102,13 +102,14 @@ export function checkDBSetupStatus(){
 				db.run("CREATE TABLE users (" +
 					  "		first_name TEXT NOT NULL, " + 
 					  "		last_name TEXT NOT NULL," +
+					  "		other_names TEXT NOT NULL," +
 					  " 	email TEXT NOT NULL UNIQUE," +
 					  " 	password TEXT NOT NULL" +
 					  ")");
 				
 				var stmt = db.prepare("INSERT INTO users " +
-				" (first_name, last_name, email, password)" +
-				" VALUES ('Expert','TelecomHall','expert@telecomhall.net','password')");
+				" (first_name, last_name, other_names, email, password)" +
+				" VALUES ('Expert','TelecomHall','','expert@telecomhall.net','password')");
 				
 				stmt.run();
 				stmt.finalize();
@@ -178,6 +179,8 @@ export function attemptAuthentication(loginDetails){
 					dispatch(logIntoApp({
 						first_name: row[0].first_name, 
 						username: row[0].email, 
+						email: row[0].email, 
+						other_names: row[0].other_names, 
 						last_name: row[0].last_name}));
 				}else{
 					dispatch(markLoginAsFailed("Wrong email and password! Try again."));
