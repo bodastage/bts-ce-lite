@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import { LOGIN, LOGOUT, AUTHENTICATE, AUTHENTICATION_FAILED, CLEAR_AUTH_ERROR,
-    CLEAR_OLD_SESSION, WAIT_FOR_DATABASE_SETUP, CONFIRM_DB_READY} 
+    CLEAR_OLD_SESSION, WAIT_FOR_DATABASE_SETUP, CONFIRM_DB_READY, CLEAR_NOTICES} 
     from './session-actions';
 
 let initialState = {
@@ -59,6 +59,14 @@ function session(state = initialState, action) {
                 waitingForDB: true,
                 loginError: (state.loginError !== null )? "Database is ready!" : null
             }
+		case CLEAR_NOTICES:
+			return {
+				...state,
+				authenticated: false,
+				authenticating: false,
+				loginError: null,
+				waitingForDB: false
+			}
         default:
             return state;
     }

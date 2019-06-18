@@ -18,6 +18,7 @@
     "dist-all": "npx electron-builder build --x64 --macos --win --linux -c.extraMetadata.main=src/electron-start.js",
     "dist": "npx electron-builder",
     "postinstall": "npx electron-builder install-app-deps",
+    "electron:snap": "build --linux snap",
     "electron:local": "npm run react:build && electron .",
     "electron:linux": "npm run react:build && npx electron-builder build --linux",
     "electron:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l",
@@ -113,9 +114,9 @@
     "reflect-metadata": "^0.1.13",
     "replace-in-file": "https://github.com/erssebaggala/replace-in-file.git#add_replace_stream",
     "rw-stream": "https://github.com/erssebaggala/rw-stream.git#truncate_file",
-    "sqlite3": "^4.0.6",
+    "sqlite3": "^4.0.9",
     "terser-webpack-plugin": "1.2.2",
-    "typeorm": "0.2.13",
+    "typeorm": "^0.2.18",
     "unzipper": "^0.10.0",
     "url-loader": "1.1.2",
     "url-search-params-polyfill": "^4.0.1",
@@ -211,7 +212,8 @@
       "package.json"
     ],
     "extraResources": [
-      "libraries"
+      "libraries",
+	  "db"
     ],
     "extraMetadata": {
       "main": "./src/electron-start.js"

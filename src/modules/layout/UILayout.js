@@ -77,7 +77,7 @@ class UILayout extends React.Component {
                             onClick={this.addTab({component: 'Help', title: 'Help'})}
                         />
                         <Popover content={sessionMenu} position={Position.BOTTOM}>
-                            <Button className={Classes.MINIMAL} icon="user" text={"Username"} />
+                            <Button className={Classes.MINIMAL} icon="user" text={this.props.userDetails.first_name} />
                         </Popover>
 					</Navbar.Group>
 				</Navbar>

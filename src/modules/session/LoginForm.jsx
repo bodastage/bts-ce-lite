@@ -29,6 +29,7 @@ class LoginForm extends React.Component {
     componentDidMount(){
         if(typeof this.props.userDetails !== 'undefined' && this.props.userDetails !== null ){
             this.setState({username: this.props.userDetails.username});
+			return;
         }
         
         //Check if database is ready
@@ -107,7 +108,7 @@ class LoginForm extends React.Component {
                             <label htmlFor="username" className="sr-only">Username</label>
                             <div className="input-group">
                             <span className="font-weight-light">Login as </span>  &nbsp;
-                                <span className="font-weight-bold">{this.props.userDetails.first_name + " " +  this.props.userDetails.last_name}</span>
+                                <span className="font-weight-bold">{this.props.userDetails.first_name + ", " +  this.props.userDetails.last_name}</span>
                             </div>
                             
                         </React.Fragment>     
