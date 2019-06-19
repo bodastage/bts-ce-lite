@@ -99,6 +99,7 @@ export function checkDBSetupStatus(){
 		try{ 
 			let db = new sqlite3.Database(SQLITE3_DB_PATH);
 			db.serialize(function() {
+				//Create users table
 				db.run("CREATE TABLE users (" +
 					  "		first_name TEXT NOT NULL, " + 
 					  "		last_name TEXT NOT NULL," +
@@ -107,9 +108,26 @@ export function checkDBSetupStatus(){
 					  " 	password TEXT NOT NULL" +
 					  ")");
 				
-				var stmt = db.prepare("INSERT INTO users " +
+				let stmt = db.prepare("INSERT INTO users " +
 				" (first_name, last_name, other_names, email, password)" +
 				" VALUES ('Expert','TelecomHall','','expert@telecomhall.net','password')");
+				
+				stmt.run();
+				stmt.finalize();
+				
+				//create database settings table 
+				db.run("CREATE TABLE databases (" +
+					  "		hostname TEXT NOT NULL, " + 
+					  "		port TEXT NOT NULL," +
+					  "		username TEXT NOT NULL," +
+					  " 	password TEXT NOT NULL," +
+					  " 	name TEXT NOT NULL UNIQUE," +
+					  " 	db_type TEXT NOT NULL" +
+					  ")");
+					  
+				stmt = db.prepare("INSERT INTO databases " +
+				" (hostname, port, username, password, name, db_type)" +
+				" VALUES ('127.0.0.1','12701','','','boda','mongodb')");
 				
 				stmt.run();
 				stmt.finalize();

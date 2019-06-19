@@ -104,6 +104,13 @@ class Dashboard extends React.Component {
                             <div className="icon-display"><a title="Log file" href="#/" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/></a></div>
                             <div className="icon-label">Log file</div>
                         </div>
+
+                        <div className="col-md-2">
+                            <div className="icon-display"><a title="Help" href="#/settings" onClick={this.addTab({
+                                component: 'Settings', title: 'Settings'})}><FontAwesomeIcon icon="cog"/></a></div>
+                            <div className="icon-label">Settings</div>
+                        </div>
+						
                         <div className="col-md-2">
                         </div>
                     </div>
