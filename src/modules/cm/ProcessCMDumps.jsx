@@ -1,7 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes, Icon   } from "@blueprintjs/core";
+import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, 
+		 ProgressBar, Classes, Icon, Switch   } from "@blueprintjs/core";
 import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
 import { saveCMParsingFolders, updateProcessCMTimer } from './cm-actions';
@@ -37,7 +38,8 @@ class ProcessCMDumps extends React.Component {
 			processing: false,
 			errorMessage: null,
 			successMessage: null,
-			infoMessage: null
+			infoMessage: null,
+			loadIntoDB: false
 		}
 		
 		this.vendorFormats = VENDOR_CM_FORMSTS
@@ -46,7 +48,7 @@ class ProcessCMDumps extends React.Component {
 		this.dismissErrorMessage = this.dismissErrorMessage.bind(this)
 		this.dismissSuccessMessage = this.dismissSuccessMessage.bind(this)
 		this.areFormInputsValid = this.areFormInputsValid.bind(this)
-		
+		this.handleLoadIntoDBChange = this.handleLoadIntoDBChange.bind(this);
 		this.clearForm = this.clearForm.bind(this)
 		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
@@ -104,6 +106,11 @@ class ProcessCMDumps extends React.Component {
 	}
 	
 	
+	handleLoadIntoDBChange = () => {
+		this.setState({loadIntoDB: !this.state.loadIntoDB})
+	}
+	
+	
 	processDumps = () => {
 		
 		//Save the input and output folders 
@@ -117,18 +124,37 @@ class ProcessCMDumps extends React.Component {
 				"outputFolder": this.state.outputFolderText
 			}
 
-		ipcRenderer.send('parse-cm-request', JSON.stringify(payload))
+		ipcRenderer.send('parse-cm-request', 'parse_cm_data', JSON.stringify(payload));
 		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
-		ipcRenderer.on('parse-cm-request', (event, args) => {
+		ipcRenderer.on('parse-cm-request', (event, task, args) => {
 			
 			log.info(`[process_cm_dumps] Received message from IPC channel "parse-cm-request with message ${args}"`)	
 			
 			const obj = JSON.parse(args)
-			if(obj.status === 'success'){
+			
+			if(obj.status === 'success' && task === 'parse_cm_data' && !this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
 			}
+			
+			if(obj.status === 'success' && task === 'parse_cm_data' &&  this.state.loadIntoDB){
+				this.setState({errorMessage: null, successMessage: null, infoMessage:obj.message, processing: true});	
+
+				const loadPayload = {
+					"vendor": this.state.currentVendor,
+					"format": this.state.currentFormat,
+					"csvFolder": this.state.outputFolderText
+				}
+			
+				ipcRenderer.send('parse-cm-request', 'load_cm_data', JSON.stringify(loadPayload))				
+			}
+			
+			if(obj.status === 'success' && task === 'load_cm_data' && this.state.loadIntoDB){
+				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false});		
+			}
+			
+			
 			
 			if(obj.status === 'error'){
 				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
@@ -253,6 +279,7 @@ class ProcessCMDumps extends React.Component {
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)}/>
 						</div>
 					  </div>
+					  
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
 						<div className="col-sm-8">
@@ -265,14 +292,24 @@ class ProcessCMDumps extends React.Component {
 					  
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
+						<div className="col-sm-8">
+						  <Switch checked={this.state.loadIntoDB} label="Load into database" onChange={this.handleLoadIntoDBChange} />
+						</div>
+						<div className="col-sm-2">
+							
+						</div>
+					  </div>
+					  
+					  
+					  <div className="form-group row">
+						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
 						<div className="col-sm-10">
 						<Timer className={"bp3-button"} visible={this.state.processing} onChange={this.updateTimerValue.bind(this)}/>  {this.state.processing? "" : <Button text={this.currentTimerValue}/>}
 						</div>
 					  </div>
 					  
 					</form>
-					
-					
+
                   </div>
 				  
                 </div>

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { setSidePanel } from '../layout/uilayout-actions';
 import { Button, Intent, ProgressBar, Dialog, Classes, Icon, Callout } from "@blueprintjs/core";
+import { updateDBSettings, getDBSettings, clearDBUpdateError, clearDBUpdateSuccess, checkConnection } from './settings-actions';
 
 class Database extends React.Component{
     static icon = "database";
@@ -11,71 +12,139 @@ class Database extends React.Component{
         super(props);
         
         this.showCMLeftPanel = this.showCMLeftPanel.bind(this);
+		this.updateDatabaseSetting = this.updateDatabaseSetting.bind(this);
+		this.handleInputChange = this.handleInputChange.bind(this);
+		this.testDBConnection = this.testDBConnection.bind(this);
 		
         this.state = {
-            hostname: this.props.hostname || "127.0.0.1",
-            port: this.props.port || "12701",
+            hostname: this.props.db.hostname || "127.0.0.1",
+            port: this.props.db.port || "27017",
+			username: this.props.db.username || "",
+			password: this.props.db.password || "",
 			dialogOpen: false
         };
     }
     
+    handleInputChange(event){
+        const name = event.target.name;
+        const value = event.target.value;
+        this.setState({
+            [name]: value
+        });
+    }
+	
+	componentDidMount(){
+		this.props.dispatch(getDBSettings());
+	}
+	
     showCMLeftPanel(){
          this.props.dispatch(setSidePanel('CMSettingsOptions'));
     }
 	
-	updateDatabaseSetting(){
-		
+	updateDatabaseSetting(event){
+		event.preventDefault();
+		console.log(this.state)
+		this.props.dispatch(updateDBSettings({
+			hostname: this.state.hostname,
+			port: this.state.port,
+			username: this.state.username,
+			password: this.state.password
+		}));
 	}
 	
 	testDBConnection(){
-		
+		this.props.dispatch(checkConnection({
+			hostname: this.state.hostname,
+			port: this.state.port,
+			username: this.state.username,
+			password: this.state.password
+		}));
 	}
 
 	
     handleOpenDialog = () => this.setState({ dialogOpen: true });
     handleCloseDialog = () => this.setState({ dialogOpen: false });
-    
+    dismissErrorMessage =() => {
+		this.props.dispatch(clearDBUpdateError());
+	}
+
+    dismissSuccessMessage =() => {
+		this.props.dispatch(clearDBUpdateSuccess());
+	}
+	
+	
     render(){
+		
+		
+		let errorNotice = null
+		if(this.props.db.error !== null){
+			errorNotice = (<div className="alert alert-danger mt-2 p-2" role="alert">
+						{this.props.db.error}
+						<button type="button" className="close"  aria-label="Close" onClick={this.dismissErrorMessage}>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+					</div>)
+		}
+		
+		let successNotice = null
+		if(this.props.db.success !== null){
+			successNotice = (<div className="alert alert-success mt-2 p-2" role="alert">
+						{this.props.db.success}
+						<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+					</div>)
+		}
+		
+		
+		
         return (
             <div>
                 <h3><FontAwesomeIcon icon="database"/> Database</h3> 
-				<Callout intent={Intent.PRIMARY}>For enhanced experience, we require MongoDB</Callout>
+				<Callout intent={Intent.PRIMARY}>For an enhanced experience, we require MongoDB</Callout>
+				
+				{errorNotice}
+				{successNotice}
+				
+				{ this.props.db.updating ? <ProgressBar className="mt-2" intent={Intent.PRIMARY}/> : "" }
+				
                 <div className="card  mt-2">
-                    <div className="card-body p-3">
+                    <div className="card-body pt-3">
 									
 						<form onSubmit={this.updateDatabaseSetting}>
 						
 							<div className="form-group row">
 								<label htmlFor="inputHostname" className="col-sm-2 col-form-label">Hostname</label>
 								<div className="col-sm-6">
-								  <input type="text" className="form-control form-control-sm" id="staticHostname" onChange={this.handleInputChange} value={this.state.hostname} name="hostname"/>
+								  <input type="text" className="form-control form-control-sm" id="staticHostname" onChange={this.handleInputChange} value={this.state.hostname} name="hostname" disabled={this.props.db.updating}/>
 								</div>
 							</div>
 						 
 							<div className="form-group row">
 								<label htmlFor="inputPort" className="col-sm-2 col-form-label">Port</label>
 								<div className="col-sm-6">
-								  <input type="text" className="form-control form-control-sm" id="staticPort" onChange={this.handleInputChange} value={this.state.port} name="port"/>
+								  <input type="text" className="form-control form-control-sm" id="staticPort" onChange={this.handleInputChange} value={this.state.port} name="port"  disabled={this.props.db.updating}/>
 								</div>
 							</div>
 							
 							<div className="form-group row">
 								<label htmlFor="inputUsername" className="col-sm-2 col-form-label">Username</label>
 								<div className="col-sm-6">
-								  <input type="text" className="form-control form-control-sm" id="staticUsername" onChange={this.handleInputChange} value={this.state.username} name="username"/>
+								  <input type="text" className="form-control form-control-sm" id="staticUsername" onChange={this.handleInputChange} value={this.state.username} name="username"  disabled={this.props.db.updating}/>
 								</div>
 							</div>
 						  
 							<div className="form-group row">
 								<label htmlFor="inputPassword" className="col-sm-2 col-form-label">Password</label>
 								<div className="col-sm-6">
-								  <input type="text" className="form-control form-control-sm" id="staticPassword" onChange={this.handleInputChange} value={this.state.password} name="password"/>
+								  <input type="text" className="form-control form-control-sm" id="staticPassword" onChange={this.handleInputChange} value={this.state.password} name="password"  disabled={this.props.db.updating}/>
 								</div>
 							</div>
 						  
-						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating}/> &nbsp;
-						  <Button type="submit" text="Test connection" intent={Intent.SUCCESS} disabled={this.props.updating}/> &nbsp;
-						  <Button type="submit" text="Install MongoDB" disabled={this.props.updating} icon="download" onClick={this.handleOpenDialog}/> &nbsp;
+
+						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating} /> &nbsp;
+						  <Button type="button" text="Test connection" intent={Intent.SUCCESS} disabled={this.props.updating} onClick={this.testDBConnection}/> &nbsp;
+						  <Button type="button" text="Install MongoDB" disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenDialog();}}/> &nbsp;
 						</form>  
 						
 						<Dialog 
@@ -92,13 +161,11 @@ class Database extends React.Component{
 								</strong>
 							</p>
 							
-							<p>
-								<ol>
-									<li> Start cmd as an Administrator </li>
-									<li> Run: <code>Powershell -ExecutionPolicy ByPass -File install_mongodb_as_service.ps1</code> </li>
-								</ol>
-								
-							</p>
+							
+							<ol>
+								<li> Start cmd as an Administrator </li>
+								<li> Run: <code>Powershell -ExecutionPolicy ByPass -File install_mongodb_as_service.ps1</code> </li>
+							</ol>
 							
 							<p className={Classes.INFO}>
 							<Icon icon="info-sign" intent={Intent.PRIMARY}/> See documentation for details
@@ -115,4 +182,34 @@ class Database extends React.Component{
     }
 }
 
-export default connect()(Database);
+function mapStateToProps(state) {
+	
+  if(state.settings.db.settings === null ){
+	  return {
+		  db: {
+			hostname: '127.0.0.1',
+			port: '27017',
+			username: '',
+			password: '',
+			error: null,
+			success: null,
+			updating: null,
+		  }
+
+	  }
+  }
+  
+  return {
+	db: {
+		hostname: state.settings.db.settings.hostname,
+		port: state.settings.db.settings.port,
+		username: state.settings.db.settings.username,
+		password: state.settings.db.settings.password,
+		error: state.settings.db.error,
+		success: state.settings.db.success,
+		updating: state.settings.db.updating,
+	}
+  }
+}
+
+export default connect(mapStateToProps)(Database);

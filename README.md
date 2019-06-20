@@ -1,6 +1,6 @@
-# BTS-CE-Lite
+# Boda-Lite
 
-BTS-CE-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
+Boda-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
 platform telecommunication management desktop app.
 
 ## Features

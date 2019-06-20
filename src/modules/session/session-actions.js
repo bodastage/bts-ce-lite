@@ -127,7 +127,7 @@ export function checkDBSetupStatus(){
 					  
 				stmt = db.prepare("INSERT INTO databases " +
 				" (hostname, port, username, password, name, db_type)" +
-				" VALUES ('127.0.0.1','12701','','','boda','mongodb')");
+				" VALUES ('127.0.0.1','27017','','','boda','mongodb')");
 				
 				stmt.run();
 				stmt.finalize();
