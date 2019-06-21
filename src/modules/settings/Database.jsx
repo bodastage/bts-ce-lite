@@ -2,8 +2,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { setSidePanel } from '../layout/uilayout-actions';
-import { Button, Intent, ProgressBar, Dialog, Classes, Icon, Callout } from "@blueprintjs/core";
+import { Button, Intent, ProgressBar, Dialog, Collapse, Classes, Icon, Callout } from "@blueprintjs/core";
 import { updateDBSettings, getDBSettings, clearDBUpdateError, clearDBUpdateSuccess, checkConnection } from './settings-actions';
+
+const { app, process, shell } = window.require('electron').remote;
 
 class Database extends React.Component{
     static icon = "database";
@@ -15,13 +17,14 @@ class Database extends React.Component{
 		this.updateDatabaseSetting = this.updateDatabaseSetting.bind(this);
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.testDBConnection = this.testDBConnection.bind(this);
+		this.handleOnHrefClick = this.handleOnHrefClick.bind(this);
 		
         this.state = {
             hostname: this.props.db.hostname || "127.0.0.1",
             port: this.props.db.port || "27017",
 			username: this.props.db.username || "",
 			password: this.props.db.password || "",
-			dialogOpen: false
+			collapseOpen: false
         };
     }
     
@@ -61,9 +64,14 @@ class Database extends React.Component{
 		}));
 	}
 
+	handleOnHrefClick = (event) => {
+		event.preventDefault();
+		let lnk = event.target.href;
+		shell.openExternal(lnk);
+	}
 	
-    handleOpenDialog = () => this.setState({ dialogOpen: true });
-    handleCloseDialog = () => this.setState({ dialogOpen: false });
+    handleOpenCollapse = () => this.setState({ collapseOpen: !this.state.collapseOpen });
+    handleCloseDialog = () => this.setState({ collapseOpen: false });
     dismissErrorMessage =() => {
 		this.props.dispatch(clearDBUpdateError());
 	}
@@ -143,36 +151,34 @@ class Database extends React.Component{
 						  
 
 						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating} /> &nbsp;
-						  <Button type="button" text="Test connection" intent={Intent.SUCCESS} disabled={this.props.updating} onClick={this.testDBConnection}/> &nbsp;
-						  <Button type="button" text="Install MongoDB" disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenDialog();}}/> &nbsp;
+						  <Button type="button" text="Test connection"  disabled={this.props.updating} onClick={this.testDBConnection}/> &nbsp;
+						  <Button type="button" text="How to install MongoDB"  minimal={true} disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenCollapse();}}/> &nbsp;
+						  
+						  <Collapse isOpen={this.state.collapseOpen} className="mt-2">
+							<Callout>
+								<p>
+									<strong>
+										We require you to manually install MongoDB as it requires elevated privileges to be run as a service.
+									</strong>
+								</p>
+								
+								
+								<ol>
+									<li>  Download installer from the <a href="https://www.mongodb.com/download-center/community" onClick={this.handleOnHrefClick}>MongoDB Download Center</a> </li>
+									<li> Run installation</li>
+									<li> Confirm <strong>mongo</strong> command is available in the system PATH i.e. can be run from the terminal</li>
+									<li> Restart Boda-Lite application</li>
+								</ol>
+								
+								<p>
+								See documentation for more details.
+								</p>
+							</Callout>
+						  </Collapse>
+						  
 						</form>  
 						
-						<Dialog 
-							icon="database"
-							isOpen={this.state.dialogOpen}
-							title="Install MongoDB"
-							onClose={this.handleCloseDialog}
-						>
-							<div className={Classes.DIALOG_BODY}>
-							
-							<p>
-								<strong>
-									We require you to manually install MongoDB as it requires elevated privileges to be run as a service.
-								</strong>
-							</p>
-							
-							
-							<ol>
-								<li> Start cmd as an Administrator </li>
-								<li> Run: <code>Powershell -ExecutionPolicy ByPass -File install_mongodb_as_service.ps1</code> </li>
-							</ol>
-							
-							<p className={Classes.INFO}>
-							<Icon icon="info-sign" intent={Intent.PRIMARY}/> See documentation for details
-							</p>
-							
-							</div>
-						</Dialog>
+						
 						
 						
                     </div>

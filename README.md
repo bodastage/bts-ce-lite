@@ -5,6 +5,13 @@ platform telecommunication management desktop app.
 
 ## Features
 * Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
+* Reports
+
+## Built with 
+* Electron
+* MongoDB
+* ReactJs
+* SQLite3
 
 ## Running in dev mode
 ```
