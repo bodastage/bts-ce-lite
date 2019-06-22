@@ -23,19 +23,19 @@ class UILayout extends React.Component {
             this.logout = this.logout.bind(this);
 
 	}
-        
-        addTab = (options) => (e) => { 
-            e.preventDefault();
-            let tabId = options.component;
-            this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
-        }
+	
+	addTab = (options) => (e) => { 
+		e.preventDefault();
+		let tabId = options.component;
+		this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
+	}
 
-        logout(event){
-            event.preventDefault();
-            this.props.dispatch({
-                type: "LOGOUT"
-            });
-        }
+	logout(event){
+		event.preventDefault();
+		this.props.dispatch({
+			type: "LOGOUT"
+		});
+	}
     
         renderNavBar() {
             

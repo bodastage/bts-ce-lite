@@ -5,6 +5,7 @@ import uiLayout from './modules/layout/uilayout-reducers';
 import cm  from './modules/cm/cm-reducers';
 import profile from './modules/profile/profile-reducers';
 import settings from './modules/settings/settings-reducer';
+import reports from './modules/reports/reports-reducer';
 
 const appReducer = combineReducers({
   session,
@@ -12,7 +13,8 @@ const appReducer = combineReducers({
   uiLayout,
   cm,
   profile,
-  settings
+  settings,
+  reports
 });
 
 export default appReducer;

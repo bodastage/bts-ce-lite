@@ -1,10 +1,12 @@
 import React from 'react';
 import DashboardSidePanel from '../dashboard/DashboardSidepanel';
+import ReportsTree from '../reports/ReportsTree';
 import { connect } from 'react-redux';
 import './sidepanel.css'
 
 const SidePanels = {
-    "DashboardSidePanel": DashboardSidePanel
+    "DashboardSidePanel": DashboardSidePanel,
+	"ReportsTree": ReportsTree
 };
 
 class SidePanel extends React.Component{

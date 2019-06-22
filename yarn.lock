@@ -2521,6 +2521,11 @@ async@^2.0.0:
   dependencies:
     lodash "^4.17.11"
 
+async@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/async/-/async-3.0.1.tgz#dfeb34657d1e63c94c0eee424297bf8a2c9a8182"
+  integrity sha512-ZswD8vwPtmBZzbn9xyi8XBQWXH3AvOQ43Za1KWYq7JeycrZuUYzx01KvHcVbXltjqH4y0MWrQ33008uLTqXuDw==
+
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -3471,6 +3476,11 @@ bson@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/bson/-/bson-1.1.1.tgz#4330f5e99104c4e751e7351859e2d408279f2f13"
   integrity sha512-jCGVYLoYMHDkOsbwJZBCqwMHyH4c+wzgI9hG7Z6SZJRXWr+x58pdIbm2i9a/jFGCkRJqRUr8eoI7lDWa0hTkxg==
+
+bson@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/bson/-/bson-3.0.2.tgz#2467a76507a98c63ce34072f9965f4024e753dfc"
+  integrity sha512-HrDzr7y/ZkgyEVancPVDmfbaD8j81GzSNr6h6yUd/yZfavkrlrqI8aUZMCHrhyMoCW2/I+vEJDat1xDWRwVR6A==
 
 buble@^0.16.0:
   version "0.16.0"
@@ -11320,6 +11330,13 @@ mongodb-core@3.2.7:
     safe-buffer "^5.1.2"
   optionalDependencies:
     saslprep "^1.0.0"
+
+mongodb-extjson@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/mongodb-extjson/-/mongodb-extjson-3.0.3.tgz#5ef19bb997cbaf3eabc2fd91171d8598db4abdc5"
+  integrity sha512-Fg81iDs3Lxtx6zvOZtAUWPf3OO4KJ1+DecvRrQHJ8Y0/qS9QQ0F6HDZ4RaN6E4Me7uN4l+SFm6RKh4L/K8vcUw==
+  dependencies:
+    bson "^3.0.2"
 
 mongodb@^3.2.7:
   version "3.2.7"

@@ -60,6 +60,7 @@
     "ag-grid-community": "^20.0.0",
     "ag-grid-react": "^20.0.0",
     "ajv": "^6.5.2",
+    "async": "^3.0.1",
     "axios": "^0.18.0",
     "bfj": "6.1.1",
     "bootstrap": "^4.1.2",
@@ -83,6 +84,7 @@
     "leaflet-semicircle": "^2.0.2",
     "mini-css-extract-plugin": "0.5.0",
     "mongodb": "^3.2.7",
+    "mongodb-extjson": "^3.0.3",
     "node-stream-zip": "^1.8.0",
     "node-unrar-js": "^0.8.1",
     "optimize-css-assets-webpack-plugin": "5.0.1",
@@ -209,8 +211,7 @@
     "files": [
       "./build/**/*",
       "./src/electron-start.js",
-      "./background/parse_cm_dumps.html",
-      "package.json"
+      "./background/parse_cm_dumps.html"
     ],
     "extraResources": [
       "libraries",

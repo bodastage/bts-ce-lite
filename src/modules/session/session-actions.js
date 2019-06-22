@@ -5,7 +5,7 @@ import 'url-search-params-polyfill';
 
 import { SQLITE3_DB_PATH } from "./db-settings";
 
-//const sqlite3 = window.require('sqlite3').sqlite3;
+const fs = window.require('fs');
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
 
@@ -97,6 +97,13 @@ export function checkDBSetupStatus(){
     return (dispatch, getState) => {
         
 		try{ 
+			//Database already exists
+			if(fs.existsSync(SQLITE3_DB_PATH)){
+				dispatch(clearNotices());
+				return;
+			}
+			
+			//@TODO: Move this logic to a different file 
 			let db = new sqlite3.Database(SQLITE3_DB_PATH);
 			db.serialize(function() {
 				//Create users table
@@ -132,56 +139,68 @@ export function checkDBSetupStatus(){
 				stmt.run();
 				stmt.finalize();
 				
+				//Create report categories
+				db.run("CREATE TABLE rpt_categories (" +
+					  "		name TEXT NOT NULL UNIQUE, " + 
+					  "		notes TEXT NOT NULL," +
+					  "		parent_id INTEGER NOT NULL" +
+					  ")");
+					  
+				//Create reports table 
+				db.run("CREATE TABLE reports (" +
+					  "		name TEXT NOT NULL UNIQUE, " + 
+					  "		notes TEXT NOT NULL," +
+					  "		query TEXT NOT NULL," + 
+					  "		options TEXT NOT NULL," + 
+					  "		type TEXT NOT NULL," + //table|pie|bar|scatter|compound
+					  "		category_id INTEGER NOT NULL" + 
+					  ")");
+				
+				//Insert default categories
+				stmt = db.prepare("INSERT INTO rpt_categories " +
+				" (name, notes, parent_id)" +
+				" VALUES " + 
+				"('Key Parameters','Key parameter reports',0),"+
+				"('Network Entities','Network Entities reports',0)"
+				);
+				
+				stmt.run();
+				stmt.finalize();
+				
+				//Insert default reports
+				stmt = db.prepare("INSERT INTO reports " +
+				" (name, notes, query, options, type, category_id)" +
+				" VALUES " + 
+				"('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1)," +
+				"('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1)," +
+				"('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1)," +
+				"('Huawei 2G parameters','Huawei 2G parameters', '', '{}', 'table',1)," +
+				"('Huawei 3G parameters','Huawei 3G parameters', '', '{}', 'table',1)," +
+				"('Huawei 4G parameters','Huawei 4G parameters', '', '{}', 'table',1)," +
+				"('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1)," +
+				"('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1)," +
+				"('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1)," + 
+				"('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1)," +
+				"('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1)," +
+				"('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1)"
+				);
+				
+				stmt.run();
+				stmt.finalize();
+				
 				dispatch(clearNotices());
 			});
 			
 		}catch(e){
 			console.log(e.toString());
 			dispatch(clearNotices());
-		}
-		
-		/*
-		const connection = createConnection({
-			  "type": "sqlite",
-			  "synchronize": true,
-			  "logging": true,
-			  "logger": "simple-console",
-			  "database": "boda-lite.sqlite3",
-			  "entities": [
-				"../../entities/*.js"
-			  ]
-		});
-		*/
-		
-		//dispatch(waitForDatabaseSetup("Loading preferences..."));
-
-		//Check every minute 1000*60
-		//setTimeout(() => dispatch(checkDBSetupStatus()), 60000);
-				
-	
+		}	
     }
 }
 
 export function attemptAuthentication(loginDetails){
     return (dispatch, getState) => {
         dispatch(authenticateUser(loginDetails));
-        /*
-        const params = new URLSearchParams();
-        params.append('username', loginDetails.username);
-        params.append('password', loginDetails.password);
-    
-		const connection = createConnection({
-			  "type": "sqlite",
-			  "synchronize": true,
-			  "logging": true,
-			  "logger": "simple-console",
-			  "database": "boda-lite.sqlite3",
-			  "entities": [
-				"../../entities/*.js"
-			  ]
-		});
-		*/
-		//connection.runMigrations()
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
 		db.all("SELECT * FROM users WHERE email = ? AND password = ?", 

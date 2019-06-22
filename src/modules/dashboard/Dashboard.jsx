@@ -2,7 +2,7 @@ import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import  './dashboard.css';
 import { connect } from 'react-redux';
-import { addTab } from '../layout/uilayout-actions';
+import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import { Icon, Toaster, Intent } from "@blueprintjs/core";
 
 const { shell } = window.require('electron').remote;
@@ -18,6 +18,7 @@ class Dashboard extends React.Component {
         super(props);
         
         this.addTab = this.addTab.bind(this);
+		this.setSidePanel = this.setSidePanel.bind(this);
 		
 		this.toaster = new Toaster();
 
@@ -29,6 +30,12 @@ class Dashboard extends React.Component {
         let tabId = options.component;
         this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
     }
+	
+	setSidePanel = (sidePanel) => (e) => { 
+		e.preventDefault();
+		
+		this.props.dispatch(setSidePanel(sidePanel));
+	}
 	
 	showLogFile = (e) => {
 		const logPath = log.transports.file.findLogPath()
@@ -63,7 +70,8 @@ class Dashboard extends React.Component {
 
                             <div className="col-md-2">
 								<div className="icon-display"><a title="Reports" href="#/reports" 
-									> <FontAwesomeIcon icon="table"/></a></div>
+									onClick={this.setSidePanel('ReportsTree')}> 
+									<FontAwesomeIcon icon="table"/></a></div>
                                 <div className="icon-label">Reports</div>
                             </div>
 							

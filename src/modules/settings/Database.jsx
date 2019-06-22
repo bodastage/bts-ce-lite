@@ -166,7 +166,7 @@ class Database extends React.Component{
 								<ol>
 									<li>  Download installer from the <a href="https://www.mongodb.com/download-center/community" onClick={this.handleOnHrefClick}>MongoDB Download Center</a> </li>
 									<li> Run installation</li>
-									<li> Confirm <strong>mongo</strong> command is available in the system PATH i.e. can be run from the terminal</li>
+									<li> Confirm <strong>mongo</strong> command is available in the system PATH i.e. can be run from the terminal. Type <code>mongo --help</code>  in the terminal to confirm.</li>
 									<li> Restart Boda-Lite application</li>
 								</ol>
 								
