@@ -269,6 +269,11 @@ uncompressFolder = (folderName) => {
 		let filePath = path.join(folderName,files[i]);
 		let fType = getFileType(filePath);
 		
+		if(typeof fType === 'undefined'){
+			sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+			continue;
+		}
+		
 		try{
 			if( fType.mime === 'application/gzip' || 
 			fType.mime === 'application/zip' || 
@@ -291,9 +296,11 @@ uncompressFolder = (folderName) => {
 				
 			}else{
 				sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`);
 			}
 		}catch(e){
 			log.error(`[parse_cm_job] file:${filePath} fType:${fType.toString()} error:${e.toString()}`);
+			sendLogToUI('parse_cm_job','error',e);
 		}
 	}
 }
