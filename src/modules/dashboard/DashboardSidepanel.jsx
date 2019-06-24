@@ -64,8 +64,7 @@ class DashboardSidePanel extends React.Component {
 								
 			<a className="dropdown-item" title="Log file" href="#/" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/> Log file</a>
                                 
-                <a className="dropdown-item" href="#" title="Settings" onClick={this.addTab({
-                                component: 'Settings', title: 'Settings'})}><FontAwesomeIcon icon="cog"/>  Settings</a>
+                <a className="dropdown-item" href="#" title="Settings" ><FontAwesomeIcon icon="cog"/>  Settings</a>
         </div>
         );
         

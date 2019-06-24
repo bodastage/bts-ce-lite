@@ -70,7 +70,7 @@ class Dashboard extends React.Component {
 
                             <div className="col-md-2">
 								<div className="icon-display"><a title="Reports" href="#/reports" 
-									onClick={this.setSidePanel('ReportsTree')}> 
+									> 
 									<FontAwesomeIcon icon="table"/></a></div>
                                 <div className="icon-label">Reports</div>
                             </div>
@@ -114,8 +114,7 @@ class Dashboard extends React.Component {
                         </div>
 
                         <div className="col-md-2">
-                            <div className="icon-display"><a title="Help" href="#/settings" onClick={this.addTab({
-                                component: 'Settings', title: 'Settings'})}><FontAwesomeIcon icon="cog"/></a></div>
+                            <div className="icon-display"><a title="Settings" href="#/settings" ><FontAwesomeIcon icon="cog"/></a></div>
                             <div className="icon-label">Settings</div>
                         </div>
 						

@@ -304,16 +304,7 @@ class ProcessCMDumps extends React.Component {
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.outputFolderText)}/>
 						</div>
 					  </div>
-					  
-					  <div className="form-group row">
-						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
-						<div className="col-sm-8">
-						  <Switch checked={this.state.loadIntoDB} label="Load into database" onChange={this.handleLoadIntoDBChange} disabled={this.state.processing}/>
-						</div>
-						<div className="col-sm-2">
-							
-						</div>
-					  </div>
+
 					  
 					  
 					  <div className="form-group row">
