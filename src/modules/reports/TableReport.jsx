@@ -225,36 +225,77 @@ class TableReport extends React.Component{
         let _fields = this.props.fields;
         let _dispatch = this.props.dispatch;
         let reportId = this.props.options.reportId;
+		
+		if(typeof this.props.reportInfo === 'undefined') return;
+		
+		let query = this.props.reportInfo.query ;
         
         let dataSource = {  
             rowCount: null,
-            getRows: function(params) {
+            getRows:  function(params) {
                 let page = params.startRow;
                 let length= params.endRow - params.startRow;
-				
-				//For now let's get the fields from the first records returned from the query 
-				//@TODO: Pick from sqlite db the connection details
-				const url = `mongodb://127.0.0.1:27017/boda`;
 
-				MongoClient.connect(url, { useNewUrlParser: true }, function(err, mongodb) {
-				  if(err !== null){
-					log.error(`Failed to connect to ${url}. ${err}`)
-					return;
-					//@TODO: Create failure notifiation action
-					//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
-				  }
-				  
-				  let lastRow = 1000;
-				  let gcell = mongodb.db().collection('huawei_cm_gcell')
-					.find({},{limit: length, skip: page*length}).toArray((err, docs) => {
-					  //console.log(docs);			  
-					  //return dispatch(receiveReportFields(reportId, Object.keys(doc)));
-					  params.successCallback(docs, lastRow);
+				//@TODO: Move this logic to a seperate file
+				//@TODO: Pick from sqlite db the connection details
+				//@TODO: Call this once at the start of the ready function 
+				let db = new sqlite3.Database(SQLITE3_DB_PATH);
+				db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
+					if(err !== null){
+						log.error(row);
+						//@TODO: Show table data log error
+						return;
+					}
+					
+					const hostname = row[0].hostname;
+					const port = row[0].port;
+					const username = row[0].username;
+					const password = row[0].password;
+
+					const url = `mongodb://${hostname}:${port}/boda`;
+
+					MongoClient.connect(url, { useNewUrlParser: true }, async function(err, mongodb) {
+						if(err !== null){
+							log.error(`Failed to connect to ${url}. ${err}`);
+							params.successCallback([], 0);
+							return;
+							//@TODO: Create failure notifiation action
+							//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
+						}
 					  
-				  });
-				  
-				  mongodb.close();
-				});
+					
+						//let lastRow = await mongodb.db().collection('huawei_cm_gcell').estimatedDocumentCount() ;
+						let lastRow = await eval("mongodb.db().collection('huawei_cm_gcell').estimatedDocumentCount() ;");
+						console.log(query);
+						try{
+							/*
+							mongodb.db().collection('huawei_cm_gcell')
+							.find({},
+								{
+									limit: length, 
+									skip: page,
+								})
+							.toArray((err, docs) => {
+							  params.successCallback(docs, lastRow);
+							});
+							*/
+							
+							eval(query).toArray((err, docs) => {
+							  params.successCallback(docs, lastRow);
+							});
+						  
+							mongodb.close();
+						}catch(e){
+							log.error(`Failed fetch data ${err}`);
+							params.successCallback([], 0);
+							return;
+						}  
+						  
+					});//eof:MongoClient
+				
+				});//eof:db.all
+				
+
 				
             }
         };

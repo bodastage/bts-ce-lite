@@ -117,7 +117,9 @@ export function checkDBSetupStatus(){
 				
 				let stmt = db.prepare("INSERT INTO users " +
 				" (first_name, last_name, other_names, email, password)" +
-				" VALUES ('Expert','TelecomHall','','expert@telecomhall.net','password')");
+				" VALUES ('Expert','TelecomHall','','expert@telecomhall.net','password')," + 
+				" ('Boda','Lite','Bodastage','btsuser@bodastage.org','password')" 
+				);
 				
 				stmt.run();
 				stmt.finalize();
@@ -134,7 +136,8 @@ export function checkDBSetupStatus(){
 					  
 				stmt = db.prepare("INSERT INTO databases " +
 				" (hostname, port, username, password, name, db_type)" +
-				" VALUES ('127.0.0.1','27017','','','boda','mongodb')");
+				" VALUES ('27.0.0.1','27017','','','boda','mongodb')"
+				);
 				
 				stmt.run();
 				stmt.finalize();
@@ -174,7 +177,7 @@ export function checkDBSetupStatus(){
 				"('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1)," +
 				"('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1)," +
 				"('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1)," +
-				"('Huawei 2G parameters','Huawei 2G parameters', '', '{}', 'table',1)," +
+				`('Huawei 2G parameters','Huawei 2G parameters', 'mongodb.db().collection("huawei_cm_gcell").find({},{limit: length, skip: page,})', '{}', 'table',1),` +
 				"('Huawei 3G parameters','Huawei 3G parameters', '', '{}', 'table',1)," +
 				"('Huawei 4G parameters','Huawei 4G parameters', '', '{}', 'table',1)," +
 				"('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1)," +

@@ -23,7 +23,7 @@ class ReportsTree extends React.Component{
         this.onNodeDoubleClick = this.onNodeDoubleClick.bind(this);
         this.handleNodeCollapse = this.handleNodeCollapse.bind(this);
         this.showContextMenu = this.showContextMenu.bind(this);
-
+		this.refreshReportTree = this.refreshReportTree.bind(this);
 
         this.state = {
             text: this.props.filter.text,
@@ -241,6 +241,12 @@ class ReportsTree extends React.Component{
         this.setState({expandedNodes: expandedNodes});
     };
 
+	/*
+	* Refresh the report tree
+	*/
+	refreshReportTree = () => {
+		this.props.dispatch(getReports());
+	}
     
     render(){        
         
@@ -252,7 +258,7 @@ class ReportsTree extends React.Component{
 		<span className="dropdown-item-text legend w-100 mb-2">
 			<FontAwesomeIcon icon={ReportsTree.icon}/> Reports
 			
-			<Icon icon="refresh" className="float-right ml-2"/>&nbsp;
+			<a href="#"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
 			<Icon icon="folder-new" className="float-right ml-2"/> &nbsp; 
 			<Icon icon="plus" className="float-right ml-2"/> &nbsp;
 		</span>

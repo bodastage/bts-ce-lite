@@ -116,6 +116,21 @@ class ProcessCMDumps extends React.Component {
 		//Save the input and output folders 
 		this.props.dispatch(saveCMParsingFolders(this.state.inputFileText, this.state.outputFolderText))
 		
+		//Confirm that the input folder exists
+		if( !fs.existsSync(this.state.inputFileText)){
+			log.info(`Input folder: ${this.state.inputFileText} does not exist`);
+			this.setState({errorMessage: `Input folder: ${this.state.inputFileText} does not exist`})
+			return;
+		}
+		
+		
+		//Confirm that the output folder exists
+		if( !fs.existsSync(this.state.outputFolderText)){
+			log.info(`Output folder: ${this.state.outputFolderText} does not exist`);
+			this.setState({errorMessage: `Output folder: ${this.state.outputFolderText} does not exist`})
+			return;
+		}
+		
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		const payload = {
 				"vendor": this.state.currentVendor,

@@ -122,30 +122,79 @@ export function getReportInfo(reportId){
     }
 }
 
+/**
+* Get table report fields
+*
+* @param String reportId
+*/
 export function getReportFields(reportId){
     return (dispatch, getState) => {
         dispatch(requestReportFields(reportId));
 		
-		//For now let's get the fields from the first records returned from the query 
-		//@TODO: Pick from sqlite db the connection details
-		const url = `mongodb://127.0.0.1:27017/boda`;
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
+			if(err !== null){
+				log.error(row);
+				//@TODO: Show table data log error
+				return;
+			}
+			
+			const hostname = row[0].hostname;
+			const port = row[0].port;
+			const username = row[0].username;
+			const password = row[0].password;
+			
+			//get report details 
+			db.all("SELECT * FROM reports r WHERE rowid = ?",[reportId], (rErr, rRows) => {
+				if(rErr !== null){
+					log.error(rRows);
+					//@TODO: Show table data log error
+					return dispatch(receiveReportFields(reportId, []));
+				}
+				
+				let query = rRows[0].query;
+				
+				//For now let's get the fields from the first records returned from the query 
+				//@TODO: Pick from sqlite db the connection details
+				//const url = `mongodb://127.0.0.1:27017/boda`;
+				const url = `mongodb://${hostname}:${port}/boda`;
+				
+				MongoClient.connect(url, { useNewUrlParser: true }, function(err, mongodb) {
+					if(err !== null){
+						log.error(`Failed to connect to ${url}. ${err}`)
+						return dispatch(receiveReportFields(reportId, []));
+						//@TODO: Create failure notifiation action
+						//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
+					}
+					 
+					/*
+					let gcell = mongodb.db().collection('huawei_cm_gcell').findOne({},{_id: 0},(err, doc) => {
+						  console.log(doc);			  
+						  return dispatch(receiveReportFields(reportId, Object.keys(doc)));
+						  
+					}); */
+				  
+					let page= 0; //start row 
+					let length = 1;//number of records to return
+					try{
+						eval(query).toArray((err, docs) => {
+						  return dispatch(receiveReportFields(reportId, Object.keys(docs[0])));
+						})
+					}catch(cErr){
+						//@TODO: Error notice
+						return dispatch(receiveReportFields(reportId, []));	
+					}
+					
+					mongodb.close();
+				});//eof:MongoClient
+				
+				
+			});
+			
 
-		MongoClient.connect(url, { useNewUrlParser: true }, function(err, mongodb) {
-		  if(err !== null){
-			log.error(`Failed to connect to ${url}. ${err}`)
-			return;
-			//@TODO: Create failure notifiation action
-			//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
-		  }
-		  
-		  let gcell = mongodb.db().collection('huawei_cm_gcell').findOne({},{_id: 0},(err, doc) => {
-			  console.log(doc);			  
-			  return dispatch(receiveReportFields(reportId, Object.keys(doc)));
-			  
-		  });
-		  
-		  mongodb.close();
+			
 		});
+
 
     }
 }
@@ -156,13 +205,13 @@ export function getReports(){
 		
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("select \
+		db.all("SELECT \
 					r.rowid as id,  \
 					r.name as name, \
 					c.rowid as cat_id, \
 					c.name as cat_name \
-				from reports r \
-				inner join rpt_categories c on r.category_id = c.rowid",  (err, rows) => {
+				FROM rpt_categories c \
+				LEFT join reports r  ON r.category_id = c.rowid		",  (err, rows) => {
 					
 			if(err !== null){
 				log.error(err);
@@ -170,6 +219,9 @@ export function getReports(){
 				return;
 			}
 
+			/*
+			* Holds an list/array of categories and  for each category there is an list/array of reports
+			*/
 			let reports = []
 			let catIndexMap = {} //Map of category names to ids
 			
@@ -183,16 +235,11 @@ export function getReports(){
 					})
 					
 					let catIndex = reports.length - 1
-					catIndexMap[item.cat_name] = catIndex
-					
-					//Add the first report
-					reports[catIndex].reports.push({
-						id: item.id,
-						name: item.name
-					})
-					
-					return;
+					catIndexMap[item.cat_name] = catIndex;
 				}
+				
+				//No report info
+				if(item.id === null) return;
 				
 				//At this point we already have the category so we update the report list
 				let catIndex = catIndexMap[item.cat_name];

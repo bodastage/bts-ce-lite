@@ -47,7 +47,7 @@ class ReportContainer extends React.Component{
         }
         
         //Table report is the default
-        return <TableReport options={this.props.options}/>
+        return <TableReport options={this.props.options} reportInfo={this.props.reportInfo}/>
     }
 }
 
