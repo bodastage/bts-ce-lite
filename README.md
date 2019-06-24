@@ -1,10 +1,17 @@
-# BTS-CE-Lite
+# Boda-Lite
 
-BTS-CE-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
+Boda-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
 platform telecommunication management desktop app.
 
 ## Features
 * Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
+* Reports
+
+## Built with 
+* Electron
+* MongoDB
+* ReactJs
+* SQLite3
 
 ## Running in dev mode
 ```

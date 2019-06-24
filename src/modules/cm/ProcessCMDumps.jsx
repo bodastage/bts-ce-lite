@@ -1,7 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, ProgressBar, Classes, Icon   } from "@blueprintjs/core";
+import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, 
+		 ProgressBar, Classes, Icon, Switch   } from "@blueprintjs/core";
 import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
 import { saveCMParsingFolders, updateProcessCMTimer } from './cm-actions';
@@ -37,7 +38,8 @@ class ProcessCMDumps extends React.Component {
 			processing: false,
 			errorMessage: null,
 			successMessage: null,
-			infoMessage: null
+			infoMessage: null,
+			loadIntoDB: false
 		}
 		
 		this.vendorFormats = VENDOR_CM_FORMSTS
@@ -46,7 +48,7 @@ class ProcessCMDumps extends React.Component {
 		this.dismissErrorMessage = this.dismissErrorMessage.bind(this)
 		this.dismissSuccessMessage = this.dismissSuccessMessage.bind(this)
 		this.areFormInputsValid = this.areFormInputsValid.bind(this)
-		
+		this.handleLoadIntoDBChange = this.handleLoadIntoDBChange.bind(this);
 		this.clearForm = this.clearForm.bind(this)
 		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
@@ -104,10 +106,30 @@ class ProcessCMDumps extends React.Component {
 	}
 	
 	
+	handleLoadIntoDBChange = () => {
+		this.setState({loadIntoDB: !this.state.loadIntoDB})
+	}
+	
+	
 	processDumps = () => {
 		
 		//Save the input and output folders 
 		this.props.dispatch(saveCMParsingFolders(this.state.inputFileText, this.state.outputFolderText))
+		
+		//Confirm that the input folder exists
+		if( !fs.existsSync(this.state.inputFileText)){
+			log.info(`Input folder: ${this.state.inputFileText} does not exist`);
+			this.setState({errorMessage: `Input folder: ${this.state.inputFileText} does not exist`})
+			return;
+		}
+		
+		
+		//Confirm that the output folder exists
+		if( !fs.existsSync(this.state.outputFolderText)){
+			log.info(`Output folder: ${this.state.outputFolderText} does not exist`);
+			this.setState({errorMessage: `Output folder: ${this.state.outputFolderText} does not exist`})
+			return;
+		}
 		
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		const payload = {
@@ -117,18 +139,37 @@ class ProcessCMDumps extends React.Component {
 				"outputFolder": this.state.outputFolderText
 			}
 
-		ipcRenderer.send('parse-cm-request', JSON.stringify(payload))
+		ipcRenderer.send('parse-cm-request', 'parse_cm_data', JSON.stringify(payload));
 		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
-		ipcRenderer.on('parse-cm-request', (event, args) => {
+		ipcRenderer.on('parse-cm-request', (event, task, args) => {
 			
 			log.info(`[process_cm_dumps] Received message from IPC channel "parse-cm-request with message ${args}"`)	
 			
 			const obj = JSON.parse(args)
-			if(obj.status === 'success'){
+			
+			if(obj.status === 'success' && task === 'parse_cm_data' && !this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
 			}
+			
+			if(obj.status === 'success' && task === 'parse_cm_data' &&  this.state.loadIntoDB){
+				this.setState({errorMessage: null, successMessage: null, infoMessage:obj.message, processing: true});	
+
+				const loadPayload = {
+					"vendor": this.state.currentVendor,
+					"format": this.state.currentFormat,
+					"csvFolder": this.state.outputFolderText
+				}
+			
+				ipcRenderer.send('parse-cm-request', 'load_cm_data', JSON.stringify(loadPayload))				
+			}
+			
+			if(obj.status === 'success' && task === 'load_cm_data' && this.state.loadIntoDB){
+				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false});		
+			}
+			
+			
 			
 			if(obj.status === 'error'){
 				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
@@ -235,33 +276,36 @@ class ProcessCMDumps extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vendor</label>
 						<div className="col-sm-10">
-						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange}/>
+						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange} disabled={this.state.processing}/>
 						</div>
 					  </div>
 					  <div className="form-group row">
 						<label htmlFor="select_file_format" className="col-sm-2 col-form-label">Format</label>
 						<div className="col-sm-10">
-						  <HTMLSelect id="select_file_format"options={VENDOR_CM_FORMSTS[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange}/>
+						  <HTMLSelect id="select_file_format"options={VENDOR_CM_FORMSTS[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange} disabled={this.state.processing}/>
 						</div>
 					  </div>
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
 						<div className="col-sm-8">
-						  <FileInput className="form-control" text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}}/>
+						  <FileInput className="form-control" text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
-							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)}/>
+							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)} disabled={this.state.processing}/>
 						</div>
 					  </div>
+					  
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
 						<div className="col-sm-8">
-						  <FileInput className="form-control" text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange}/>
+						  <FileInput className="form-control" text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.outputFolderText)}/>
 						</div>
 					  </div>
+
+					  
 					  
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
@@ -271,8 +315,7 @@ class ProcessCMDumps extends React.Component {
 					  </div>
 					  
 					</form>
-					
-					
+
                   </div>
 				  
                 </div>

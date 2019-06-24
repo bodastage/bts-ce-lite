@@ -1,6 +1,6 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain} = require('electron');
-
+const log = require('electron-log');
 const path = require('path');
 const url = require('url');
 
@@ -91,18 +91,18 @@ app.on('ready', ()  => {
 		console.log("to-main:",arg)
 	});
 	
-	//Recieve messages from the background process to the UI renderer
-	ipcMain.on('parse-cm-request', (event, arg) => {
-		
+	//Recieve messages from UI renderer and send to the background process/window
+	ipcMain.on('parse-cm-request', (event, task, arg) => {
+		log.info(`parse-cm-request: task:${task} options: ${arg}`)
 		//forward requests to background process 
-		jobRenderer.webContents.send('parse-cm-job', arg);
+		jobRenderer.webContents.send('parse-cm-job', task, arg);
 	});
 	
-	//Forward UI renderer requests to backgroup process 
-	ipcMain.on('parse-cm-job', (event, arg) => {
-		
-		//forware requests to ui renderer
-		mainWindow.webContents.send('parse-cm-request', arg);
+	//Messages from backgroup windows to renderer
+	ipcMain.on('parse-cm-job', (event, task, arg) => {
+		log.info(`parse-cm-job: task:${task} options: ${arg}`)
+		//forward requests to ui renderer
+		mainWindow.webContents.send('parse-cm-request', task, arg);
 	});
 	
 	ipcMain.on('ready', (event, arg) => {

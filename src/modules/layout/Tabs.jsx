@@ -8,12 +8,18 @@ import { Breadcrumb, OverflowList, Boundary, Position, Classes, MenuItem,
     Popover, Menu, Icon } from "@blueprintjs/core";
 import Help from '../help/Help';
 import UserProfile from '../profile/UserProfile';
+import Settings from '../settings/Settings';
+import Database from '../settings/Database';
+import ReportContainer from '../reports/ReportContainer';
 
 const Components = {
     "Help": Help,
     "Dashboard": Dashboard,
 	"ProcessCMDumps": ProcessCMDumps,
 	"UserProfile": UserProfile,
+	"Settings": Settings,
+	"Database": Database,
+	"ReportContainer": ReportContainer
     };
 
 class Tabs extends React.Component {

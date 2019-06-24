@@ -3,6 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import  './dashboard.css';
 import { connect } from 'react-redux';
 import { addTab } from '../layout/uilayout-actions';
+import { Intent   } from "@blueprintjs/core";
+
+const log = window.require('electron-log');
+const { app, process, shell } = window.require('electron').remote;
+const fs = window.require('fs');
 
 class DashboardSidePanel extends React.Component {
     constructor(props){
@@ -12,6 +17,20 @@ class DashboardSidePanel extends React.Component {
 
     }
     
+	showLogFile = (e) => {
+		const logPath = log.transports.file.findLogPath()
+		if (!fs.existsSync(logPath)) {
+			log.warn(`[dashboard] ${logPath} does not exist.`)
+			this.toaster.show({
+                icon: "info-sign",
+                intent: Intent.WARNING,
+                message: "${logPath} does nit exist.",
+			});
+			return;
+		}
+		shell.openItem(logPath)
+	}
+	
     addTab = (options) => (e) => { 
         e.preventDefault();
 
@@ -30,8 +49,6 @@ class DashboardSidePanel extends React.Component {
 
             <a title="Reports" className="dropdown-item" href="#" ><FontAwesomeIcon icon="table"/> Reports</a>
 
-
-
                                 
                 <span className="dropdown-item-text legend w-100">System</span>
 
@@ -44,6 +61,10 @@ class DashboardSidePanel extends React.Component {
                                 
                 <a className="dropdown-item" href="#" title="Help" onClick={this.addTab({
                                 component: 'Help', title: 'Help'})}><FontAwesomeIcon icon="question-circle"/>  Help</a>
+								
+			<a className="dropdown-item" title="Log file" href="#/" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/> Log file</a>
+                                
+                <a className="dropdown-item" href="#" title="Settings" ><FontAwesomeIcon icon="cog"/>  Settings</a>
         </div>
         );
         

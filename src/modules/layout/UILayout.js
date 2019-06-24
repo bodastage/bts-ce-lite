@@ -23,19 +23,19 @@ class UILayout extends React.Component {
             this.logout = this.logout.bind(this);
 
 	}
-        
-        addTab = (options) => (e) => { 
-            e.preventDefault();
-            let tabId = options.component;
-            this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
-        }
+	
+	addTab = (options) => (e) => { 
+		e.preventDefault();
+		let tabId = options.component;
+		this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
+	}
 
-        logout(event){
-            event.preventDefault();
-            this.props.dispatch({
-                type: "LOGOUT"
-            });
-        }
+	logout(event){
+		event.preventDefault();
+		this.props.dispatch({
+			type: "LOGOUT"
+		});
+	}
     
         renderNavBar() {
             
@@ -49,7 +49,13 @@ class UILayout extends React.Component {
                 />
 				
                 <MenuItem icon="th" text="Reports" />
-				
+				<MenuDivider />
+                <MenuItem icon="cog" text="Settings" 
+                    onClick={this.addTab({
+                                component: 'Settings',
+                                title: 'Settings'
+                                })}
+                />
             </Menu>
             );
     
@@ -67,7 +73,7 @@ class UILayout extends React.Component {
 				
 					<Navbar.Group align={Alignment.LEFT}>
 						<img src={logo} width="50px" alt="BTS-CE-Lite" />  &nbsp;&nbsp;&nbsp;
-						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.1.6"}</span></Navbar.Heading>
+						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.1.7"}</span></Navbar.Heading>
 					</Navbar.Group>
 					<Navbar.Group align={Alignment.RIGHT}>
 						<Button className={Classes.MINIMAL} icon="home" text="Home" 

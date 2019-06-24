@@ -3,7 +3,7 @@
 	
 const {ipcRenderer} = window.require('electron');
 const { app, process } = window.require('electron').remote;
-const { spawn, spawnSync } = window.require('child_process') 
+const { spawn, spawnSync, execSync } = window.require('child_process') 
 const path = window.require('path');
 const isDev = window.require('electron-is-dev');
 const replace = window.require('replace-in-file');
@@ -54,6 +54,15 @@ extractRar = (fileName, targetFolder) => {
 	}
 }
 
+/**
+* Send log to UI 
+*
+*@param level string info|error|debug
+*@param message string
+*/
+function sendLogToUI(task, level, message){
+	ipcRenderer.send('parse-cm-job',task, JSON.stringify({status:level, message: message}))
+}
 
 /*
 * Extract gz file into targetFolder
@@ -120,7 +129,7 @@ getFileType = (filename) => {
 * @param string folderName
 */
 uncompressFiles = async (folderName) => {
-	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files in ${folderName} ... `}));
+	sendLogToUI('parse_cm_data','info', `Uncompressing files in ${folderName} ... `);
 	log.info(`[parse_cm_job] Uncompressing files in ${folderName} ...`)
 	let files = fs.readdirSync(folderName,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
@@ -137,8 +146,8 @@ uncompressFiles = async (folderName) => {
 					new Promise((resolve, reject) => {
 					
 						gunzip( filePath, filePath.replace('.gz',''), function() {
-							ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressed  ${filename}. `}));
 							log.info(`[parse_cm_job] Uncompressed  ${filename} successfully.`)
+							sendLogToUI('parse_cm_data','info', `Uncompressed  ${filename}. `);
 
 							resolve(`Uncompressed  ${filename}. `)
 						});
@@ -146,10 +155,12 @@ uncompressFiles = async (folderName) => {
 					})
 				);
 			}else{
-				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
+				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`);
+				sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
 			}
 		}catch(e){
 			log.info(`[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`)
+			sendLogToUI('parse_cm_data','error', `[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`);
 		}
 	}
 	
@@ -247,6 +258,7 @@ uncompressFolder = (folderName) => {
 	*Create backup folder for originals
 	*/
 	log.info(`[parse_cm_job] Create folder for original version of modified files(originals)...`);
+	
 	const originalsBackup = path.join(folderName,'originals');
 	if (!fs.existsSync(originalsBackup)) {
 		fs.mkdirSync(originalsBackup)	
@@ -256,6 +268,11 @@ uncompressFolder = (folderName) => {
 	for (let i=0; i<files.length; i++) {
 		let filePath = path.join(folderName,files[i]);
 		let fType = getFileType(filePath);
+		
+		if(typeof fType === 'undefined'){
+			sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+			continue;
+		}
 		
 		try{
 			if( fType.mime === 'application/gzip' || 
@@ -269,7 +286,8 @@ uncompressFolder = (folderName) => {
 			fType.mime === 'application/x-gtar'
 			) {
 				log.info(`Uncompressing ${files[i]}...`);
-				ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing  ${files[i]}...`}));
+				sendLogToUI('parse_cm_data','info', `Uncompressing  ${files[i]}...`);
+				
 				unCompressFile(filePath,folderName);
 				
 				//Move
@@ -277,11 +295,12 @@ uncompressFolder = (folderName) => {
 				fs.renameSync(filePath, newPath)
 				
 			}else{
-				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`)
+				sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`);
 			}
 		}catch(e){
-			log.info(`[parse_cm_job] file:${filePath} fType:${fType.toString()} error:${e.toString()}`);
 			log.error(`[parse_cm_job] file:${filePath} fType:${fType.toString()} error:${e.toString()}`);
+			sendLogToUI('parse_cm_job','error',e);
 		}
 	}
 }
@@ -352,7 +371,7 @@ cleanHuaweiGExportWithSed = (inputFolder) => {
 		inputFile = path.join(inputFolder,f);
 		
 		log.info(`Cleaning ${f}...`);
-		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning  ${f}...`}));
+		sendLogToUI('parse_cm_data','info', `Cleaning  ${f}...`);
 		
 		const child = spawnSync(sed, ['-i', '-r', '-f', sedScript, inputFile]);
 		log.info(`${sed} -i -r -f ${sedScript} ${inputFile}`);
@@ -376,15 +395,15 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	//Create temp folder
 	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files');
 	
-	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Creating folder for duplicate files: ${repeatedFilesFolder} ... `}));
 	log.info(`[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `)
+	sendLogToUI('parse_cm_data','info', `[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `);
 	
 	if (!fs.existsSync(repeatedFilesFolder)) {
 		fs.mkdirSync(repeatedFilesFolder)	
 	}
 
 	log.info("[parse_cm_job] Starting removal of duplicate gexport files...")
-	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: "Starting removal of duplicate gexport files..."}));
+	sendLogToUI('parse_cm_data','info', `[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `);
 	//Key - value pair of node and the most recent file
 	let nodeAndRecentFile = {};
 	
@@ -395,7 +414,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 		let gexportFilename = items[i];
 		let matches = gexportFilename.match(/(.*)_(\d+)\.xml.*/)
 		
-		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Checking whether ${gexportFilename} is a duplicate... `}));
+		sendLogToUI('parse_cm_data','info', `Checking whether ${gexportFilename} is a duplicate... `);
 		log.info(`[parse_cm_job] Checking whether ${gexportFilename} is a duplicate... `)
 		
 		if(matches === null) continue;
@@ -423,7 +442,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	
 	nodeAndRecentFile = {};
 	
-	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Duplicate file removal completed.`}))
+	sendLogToUI('parse_cm_data','info', `Duplicate file removal completed.`);
 	log.info(`[parse_cm_job] Duplicate file removal completed.`)
 	
 }
@@ -446,7 +465,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
 	//uncompressing what does not need to be uncompressed 
 	if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
-		ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files...`}))
+		sendLogToUI('parse_cm_data','info',`Uncompressing files...` );
 		log.info(`[parse_cm_job] Uncompressing files...`)
 		uncompressFolder(inputFolder);
 	}
@@ -457,13 +476,13 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 		try{
 			removeDublicateHuaweiGExportFiles(inputFolder)
 						
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Uncompressing files GExport XML files...`}))
 			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
+			sendLogToUI('parse_cm_data','info',`Uncompressing files GExport XML files...` );
 			
 			uncompressFolder(inputFolder);
 			
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleaning GExport XML files...`}))
-			log.info(`[parse_cm_job] Cleaning GExport XML files...`)
+			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
+			sendLogToUI('parse_cm_data','info',`Cleaning GExport XML files...`);
 			
 			if(process.platform === "win32"){
 				//If windows test, with sed.exe 
@@ -472,18 +491,22 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 				await cleanHuaweiGexportFiles(inputFolder);
 			}
 			
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Cleanup of GExport XML files completed.`}))
-			log.info(`[parse_cm_job] Cleanup of GExport XML files completed.`)
+			log.info(`[parse_cm_job] Cleanup of GExport XML files completed.`);
+			sendLogToUI('parse_cm_data','info',`Cleanup of GExport XML files completed.`);
 			
 		}catch(error){
 			log.error('[parse_cm_job] Error occurred:', error);
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: error.toString()}))
+			if(typeof error === 'undefined'){
+				sendLogToUI('parse_cm_data','error', 'Error occured.');
+				return;
+			}
+			sendLogToUI('parse_cm_data','error',error.toString());
 			return;
 		}
 		
 	}
 	
-	ipcRenderer.send('parse-cm-job', JSON.stringify({status:"info", message: `Parsing files...`}))
+	sendLogToUI('parse_cm_data','info', `Parsing files...`);
 	log.info("[parse_cm_job] Parsing files...")
 	
 	const child = spawn('java', ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder]);
@@ -493,28 +516,88 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	});
 
 	child.stderr.on('data', (data) => {
-	  ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: data.toString()}))
+	  sendLogToUI('parse_cm_data','error', data.toString());
 	  log.info(`[parse_cm_job] ${data.toString()}`)
 	});
 	
 	child.on('exit', code => {
 		if(code === 0 ){
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"success", message: `Dump successfully parsed. Find csv files in ${outputFolder}`}))
-			log.info(`[parse_cm_job] Dump successfully parsed. Find csv files in ${outputFolder}`)
+			sendLogToUI('parse_cm_data','success', `Dump successfully parsed. Find csv files in ${outputFolder}`);
+			log.info(`[parse_cm_job] Dump successfully parsed. Find csv files in ${outputFolder}`);
 		}else{
-			ipcRenderer.send('parse-cm-job', JSON.stringify({status:"error", message: "Something went wrong"}))
-			log.error(`Something went wrong. Error code : ${code}`)
+			log.error(`Something went wrong`);
+			sendLogToUI('parse_cm_data','error', `Something went wrong`);
+			
 		}
 	});
 
 }
+
+
+/*
+* Load CM Data into mongodb
+* 
+* @param string vendor 
+* @param string format
+* @param string csvFolder
+*/
+function loadCMData(vendor, format, csvFolder){
+	log.info(`vendor:${vendor} format:${format}, ${csvFolder}`);
+	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
-ipcRenderer.on('parse-cm-job', (event, args) => {
+	log.info(`Loading ${vendor} ${format} files from ${csvFolder}`);
+	sendLogToUI('parse_cm_data', 'info', `Loading ${vendor} ${format} files from ${csvFolder}` );
 	
+	for (let i=0; i<items.length; i++) {
+		let fileName = items[i];
+		let filePath = path.join(csvFolder, items[i]);
+		let moName = items[i].replace(/.csv$/i,'');
+		let collection = `${vendor}_cm_${moName}`.toLowerCase();
+		
+		sendLogToUI('load_cm_data','info', `Loading ${fileName} into boda.${collection}`);
+		
+		const child = spawnSync('mongoimport', ['-d', 'boda', '-c',collection, '--type','csv', '--headerline', '--file', filePath]);
+		
+		log.info(`mongoimport -d boda -c ${collection} --type csv --headerline --file ${filePath}`);
+		
+		if(child.error){
+			throw child.error.toString();
+		}else{
+			log.info(child.stdout.toString());	
+		}
+		
+	}
+	sendLogToUI('load_cm_data','success', `Completed loading data.`);
+	
+}
+	
+
+/*
+*
+*
+*/	
+function executeTask(task, options){
+	try {
+		if(task === 'parse_cm_data'){
+			processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
+		}
+		
+		if(task === 'load_cm_data'){
+			loadCMData(options.vendor, options.format, options.csvFolder);
+		}
+	}catch(err){
+		sendLogToUI('load_cm_data','error', err);
+	}
+}
+
+ipcRenderer.on('parse-cm-job', (event, task, args) => {
+	log.info(`Backgroup process: task: ${task} args: ${args}`);
 	const obj  = JSON.parse(args)
-	
-	processCMDumps(obj.vendor, obj.format, obj.inputFolder, obj.outputFolder)
+	executeTask(task, obj);
 })
+
+
+
 
 ipcRenderer.send('ready')
 
