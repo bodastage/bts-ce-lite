@@ -7,6 +7,9 @@ import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
 import { saveCMParsingFolders, updateProcessCMTimer } from './cm-actions';
 
+//styles
+import  './process.css';
+
 const { remote, ipcRenderer} = window.require("electron")
 const { app, process, shell } = window.require('electron').remote;
 const { spawn } = window.require('child_process') 
@@ -260,6 +263,10 @@ class ProcessCMDumps extends React.Component {
 		}
 
 		
+		//Add ellipsi.. on the left if folder name is given 
+		let inputFolderEllipsis = this.state.inputFileText === 'Choose folder...' ? "" : "file-text-dir-rtl";
+		let outputFolderEllipsis = this.state.outputFolderText === 'Choose folder...' ? "" : "file-text-dir-rtl"
+		
         return (
             <div>
                 <h3><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</h3>
@@ -288,7 +295,7 @@ class ProcessCMDumps extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
 						<div className="col-sm-8">
-						  <FileInput className="form-control" text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
+						  <FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)} disabled={this.state.processing}/>
@@ -298,7 +305,7 @@ class ProcessCMDumps extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
 						<div className="col-sm-8">
-						  <FileInput className="form-control" text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange} disabled={this.state.processing}/>
+						  <FileInput className={"form-control " + outputFolderEllipsis} text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.outputFolderText)}/>
