@@ -8,18 +8,11 @@ platform telecommunication management desktop app.
 * Reports
 
 ## Built with 
-* Electron
-* MongoDB
-* ReactJs
-* SQLite3
+* [Electron](https://electronjs.org)
+* [PostgreSQL](https://www.postgresql.org/)
+* [ReactJs](https://reactjs.org/)
+* [SQLite3](https://www.sqlite.org/index.html)
 
-## Running in dev mode
-```
-> git clone repo_url
-> cd bts-ce-lite
-> npm install
-> npm run dev
-```
 
 ## Getting help
 To report issues with the application or request new features use the issue tracker. For help and customizations send an email to info@bodastage.com.
