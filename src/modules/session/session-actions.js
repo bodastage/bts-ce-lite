@@ -1,7 +1,7 @@
 import axios from '../../api/config';
 import 'url-search-params-polyfill';
 //import * as sqlite3 from 'sqlite3';
-//import {createConnection} from "typeorm";
+import {createConnection} from "typeorm";
 
 import { SQLITE3_DB_PATH } from "./db-settings";
 
