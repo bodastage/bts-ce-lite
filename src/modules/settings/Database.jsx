@@ -109,7 +109,7 @@ class Database extends React.Component{
         return (
             <div>
                 <h3><FontAwesomeIcon icon="database"/> Database</h3> 
-				<Callout intent={Intent.PRIMARY}>For an enhanced experience, we require MongoDB</Callout>
+				<Callout intent={Intent.PRIMARY}>For an enhanced experience, we require PostgreSQL</Callout>
 				
 				{errorNotice}
 				{successNotice}
@@ -152,21 +152,21 @@ class Database extends React.Component{
 
 						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating} /> &nbsp;
 						  <Button type="button" text="Test connection"  disabled={this.props.updating} onClick={this.testDBConnection}/> &nbsp;
-						  <Button type="button" text="How to install MongoDB"  minimal={true} disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenCollapse();}}/> &nbsp;
+						  <Button type="button" text="How to install PostgreSQL"  minimal={true} disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenCollapse();}}/> &nbsp;
 						  
 						  <Collapse isOpen={this.state.collapseOpen} className="mt-2">
 							<Callout>
 								<p>
 									<strong>
-										We require you to manually install MongoDB as it requires elevated privileges to be run as a service.
+										We require you to manually install PostgreSQL as it requires elevated privileges to be run as a service.
 									</strong>
 								</p>
 								
 								
 								<ol>
-									<li>  Download installer from the <a href="https://www.mongodb.com/download-center/community" onClick={this.handleOnHrefClick}>MongoDB Download Center</a> </li>
+									<li>  Download version 10.9 installer from the <a href="https://www.enterprisedb.com/downloads/postgres-postgresql-downloads" onClick={this.handleOnHrefClick}>Enterprise DB Download page</a> </li>
 									<li> Run installation</li>
-									<li> Confirm <strong>mongo</strong> command is available in the system PATH i.e. can be run from the terminal. Type <code>mongo --help</code>  in the terminal to confirm.</li>
+									<li> Confirm <strong>psql</strong> command is available in the system PATH i.e. can be run from the terminal. Type <code>psql --help</code>  in the terminal to confirm.</li>
 									<li> Restart Boda-Lite application</li>
 								</ol>
 								
