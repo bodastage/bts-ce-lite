@@ -68,7 +68,7 @@ class UILayout extends React.Component {
 				
 					<Navbar.Group align={Alignment.LEFT}>
 						<img src={logo} width="50px" alt="BTS-CE-Lite" />  &nbsp;&nbsp;&nbsp;
-						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.1.8"}</span></Navbar.Heading>
+						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.1.9"}</span></Navbar.Heading>
 					</Navbar.Group>
 					<Navbar.Group align={Alignment.RIGHT}>
 						<Button className={Classes.MINIMAL} icon="home" text="Home" 
