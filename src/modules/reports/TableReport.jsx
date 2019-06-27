@@ -16,7 +16,7 @@ import { SQLITE3_DB_PATH } from "../session/db-settings";
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
-const MongoClient = window.require('mongodb').MongoClient;
+const { Client } = window.require('pg');
 
 //Maximum number of times to check if the file is being generated 
 //for download
@@ -236,6 +236,8 @@ class TableReport extends React.Component{
                 let page = params.startRow;
                 let length= params.endRow - params.startRow;
 
+				let lastRow = 100;
+				
 				//@TODO: Move this logic to a seperate file
 				//@TODO: Pick from sqlite db the connection details
 				//@TODO: Call this once at the start of the ready function 
@@ -252,46 +254,57 @@ class TableReport extends React.Component{
 					const username = row[0].username;
 					const password = row[0].password;
 
-					const url = `mongodb://${hostname}:${port}/boda`;
-
-					MongoClient.connect(url, { useNewUrlParser: true }, async function(err, mongodb) {
-						if(err !== null){
-							log.error(`Failed to connect to ${url}. ${err}`);
-							params.successCallback([], 0);
-							return;
-							//@TODO: Create failure notifiation action
-							//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
-						}
-					  
+					const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+					const client = new Client({
+					  connectionString: connectionString,
+					});
 					
-						//let lastRow = await mongodb.db().collection('huawei_cm_gcell').estimatedDocumentCount() ;
-						let lastRow = await eval("mongodb.db().collection('huawei_cm_gcell').estimatedDocumentCount() ;");
-						console.log(query);
-						try{
-							/*
-							mongodb.db().collection('huawei_cm_gcell')
-							.find({},
-								{
-									limit: length, 
-									skip: page,
-								})
-							.toArray((err, docs) => {
-							  params.successCallback(docs, lastRow);
-							});
-							*/
-							
-							eval(query).toArray((err, docs) => {
-							  params.successCallback(docs, lastRow);
-							});
-						  
-							mongodb.close();
-						}catch(e){
-							log.error(`Failed fetch data ${err}`);
+				
+					client.connect((err) => {
+						if(err){
+							log.error(`Failed to connect to ${connectionString}. ${err}`);
 							params.successCallback([], 0);
-							return;
-						}  
-						  
-					});//eof:MongoClient
+						}
+					});
+					
+					client.query(`
+						SELECT
+						t1."DATETIME" AS "DATETIME",
+						t2."SYSOBJECTID" as "NENAME",
+						'HUAWEI' AS "VENDOR",
+						'2G' AS "TECHNOLOGY",
+						t3."BTSNAME" AS "SITENAME",
+						t3."BTSID" AS "SITEID",
+						t1."CELLNAME" AS "CELLNAME",
+						t1."ACTSTATUS" AS "ACTSTATUS",
+						t1."ADMSTAT" AS "BLKSTATUS",
+						t1."MCC" AS "MCC",
+						t1."MNC" AS "MNC",
+						t1."LAC" AS "LAC",
+						t1."CI" AS "CI",
+						t1."BCCHNO" AS "BCCHNO",
+						t1."NCC" AS "NCC",
+						t1."BCC" AS "BCC",
+						CONCAT(t1."NCC", t1."BCC") AS "BSIC",
+						CONCAT(t1."MCC", '-', t1."MNC", '-', t1."LAC", '-', t1."CI") AS "CGI_RAW",
+						CONCAT(t1."MCC", '-', t1."MNC", '-', LPAD(t1."LAC",5,'0'), '-', t1."CI") AS "CGI"
+						FROM huawei_cm."GCELL" t1
+						INNER JOIN huawei_cm."SYS" t2 ON t1."FILENAME" = t2."FILENAME"
+						INNER JOIN huawei_cm."BTS" t3 ON t3."BTSID" = t1."BTSID" AND t1."FILENAME" = t3."FILENAME"
+						INNER JOIN huawei_cm."GCELLGPRS" t4 ON t4."FILENAME" = t1."FILENAME" AND T4."CELLID" = t1."CELLID"
+						LIMIT 5
+					`)
+					.then( result => {
+						params.successCallback(result, lastRow);
+					} )
+					.catch(e => {
+						//@TODO: Error notice
+						params.successCallback([], 0);
+
+					})
+					.then(() => client.end());
+				
+					
 				
 				});//eof:db.all
 				

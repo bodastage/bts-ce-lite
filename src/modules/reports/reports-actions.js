@@ -2,7 +2,7 @@ import { SQLITE3_DB_PATH } from "../session/db-settings";
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
-const MongoClient = window.require('mongodb').MongoClient;
+const { Client } = window.require('pg');
 
 
 export const REQUEST_REPORTS = 'REQUEST_REPORTS';
@@ -157,37 +157,32 @@ export function getReportFields(reportId){
 				//For now let's get the fields from the first records returned from the query 
 				//@TODO: Pick from sqlite db the connection details
 				//const url = `mongodb://127.0.0.1:27017/boda`;
-				const url = `mongodb://${hostname}:${port}/boda`;
 				
-				MongoClient.connect(url, { useNewUrlParser: true }, function(err, mongodb) {
-					if(err !== null){
-						log.error(`Failed to connect to ${url}. ${err}`)
+				const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`
+				
+				const client = new Client({
+				  connectionString: connectionString,
+				});
+				
+				client.connect((err) => {
+					if(err){
+						log.error(`Failed to connect to ${connectionString}. ${err}`)
 						return dispatch(receiveReportFields(reportId, []));
 						//@TODO: Create failure notifiation action
 						//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
 					}
-					 
-					/*
-					let gcell = mongodb.db().collection('huawei_cm_gcell').findOne({},{_id: 0},(err, doc) => {
-						  console.log(doc);			  
-						  return dispatch(receiveReportFields(reportId, Object.keys(doc)));
-						  
-					}); */
-				  
-					let page= 0; //start row 
-					let length = 1;//number of records to return
-					try{
-						eval(query).toArray((err, docs) => {
-						  return dispatch(receiveReportFields(reportId, Object.keys(docs[0])));
-						})
-					}catch(cErr){
-						//@TODO: Error notice
-						return dispatch(receiveReportFields(reportId, []));	
-					}
-					
-					mongodb.close();
-				});//eof:MongoClient
+				});
 				
+				
+			client.query(`SELECT * FROM (${query}) LIMIT 1`)
+				.then( result => {
+					return dispatch(receiveReportFields(reportId, Object.keys(result[0])));
+				} )
+				.catch(e => {
+					//@TODO: Error notice
+					return dispatch(receiveReportFields(reportId, []));	
+				})
+				.then(() => client.end());
 				
 			});
 			
