@@ -19,7 +19,13 @@ export const CLEAR_OLD_SESSION = 'CLEAR_OLD_SESSION';
 export const CHECK_DB_SETUP_STATUS = 'CHECK_DB_SETUP_STATUS';
 export const CONFIRM_DB_READY = 'CONFIRM_DB_READY';
 export const CLEAR_NOTICES = 'CLEAR_NOTICES';
+export const RESET_STATE = 'RESET_STATE';
 
+export function resetState(){
+	return {
+		type: RESET_STATE
+	};
+}
 
 export function clearNotices(){
 	return {
@@ -230,6 +236,5 @@ export function attemptAuthentication(loginDetails){
 	
     }
 }
-
 
 export default { logIntoApp, logOutOfApp, authenticateUser, attemptAuthentication };
