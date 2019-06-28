@@ -13,6 +13,7 @@ import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert } fro
 import classNames from 'classnames';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
+import { runQuery, getSQLiteReportInfo, getSortAndFilteredQuery } from './DBQueryHelper.js';
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
@@ -205,9 +206,12 @@ class TableReport extends React.Component{
         
         for(var key in this.props.fields){
             let columnName = this.props.fields[key]
-            this.columnDef.push(
-                {headerName: columnName, field: columnName,  
-                 filter: "agTextColumnFilter"},);
+            this.columnDef.push({
+				headerName: columnName, 
+				field: columnName,  
+                filter: "agTextColumnFilter",
+				filterParams:{caseSensitive: true}
+			});
         }
     }
 
@@ -217,7 +221,7 @@ class TableReport extends React.Component{
      * @param {type} params
      * @returns {undefined}
      */
-    onGridReady(params) {
+     onGridReady(params) {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
         let _columnApi =  params.columnApi;
@@ -229,86 +233,27 @@ class TableReport extends React.Component{
 		if(typeof this.props.reportInfo === 'undefined') return;
 		
 		let query = this.props.reportInfo.query ;
+		
+
         
         let dataSource = {  
             rowCount: null,
-            getRows:  function(params) {
-                let page = params.startRow;
+            getRows:  async function(params) {
+                let offset = params.startRow;
                 let length= params.endRow - params.startRow;
 
 				let lastRow = 100;
 				
-				//@TODO: Move this logic to a seperate file
-				//@TODO: Pick from sqlite db the connection details
-				//@TODO: Call this once at the start of the ready function 
-				let db = new sqlite3.Database(SQLITE3_DB_PATH);
-				db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
-					if(err !== null){
-						log.error(row);
-						//@TODO: Show table data log error
-						return;
-					}
-					
-					const hostname = row[0].hostname;
-					const port = row[0].port;
-					const username = row[0].username;
-					const password = row[0].password;
-
-					const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
-					const client = new Client({
-					  connectionString: connectionString,
-					});
-					
+				let filteredSortedQuery = getSortAndFilteredQuery(query,  _fields, 
+						params.sortModel, params.filterModel, _columnApi.getAllColumns());
+				console.log(filteredSortedQuery);
+				//let reportInfo = await getSQLiteReportInfo(reportId);
 				
-					client.connect((err) => {
-						if(err){
-							log.error(`Failed to connect to ${connectionString}. ${err}`);
-							params.successCallback([], 0);
-						}
-					});
-					
-					client.query(`
-						SELECT
-						t1."DATETIME" AS "DATETIME",
-						t2."SYSOBJECTID" as "NENAME",
-						'HUAWEI' AS "VENDOR",
-						'2G' AS "TECHNOLOGY",
-						t3."BTSNAME" AS "SITENAME",
-						t3."BTSID" AS "SITEID",
-						t1."CELLNAME" AS "CELLNAME",
-						t1."ACTSTATUS" AS "ACTSTATUS",
-						t1."ADMSTAT" AS "BLKSTATUS",
-						t1."MCC" AS "MCC",
-						t1."MNC" AS "MNC",
-						t1."LAC" AS "LAC",
-						t1."CI" AS "CI",
-						t1."BCCHNO" AS "BCCHNO",
-						t1."NCC" AS "NCC",
-						t1."BCC" AS "BCC",
-						CONCAT(t1."NCC", t1."BCC") AS "BSIC",
-						CONCAT(t1."MCC", '-', t1."MNC", '-', t1."LAC", '-', t1."CI") AS "CGI_RAW",
-						CONCAT(t1."MCC", '-', t1."MNC", '-', LPAD(t1."LAC",5,'0'), '-', t1."CI") AS "CGI"
-						FROM huawei_cm."GCELL" t1
-						INNER JOIN huawei_cm."SYS" t2 ON t1."FILENAME" = t2."FILENAME"
-						INNER JOIN huawei_cm."BTS" t3 ON t3."BTSID" = t1."BTSID" AND t1."FILENAME" = t3."FILENAME"
-						INNER JOIN huawei_cm."GCELLGPRS" t4 ON t4."FILENAME" = t1."FILENAME" AND T4."CELLID" = t1."CELLID"
-						LIMIT 5
-					`)
-					.then( result => {
-						params.successCallback(result, lastRow);
-					} )
-					.catch(e => {
-						//@TODO: Error notice
-						params.successCallback([], 0);
-
-					})
-					.then(() => client.end());
+				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
 				
-					
+				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
 				
-				});//eof:db.all
-				
-
+				params.successCallback(queryResult.rows, count); 
 				
             }
         };
@@ -365,7 +310,6 @@ class TableReport extends React.Component{
                                 enableServerSideSorting={true}
                                 enableServerSideFilter={true}
                                 onGridReady={this.onGridReady.bind(this)}
-
                                 >
                             </AgGridReact>
 

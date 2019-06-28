@@ -46,7 +46,7 @@ const persistor = persistStore(store);
 ReactDOM.render(
         <Provider store={store} key="provider">
             <PersistGate loading={<Loading show={true}/>} persistor={persistor}>
-                <App/>
+                <App persistor={persistor}/>
             </PersistGate>
         </Provider>,
     document.getElementById('root'));

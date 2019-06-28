@@ -9,6 +9,7 @@ import Loading from './Loading';
 import axios from 'axios';
 import { attemptAuthentication, clearAuthError, clearOldSession, checkDBSetupStatus } from '../session/session-actions';
 import { Button, Intent, FormGroup, InputGroup } from "@blueprintjs/core";
+import VERSION from '../../version';
 
 class LoginForm extends React.Component {
     constructor(props){
@@ -72,7 +73,7 @@ class LoginForm extends React.Component {
             return (
             <div className="login-mask">
                 <div className="login-logo">
-                    <img src={logo} width="100px" alt="Boda Lite - CE" /> <span><h2  className="bp3-heading bp3-ui-text">Boda Lite</h2></span>
+                    <img src={logo} width="100px" alt="Boda Lite - CE" /> <span><h2  className="bp3-heading bp3-ui-text">Boda Lite</h2><h6 className="bp3-heading">v{VERSION}</h6></span>
                 </div>
                 
                 <form className="form-signin" onSubmit={this.handleSubmit}>

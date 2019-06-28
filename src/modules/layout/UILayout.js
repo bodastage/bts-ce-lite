@@ -15,6 +15,7 @@ import { addTab } from '../layout/uilayout-actions';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import './layout.less';
+import VERSION from '../../version';
 
 class UILayout extends React.Component {
 	constructor(props){
@@ -73,7 +74,7 @@ class UILayout extends React.Component {
 				
 					<Navbar.Group align={Alignment.LEFT}>
 						<img src={logo} width="50px" alt="BTS-CE-Lite" />  &nbsp;&nbsp;&nbsp;
-						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{"0.2.0"}</span></Navbar.Heading>
+						<Navbar.Heading>Boda-Lite <span className="version bp3-text-muted">v{VERSION}</span></Navbar.Heading>
 					</Navbar.Group>
 					<Navbar.Group align={Alignment.RIGHT}>
 						<Button className={Classes.MINIMAL} icon="home" text="Home" 

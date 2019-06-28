@@ -173,10 +173,11 @@ export function getReportFields(reportId){
 					}
 				});
 				
-				
-			client.query(`SELECT * FROM (${query}) LIMIT 1`)
+			client.query(`SELECT * FROM (${query}) t LIMIT 0`)
 				.then( result => {
-					return dispatch(receiveReportFields(reportId, Object.keys(result[0])));
+					console.log(result);
+					let fields = result.fields.map((v,i) => v.name );
+					return dispatch(receiveReportFields(reportId, fields));
 				} )
 				.catch(e => {
 					//@TODO: Error notice
@@ -184,11 +185,11 @@ export function getReportFields(reportId){
 				})
 				.then(() => client.end());
 				
-			});
+			});//db.all()
 			
 
 			
-		});
+		});//db.all- get db connection details
 
 
     }

@@ -17,6 +17,7 @@ const unzip = window.require('unzipper');
 const unrar = window.require("node-unrar-js");
 const fstream = window.require("fstream");
 //const sync = window.require('sync');
+const csv=window.require('csvtojson');
 
 log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
 
@@ -541,7 +542,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 * @param string format
 * @param string csvFolder
 */
-function loadCMData(vendor, format, csvFolder){
+async function loadCMData(vendor, format, csvFolder){
 	log.info(`vendor:${vendor} format:${format}, ${csvFolder}`);
 	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
@@ -552,19 +553,61 @@ function loadCMData(vendor, format, csvFolder){
 		let fileName = items[i];
 		let filePath = path.join(csvFolder, items[i]);
 		let moName = items[i].replace(/.csv$/i,'');
-		let collection = `${vendor}_cm_${moName}`.toLowerCase();
+		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
+		let table2 = `${vendor}_cm.\\"${moName}\\"`;
 		
-		sendLogToUI('load_cm_data','info', `Loading ${fileName} into boda.${collection}`);
+		sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${table}`);
 		
-		const child = spawnSync('mongoimport', ['-d', 'boda', '-c',collection, '--type','csv', '--headerline', '--file', filePath]);
+				
+		const child = spawn('psql', ['-U', 'bodastage', '-h', 'localhost', '-p', '5432', '-d', 'boda', '-c', `"COPY ${table2} (data) FROM STDIN;"` ],{
+			env: {'PGPASSWORD':'password'},
+			shell: true
+		});
 		
-		log.info(`mongoimport -d boda -c ${collection} --type csv --headerline --file ${filePath}`);
+		child.stderr.on('data', (data) => {
+		  console.log(`grep stderr: ${data}`);
+		  log.error(data)
+		});
 		
-		if(child.error){
-			throw child.error.toString();
-		}else{
-			log.info(child.stdout.toString());	
-		}
+		child.stdin.on('data', (data) => {
+		  console.log(`child.stdin.on.data: ${data}`);
+		});
+		
+		
+		await new Promise((resolve, reject) => {
+			csv()
+			.fromFile(filePath)
+			.subscribe((json)=>{
+				const jsonString = JSON.stringify(json);
+				//console.log(`json:`, json);
+				//log.log(`json:`, json);
+				//log.log(`jsonString:`, jsonString);
+				
+				child.stdin.write(jsonString + '\n');
+
+				log.info(`echo ${jsonString} | psql -U bodastage -h localhost -p 5432 -d boda -c "COPY ${table2} (data) FROM STDIN;"`);				
+				
+				if(child.error){
+					throw child.error.toString();
+				}else{
+					log.info(child.stdout.toString());	
+				}
+			},(err) => {//onError
+				console.error(err);
+				child.stdin.end();
+				reject();
+			},
+			()=>{//onComplete
+				child.stdin.end();
+				resolve(undefined);
+				console.log(`csv.fromStream.subscribe.end`);
+				//end cild spawn
+			}); 
+			
+		});
+
+		
+		
 		
 	}
 	sendLogToUI('load_cm_data','success', `Completed loading data.`);
