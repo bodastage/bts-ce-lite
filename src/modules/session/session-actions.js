@@ -2,6 +2,7 @@ import axios from '../../api/config';
 import 'url-search-params-polyfill';
 //import * as sqlite3 from 'sqlite3';
 import {createConnection} from "typeorm";
+import { HUAWEI_2G_KEY_PARAMAETERS, HUAWEI_3G_KEY_PARAMAETERS, HUAWEI_4G_KEY_PARAMAETERS } from '../../services/postgresql/HuaweiKeyParametersQueries.js';
 
 import { SQLITE3_DB_PATH } from "./db-settings";
 
@@ -136,7 +137,7 @@ export function checkDBSetupStatus(){
 					  
 				stmt = db.prepare("INSERT INTO databases " +
 				" (hostname, port, username, password, name, db_type)" +
-				" VALUES ('27.0.0.1','27017','','','boda','mongodb')"
+				" VALUES ('127.0.0.1','5432','bodastage','password','boda','postgresql')"
 				);
 				
 				stmt.run();
@@ -171,24 +172,22 @@ export function checkDBSetupStatus(){
 				stmt.finalize();
 				
 				//Insert default reports
-				stmt = db.prepare("INSERT INTO reports " +
-				" (name, notes, query, options, type, category_id)" +
-				" VALUES " + 
-				"('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1)," +
-				"('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1)," +
-				"('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1)," +
-				`('Huawei 2G parameters','Huawei 2G parameters', 'mongodb.db().collection("huawei_cm_gcell").find({},{limit: length, skip: page,})', '{}', 'table',1),` +
-				"('Huawei 3G parameters','Huawei 3G parameters', '', '{}', 'table',1)," +
-				"('Huawei 4G parameters','Huawei 4G parameters', '', '{}', 'table',1)," +
-				"('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1)," +
-				"('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1)," +
-				"('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1)," + 
-				"('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1)," +
-				"('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1)," +
-				"('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1)"
-				);
+				stmt = db.prepare("INSERT INTO reports  (name, notes, query, options, type, category_id)" +
+				" VALUES (?, ?, ?, ?, ?, ?)" );
 				
-				stmt.run();
+				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1);
+				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1);
+				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1);
+				stmt.run('Huawei 2G parameters','Huawei 2G parameters', HUAWEI_2G_KEY_PARAMAETERS, '{}', 'table',1);
+				stmt.run('Huawei 3G parameters','Huawei 3G parameters', HUAWEI_3G_KEY_PARAMAETERS, '{}', 'table',1);
+				stmt.run('Huawei 4G parameters','Huawei 4G parameters', HUAWEI_4G_KEY_PARAMAETERS, '{}', 'table',1);
+				stmt.run('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1);
+				stmt.run('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1);
+				stmt.run('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1);
+				stmt.run('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1);
+				stmt.run('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1);
+				stmt.run('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1);
+				
 				stmt.finalize();
 				
 				dispatch(clearNotices());
