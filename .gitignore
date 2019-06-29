@@ -5,3 +5,5 @@ build
 *.log
 venv
 nbproject
+
+db/boda-lite.sqlite3

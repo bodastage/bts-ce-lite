@@ -234,7 +234,6 @@ class TableReport extends React.Component{
 		
 		let query = this.props.reportInfo.query ;
 		
-
         
         let dataSource = {  
             rowCount: null,
@@ -243,6 +242,11 @@ class TableReport extends React.Component{
                 let length= params.endRow - params.startRow;
 
 				let lastRow = 100;
+				
+				if(_fields.length === 0) {
+					params.successCallback([], 0); 
+					return;
+				}
 				
 				let filteredSortedQuery = getSortAndFilteredQuery(query,  _fields, 
 						params.sortModel, params.filterModel, _columnApi.getAllColumns());
