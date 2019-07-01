@@ -9,7 +9,8 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 
 import axios from '../../api/config';
-import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert } from "@blueprintjs/core"; 
+import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert,
+		 Dialog, Popover  } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
@@ -18,6 +19,9 @@ import { runQuery, getSQLiteReportInfo, getSortAndFilteredQuery } from './DBQuer
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
 const { Client } = window.require('pg');
+const { remote, ipcRenderer} = window.require("electron")
+const { app, shell } = window.require('electron').remote;
+const path = window.require('path')
 
 //Maximum number of times to check if the file is being generated 
 //for download
@@ -48,6 +52,11 @@ class TableReport extends React.Component{
         this.clearDownloadProgress = this.clearDownloadProgress.bind(this)
         this.handleAlertClose = this.handleAlertClose.bind(this)
         
+		this.handleDialogOpen = this.handleDialogOpen.bind(this)
+		this.handleDialogClose = this.handleDialogClose.bind(this)
+		this.dismissNotice = this.dismissNotice.bind(this)
+		this.setNotice = this.setNotice.bind(this)
+		
         this.state = {
             columnDefs: [],
             rowData: [
@@ -55,7 +64,7 @@ class TableReport extends React.Component{
             rowBuffer: 0,
             rowSelection: "multiple",
             rowModelType: "infinite",
-            paginationPageSize: 100,
+            paginationPageSize: 50,
             cacheOverflowSize: 2,
             maxConcurrentDatasourceRequests: 2,
             infiniteInitialRowCount: 1,
@@ -68,7 +77,19 @@ class TableReport extends React.Component{
             canOutsideClickCancel: false,
             isOpen: false,
             isOpenError: false,
-            isAlertOpen: false
+            isAlertOpen: false,
+			
+			//Report detials dialog 
+			isDialogOpen: false,
+			
+			//Processing
+			processing: false,
+			
+			popoverIsOpen: false,
+			
+			notice: null, //{type:info|success|error|warning, message: ...}
+			
+			
             
             
         };
@@ -135,6 +156,7 @@ class TableReport extends React.Component{
         
     }
     
+	setNotice = (type,message) => {this.setState({notice: {type: type, message: message}})}
     /**
      * Trigger the download 
      * 
@@ -142,6 +164,49 @@ class TableReport extends React.Component{
      */
     onDownloadClick(){
 
+        this.toaster.show({
+                icon: "download",
+                intent: Intent.INFO,
+                message: "Downloading report...",
+        });
+		
+		this.setState({processing: true});
+		let payload = {
+			reportId: this.props.options.reportId,
+			outputFolder: app.getPath('downloads')
+		}
+		
+		ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
+		
+		ipcRenderer.on('parse-cm-request', (event, task, args) => {
+
+			const obj = JSON.parse(args)
+			console.log("obj:", obj, "task:", task)
+			
+			if(task !== 'download_report') return;
+			
+			if(obj.status === 'error' && task === 'download_report' ){
+				this.setState({
+						notice: {type: 'error', message: obj.message},
+						processing: false
+						});
+			}
+			
+			if(obj.status === 'info' && task === 'download_report' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'download_report' ){
+				let reportFile = path.join(app.getPath('downloads'),'');
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: `<a href="" onClick={this.showFileInFolder('${obj.message}')}></a>`
+							},
+						processing: false
+						});
+			}
+		});
     }
     
     /*
@@ -240,8 +305,6 @@ class TableReport extends React.Component{
             getRows:  async function(params) {
                 let offset = params.startRow;
                 let length= params.endRow - params.startRow;
-
-				let lastRow = 100;
 				
 				if(_fields.length === 0) {
 					params.successCallback([], 0); 
@@ -253,6 +316,7 @@ class TableReport extends React.Component{
 				console.log(filteredSortedQuery);
 				//let reportInfo = await getSQLiteReportInfo(reportId);
 				
+				//Count is the last row
 				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
 				
 				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
@@ -263,6 +327,10 @@ class TableReport extends React.Component{
         };
         this.gridApi.setDatasource(dataSource);
     }
+	
+	dismissNotice = () => {
+		this.setState({notice: null});
+	}
     
     /**
      * Create toask reference
@@ -271,27 +339,41 @@ class TableReport extends React.Component{
         toaster: (ref) => (this.toaster = ref),
     };
     
-//    handleEscapeKeyChange = handleBooleanChange(canEscapeKeyCancel => this.setState({ canEscapeKeyCancel }));
-//    handleOutsideClickChange = handleBooleanChange(click => this.setState({ canOutsideClickCancel: click }));
-    
+    handleDialogOpen = () => this.setState({ isDialogOpen: true });
+    handleDialogClose = () => this.setState({ isDialogOpen: false });
+	
     render(){
         this.updateColumnDefs();
         
         //Download alert
         const { isOpen, isOpenError, ...alertProps } = this.state;
 
+		let notice = null;
+		if(this.state.notice !== null ){ 
+			notice = (<div className={`alert alert-${this.state.notice.type} m-1 p-2`} role="alert">{this.state.notice.message}
+					<button type="button" className="close"  aria-label="Close" onClick={this.dismissNotice}>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>)
+		}
+		
+		
         return (
             <div>
     
             <h3><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</h3>        
                 <div className="card">
                     <div className="card-body p-2">
+						{notice}
+						
+						{this.state.processing === false? "" : <ProgressBar intent={Intent.PRIMARY}/>}
+						
                         <div className="mb-1">
                         <ButtonGroup minimal={true}>
                             <Button icon="refresh" onClick={this.refreshData}></Button>
-                            <Button icon="download" onClick={this.onDownloadClick} ></Button>
+                            <Button icon="download"  onClick={this.onDownloadClick}></Button>
                             <Toaster {...this.state} ref={this.refHandlers.toaster} />
-                            <Button icon="info-sign"></Button>
+                            <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
                         </ButtonGroup>
 
                         </div>
@@ -333,6 +415,25 @@ class TableReport extends React.Component{
                         Or pick it from the reports folder.
                     </p>
                 </Alert>
+
+				{ typeof this.props.reportInfo === 'undefined' ? "" :
+				<Dialog
+				isOpen={this.state.isDialogOpen}
+				onClose={this.handleDialogClose}
+				title={this.props.reportInfo.name}
+				>
+					<div className={Classes.DIALOG_BODY}>
+						<pre>
+						{this.props.reportInfo.query}
+						</pre>
+					</div>
+					<div className={Classes.DIALOG_FOOTER}>
+						<div className={Classes.DIALOG_FOOTER_ACTIONS}>
+							<Button onClick={this.handleDialogClose}>Close</Button>
+						</div>
+					</div>
+				</Dialog>
+				}
                 
             </div>
         );

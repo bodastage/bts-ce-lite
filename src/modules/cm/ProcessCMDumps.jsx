@@ -174,11 +174,11 @@ class ProcessCMDumps extends React.Component {
 			
 			
 			
-			if(obj.status === 'error'){
+			if(obj.status === 'error' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
 				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
 			}
 			
-			if(obj.status === 'info'){
+			if(obj.status === 'info' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
 				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})
 				
 			}

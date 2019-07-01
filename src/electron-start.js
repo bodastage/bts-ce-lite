@@ -22,7 +22,7 @@ function createParseCMBgWindow() {
 	  result = new BrowserWindow({"show": false, webPreferences: {nodeIntegration: true}})
   }
   //
-  result.loadURL('file://' + __dirname + '/../background/parse_cm_dumps.html')
+  result.loadURL('file://' + __dirname + '/../background/background-process.html')
   result.on('closed', () => {
     console.log('background window closed')
   });

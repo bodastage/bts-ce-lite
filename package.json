@@ -66,6 +66,7 @@
     "bootstrap": "^4.1.2",
     "case-sensitive-paths-webpack-plugin": "2.2.0",
     "css-loader": "1.0.0",
+    "csv-writer": "^1.4.0",
     "csvtojson": "^2.0.8",
     "dotenv": "6.0.0",
     "dotenv-expand": "4.2.0",
@@ -213,7 +214,8 @@
     "files": [
       "./build/**/*",
       "./src/electron-start.js",
-      "./background/parse_cm_dumps.html"
+      "./background/background-process.html",
+      "./background/background-utils.js"
     ],
     "extraResources": [
       "libraries",

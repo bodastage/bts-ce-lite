@@ -18,6 +18,8 @@ const unrar = window.require("node-unrar-js");
 const fstream = window.require("fstream");
 //const sync = window.require('sync');
 const csv=window.require('csvtojson');
+const utils = window.require('./background-utils');
+
 
 log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
 
@@ -615,11 +617,23 @@ async function loadCMData(vendor, format, csvFolder){
 }
 	
 
+
+async function generateCSVReport(reportId, outputFolder){
+	let reportInfo = await utils.getSQLiteReportInfo(reportId);
+	console.log("reportInfo", reportInfo);
+	let csvFileName = reportInfo.name.replace(/\s+/g,"_") + ".csv";
+	console.log(csvFileName, outputFolder, reportInfo.query);
+	const reportFile = await utils.generateCSVFromQuery(csvFileName, outputFolder, reportInfo.query);
+	sendLogToUI('download_report','success', reportFile);
+}
+	
 /*
-*
+* Run backgroup task
 *
 */	
-function executeTask(task, options){
+async function  executeTask(task, options){
+	console.log("executeTask(task, options) task:",task," options:", options);
+	
 	try {
 		if(task === 'parse_cm_data'){
 			processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
@@ -630,6 +644,17 @@ function executeTask(task, options){
 		}
 	}catch(err){
 		sendLogToUI('load_cm_data','error', err);
+	}
+	
+	
+	//Generate Reports
+	try{
+		if(task === 'download_report'){
+			console.log("await generateCSVReport(options.reportId, options.outputFolder);");
+			await generateCSVReport(options.reportId, options.outputFolder);
+		}
+	}catch(err){
+		sendLogToUI('download_report ','error', err);
 	}
 }
 
