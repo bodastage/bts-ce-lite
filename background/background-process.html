@@ -452,8 +452,6 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 
 
 processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
-
-
 	
 	let basepath = app.getAppPath();
 
@@ -463,15 +461,6 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	
 	const parser = VENDOR_PARSERS[vendor][format]
 	const parserPath = path.join(basepath,'libraries',parser)
-	
-	//Uncompress files for other vendor format combinations except huawei gexport 
-	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
-	//uncompressing what does not need to be uncompressed 
-	if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
-		sendLogToUI('parse_cm_data','info',`Uncompressing files...` );
-		log.info(`[parse_cm_job] Uncompressing files...`)
-		uncompressFolder(inputFolder);
-	}
 	
 	
 	//Clean Huawei GExport files 
@@ -507,6 +496,15 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			return;
 		}
 		
+	}
+	//Uncompress files for other vendor format combinations except huawei gexport 
+	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
+	//uncompressing what does not need to be uncompressed 
+	//else if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
+	else{
+		sendLogToUI('parse_cm_data','info',`Uncompressing files...` );
+		log.info(`[parse_cm_job] Uncompressing files...`)
+		uncompressFolder(inputFolder);
 	}
 	
 	sendLogToUI('parse_cm_data','info', `Parsing files...`);
