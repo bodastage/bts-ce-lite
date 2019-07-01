@@ -201,10 +201,11 @@ class TableReport extends React.Component{
 				this.setState({
 						notice: {
 							type: 'success', 
-							message: `<a href="" onClick={this.showFileInFolder('${obj.message}')}></a>`
+							message: `File generated at ${obj.message}`
 							},
 						processing: false
 						});
+				shell.showItemInFolder(obj.message);
 			}
 		});
     }
