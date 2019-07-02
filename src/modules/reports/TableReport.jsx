@@ -97,6 +97,7 @@ class TableReport extends React.Component{
         //This is filled when a download is triggered
         this.downloadUrl = "";
         this.downloadFilename="";
+		this.downloadReportListener = null;
         
         this.agTblReload = 1; //used to reload the aggrid table
     }
@@ -178,7 +179,7 @@ class TableReport extends React.Component{
 		
 		ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
 		
-		ipcRenderer.on('parse-cm-request', (event, task, args) => {
+		this.downloadReportListener = (event, task, args) => {
 
 			const obj = JSON.parse(args)
 			console.log("obj:", obj, "task:", task)
@@ -190,6 +191,8 @@ class TableReport extends React.Component{
 						notice: {type: 'error', message: obj.message},
 						processing: false
 						});
+				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
+				this.downloadReportListener = null;
 			}
 			
 			if(obj.status === 'info' && task === 'download_report' ){
@@ -206,8 +209,12 @@ class TableReport extends React.Component{
 						processing: false
 						});
 				shell.showItemInFolder(obj.message);
+				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
+				this.downloadReportListener = null;
 			}
-		});
+		}
+		
+		ipcRenderer.on('parse-cm-request', this.downloadReportListener);
     }
     
     /*

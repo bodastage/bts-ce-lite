@@ -57,6 +57,9 @@ class ProcessCMDumps extends React.Component {
 		
 		this.currentTimerValue = "00:00:00";
 		
+		
+		this.processFilesListener = null;
+		
 	}
 	
 	/**
@@ -146,14 +149,16 @@ class ProcessCMDumps extends React.Component {
 		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
-		ipcRenderer.on('parse-cm-request', (event, task, args) => {
+		this.processFilesListener = (event, task, args) => {
 			
-			log.info(`[process_cm_dumps] Received message from IPC channel "parse-cm-request with message ${args}"`)	
+			log.info(`Received message from IPC channel "parse-cm-request with message ${args}"`)	
 			
 			const obj = JSON.parse(args)
 			
 			if(obj.status === 'success' && task === 'parse_cm_data' && !this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
+				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				this.processFilesListener = null;
 			}
 			
 			if(obj.status === 'success' && task === 'parse_cm_data' &&  this.state.loadIntoDB){
@@ -164,18 +169,21 @@ class ProcessCMDumps extends React.Component {
 					"format": this.state.currentFormat,
 					"csvFolder": this.state.outputFolderText
 				}
-			
 				ipcRenderer.send('parse-cm-request', 'load_cm_data', JSON.stringify(loadPayload))				
 			}
 			
 			if(obj.status === 'success' && task === 'load_cm_data' && this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false});		
+				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				this.processFilesListener = null;
 			}
 			
 			
 			
 			if(obj.status === 'error' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
-				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
+				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false});
+				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				this.processFilesListener = null;
 			}
 			
 			if(obj.status === 'info' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
@@ -183,7 +191,9 @@ class ProcessCMDumps extends React.Component {
 				
 			}
 
-		})
+		}
+		
+		ipcRenderer.on('parse-cm-request', )
 		
 		return;
 
