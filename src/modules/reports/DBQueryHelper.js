@@ -8,13 +8,13 @@ const { Client } = window.require('pg');
 /**
 * Get database connection details
 */
-export async function getSQLiteDBConnectionDetails(){
+export async function getSQLiteDBConnectionDetails(dbName){
 		
 		let details = await
-		new Promise((resolve, reject) => {
+		await new Promise((resolve, reject) => {
 			
 			let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
+			db.all("SELECT * FROM databases WHERE name = ?", [dbName] , (err, row) => {
 				if(err !== null){
 					log.error(row);
 					//@TODO: Show table data log error
@@ -65,7 +65,7 @@ export async function getSQLiteReportInfo(reportId){
 */
 export async function runQuery(query){
 	
-	const dbConDetails  = await getSQLiteDBConnectionDetails();
+	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
 
 	const hostname = dbConDetails.hostname;
 	const port = dbConDetails.port;

@@ -21,13 +21,13 @@ const SQLITE3_DB_PATH = path.join(basepath,'db',SQLITE3_DB_NAME);
 /**
 * Get database connection details
 */
-async function getSQLiteDBConnectionDetails(){
+async function getSQLiteDBConnectionDetails(dbName='boda'){
 		
 		let details = await
 		new Promise((resolve, reject) => {
 			
 			let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
+			db.all("SELECT * FROM databases WHERE name = ?", [dbName] , (err, row) => {
 				if(err !== null){
 					log.error(row);
 					//@TODO: Show table data log error
@@ -78,7 +78,7 @@ async function getSQLiteReportInfo(reportId){
 */
 async function runQuery(query){
 	
-	const dbConDetails  = await getSQLiteDBConnectionDetails();
+	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
 
 	const hostname = dbConDetails.hostname;
 	const port = dbConDetails.port;

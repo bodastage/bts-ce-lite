@@ -143,7 +143,8 @@ export function checkDBSetupStatus(){
 					  
 				stmt = db.prepare("INSERT INTO databases " +
 				" (hostname, port, username, password, name, db_type)" +
-				" VALUES ('127.0.0.1','5432','bodastage','password','boda','postgresql')"
+				" VALUES ('127.0.0.1','5432','bodastage','password','boda','postgresql')," + 
+				" VALUES ('127.0.0.1','5432','postgres','postgres','postgres','postgresql')"
 				);
 				
 				stmt.run();

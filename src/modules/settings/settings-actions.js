@@ -11,7 +11,15 @@ export const SHOW_DB_UPDATE_ERROR = 'SHOW_DB_UPDATE_ERROR';
 export const UPDATE_STATE_DB_SETTINGS = 'UPDATE_STATE_DB_SETTINGS';
 export const CLEAR_DB_UPDATE_ERROR = 'CLEAR_DB_UPDATE_ERROR';
 export const CLEAR_DB_UPDATE_SUCCESS = 'CLEAR_DB_UPDATE_SUCCESS';
+export const STOP_DB_SETTINGS_UPDATE = 'STOP_DB_SETTINGS_UPDATE';
 
+
+
+export function stopDBSettingsUpdate(){
+	return {
+		type: STOP_DB_SETTINGS_UPDATE
+	}
+}
 
 export function clearDBUpdateSuccess(){
 	return {
@@ -37,7 +45,7 @@ export function getDBSettings(){
 		startDBSettingsUpdate();
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
+		db.all("SELECT * FROM databases WHERE name = ?", ["postgres"] , (err, row) => {
 				if(err !== null){
 					log.error(row);
 					dispatch(showDBUpdateError(err.toString()));
@@ -93,7 +101,7 @@ export function updateDBSettings(settings){
 							 settings.username, 
 							 settings.password]
 
-				query += " WHERE name = 'boda'";
+				query += " WHERE name = 'postgres'";
 				
 				var stmt = db.prepare(query,values);
 					
