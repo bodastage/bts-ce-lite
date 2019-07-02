@@ -111,6 +111,11 @@ class Database extends React.Component{
 			const obj = JSON.parse(args)
 			console.log("obj:", obj, "task:", task)
 			
+			console.log(typeof task);
+			console.log(task,"|setup_database");
+			console.log(task === "setup_database");
+			console.log(task !== "setup_database");
+			
 			if(task !== "setup_database") return;
 			console.log("obj.status:", obj.status)
 			
@@ -119,6 +124,7 @@ class Database extends React.Component{
 				this.props.dispatch(showDBUpdateError(obj.message));
 				ipcRenderer.removeListener("parse-cm-request", this.setupDBListener);
 				this.props.dispatch(stopDBSettingsUpdate());
+				this.setupDBListener = null;
 				
 			}
 
@@ -127,6 +133,7 @@ class Database extends React.Component{
 				this.props.dispatch(showDBUpdateSuccess( obj.message));
 				ipcRenderer.removeListener("parse-cm-request", this.setupDBListener);
 				this.props.dispatch(stopDBSettingsUpdate());
+				this.setupDBListener = null;
 
 			}
 		}

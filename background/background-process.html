@@ -637,29 +637,33 @@ async function generateCSVReport(reportId, outputFolder){
 function setupBodaDatabase(hostname, port, username, password){
 
 	return new Promise((resolve, reject) => {
-		let basepath = app.getAppPath();
+		try{
+			let basepath = app.getAppPath();
 
-		if (!isDev) {
-		  basepath = process.resourcesPath
-		} 
-		
-		const sqlFile  = path.join(basepath, 'db', 'scripts', 'create_pg_database.sql');
-		const child = spawnSync('psql', ['-U', username, '-h', hostname, '-p', port, '-f', sqlFile ],{
-			env: {'PGPASSWORD': password},
-			shell: true
-		});
-		
-		log.info(`psql -U ${username} -h ${hostname} -p ${port} -f ${sqlFile}`);
-		
-		if(child.status != 0){
-			log.error(`[backgroup_job:setupBodaDatabase] error:${child.error.toString()}`);
-			sendLogToUI('setup_database ','error', child.output.toString());
-			//throw Error(child.output.toString());
-			reject();
-		}else{
-			log.info(child.output.toString())
-			resolve();
-			sendLogToUI('setup_database','success', 'Database setup completed.');
+			if (!isDev) {
+			  basepath = process.resourcesPath
+			} 
+			
+			const sqlFile  = path.join(basepath, 'db', 'scripts', 'create_pg_database.sql');
+			const child = spawnSync('psql', ['-U', username, '-h', hostname, '-p', port, '-f', sqlFile ],{
+				env: {'PGPASSWORD': password},
+				shell: true
+			});
+			
+			log.info(`psql -U ${username} -h ${hostname} -p ${port} -f ${sqlFile}`);
+			
+			if(child.status != 0){
+				log.error(`[backgroup_job:setupBodaDatabase] error:${child.output.toString()}`);
+				sendLogToUI('setup_database','error', child.output.toString());
+				//throw Error(child.output.toString());
+				//reject(undefined);
+			}else{
+				log.info(child.output.toString())
+				//resolve();
+				sendLogToUI('setup_database','success', 'Database setup completed.');
+			}
+		}catch(e){
+			sendLogToUI('setup_database','error', e);
 		}
 	});
 
@@ -694,7 +698,7 @@ async function  executeTask(task, options){
 			await generateCSVReport(options.reportId, options.outputFolder);
 		}
 	}catch(err){
-		sendLogToUI('download_report ','error', err);
+		sendLogToUI('download_report','error', err);
 	}
 	
 	//Setup database -- 
@@ -703,7 +707,7 @@ async function  executeTask(task, options){
 			setupBodaDatabase(options.hostname, options.port, options.username, options.password);
 		}
 	}catch(err){
-		sendLogToUI('setup_database ','error', err);
+		sendLogToUI('setup_database','error', err);
 	}
 }
 
