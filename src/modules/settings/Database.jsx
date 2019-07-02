@@ -109,12 +109,7 @@ class Database extends React.Component{
 		this.setupDBListener = (event, task, args) => {
 
 			const obj = JSON.parse(args)
-			console.log("obj:", obj, "task:", task)
-			
-			console.log(typeof task);
-			console.log(task,"|setup_database");
-			console.log(task === "setup_database");
-			console.log(task !== "setup_database");
+			log.info("[setupDBListener] obj:", obj, "task:", task)
 			
 			if(task !== "setup_database") return;
 			console.log("obj.status:", obj.status)
