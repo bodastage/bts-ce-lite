@@ -193,17 +193,14 @@ class ProcessCMDumps extends React.Component {
 
 		}
 		
-		ipcRenderer.on('parse-cm-request', )
-		
+		ipcRenderer.on('parse-cm-request', this.processFilesListener);
 		return;
-
 	}
 	
 	dismissErrorMessage = () => { this.setState({errorMessage: null})}
 	
 	dismissSuccessMessage = () => { this.setState({successMessage: null})}
 	
-		
 	/**
 	* Launch given folder path in file explorer
 	*

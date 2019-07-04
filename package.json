@@ -90,6 +90,7 @@
     "node-unrar-js": "^0.8.1",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "pg": "^7.11.0",
+    "pg-copy-streams": "^2.2.0",
     "pg-native": "^3.0.0",
     "plotly.js": "^1.41.3",
     "pnp-webpack-plugin": "1.2.1",

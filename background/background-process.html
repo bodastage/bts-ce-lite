@@ -685,7 +685,25 @@ async function  executeTask(task, options){
 		}
 		
 		if(task === 'load_cm_data'){
-			loadCMData(options.vendor, options.format, options.csvFolder);
+			await utils.loadCMDataViaStream(
+				options.vendor, 
+				options.format, 
+				options.csvFolder,
+				(tableName, fileName, csvFolder) => { //beforeFileLoad
+					//sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${tableName}...`);
+					log.info(`Loading ${fileName} into ${tableName}...`);
+				}, 
+				(tableName, fileName, csvFolder) => { //afterFileLoad
+					//sendLogToUI('load_cm_data','info', `Loaded ${fileName} into ${tableName}.`);
+					//log.info(`Loaded ${fileName} into ${tableName}.`);
+				}, 
+				function beforeLoad(){
+					sendLogToUI('load_cm_data','info', 'Loading csv files into database...');
+				}, 
+				function afterLoad(){
+					sendLogToUI('load_cm_data','success', 'Loading completed successfully.')
+			});
+			
 		}
 	}catch(err){
 		sendLogToUI('load_cm_data','error', err);

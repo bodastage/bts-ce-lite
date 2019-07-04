@@ -1,6 +1,7 @@
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
 const { Client } = window.require('pg');
+const copyFrom = require('pg-copy-streams').from;
 const path = window.require('path');
 const isDev = window.require('electron-is-dev');
 const { app, process } = window.require('electron').remote;
@@ -267,9 +268,103 @@ async function generateCSVFromQuery(csvFileName, outputFolder, query){
 	
 }
 
+/**
+*
+* @param veondor string vendor 
+* @param format string format 
+* @param csvFolder string 
+* @param callbacks {beforeFileLoad, afterFileLoad, beforeLoad, afterLoad}
+*
+*/
+async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
+	
+	
+	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+
+	const hostname = dbConDetails.hostname;
+	const port = dbConDetails.port;
+	const username = dbConDetails.username;
+	const password = dbConDetails.password;
+	
+	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+	const client = new Client({
+		connectionString: connectionString,
+	});
+		
+	client.connect((err) => {
+		if(err){
+			log.error(err);
+			return err;
+		}
+	});
+	
+	if(typeof beforeLoad === 'function'){
+		beforeLoad();
+	}
+
+	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	
+	for (let i=0; i<items.length; i++) {
+		let fileName = items[i];
+		let filePath = path.join(csvFolder, items[i]);
+		let moName = items[i].replace(/.csv$/i,'');
+		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
+
+		let copyFromStream = null;
+		try{
+			copyFromStream = client.query(copyFrom(`COPY ${table} (data) FROM STDIN`));
+		}catch(e){
+			log.error(e);
+			return false;
+		}
+
+		
+		if(typeof beforeFileLoad === 'function'){
+			beforeFileLoad(table, fileName, csvFolder);
+		}
+
+		await new Promise((resolve, reject) => {
+			csv()
+			.fromFile(filePath)
+			.subscribe((json)=>{
+				const jsonString = JSON.stringify(json);
+				//log.info(jsonString);
+				try{
+					copyFromStream.write(jsonString + "\n");
+				}catch(err){
+					log.error(err);
+				}
+
+			},(err) => {//onError
+				log.error(err);
+				copyFromStream.end();
+				reject();
+			},
+			()=>{//onComplete
+				copyFromStream.end();
+				resolve(undefined);
+			}); 
+			
+		});
+
+		
+		if(typeof afterFileLoad === 'function'){
+			afterFileLoad(table, fileName, csvFolder);
+		}
+	}
+	
+	
+	if(typeof afterLoad === 'function'){
+		afterLoad();
+	}
+	
+}
+
+
 
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteDBConnectionDetails = getSQLiteDBConnectionDetails;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
 exports.runQuery = runQuery;
 exports.generateCSVFromQuery = generateCSVFromQuery;
+exports.loadCMDataViaStream = loadCMDataViaStream;

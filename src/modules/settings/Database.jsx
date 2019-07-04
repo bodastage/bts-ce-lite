@@ -10,6 +10,7 @@ import { updateDBSettings, getDBSettings, clearDBUpdateError, clearDBUpdateSucce
 const path = window.require('path')
 const { ipcRenderer} = window.require("electron")
 const { app, process, shell } = window.require('electron').remote;
+const log = window.require('electron-log');
 
 class Database extends React.Component{
     static icon = "database";
