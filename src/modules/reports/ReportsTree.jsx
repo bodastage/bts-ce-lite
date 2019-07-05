@@ -1,13 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getReports, setReportFilter, getReportInfo,
+import { getReports, setReportFilter, deleteReport, getReportInfo,
          clearReportTreeError } from './reports-actions';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { Classes, Icon, ITreeNode, Tooltip, Tree, FormGroup, InputGroup, 
          ContextMenu, ContextMenuTarget, Menu, MenuDivider, MenuItem,
-        ProgressBar, Dialog, TextArea, Intent, Spinner, Button} from "@blueprintjs/core";
+        ProgressBar, Dialog, TextArea, Intent, Spinner, Button} 
+		from "@blueprintjs/core";
 import './reports-panel.css';
+import { saveCategory, clearReportCreateState, removeCategory, getCategory } 
+	from "./reports-actions"
+
 
 class ReportsTree extends React.Component{
     static icon = "table";
@@ -24,7 +28,9 @@ class ReportsTree extends React.Component{
         this.handleNodeCollapse = this.handleNodeCollapse.bind(this);
         this.showContextMenu = this.showContextMenu.bind(this);
 		this.refreshReportTree = this.refreshReportTree.bind(this);
-
+		this.openCreateCategoryDialog = this.openCreateCategoryDialog.bind(this)
+        this.handleSave = this.handleSave.bind(this)
+		
         this.state = {
             text: this.props.filter.text,
             categories: this.props.filter.categories,
@@ -56,9 +62,16 @@ class ReportsTree extends React.Component{
         //re-render
         this.nameRedraw = 0;
         
-
+        //This shows the saving spinner when true
+        this.isSaving  = false;
+        
+        this.catNames = "Category name";
+        this.catNotes = "Category notes";
     }
 
+    handleNotesChange = (event) => this.catNotes = event.target.value
+    handleCatNameChange = (event) => this.catName = event.target.value
+    
     /**
      * Show reports context menu
      * 
@@ -74,16 +87,71 @@ class ReportsTree extends React.Component{
             ContextMenu.show(
                 <Menu>
                     <MenuItem icon="th" text="View report" onClick={(ev) => {ev.preventDefault(); this.showReportDataTab(node.label, node.reportId);}}/>
+					{node.inBuilt === 1 ? "" : <MenuItem icon="graph-remove" text="Delete report" onClick={(ev) => {ev.preventDefault(); this.removeReport(node.reportId);}}/> }	
+					{node.inBuilt === 1 ? "" : <MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
+					
                 </Menu>,
                 { left: e.clientX, top: e.clientY },
                 () => this.setState({ isContextMenuOpen: false }),
             );
+        }else{ //category folder
+            
+            ContextMenu.show(
+                <Menu>
+                    <MenuItem icon="edit" text="Edit category" onClick={(ev) => {ev.preventDefault(); this.openEditCategoryDialog(node.catId)} } />                    
+                    {node.inBuilt === 1 ? "" : <MenuItem icon="delete" text="Delete category" onClick={(ev) => {ev.preventDefault(); this.deleteCategory(node.catId)} } /> }	
+                </Menu>,
+                { left: e.clientX, top: e.clientY },
+                () => this.setState({ isContextMenuOpen: false }),
+            );
+            
         }
         
         this.setState({ isContextMenuOpen: true });
 
     }
 
+    /**
+     * Open report edit tab. This uses the same component as for creating new
+     * reports. The reportId differentiates between create and edit.
+     * 
+     * @param {type} reportId
+     * @returns {undefined}
+     */
+    showEditTab(reportId){
+        let tabId  = 'create_report';
+        
+        //Close any open create tab
+        this.props.dispatch(closeTab(tabId));
+        this.props.dispatch(clearReportCreateState());
+        
+        //Fetch report details 
+        this.props.dispatch(getReportInfo(reportId))
+        
+        //add delay before showing edit mode
+        //Without this, there is 
+        setTimeout(()=> {
+            this.props.dispatch(addTab(tabId, 'CreateReport', {
+                title: 'Edit Report',
+                reportId: reportId
+            }));
+        },100)
+
+                
+    }
+	
+    /**
+     * Delete report
+     * 
+     * @param Integer reportId report primary key
+     */
+    removeReport(reportId){
+        this.props.dispatch(deleteReport(reportId))
+        
+        ContextMenu.hide();
+    }
+    
+	
     /**
      * Handle change event on search input field
      * 
@@ -106,7 +174,24 @@ class ReportsTree extends React.Component{
         
         this.updateFilter();
     }
-    
+
+
+	openEditCategoryDialog = (categoryId) => { 
+		this.setState({ isOpen: true });
+		this.props.dispatch(getCategory(categoryId));
+		
+		ContextMenu.hide();
+	} 
+
+	
+    /**
+     * Delete report category 
+     * 
+     */
+    deleteCategory(catId){
+        this.props.dispatch(removeCategory(catId));
+    }    
+	
     /**
      * Check whether list of reports provided contains atleast one matching the 
      * search string 
@@ -186,6 +271,7 @@ class ReportsTree extends React.Component{
                 key: cat.cat_id,
                 isExpanded : isExpanded,
                 catId: cat.cat_id,
+				inBuilt: cat.in_built,
                 childNodes: []        
             };
             
@@ -203,7 +289,8 @@ class ReportsTree extends React.Component{
                     label: report.name,
                     icon: "document",
                     reportId: report.id,
-                    catId: cat.cat_id
+                    catId: cat.cat_id,
+					inBuilt: report.in_built
                 });
             }
             this.nodes.push(reportCategory);
@@ -241,17 +328,49 @@ class ReportsTree extends React.Component{
         this.setState({expandedNodes: expandedNodes});
     };
 
+    createReport = () => {
+        let tabId  = 'create_report';
+        
+        //Close any open create tab
+        //This is to fix a bug caused by create and edit using the same component
+        this.props.dispatch(closeTab(tabId));
+        this.props.dispatch(clearReportCreateState());
+        
+        //The delay is toe ensure the previous close has time to clean up
+        setTimeout(()=>{
+            this.props.dispatch(addTab(tabId, 'CreateReport', {
+                title: 'Create Report'
+            }));
+        },10)
+
+    }
+	
 	/*
 	* Refresh the report tree
 	*/
 	refreshReportTree = () => {
 		this.props.dispatch(getReports());
 	}
+	
     
+    openCreateCategoryDialog = () => this.setState({ isOpen: true });
+    closeCreateCategoryDialog = () => this.setState({ isOpen: false });
+    
+    handleSave = () => {
+        this.props.dispatch(saveCategory(this.catName, this.catNotes));
+        this.isSaving  = true;
+    }
+	
     render(){        
         
         this.updateNodes();
-                                
+                         
+        //Show progress bar when report details are being fetched 
+        let catDetailsLoadingProgressBar = null;
+        if( this.props.editCat !== null){
+            catDetailsLoadingProgressBar = this.props.editCat.requesting === true ? <ProgressBar className="mb-2"/> : "";
+        }
+		
         return (
             
         <div>
@@ -259,8 +378,8 @@ class ReportsTree extends React.Component{
 			<FontAwesomeIcon icon={ReportsTree.icon}/> Reports
 			
 			<a href="#"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
-			<Icon icon="folder-new" className="float-right ml-2"/> &nbsp; 
-			<Icon icon="plus" className="float-right ml-2"/> &nbsp;
+			<a href="#"><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
+			<a href="#"><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
 		</span>
 
                 <div>
@@ -311,7 +430,47 @@ class ReportsTree extends React.Component{
             />
             </div>
             
- 
+			<Dialog
+			icon="folder-new"
+			title="Add report category"
+			{...this.state}
+			onClose={this.closeCreateCategoryDialog}
+			>
+			
+				<div className={Classes.DIALOG_BODY}>
+			
+					{catDetailsLoadingProgressBar}
+					
+					<FormGroup
+						helperText=""
+						label="Category Name"
+						labelFor="text-input"
+						labelInfo=""
+					>
+					<InputGroup id="text-input" placeholder="Report category name" className='mb-1' onChange={this.handleCatNameChange}/>
+					</FormGroup>       
+					
+					<FormGroup
+						helperText=""
+						label="Notes"
+						labelFor=""
+						labelInfo=""
+					>
+						<TextArea
+							placeholder="Report category notes"
+							large={true}
+							intent={Intent.PRIMARY}
+							onChange={this.handleNotesChange}
+							value={this.state.notesValue}
+							className='mb-1'
+							fill={true}
+						/>
+					</FormGroup>
+					
+					<Button icon="plus" intent='success' text="Save" onClick={this.handleSave} disabled={this.props.requesting} />  {this.props.requesting === true ? <Spinner intent={Intent.PRIMARY} size={Spinner.SIZE_SMALL}/> : ""}
+				</div>
+			</Dialog>
+			
         </div>
         );
     }
@@ -325,6 +484,8 @@ function mapStateToProps(state){
         filter: state.reports.filter,
         requestingReports: state.reports.requestingReports,
         requestError: state.reports.requestError,
+		requesting: state.reports.newCat.requesting, //report categories
+		editCat: state.reports.editCat
     };
     
     

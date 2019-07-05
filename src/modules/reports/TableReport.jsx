@@ -151,6 +151,7 @@ class TableReport extends React.Component{
  
     
     componentDidMount() {
+		console.log('Mounting TableReport...');
         if(this.props.fields.length === 0 ){
             this.props.dispatch(getReportFields(this.props.options.reportId));
         }
@@ -182,7 +183,6 @@ class TableReport extends React.Component{
 		this.downloadReportListener = (event, task, args) => {
 
 			const obj = JSON.parse(args)
-			console.log("obj:", obj, "task:", task)
 			
 			if(task !== 'download_report') return;
 			
@@ -306,8 +306,7 @@ class TableReport extends React.Component{
 		if(typeof this.props.reportInfo === 'undefined') return;
 		
 		let query = this.props.reportInfo.query ;
-		
-        
+
         let dataSource = {  
             rowCount: null,
             getRows:  async function(params) {
@@ -321,8 +320,6 @@ class TableReport extends React.Component{
 				
 				let filteredSortedQuery = getSortAndFilteredQuery(query,  _fields, 
 						params.sortModel, params.filterModel, _columnApi.getAllColumns());
-				console.log(filteredSortedQuery);
-				//let reportInfo = await getSQLiteReportInfo(reportId);
 				
 				//Count is the last row
 				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count

@@ -143,8 +143,9 @@ export function checkDBSetupStatus(){
 					  
 				stmt = db.prepare("INSERT INTO databases " +
 				" (hostname, port, username, password, name, db_type)" +
-				" VALUES ('127.0.0.1','5432','bodastage','password','boda','postgresql')," + 
-				" VALUES ('127.0.0.1','5432','postgres','postgres','postgres','postgresql')"
+				" VALUES " +
+				" ('127.0.0.1','5432','bodastage','password','boda','postgresql')," + 
+				" ('127.0.0.1','5432','postgres','postgres','postgres','postgresql')"
 				);
 				
 				stmt.run();
@@ -154,7 +155,8 @@ export function checkDBSetupStatus(){
 				db.run("CREATE TABLE rpt_categories (" +
 					  "		name TEXT NOT NULL UNIQUE, " + 
 					  "		notes TEXT NOT NULL," +
-					  "		parent_id INTEGER NOT NULL" +
+					  "		parent_id INTEGER NOT NULL," +
+					  "		in_built INTEGER DEFAULT 0" +
 					  ")");
 					  
 				//Create reports table 
@@ -164,36 +166,37 @@ export function checkDBSetupStatus(){
 					  "		query TEXT NOT NULL," + 
 					  "		options TEXT NOT NULL," + 
 					  "		type TEXT NOT NULL," + //table|pie|bar|scatter|compound
-					  "		category_id INTEGER NOT NULL" + 
+					  "		category_id INTEGER NOT NULL," + 
+					  "		in_built INTEGER DEFAULT 0" + //1-inbuilt, 0-not inbuilt
 					  ")");
 				
 				//Insert default categories
 				stmt = db.prepare("INSERT INTO rpt_categories " +
-				" (name, notes, parent_id)" +
+				" (name, notes, parent_id, in_built)" +
 				" VALUES " + 
-				"('Key Parameters','Key parameter reports',0),"+
-				"('Network Entities','Network Entities reports',0)"
+				"('Key Parameters','Key parameter reports',0, 1),"+
+				"('Network Entities','Network Entities reports',0, 1)"
 				);
 				
 				stmt.run();
 				stmt.finalize();
 				
 				//Insert default reports
-				stmt = db.prepare("INSERT INTO reports  (name, notes, query, options, type, category_id)" +
-				" VALUES (?, ?, ?, ?, ?, ?)" );
+				stmt = db.prepare("INSERT INTO reports  (name, notes, query, options, type, category_id, in_built)" +
+				" VALUES (?, ?, ?, ?, ?, ?, ?)" );
 				
-				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1);
-				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1);
-				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1);
-				stmt.run('Huawei 2G parameters','Huawei 2G parameters', HUAWEI_2G_KEY_PARAMAETERS, '{}', 'table',1);
-				stmt.run('Huawei 3G parameters','Huawei 3G parameters', HUAWEI_3G_KEY_PARAMAETERS, '{}', 'table',1);
-				stmt.run('Huawei 4G parameters','Huawei 4G parameters', HUAWEI_4G_KEY_PARAMAETERS, '{}', 'table',1);
-				stmt.run('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1);
-				stmt.run('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1);
-				stmt.run('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1);
-				stmt.run('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1);
-				stmt.run('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1);
-				stmt.run('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1);
+				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Huawei 2G parameters','Huawei 2G parameters', HUAWEI_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Huawei 3G parameters','Huawei 3G parameters', HUAWEI_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Huawei 4G parameters','Huawei 4G parameters', HUAWEI_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1, 1);
+				stmt.run('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1, 1);
+				stmt.run('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1, 1);
 				
 				stmt.finalize();
 				
@@ -215,8 +218,6 @@ export function attemptAuthentication(loginDetails){
 		db.all("SELECT * FROM users WHERE email = ? AND password = ?", 
 			[loginDetails.username, loginDetails.password] , (err, row) => {
 				if(err !== null){
-					log.info(loginDetails);
-					log.info(row);
 					dispatch(markLoginAsFailed(err.toString()));
 					return;
 				}

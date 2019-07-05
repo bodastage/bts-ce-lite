@@ -1,5 +1,9 @@
 import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
-		RECEIVE_REPORT, RECEIVE_REPORT_FIELDS } from './reports-actions';
+		RECEIVE_REPORT, RECEIVE_REPORT_FIELDS, SEND_CREATE_RPT_CATEGORY_REQ,
+		CONFIRM_RPT_CATEGORY_CREATION, SEND_DELETE_RPT_CATEGORY_REQ, CONFIRM_RPT_CATEGORY_DELETION,
+		NOTIFY_REPORT_CATEGORY_CREATION_ERROR, CREATE_RPT_RECEIVE_FIELDS, CONFIRM_REPORT_CREATED,
+		CREATE_RPT_PRVW_ERROR, RECEIVE_GRAPH_DATA
+		} from './reports-actions';
 
 let initialState = {
     
@@ -11,7 +15,7 @@ let initialState = {
     //Report tree filtering state
     filter:{
         text: '',
-        reports: true,
+        reports: false,
         categories: false
     },
     
@@ -40,6 +44,18 @@ let initialState = {
 	}
 	*/
     reportsInfo:{},
+	
+    //Contains all report creation related data
+    create: {
+        error: null,
+        fields: [],
+        creating: false // for showing a loading indicator when request is sent to the server
+    },
+	
+     //Stores the sate of new category creation
+    newCat:{},
+    
+    editCat: null // edit category details her
 };
 
 
@@ -102,6 +118,73 @@ export default function reports(state = initialState, action){
                             }
                         })
                     });
+            case SEND_CREATE_RPT_CATEGORY_REQ:
+                return {
+                    ...state,
+                    newCat: { ...state.newCat, requesting: true}
+                }
+            case CONFIRM_RPT_CATEGORY_CREATION:
+                return {
+                    ...state,
+                    newCat: { ...state.newCat, requesting: false}
+                }
+            case SEND_DELETE_RPT_CATEGORY_REQ:
+                return {
+                    ...state,
+                    requestingReports: true
+                }
+            case CONFIRM_RPT_CATEGORY_DELETION:
+                return {
+                    ...state,
+                    requestingReports: false
+                }
+            case NOTIFY_REPORT_CATEGORY_CREATION_ERROR:
+                return {
+                    ...state,
+                    requestingReports: false,
+                    requestError: action.error
+                }
+            case CREATE_RPT_RECEIVE_FIELDS:
+                return {
+                    ...state,
+                    create: { ...state.create, fields: action.fields, error: null}
+                }
+            case CONFIRM_REPORT_CREATED:
+                return {
+                    ...state,
+                    create: { 
+                        ...state.create,
+                        //fields: [], //Don't reset fields after saving.
+                        error: null, 
+                        creating: false
+                    },
+                    reportsInfo: {
+                        ...state.reportsInfo,
+                        [action.reportId]: {
+                            ...action.reportInfo, 
+                            id: action.reportId 
+                        }        
+                    }
+                }
+            case CREATE_RPT_PRVW_ERROR:
+                return {
+                    ...state,
+                    create: { ...state.create, error: action.error, fields:[], creating: false}
+                }
+            case RECEIVE_GRAPH_DATA:
+                return {
+                    ...state,
+                    reportsdata: { 
+                            ...state.reportsdata,
+                        [action.reportId]: {
+                            requesting: false,
+                            requestError:  null,
+                            fields: [],
+                            download: null,
+                            data: action.reportData
+                        }
+                    }
+                }
             default:
                 return state;
 		}

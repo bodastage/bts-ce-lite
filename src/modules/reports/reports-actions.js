@@ -1,4 +1,5 @@
 import { SQLITE3_DB_PATH } from "../session/db-settings";
+import { runQuery, getQueryFieldsInfo, getSQLiteReportInfo } from './DBQueryHelper.js';
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
@@ -20,6 +21,58 @@ export const SET_REPORTS_FILTER = 'SET_REPORTS_FILTER';
 export const CLEAR_REPORT_TREE_ERROR = 'CLEAR_REPORT_TREE_ERROR';
 export const REQUEST_REPORT = 'REQUEST_REPORT';
 export const RECEIVE_REPORT = 'REQUEST_REPORT';
+
+/**
+ * Send report category request action
+ */
+export const SEND_CREATE_RPT_CATEGORY_REQ = 'SEND_CREATE_RPT_CATEGORY_REQ';
+export const CONFIRM_RPT_CATEGORY_CREATION = 'CONFIRM_RPT_CATEGORY_CREATION';
+
+export const SEND_DELETE_RPT_CATEGORY_REQ = 'SEND_DELETE_RPT_CATEGORY_REQ';
+
+//Rename report category request
+export const SEND_RENAME_RPT_CATEGORY_REQ = 'SEND_RENAME_RPT_CATEGORY_REQ';
+
+//Action that confirms that the category was created
+export const CONFIRM_RPT_CATEGORY_DELETION = 'CONFIRM_RPT_CATEGORY_DELETION';
+
+//Confirm the category has been renamed
+export const CONFIRM_RPT_CATEGORY_RENAMING = 'CONFIRM_RPT_CATEGORY_RENAMING';
+
+export const NOTIFY_REPORT_CATEGORY_RENAME_ERROR = 'NOTIFY_REPORT_CATEGORY_RENAME_ERROR';
+
+export const NOTIFY_REPORT_CATEGORY_CREATION_ERROR = 'NOTIFY_REPORT_CATEGORY_CREATION_ERROR';
+
+export const REQUEST_REPORT_CATEGORY = 'REQUEST_REPORT_CATEGORY';
+export const CONFIRM_REPORT_CATEGORY_RECEIVED = 'CONFIRM_REPORT_CATEGORY_RECEIVED';
+
+/**
+ * 
+ * @type StringClears the state.edit_cat state
+ */
+export const CLEAR_EDIT_RPT_CATEGORY = 'CLEAR_EDIT_RPT_CATEGORY';
+
+
+export const CREATE_RPT_REQUEST_FIELDS = 'CREATE_RPT_REQUEST_FIELDS';
+export const CREATE_RPT_RECEIVE_FIELDS = 'CREATE_RPT_RECEIVE_FIELDS';
+
+//Preview error
+export const CREATE_RPT_PRVW_ERROR = 'CREATE_RPT_PRVW_ERROR';
+export const CREATE_RPT_CLEAR_ERROR = 'CREATE_RPT_CLEAR_ERROR';
+export const CREATE_RPT_CLEAR_STATE = 'CREATE_RPT_CLEAR_STATE';
+
+//Signals start of server request
+export const CREATE_REPORT_REQUEST = 'CREATE_REPORT_REQUEST';
+
+//Signals end of server request
+export const CONFIRM_REPORT_CREATED = 'CONFIRM_REPORT_CREATED';
+
+export const REQUEST_REPORT_DELETION = 'REQUEST_REPORT_DELETION';
+export const CONFIRM_REPORT_DELETION = 'CONFIRM_REPORT_DELETION';
+
+//Action necessary to fecth graph data
+export const REQUEST_GRAPH_DATA = 'REQUEST_REPORT_DATA'
+export const RECEIVE_GRAPH_DATA = 'RECEIVE_REPORT_DATA'
 
 
 export function clearReportTreeError(){
@@ -201,18 +254,19 @@ export function getReports(){
 		
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT \
+		return db.all("SELECT \
 					r.rowid as id,  \
 					r.name as name, \
 					c.rowid as cat_id, \
-					c.name as cat_name \
+					c.name as cat_name, \
+					r.in_built as r_in_built, \
+					c.in_built as c_in_built \
 				FROM rpt_categories c \
 				LEFT join reports r  ON r.category_id = c.rowid		",  (err, rows) => {
 					
 			if(err !== null){
 				log.error(err);
-				dispatch(notifyReportRequestError(err.toString()));
-				return;
+				return dispatch(notifyReportRequestError(err.toString()));
 			}
 
 			/*
@@ -227,6 +281,7 @@ export function getReports(){
 					reports.push({
 						cat_id: item.cat_id,
 						cat_name: item.cat_name,
+						in_built: item.c_in_built,
 						reports: []
 					})
 					
@@ -241,7 +296,8 @@ export function getReports(){
 				let catIndex = catIndexMap[item.cat_name];
 				reports[catIndex].reports.push({
 					id: item.id,
-					name: item.name
+					name: item.name,
+					in_built: item.r_in_built
 				})
 			});
 			
@@ -262,6 +318,417 @@ export function getReports(){
  */
 export function getReport(reportId){
     return (dispatch, getState) => {
+        
+    }
+}
+
+export function notifyReportCategoryRenameError(categoryId, error){
+    return {
+        type: NOTIFY_REPORT_CATEGORY_RENAME_ERROR,
+        categoryId: categoryId,
+        error: error
+    }
+}
+
+
+/**
+ * Confirm that the report category rename/edit request has been successful
+ * 
+ * @param {type} categoryId
+ * @returns {confirmReportCategoryRenaming.reports-actionsAnonym$0}
+ */
+export function confirmReportCategoryRenaming(categoryId){
+    return {
+        type: CONFIRM_RPT_CATEGORY_RENAMING
+    }
+}
+
+/**
+ * Mark beginning of report category rename request 
+ * 
+ * @returns {sendRenameReportCategoryRequest.reports-actionsAnonym$1}
+ */
+export function sendRenameReportCategoryRequest(){
+    return {
+        type: SEND_RENAME_RPT_CATEGORY_REQ
+    }
+}
+
+
+export function clearEditCategoryState(){
+    return {
+        type: CLEAR_EDIT_RPT_CATEGORY
+    }
+}
+
+
+export function sendCreateReportCategoryRequest(){
+    return {
+        type: SEND_CREATE_RPT_CATEGORY_REQ
+    }
+}
+
+export function confirmReportCategoryCreation(category){
+    return {
+        type: CONFIRM_RPT_CATEGORY_CREATION,
+        category: category
+    }
+}
+
+export function sendDeleteReportCategoryRequest(){
+    return {
+        type: SEND_DELETE_RPT_CATEGORY_REQ
+    }
+}
+
+
+//@TODO: Refactor code and combine adding and renameing/editting report 
+/**
+ * Add a category
+ * 
+ * @param {type} catName Category nam e
+ * @param {type} catNotes Notes about the category
+ * @returns {undefined}
+ */
+export  function saveCategory(catName, catNotes){
+    return(dispatch, getState) => {
+        dispatch(sendCreateReportCategoryRequest());
+        
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.serialize(async () => {
+			try{
+				let stmt = db.prepare(
+					"INSERT INTO rpt_categories " +
+					" (name, notes, parent_id)" +
+					" VALUES " + 
+					"(?,?,0)"
+				);
+
+				stmt.run([catName, catNotes], (err) => {
+					if(err !== null){
+						log.error(err.toString())
+						return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
+					}
+				});
+				stmt.finalize();
+				
+				await dispatch(getReports());
+				return dispatch(confirmReportCategoryCreation());
+			}catch(e){
+				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+			}
+		});
+    }
+}
+
+export function notifyReportCategoryCreationError(error){
+    return {
+        type: NOTIFY_REPORT_CATEGORY_CREATION_ERROR,
+        error: error
+    }
+}
+
+
+export function sendDeleteCategoryRequest(){
+    return {
+        type: SEND_DELETE_RPT_CATEGORY_REQ
+    }
+}
+
+/**
+ * Remove a category
+ * 
+ * @returns {Function}* 
+ */
+export function removeCategory(catId){
+    return(dispatch, getState) => {
+        dispatch(sendDeleteCategoryRequest());
+        
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.serialize(() => {
+			try{
+				db.run("DELETE FROM rpt_categories WHERE rowid = ? ", catId, (err) => {
+					if(err !== null){
+						log.error(err.toString());
+						return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+					}
+					
+					return dispatch(notifyReportCategoryCreationError("Error while deleting category."));
+				});
+				
+				dispatch(getReports());
+				return dispatch(confirmReportCategoryDeletion({}));
+			}catch(e){
+				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+			}
+		});
+    }
+}
+
+
+export function confirmReportCategoryDeletion(){
+    return {
+        type: CONFIRM_RPT_CATEGORY_DELETION
+    }
+}
+
+/**
+ * This marks the beginning of the report category details request
+ * 
+ * @param {type} categoryId
+ * @returns {requestReportCategory.reports-actionsAnonym$39}
+ */
+export function requestReportCategory(categoryId){
+    return {
+        type: REQUEST_REPORT_CATEGORY,
+        categoryId: categoryId
+    }
+}
+
+
+/**
+ * Confirm that the report category details have been received from the api call
+ * 
+ * @param {type} categoryId
+ * @param {type} data
+ * @returns {confirmReportCategoryReceived.reports-actionsAnonym$40}
+ */
+export function confirmReportCategoryReceived(categoryId, data){
+    return {
+        type: CONFIRM_REPORT_CATEGORY_RECEIVED,
+        categoryId: categoryId,
+        data: data
+    }
+}
+
+/**
+ * Get report category details 
+ * 
+ * @param {type} categoryId
+ * @returns {Function}
+ */
+export function getCategory(categoryId){
+    return(dispatch, getState) => {
+        dispatch(requestReportCategory(categoryId))
+        
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.all("SELECT * FROM rpt_categories WHERE rowid = ? ", (err, rows ) => {
+			if(err !== null){
+				log.error(err.toString());
+				return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
+			}
+			
+			return dispatch(confirmReportCategoryReceived(categoryId, rows));
+			
+		});
+    }
+}
+
+
+export function clearReportCreateState(){
+    return {
+        type: CREATE_RPT_CLEAR_STATE
+    }
+}
+
+
+export function clearPreviewReportError(){
+    return {
+        type: CREATE_RPT_CLEAR_ERROR
+    }
+}
+
+
+export function confirmReportCreation(reportId, reportInfo){
+    return { type: CONFIRM_REPORT_CREATED,
+        reportId: reportId,
+        reportInfo: reportInfo
+    };
+}
+
+export function createOrUpdateReport({name, category_id, notes, qry, reportId, options}){
+   return (dispatch, getState) => {
+        dispatch(createReportRequest());
+
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.serialize(async () => {
+			try{
+				let stmt = db.prepare(
+					"INSERT INTO reports " +
+					" (name, notes, category_id, query, options, type)" +
+					" VALUES " + 
+					"(?,?,?,?,?,?)"
+				);
+				
+				const reportType = typeof options.type === 'undefined' ? 'Table': options.type;
+
+				stmt.run([name, notes, category_id, qry, JSON.stringify(options), reportType], function(err){
+					if(err !== null){
+						log.error(err.toString())
+						return dispatch(createReportPreviewError('Error inserting category. Check log for details'));
+					}
+					
+					const reportId = this.lastID;
+					const data = {
+						name: name,
+						category_id: category_id,
+						notes: notes,
+						query: qry,
+						options: options
+					}
+					return dispatch(confirmReportCreation(reportId, data));
+					
+				});
+				stmt.finalize();
+				
+				await dispatch(getReports());
+				
+			}catch(e){
+				return dispatch(createReportPreviewError('Error during category creation.'));
+			}
+		});
+        
+    }
+}
+
+/**
+ * reportId  is used when the error is during and edit of the report.
+ * 
+ * @param {type} error
+ * @param {type} reportId ID of the report being editted.
+ * @returns {createReportPreviewError.reports-actionsAnonym$9}
+ */
+export function createReportPreviewError(error, reportId){
+    return {
+        type: CREATE_RPT_PRVW_ERROR,
+        error: error,
+        reportId: reportId
+    }
+}
+
+/**
+ * Get fields during report creation
+ * @param {type} name
+ * @returns {requestCreateReportFields.reports-actionsAnonym$7}
+ */
+export function createReportFields(name,qry, options){
+    return {
+        type: CREATE_RPT_REQUEST_FIELDS,
+        name: name,
+        qry: qry,
+        options: options
+    };
+
+}
+
+export function requestCreateReportFields(name,qry, options){
+    return async (dispatch, getState) => {
+        dispatch(createReportFields(name,qry, options));
+
+		const fieldsInfo = await getQueryFieldsInfo(qry);
+		if( typeof fieldsInfo.error !== 'undefined'){
+			return dispatch(createReportPreviewError(fieldsInfo.error.toString()));
+		}
+		const fields = fieldsInfo.map((v,i) => v.name );
+		return dispatch(receiveCreateReportFields(fields));
+    }
+}
+
+export function createReportRequest(){
+    return {
+        type: CREATE_REPORT_REQUEST
+    }
+}
+
+export function receiveCreateReportFields(fields){
+    return {
+        type: CREATE_RPT_RECEIVE_FIELDS,
+        fields: fields
+    }
+}
+
+export function requestReportDeletion(reportId){
+    return {
+        type: REQUEST_REPORT_DELETION,
+        reportId: reportId
+    }
+}
+
+export function confirmReportDeletion(reportId){
+    return {
+        type: CONFIRM_REPORT_DELETION,
+        reportId: reportId
+    }
+}
+
+
+
+export function deleteReport(reportId){
+    return (dispatch, getState) => {
+        dispatch(requestReportDeletion());
+       
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.serialize(() => {
+			try{
+				db.run("DELETE FROM reports WHERE rowid = ? ", reportId, (err) => {
+					if(err !== null){
+						log.error(err.toString());
+						return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+					}
+					
+					return dispatch(confirmReportDeletion("Report successfully deleted."));
+				});
+				
+				dispatch(getReports());
+			}catch(e){
+				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+			}
+		});
+    }
+}
+
+/**
+ * Request data for a graph report type.
+ * 
+ * @param int reportId
+ */
+export function requestGraphData(reportId){
+    return {
+        type: REQUEST_GRAPH_DATA
+    }
+}
+
+/**
+ * Receive graph report data
+ * 
+ * @param int reportId
+  * @param Array reportData
+ */
+export function receiveGraphData(reportId, reportData){
+    return {
+        type: RECEIVE_GRAPH_DATA,
+        reportData: reportData,
+        reportId: reportId
+    }
+}
+
+export function getGraphData(reportId){
+    return(dispatch, getState) => {
+        dispatch(requestGraphData(reportId))
+        
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.all("SELECT * FROM reports WHERE rowid = ? ", reportId, async (err, rows ) => {
+			if(err !== null){
+				log.error(err.toString());
+				return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
+			}
+			
+			const query = rows[0].query;
+			const results = await runQuery(query);
+			console.log(results);
+			return dispatch(receiveGraphData(reportId, results.rows));
+			
+		});
         
     }
 }

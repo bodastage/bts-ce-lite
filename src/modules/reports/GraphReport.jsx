@@ -34,6 +34,7 @@ class GraphReport extends React.Component{
      * @returns
      */
     updatePlotData(newOptions){
+		console.log("newOptions:", newOptions);
         //Remove empty slots
         newOptions = newOptions.filter((v) => v!==undefined )
         for(let i in newOptions){
@@ -99,7 +100,7 @@ function mapStateToProps(state, ownProps){
     if ( typeof state.reports.reportsdata[ownProps.options.reportId] === 'undefined'){
         return {
             reportInfo: null,
-            data: []
+            reportData: null
         };
     }
     

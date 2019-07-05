@@ -79,6 +79,7 @@ export async function runQuery(query){
 		
 	client.connect((err) => {
 		if(err){
+			log.error(err);
 			return err;
 		}
 	});
@@ -101,6 +102,16 @@ export async function runQuery(query){
 	
 }
 
+export async function getQueryFieldsInfo(query){
+	let result = null;
+	try{
+		result = await runQuery(`SELECT * FROM (${query}) ttt LIMIT 0`);
+		return result.fields;
+	}catch(e){
+		return {error: e}
+	}
+
+}
 
 export function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGGridFilterModel, AGGridColumns){
 	let newQuery = `SELECT * FROM (${query}) qt`;

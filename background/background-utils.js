@@ -250,7 +250,7 @@ async function generateCSVFromQuery(csvFileName, outputFolder, query){
 		
 		let header = []
 		results.fields.forEach((v,i) => {
-			header.push({id: v.name, name: v.name})
+			header.push({id: v.name, title: v.name})
 		});
 		
 		const csvWriter = createCsvWriter({
@@ -314,6 +314,8 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		try{
 			copyFromStream = client.query(copyFrom(`COPY ${table} (data) FROM STDIN`));
 		}catch(e){
+			if( copyFromStream !== null) copyFromStream.end();
+			
 			log.error(e);
 			return false;
 		}

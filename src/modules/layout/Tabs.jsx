@@ -11,6 +11,7 @@ import UserProfile from '../profile/UserProfile';
 import Settings from '../settings/Settings';
 import Database from '../settings/Database';
 import ReportContainer from '../reports/ReportContainer';
+import CreateReport from '../reports/CreateReport';
 
 const Components = {
     "Help": Help,
@@ -19,7 +20,8 @@ const Components = {
 	"UserProfile": UserProfile,
 	"Settings": Settings,
 	"Database": Database,
-	"ReportContainer": ReportContainer
+	"ReportContainer": ReportContainer,
+	"CreateReport": CreateReport
     };
 
 class Tabs extends React.Component {
