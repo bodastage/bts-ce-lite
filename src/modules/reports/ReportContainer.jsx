@@ -35,15 +35,19 @@ class ReportContainer extends React.Component{
         if( this.props.reportInfo === null ){
             return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
         }
+		
+		if( this.props.reportInfo.options === null || typeof this.props.reportInfo.options === 'undefined' ) return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
         console.log("this.props.reportInfo.options:", this.props.reportInfo.options);
 		
         //Show table tabular data
         //If options are null, {},
-        if( this.props.reportInfo.options === null || typeof this.props.reportInfo.options === 'undefined' ) return <TableReport options={this.props.options}/> 
+        //if( this.props.reportInfo.options === null || typeof this.props.reportInfo.options === 'undefined' ) return <TableReport options={this.props.options}/> 
 		if( Object.keys(this.props.reportInfo.options).length === 0) return <TableReport options={this.props.options}/> 
 
+		//@TODO: Refactor code and be consistenet. return options as object in action code 
+        let reportOptions = this.props.reportInfo.options
+		if (typeof  reportOptions === 'string') reportOptions =  JSON.parse(this.props.reportInfo.options)
 		
-        const reportOptions = JSON.parse(this.props.reportInfo.options)
         if(reportOptions.type === 'Graph'){
             return <GraphReport options={this.props.options}/>
         }

@@ -169,7 +169,6 @@ class CreateReport extends React.Component{
         
     saveReport(){
         //this.setState({loadPreview: false});
-        
         let options = {"type": this.state.reportType}
         if(this.state.reportType === 'Graph'){
             options = {
@@ -613,7 +612,13 @@ class CreateReport extends React.Component{
                 //this.reportTypeChange prevents this code section from being run every time
                 //the report type is changed.
                 if(Object.keys(this.props.reportInfo.options).length !== 0 && this.reportTypeChange === false){
-                    let plotOptions =  JSON.parse(this.props.reportInfo.options)
+                    
+					//@TODO: Refactor code and be consistenet. return options as object in action code 
+					let plotOptions  = this.props.reportInfo.options
+					if (typeof  plotOptions === 'string'){
+						plotOptions =  JSON.parse(this.props.reportInfo.options)
+					}
+					
     
                     if(plotOptions.type === 'Graph' && this.state.reportType !== 'Graph'){
                         this.plotData = plotOptions.data
@@ -745,7 +750,7 @@ class CreateReport extends React.Component{
 
 function mapStateToProps(state, ownProps){
     let reportInfo = null //holds details of report to be editted
-    
+
     if(typeof ownProps.options.reportId !== 'undefined'){
         const reportId = ownProps.options.reportId
         if(typeof state.reports.reportsInfo[reportId] !== 'undefined'){ 

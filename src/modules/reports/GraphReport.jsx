@@ -69,7 +69,7 @@ class GraphReport extends React.Component{
     render(){
         let plotTitle = 'Loading...'
         if(this.props.reportInfo !== null){
-            let plotOptions = JSON.parse(this.props.reportInfo.options)
+            let plotOptions = this.props.reportInfo.options;
             this.plotData = this.updatePlotData(plotOptions.data)
             this.layoutOptions = plotOptions.layout
             plotTitle = this.props.reportInfo.name
@@ -100,9 +100,17 @@ function mapStateToProps(state, ownProps){
     if ( typeof state.reports.reportsdata[ownProps.options.reportId] === 'undefined'){
         return {
             reportInfo: null,
-            reportData: null
+            reportData: {}
         };
     }
+	
+	//If there is no data yet 
+	if(typeof state.reports.reportsdata[ownProps.options.reportId].data === 'undefined' ){
+        return {
+            reportInfo: null,
+            reportData: {}
+        };
+	}
     
     return {
         reportInfo: state.reports.reportsInfo[ownProps.options.reportId],

@@ -163,7 +163,7 @@ export default function reports(state = initialState, action){
                         [action.reportId]: {
                             ...action.reportInfo, 
                             id: action.reportId 
-                        }        
+                        }       
                     }
                 }
             case CREATE_RPT_PRVW_ERROR:

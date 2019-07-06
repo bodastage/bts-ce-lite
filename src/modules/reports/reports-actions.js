@@ -162,14 +162,15 @@ export function getReportInfo(reportId){
         dispatch(requestReport(reportId));
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM reports WHERE rowid = ?", [reportId], (err, rows) => {
+		db.all("SELECT t.rowid as id, t.* FROM reports t WHERE t.rowid = ?", [reportId], (err, rows) => {
 			if(err !== null){
 				log.error(err);
 				dispatch(notifyReportRequestError(err.toString()));
 				return;
 			}
-			
-			return dispatch(receiveReport(reportId, rows[0]));
+			let reportInfo = rows[0]
+			reportInfo.options = JSON.parse(rows[0].options)
+			return dispatch(receiveReport(reportId, reportInfo));
 			
 		});
     }
@@ -550,38 +551,76 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
    return (dispatch, getState) => {
         dispatch(createReportRequest());
 
+		const reportType = typeof options.type === 'undefined' ? 'Table': options.type;
+
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
 		db.serialize(async () => {
 			try{
-				let stmt = db.prepare(
-					"INSERT INTO reports " +
-					" (name, notes, category_id, query, options, type)" +
-					" VALUES " + 
-					"(?,?,?,?,?,?)"
-				);
-				
-				const reportType = typeof options.type === 'undefined' ? 'Table': options.type;
 
-				stmt.run([name, notes, category_id, qry, JSON.stringify(options), reportType], function(err){
-					if(err !== null){
-						log.error(err.toString())
-						return dispatch(createReportPreviewError('Error inserting category. Check log for details'));
-					}
-					
-					const reportId = this.lastID;
-					const data = {
-						name: name,
-						category_id: category_id,
-						notes: notes,
-						query: qry,
-						options: options
-					}
-					return dispatch(confirmReportCreation(reportId, data));
-					
-				});
-				stmt.finalize();
+				//Update if reportId not null
+				if(reportId !== null){
+					let stmt = db.prepare(
+						"UPDATE reports SET " +
+						" name = ?, notes = ?, category_id = ?, query = ?, options = ?, type = ?" +
+						" WHERE " + 
+						" rowid = ?");
+						
+					stmt.run([name, notes, category_id, qry, JSON.stringify(options), reportType, reportId], async function(err){
+						if(err !== null){
+							log.error(err.toString())
+							return dispatch(createReportPreviewError('Error updating report. Check log for details'));
+						}
+						
+						const data = {
+							name: name,
+							category_id: category_id,
+							notes: notes,
+							query: qry,
+							options: options,
+							id: reportId
+						}
+						//Update the report tree incase the report name changed
+						await dispatch(getReports());
+						return dispatch(confirmReportCreation(reportId, data));
+					});
+
+				}else{
 				
-				await dispatch(getReports());
+					//Insert/create new report
+					let stmt = db.prepare(
+						"INSERT INTO reports " +
+						" (name, notes, category_id, query, options, type)" +
+						" VALUES " + 
+						"(?,?,?,?,?,?)"
+					);
+					
+		
+					stmt.run([name, notes, category_id, qry, JSON.stringify(options), reportType], async function(err){
+						if(err !== null){
+							log.error(err.toString())
+							return dispatch(createReportPreviewError('Error creating report. Check log for details'));
+						}
+						
+						const reportId = this.lastID;
+						const data = {
+							name: name,
+							category_id: category_id,
+							notes: notes,
+							query: qry,
+							options: options
+						}
+						//Update the report tree incase the report name changed
+						await dispatch(getReports());
+						
+						return dispatch(confirmReportCreation(reportId, data));
+						
+					});
+					stmt.finalize();
+					
+				}
+
+
+
 				
 			}catch(e){
 				return dispatch(createReportPreviewError('Error during category creation.'));
