@@ -10,7 +10,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 import axios from '../../api/config';
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert,
-		 Dialog, Popover, Spinner } from "@blueprintjs/core"; 
+		 Dialog, Popover, Spinner, Callout } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
@@ -363,10 +363,19 @@ class TableReport extends React.Component{
 		}
 		
         //Show spinner as we wait for fields
-        if( this.props.fields.length === 0 ){
+        if( this.props.fields.length === 0 && this.props.requestError === null ){
             return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
         }
 		
+		//If there is an error and the fields are zero, then there may be an issue with the query
+        if( this.props.fields.length === 0 && this.props.requestError !== null ){
+            return (
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</legend>
+                    <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
+				</fieldset>		
+				);
+        }
 		
         return (
             <div>

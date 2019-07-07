@@ -7,7 +7,9 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		REQUEST_REPORT_CATEGORY,
 		NOTIFY_REPORT_CATEGORY_RENAME_ERROR,
 		CONFIRM_REPORT_CATEGORY_RECEIVED,
-		CLEAR_EDIT_RPT_CATEGORY
+		CLEAR_EDIT_RPT_CATEGORY,
+		//Table report 
+		NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE
 		} from './reports-actions';
 
 let initialState = {
@@ -213,6 +215,18 @@ export default function reports(state = initialState, action){
                     ...state,
                     requestingReports: false,
                     editCat: { ...action.data , requesting: false,  id: action.categoryId}
+                }
+			case NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE:
+                return {
+                    ...state,
+                    reportsdata: { 
+                            ...state.reportsdata,
+                        [action.reportId]: {
+                            requesting: false,
+                            requestError:  action.error,
+							fields: [],
+                        }
+                    }
                 }
             default:
                 return state;

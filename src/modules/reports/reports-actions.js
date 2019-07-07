@@ -74,6 +74,10 @@ export const CONFIRM_REPORT_DELETION = 'CONFIRM_REPORT_DELETION';
 export const REQUEST_GRAPH_DATA = 'REQUEST_REPORT_DATA'
 export const RECEIVE_GRAPH_DATA = 'RECEIVE_REPORT_DATA'
 
+/**
+* Error while getting report fields possibly caused by an error in the query or connection
+*/
+export const NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE = 'NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE' ;
 
 export function clearReportTreeError(){
     return {
@@ -176,6 +180,17 @@ export function getReportInfo(reportId){
     }
 }
 
+
+export function notifyReceiveReportFieldsFailure(reportId, error){
+    return {
+		type: NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE,
+		reportId: reportId,
+		error: error
+	}
+}
+
+
+
 /**
 * Get table report fields
 *
@@ -189,8 +204,7 @@ export function getReportFields(reportId){
 		db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
 			if(err !== null){
 				log.error(row);
-				//@TODO: Show table data log error
-				return;
+				return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
 			}
 			
 			const hostname = row[0].hostname;
@@ -201,9 +215,8 @@ export function getReportFields(reportId){
 			//get report details 
 			db.all("SELECT * FROM reports r WHERE rowid = ?",[reportId], (rErr, rRows) => {
 				if(rErr !== null){
-					log.error(rRows);
-					//@TODO: Show table data log error
-					return dispatch(receiveReportFields(reportId, []));
+					log.error(rErr);
+					return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error getting report info. See log for detials."));
 				}
 				
 				let query = rRows[0].query;
@@ -220,8 +233,9 @@ export function getReportFields(reportId){
 				
 				client.connect((err) => {
 					if(err){
-						log.error(`Failed to connect to ${connectionString}. ${err}`)
-						return dispatch(receiveReportFields(reportId, []));
+						log.error(`Failed to connect to ${connectionString}. ${err}`);
+						return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while connecting to database. See log for detials."));
+						//return dispatch(receiveReportFields(reportId, []));
 						//@TODO: Create failure notifiation action
 						//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
 					}
@@ -229,13 +243,14 @@ export function getReportFields(reportId){
 				
 			client.query(`SELECT * FROM (${query}) t LIMIT 0`)
 				.then( result => {
-					console.log(result);
 					let fields = result.fields.map((v,i) => v.name );
 					return dispatch(receiveReportFields(reportId, fields));
 				} )
 				.catch(e => {
 					//@TODO: Error notice
-					return dispatch(receiveReportFields(reportId, []));	
+					log.error(e);
+					return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while executing query to get fields. See log for detials."));
+					//return dispatch(receiveReportFields(reportId, []));	
 				})
 				.then(() => client.end());
 				
@@ -792,13 +807,18 @@ export function getGraphData(reportId){
 		db.all("SELECT * FROM reports WHERE rowid = ? ", reportId, async (err, rows ) => {
 			if(err !== null){
 				log.error(err.toString());
-				return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
+				return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
 			}
 			
 			const query = rows[0].query;
-			const results = await runQuery(query);
-			console.log(results);
-			return dispatch(receiveGraphData(reportId, results.rows));
+			try{
+				const results = await runQuery(query);
+				return dispatch(receiveGraphData(reportId, results.rows));
+			}catch(err2){
+				log.error(err2);
+				return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
+			}
+
 			
 		});
         

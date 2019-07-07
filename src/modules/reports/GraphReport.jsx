@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
 import { SizeMe } from 'react-sizeme'
-import { Icon, ButtonGroup, Button, Intent, Toaster } from "@blueprintjs/core";
+import { Icon, ButtonGroup, Button, Intent, Toaster, Callout } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -99,12 +99,24 @@ class GraphReport extends React.Component{
             plotTitle = this.props.reportInfo.name
         }
         
+		//If there is an error with the query
+        if( this.props.requestError !== null ){
+            return (
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}
+						<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
+					</legend>
+                    <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
+					<Toaster {...this.state} ref={this.refHandlers.toaster} />
+				</fieldset>		
+				);
+        }
+		
+		
         return (
 		<fieldset className="col-md-12 fieldset">    	
 			<legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}
-				<ButtonGroup minimal={true} className="float-right">
-					<Button icon="refresh" onClick={this.refreshData}></Button>
-				</ButtonGroup>
+					<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
 			</legend>			
 				<div style={{width:"100%"}}>
 					<SizeMe>
@@ -129,21 +141,37 @@ function mapStateToProps(state, ownProps){
     if ( typeof state.reports.reportsdata[ownProps.options.reportId] === 'undefined'){
         return {
             reportInfo: null,
-            reportData: {}
+            reportData: {},
+            requesting: false,
+            requestError:  null,
         };
     }
+	
+	//Error 
+	if(state.reports.reportsdata[ownProps.options.reportId].requestError !== null){
+		return {
+            reportInfo: null,
+            reportData: {},
+            requesting: false,
+			requestError: state.reports.reportsdata[ownProps.options.reportId].requestError,
+		}
+	}
 	
 	//If there is no data yet 
 	if(typeof state.reports.reportsdata[ownProps.options.reportId].data === 'undefined' ){
         return {
             reportInfo: null,
-            reportData: {}
+            reportData: {},
+            requesting: false,
+            requestError:  null,
         };
 	}
     
     return {
         reportInfo: state.reports.reportsInfo[ownProps.options.reportId],
-        reportData: state.reports.reportsdata[ownProps.options.reportId]
+        reportData: state.reports.reportsdata[ownProps.options.reportId],
+		requesting: state.reports.reportsdata[ownProps.options.reportId].requesting,
+		requestError: state.reports.reportsdata[ownProps.options.reportId].requestError,
     };
 }
 
