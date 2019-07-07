@@ -31,6 +31,7 @@ class ReportsTree extends React.Component{
 		this.refreshReportTree = this.refreshReportTree.bind(this);
 		this.openCreateCategoryDialog = this.openCreateCategoryDialog.bind(this)
         this.handleSave = this.handleSave.bind(this)
+		this.createCompositeReport = this.createCompositeReport.bind(this)
 		
         this.state = {
             text: this.props.filter.text,
@@ -258,16 +259,19 @@ class ReportsTree extends React.Component{
         this.nodes = [];
         
         const filterText = this.state.text;
-        const filterOnReports = this.state.reports;
+        let filterOnReports = this.state.reports
         const filterOnCategories = this.state.categories;
         const noFilter = filterOnReports && filterOnCategories && (filterText === '');
+		
+		//If nothing is selected, filter on reports
+		if( !filterOnReports && !filterOnCategories && filterText !== "") filterOnReports = true
         
         for(let key in this.props.reports){
             let cat = this.props.reports[key];
             
             //Filter categories
             var regex = new RegExp(filterText, 'i');
-            if( (filterText !== "" && filterOnCategories && !regex.test(cat.cat_name)) ||
+            if( (filterText !== "" && filterOnCategories && !regex.test(cat.cat_name)) || 
                 (!this.catContainsMatchingReport(cat.reports, filterText) && filterOnReports )
               ){ 
                 continue;
@@ -291,7 +295,7 @@ class ReportsTree extends React.Component{
             for (let k in cat.reports){
                 let report = cat.reports[k];
                 
-                //Filter rules
+                //Filter reports
                 if( (filterText !== "" && filterOnReports && !regex.test(report.name)) ){
                     continue;
                 }
@@ -380,6 +384,9 @@ class ReportsTree extends React.Component{
         this.isSaving  = true;
     }
 	
+	createCompositeReport = () => {
+		
+	}
     render(){        
         
         this.updateNodes();
@@ -403,9 +410,10 @@ class ReportsTree extends React.Component{
 		<span className="dropdown-item-text legend w-100 mb-2">
 			<FontAwesomeIcon icon={ReportsTree.icon}/> Reports
 			
-			<a href="#"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
-			<a href="#"><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
-			<a href="#"><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
+			<a href="#" title="Reload report tree"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
+			<a href="#" title="Create report category"><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
+			<a href="#" title="Create report"><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
+			<a href="#" title="Create composite report"><Icon icon="new-object" className="float-right ml-2" onClick={this.createCompositeReport}/></a> &nbsp;
 		</span>
 
                 <div>
