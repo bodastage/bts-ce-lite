@@ -102,22 +102,18 @@ class GraphReport extends React.Component{
 		//If there is an error with the query
         if( this.props.requestError !== null ){
             return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}
-						<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
-					</legend>
+                <div>
+					<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
                     <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
 					<Toaster {...this.state} ref={this.refHandlers.toaster} />
-				</fieldset>		
+				</div>		
 				);
         }
 		
 		
         return (
-		<fieldset className="col-md-12 fieldset">    	
-			<legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}
-					<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
-			</legend>			
+		<div>		
+				<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
 				<div style={{width:"100%"}}>
 					<SizeMe>
 						{({ size }) => <Plot
@@ -131,7 +127,7 @@ class GraphReport extends React.Component{
 					</SizeMe>
 				</div>
 			<Toaster {...this.state} ref={this.refHandlers.toaster} />
-		</fieldset>	
+		</div>	
 		);
     }
 }

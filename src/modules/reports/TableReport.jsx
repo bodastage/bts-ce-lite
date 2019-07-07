@@ -379,9 +379,6 @@ class TableReport extends React.Component{
 		
         return (
             <div>
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</legend>
-					
 						{notice}
 						
 						{this.state.processing === false? "" : <ProgressBar intent={Intent.PRIMARY}/>}
@@ -449,7 +446,6 @@ class TableReport extends React.Component{
 					</div>
 				</Dialog>
 				}
-                </fieldset>	
             </div>
         );
     }

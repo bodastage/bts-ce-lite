@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Intent, Spinner } from "@blueprintjs/core";
+import { Intent, Spinner, Icon } from "@blueprintjs/core";
 import { getReportInfo } from './reports-actions';
 import TableReport from './TableReport';
 import GraphReport from './GraphReport';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 //const GraphReport = <div/>
 //const TableReport = <div />
@@ -31,21 +32,45 @@ class ReportContainer extends React.Component{
 		
         //Show spinner as we wait for data
         if( this.props.reportInfo === null ){
-            return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+            return (
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend">Loading...</legend>
+						<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+				</fieldset>
+			);
         }
 		
-		if( this.props.reportInfo.options === null || typeof this.props.reportInfo.options === 'undefined' ) return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+		//if the report options are not set or are undefined
+		if( this.props.reportInfo.options === null || typeof this.props.reportInfo.options === 'undefined' ){
+            return (
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend">Loading...</legend>
+						<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+				</fieldset>
+			);
+			
+		}
 		
 		//@TODO: Refactor code and be consistenet. return options as object in action code 
         let reportOptions = this.props.reportInfo.options
 		if (typeof  reportOptions === 'string') reportOptions =  JSON.parse(this.props.reportInfo.options)
 		
         if(reportOptions.type === 'Graph'){
-            return <GraphReport options={this.props.options}/>
+            return (
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><Icon icon="timeline-bar-chart"/> {this.props.reportInfo.name}</legend>
+					<GraphReport options={this.props.options}/>
+				</fieldset>
+			);
         }
 		
         //Table report is the default
-        return <TableReport options={this.props.options} reportInfo={this.props.reportInfo}/>
+        return (
+			<fieldset className="col-md-12 fieldset">    	
+				<legend className="legend"><FontAwesomeIcon icon="table"/> {this.props.options.title}</legend>
+				<TableReport options={this.props.options} reportInfo={this.props.reportInfo}/>
+			</fieldset>
+		);
 		
     }
 }
