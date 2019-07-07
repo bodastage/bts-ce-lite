@@ -155,9 +155,9 @@ export function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGG
 					newQuery += ` qt."${col}" ~ '.*${value}$' `                
                 }
 				
-                if( filterType === 'endsWith' ){
-					newQuery += ` qt."${col}" ~ '^((?!${value}).)*$' `                
-                }
+                //if( filterType === 'contains' ){
+				//	newQuery += ` qt."${col}" ~ '^((?!${value}).)*$' `                
+                //}
 			}else{
                 let filterOperator = filterModel.operator;
                 let condition1 = filterModel.condition1;

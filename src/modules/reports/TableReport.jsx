@@ -370,10 +370,7 @@ class TableReport extends React.Component{
 		//If there is an error and the fields are zero, then there may be an issue with the query
         if( this.props.fields.length === 0 && this.props.requestError !== null ){
             return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</legend>
                     <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
-				</fieldset>		
 				);
         }
 		
