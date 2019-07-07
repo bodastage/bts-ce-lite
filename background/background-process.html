@@ -713,7 +713,9 @@ async function  executeTask(task, options){
 	//Generate Reports
 	try{
 		if(task === 'download_report'){
-			await generateCSVReport(options.reportId, options.outputFolder);
+			//await generateCSVReport(options.reportId, options.outputFolder);
+			const reportFile = await utils.generateCSVFromQuery(options.filename, options.outputFolder, options.query);
+			sendLogToUI('download_report','success', reportFile);
 		}
 	}catch(err){
 		sendLogToUI('download_report','error', err);

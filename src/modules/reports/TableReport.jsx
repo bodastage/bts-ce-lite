@@ -100,6 +100,9 @@ class TableReport extends React.Component{
 		this.downloadReportListener = null;
         
         this.agTblReload = 1; //used to reload the aggrid table
+		
+		//Filtered query to be used by download
+		this.filteredSortedQuery = null;
     }
     
     refreshData = () => {
@@ -165,7 +168,7 @@ class TableReport extends React.Component{
      * @returns {undefined}
      */
     onDownloadClick(){
-
+		
         this.toaster.show({
                 icon: "download",
                 intent: Intent.INFO,
@@ -173,8 +176,13 @@ class TableReport extends React.Component{
         });
 		
 		this.setState({processing: true});
+		
+		let csvFileName = this.props.reportInfo.name.replace(/\s+/g,"_") + ".csv";
+		
 		let payload = {
 			reportId: this.props.options.reportId,
+			query: this.filteredSortedQuery,
+			filename: csvFileName,
 			outputFolder: app.getPath('downloads')
 		}
 		
@@ -302,6 +310,7 @@ class TableReport extends React.Component{
         let _fields = this.props.fields;
         let _dispatch = this.props.dispatch;
         let reportId = this.props.options.reportId;
+		let that = this;
 		
 		if(typeof this.props.reportInfo === 'undefined') return;
 		
@@ -312,7 +321,7 @@ class TableReport extends React.Component{
             getRows:  async function(params) {
                 let offset = params.startRow;
                 let length= params.endRow - params.startRow;
-				console.log("_fields.length:" + _fields.length );
+
 				if(_fields.length === 0) {
 					params.successCallback([], 0); 
 					return;
@@ -320,6 +329,9 @@ class TableReport extends React.Component{
 				
 				let filteredSortedQuery = getSortAndFilteredQuery(query,  _fields, 
 						params.sortModel, params.filterModel, _columnApi.getAllColumns());
+						
+				//Updated the this.filteredSortedQuery	for download	
+				that.filteredSortedQuery = filteredSortedQuery;
 				
 				//Count is the last row
 				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
