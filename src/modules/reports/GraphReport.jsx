@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
 import { SizeMe } from 'react-sizeme'
-import { Icon } from "@blueprintjs/core";
+import { Icon, ButtonGroup, Button, Intent, Toaster } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -17,10 +17,13 @@ class GraphReport extends React.Component{
         }
         
         this.updatePlotData.bind(this)
+		this.refreshData = this.refreshData.bind(this)
 
         //Plot data and options/settings
         this.plotData = []
         this.layoutOptions = {width: this.state.width, height: null, autosize: false, title: null}
+		
+		this.toaster = new Toaster();
 
     }       
     
@@ -28,6 +31,26 @@ class GraphReport extends React.Component{
         this.props.dispatch(getGraphData(this.props.options.reportId));
     }
     
+    /**
+     * Create toask reference
+     */
+    refHandlers = {
+        toaster: (ref) => (this.toaster = ref),
+    };
+	
+	/**
+	* Refresh graph data
+	*/
+	refreshData(){
+		this.props.dispatch(getGraphData(this.props.options.reportId));
+		
+		
+        this.toaster.show({
+			icon: "info-sign",
+			intent: Intent.INFO,
+			message: "Refreshing report...",
+        });
+	}
     /**
      * Update plot data with the values from the query and any new options
      * 
@@ -78,7 +101,11 @@ class GraphReport extends React.Component{
         
         return (
 		<fieldset className="col-md-12 fieldset">    	
-			<legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}</legend>			
+			<legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}
+				<ButtonGroup minimal={true} className="float-right">
+					<Button icon="refresh" onClick={this.refreshData}></Button>
+				</ButtonGroup>
+			</legend>			
 				<div style={{width:"100%"}}>
 					<SizeMe>
 						{({ size }) => <Plot
@@ -91,6 +118,7 @@ class GraphReport extends React.Component{
 
 					</SizeMe>
 				</div>
+			<Toaster {...this.state} ref={this.refHandlers.toaster} />
 		</fieldset>	
 		);
     }
