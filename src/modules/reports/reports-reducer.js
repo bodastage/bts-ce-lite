@@ -2,7 +2,12 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		RECEIVE_REPORT, RECEIVE_REPORT_FIELDS, SEND_CREATE_RPT_CATEGORY_REQ,
 		CONFIRM_RPT_CATEGORY_CREATION, SEND_DELETE_RPT_CATEGORY_REQ, CONFIRM_RPT_CATEGORY_DELETION,
 		NOTIFY_REPORT_CATEGORY_CREATION_ERROR, CREATE_RPT_RECEIVE_FIELDS, CONFIRM_REPORT_CREATED,
-		CREATE_RPT_PRVW_ERROR, RECEIVE_GRAPH_DATA
+		CREATE_RPT_PRVW_ERROR, RECEIVE_GRAPH_DATA,
+		//Category edit 
+		REQUEST_REPORT_CATEGORY,
+		NOTIFY_REPORT_CATEGORY_RENAME_ERROR,
+		CONFIRM_REPORT_CATEGORY_RECEIVED,
+		CLEAR_EDIT_RPT_CATEGORY
 		} from './reports-actions';
 
 let initialState = {
@@ -184,6 +189,30 @@ export default function reports(state = initialState, action){
                             data: action.reportData
                         }
                     }
+                }
+			//Edit category states 
+            case REQUEST_REPORT_CATEGORY:
+                return {
+                   ...state,
+                   editCat:{ requesting: true}
+                }
+            case CLEAR_EDIT_RPT_CATEGORY:
+                return {
+                    ...state,
+                    editCat: null
+                }
+            case NOTIFY_REPORT_CATEGORY_RENAME_ERROR:
+                return {
+                    ...state,
+                    editCat: { ...state.editCat, requesting: false},
+                    requestingReports: false,
+                    requestError: action.error
+                }
+            case CONFIRM_REPORT_CATEGORY_RECEIVED:
+                return {
+                    ...state,
+                    requestingReports: false,
+                    editCat: { ...action.data , requesting: false,  id: action.categoryId}
                 }
             default:
                 return state;

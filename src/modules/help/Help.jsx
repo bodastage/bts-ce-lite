@@ -19,9 +19,10 @@ export default class Help extends React.Component {
     render(){
         return (
             <div>
-                <h3><FontAwesomeIcon icon="question-circle"/> Help</h3>
 
-                <div className="card">
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><FontAwesomeIcon icon="question-circle"/> Help</legend>
+                    
                 
                   <div className="card-body">
                     <h4 className="card-title">About</h4>
@@ -45,7 +46,8 @@ export default class Help extends React.Component {
                     </ul>    
 
                   </div>
-                </div>
+				  
+				  </fieldset>
             </div>    
         );
     }

@@ -53,8 +53,11 @@ class UserProfile extends React.Component{
     render(){
         return (
         <div className="user-profile-form">
-            <h3><FontAwesomeIcon icon={UserProfile.icon}/> Profile</h3>
 
+		<fieldset className="col-md-12 fieldset">    	
+			<legend className="legend"><FontAwesomeIcon icon={UserProfile.icon}/> Profile</legend>
+			
+			
             {this.props.updating === false ? "" : 
                 <div className="pb-1">
                     <ProgressBar intent={Intent.PRIMARY}/>
@@ -70,8 +73,6 @@ class UserProfile extends React.Component{
                     </div>
             }
             
-            <div className="card">
-                <div className="card-body p-3">
                 
             <form onSubmit={this.updateUserProfile}>
             
@@ -123,8 +124,9 @@ class UserProfile extends React.Component{
               <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating}/> &nbsp;
             </form>  
             
-                </div>
-            </div>
+
+			
+			</fieldset>
         </div>
         );
     }

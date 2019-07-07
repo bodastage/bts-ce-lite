@@ -162,7 +162,11 @@ class Database extends React.Component{
 		
         return (
             <div>
-                <h3><FontAwesomeIcon icon="database"/> Database</h3> 
+
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><FontAwesomeIcon icon="database"/> Database</legend>
+                    
+					
 				<Callout intent={Intent.PRIMARY}>
 					For an enhanced experience, we require PostgreSQL. Provide the superuser connection details(or default user created during installation) and click the <strong>Setup database</strong> button. 
 					This will create the  application database (<strong>boda</strong>), user(<strong>bodastage</strong>) with password (<strong>password</strong>) 
@@ -174,9 +178,7 @@ class Database extends React.Component{
 				{successNotice}
 				
 				{ this.props.db.updating ? <ProgressBar className="mt-2" intent={Intent.PRIMARY}/> : "" }
-				
-                <div className="card  mt-2">
-                    <div className="card-body pt-3">
+
 									
 						<form onSubmit={this.updateDatabaseSetting}>
 						
@@ -237,12 +239,8 @@ class Database extends React.Component{
 						  </Collapse>
 						  
 						</form>  
-						
-						
-						
-						
-                    </div>
-                </div>
+				
+				</fieldset>
             </div>
         );
     }

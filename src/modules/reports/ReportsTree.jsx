@@ -9,7 +9,8 @@ import { Classes, Icon, ITreeNode, Tooltip, Tree, FormGroup, InputGroup,
         ProgressBar, Dialog, TextArea, Intent, Spinner, Button} 
 		from "@blueprintjs/core";
 import './reports-panel.css';
-import { saveCategory, clearReportCreateState, removeCategory, getCategory } 
+import { saveCategory, clearReportCreateState, removeCategory, getCategory,
+		clearEditCategoryState } 
 	from "./reports-actions"
 
 
@@ -48,9 +49,14 @@ class ReportsTree extends React.Component{
             isOpen: false,
             usePortal: true,
             
-            catName: ''
+            catName: '',
+			notesValue: ""
         };
         
+		if( this.props.editCat !== null ){
+			this.state.notesValue = typeof this.props.editCat.id !== 'undefined' ? this.props.editCat.notes : "";
+		}
+		
         this.filterReports = this.state.reports;
         this.filterText = this.state.text;
         this.filterCategories = this.state.categories;
@@ -58,18 +64,24 @@ class ReportsTree extends React.Component{
         this.nodes = [];
 
         
-        //This is incremenet to force input and textare for category renaming to
+        //This is incremented to force input and textare for category renaming to
         //re-render
         this.nameRedraw = 0;
         
         //This shows the saving spinner when true
         this.isSaving  = false;
         
-        this.catNames = "Category name";
+		//Add/Edit category 
+        this.catName = "Category name";
         this.catNotes = "Category notes";
+		this.catDialogTitle = "Add report catgory"
+
     }
 
-    handleNotesChange = (event) => this.catNotes = event.target.value
+    handleNotesChange = (event) => { 
+		this.catNotes = event.target.value; 
+		this.setState({notesValue: event.target.value})
+	}
     handleCatNameChange = (event) => this.catName = event.target.value
     
     /**
@@ -353,11 +365,18 @@ class ReportsTree extends React.Component{
 	}
 	
     
-    openCreateCategoryDialog = () => this.setState({ isOpen: true });
+    openCreateCategoryDialog = () => { 
+		this.props.dispatch(clearEditCategoryState());
+		this.catName = "";
+		this.catNotes = "";
+		this.catDialogTitle = "Add report category";
+		this.setState({ isOpen: true, notesValue: "" }) 
+	};
     closeCreateCategoryDialog = () => this.setState({ isOpen: false });
     
     handleSave = () => {
-        this.props.dispatch(saveCategory(this.catName, this.catNotes));
+		const catId = this.props.editCat !== null ? this.props.editCat.id : null;
+        this.props.dispatch(saveCategory(this.catName, this.catNotes, catId ));
         this.isSaving  = true;
     }
 	
@@ -370,6 +389,13 @@ class ReportsTree extends React.Component{
         if( this.props.editCat !== null){
             catDetailsLoadingProgressBar = this.props.editCat.requesting === true ? <ProgressBar className="mb-2"/> : "";
         }
+		
+
+		if(this.props.editCat !== null){
+			this.catName = this.props.editCat.name;
+			this.catNotes = this.props.editCat.notes;
+			this.catDialogTitle = "Edit report catgory"
+		}
 		
         return (
             
@@ -432,7 +458,7 @@ class ReportsTree extends React.Component{
             
 			<Dialog
 			icon="folder-new"
-			title="Add report category"
+			title={this.catDialogTitle}
 			{...this.state}
 			onClose={this.closeCreateCategoryDialog}
 			>
@@ -447,7 +473,7 @@ class ReportsTree extends React.Component{
 						labelFor="text-input"
 						labelInfo=""
 					>
-					<InputGroup id="text-input" placeholder="Report category name" className='mb-1' onChange={this.handleCatNameChange}/>
+					<InputGroup id="text-input" placeholder="Report category name" className='mb-1' onChange={this.handleCatNameChange} defaultValue={this.catName}/>
 					</FormGroup>       
 					
 					<FormGroup
@@ -461,9 +487,9 @@ class ReportsTree extends React.Component{
 							large={true}
 							intent={Intent.PRIMARY}
 							onChange={this.handleNotesChange}
-							value={this.state.notesValue}
 							className='mb-1'
 							fill={true}
+							value={this.state.notesValue}
 						/>
 					</FormGroup>
 					

@@ -387,34 +387,66 @@ export function sendDeleteReportCategoryRequest(){
 /**
  * Add a category
  * 
- * @param {type} catName Category nam e
- * @param {type} catNotes Notes about the category
+ * @param string catName Category nam e
+ * @param string catNotes Notes about the category
+ * @param integer catId Category ID
  * @returns {undefined}
  */
-export  function saveCategory(catName, catNotes){
+export  function saveCategory(catName, catNotes, catId){
     return(dispatch, getState) => {
         dispatch(sendCreateReportCategoryRequest());
         
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
 		db.serialize(async () => {
 			try{
-				let stmt = db.prepare(
-					"INSERT INTO rpt_categories " +
-					" (name, notes, parent_id)" +
-					" VALUES " + 
-					"(?,?,0)"
-				);
+				//Update if category id not null
+				if(catId !== null){
 
-				stmt.run([catName, catNotes], (err) => {
-					if(err !== null){
-						log.error(err.toString())
-						return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
-					}
-				});
-				stmt.finalize();
-				
-				await dispatch(getReports());
-				return dispatch(confirmReportCategoryCreation());
+					let stmt = db.prepare(
+						"UPDATE rpt_categories SET " +
+						" name = ?, notes = ? " +
+						" WHERE " + 
+						" rowid = ?");
+						
+					stmt.run([catName, catNotes, catId], async function(err){
+						if(err !== null){
+							log.error(err.toString())
+							return dispatch(notifyReportCategoryCreationError('Error updating report. Check log for details'));
+						}
+						
+						const data = {
+							name: catName,
+							id: catId,
+							notes: catNotes
+						}
+						//Update the report tree incase the report name changed
+						await dispatch(getReports());
+						return dispatch(confirmReportCategoryCreation());
+					});
+
+				}else{
+					let stmt = db.prepare(
+						"INSERT INTO rpt_categories " +
+						" (name, notes, parent_id)" +
+						" VALUES " + 
+						"(?,?,0)"
+					);
+
+					stmt.run([catName, catNotes], (err) => {
+						if(err !== null){
+							log.error(err.toString())
+							return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
+						}
+						
+					
+						dispatch(getReports());
+						return dispatch(confirmReportCategoryCreation());
+					});
+					stmt.finalize();
+
+					
+				}
+
 			}catch(e){
 				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
 			}
@@ -503,7 +535,7 @@ export function confirmReportCategoryReceived(categoryId, data){
 }
 
 /**
- * Get report category details 
+ * Get report category details when editing
  * 
  * @param {type} categoryId
  * @returns {Function}
@@ -513,13 +545,13 @@ export function getCategory(categoryId){
         dispatch(requestReportCategory(categoryId))
         
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM rpt_categories WHERE rowid = ? ", (err, rows ) => {
+		db.all("SELECT * FROM rpt_categories WHERE rowid = ? ", categoryId, (err, rows ) => {
 			if(err !== null){
 				log.error(err.toString());
 				return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
 			}
 			
-			return dispatch(confirmReportCategoryReceived(categoryId, rows));
+			return dispatch(confirmReportCategoryReceived(categoryId, rows[0]));
 			
 		});
     }
@@ -720,6 +752,7 @@ export function deleteReport(reportId){
 				
 				dispatch(getReports());
 			}catch(e){
+				log.error(e.toString());
 				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
 			}
 		});

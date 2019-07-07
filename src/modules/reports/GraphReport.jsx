@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
 import { SizeMe } from 'react-sizeme'
+import { Icon } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -34,7 +35,7 @@ class GraphReport extends React.Component{
      * @returns
      */
     updatePlotData(newOptions){
-		console.log("newOptions:", newOptions);
+
         //Remove empty slots
         newOptions = newOptions.filter((v) => v!==undefined )
         for(let i in newOptions){
@@ -75,23 +76,23 @@ class GraphReport extends React.Component{
             plotTitle = this.props.reportInfo.name
         }
         
-        console.log("this.plotData:", this.plotData)
-        console.log("this.layoutOptions:", this.layoutOptions)
-        
         return (
-        <div style={{width:"100%"}}>
-            <SizeMe>
-                {({ size }) => <Plot
-                    data={this.plotData}
-                    layout={this.layoutOptions}
-                    config={{displaylogo:false}}
-                    responsive={true}
-                    useResizeHandler={true}
-                />}
+		<fieldset className="col-md-12 fieldset">    	
+			<legend className="legend"><Icon icon="timeline-bar-chart"/> {plotTitle}</legend>			
+				<div style={{width:"100%"}}>
+					<SizeMe>
+						{({ size }) => <Plot
+							data={this.plotData}
+							layout={this.layoutOptions}
+							config={{displaylogo:false}}
+							responsive={true}
+							useResizeHandler={true}
+						/>}
 
-            </SizeMe>
-        </div>)
-        ;
+					</SizeMe>
+				</div>
+		</fieldset>	
+		);
     }
 }
 

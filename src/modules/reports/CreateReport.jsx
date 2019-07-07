@@ -644,8 +644,11 @@ class CreateReport extends React.Component{
         }
         
         return (
-        <div className='cotainer p-0 m-0 mr-2'>
-            <h3><FontAwesomeIcon icon="table"/> {tabTitle}</h3>
+        <div >
+			
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><FontAwesomeIcon icon="table"/> {tabTitle}</legend>
+                    
             {this.props.creating === true || this.fetchingReportInfo === true ? <ProgressBar intent={Intent.PRIMARY} className="mb-2"></ProgressBar> : ""}
             <div className="row">
                 <div className="col-sm">
@@ -742,7 +745,7 @@ class CreateReport extends React.Component{
                 </div>
             </div>
             : "" }
-
+			</fieldset>		
         </div>
         );
     }

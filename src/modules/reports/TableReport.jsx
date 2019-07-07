@@ -10,7 +10,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 import axios from '../../api/config';
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert,
-		 Dialog, Popover  } from "@blueprintjs/core"; 
+		 Dialog, Popover, Spinner } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
@@ -312,7 +312,7 @@ class TableReport extends React.Component{
             getRows:  async function(params) {
                 let offset = params.startRow;
                 let length= params.endRow - params.startRow;
-				
+				console.log("_fields.length:" + _fields.length );
 				if(_fields.length === 0) {
 					params.successCallback([], 0); 
 					return;
@@ -323,7 +323,7 @@ class TableReport extends React.Component{
 				
 				//Count is the last row
 				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
-				
+				console.log("count:", count);
 				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
 				
 				params.successCallback(queryResult.rows, count); 
@@ -362,13 +362,17 @@ class TableReport extends React.Component{
 			</div>)
 		}
 		
+        //Show spinner as we wait for fields
+        if( this.props.fields.length === 0 ){
+            return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+        }
+		
 		
         return (
             <div>
-    
-            <h3><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</h3>        
-                <div className="card">
-                    <div className="card-body p-2">
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</legend>
+					
 						{notice}
 						
 						{this.state.processing === false? "" : <ProgressBar intent={Intent.PRIMARY}/>}
@@ -407,9 +411,6 @@ class TableReport extends React.Component{
                         </div>
 
 
-                    </div>
-                </div>
-                
                 <Alert
                     {...alertProps}
                     confirmButtonText="Okay"
@@ -439,7 +440,7 @@ class TableReport extends React.Component{
 					</div>
 				</Dialog>
 				}
-                
+                </fieldset>	
             </div>
         );
     }
