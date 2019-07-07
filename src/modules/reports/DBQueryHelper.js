@@ -80,6 +80,7 @@ export async function runQuery(query){
 	client.connect((err) => {
 		if(err){
 			log.error(err);
+			client.end();
 			return err;
 		}
 	});
@@ -88,7 +89,7 @@ export async function runQuery(query){
 	new Promise((resolve, reject) => {
 		client.query(query)
 		.then( result => {
-			resolve(result);
+			return resolve(result);
 		} )
 		.catch(e => {
 			//@TODO: Error notice

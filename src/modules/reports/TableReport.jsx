@@ -10,7 +10,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 import axios from '../../api/config';
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert,
-		 Dialog, Popover, Spinner, Callout } from "@blueprintjs/core"; 
+		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
@@ -162,12 +162,15 @@ class TableReport extends React.Component{
     }
     
 	setNotice = (type,message) => {this.setState({notice: {type: type, message: message}})}
+	
     /**
      * Trigger the download 
      * 
+	 * @param string format csv|excel
      * @returns {undefined}
      */
-    onDownloadClick(){
+    onDownloadClick = (format) => (e) => {
+		e.preventDefault();
 		
         this.toaster.show({
                 icon: "download",
@@ -177,13 +180,14 @@ class TableReport extends React.Component{
 		
 		this.setState({processing: true});
 		
-		let csvFileName = this.props.reportInfo.name.replace(/\s+/g,"_") + ".csv";
+		let fileName = this.props.reportInfo.name.replace(/\s+/g,"_");
 		
 		let payload = {
-			reportId: this.props.options.reportId,
+			reportId: this.props.options.reportId, //deprecate
 			query: this.filteredSortedQuery,
-			filename: csvFileName,
-			outputFolder: app.getPath('downloads')
+			filename: fileName, //Name of the file to be downloaded  without extension
+			outputFolder: app.getPath('downloads'),
+			format: format
 		}
 		
 		ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
@@ -200,7 +204,6 @@ class TableReport extends React.Component{
 						processing: false
 						});
 				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
-				this.downloadReportListener = null;
 			}
 			
 			if(obj.status === 'info' && task === 'download_report' ){
@@ -218,7 +221,6 @@ class TableReport extends React.Component{
 						});
 				shell.showItemInFolder(obj.message);
 				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
-				this.downloadReportListener = null;
 			}
 		}
 		
@@ -381,10 +383,18 @@ class TableReport extends React.Component{
 		
 		//If there is an error and the fields are zero, then there may be an issue with the query
         if( this.props.fields.length === 0 && this.props.requestError !== null ){
-            return (
+            return (<div>
                     <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
+					<Toaster {...this.state} ref={this.refHandlers.toaster} />
+					</div>
 				);
         }
+		
+		//Download file types 
+		const downloadFileTypesMenu = (<Menu>
+				<MenuItem icon={<span><FontAwesomeIcon icon="file-csv"/></span>} text="CSV" onClick={this.onDownloadClick('csv')}/>
+				<MenuItem icon={<span><FontAwesomeIcon icon="file-excel"/></span>} text="EXCEL" onClick={this.onDownloadClick('excel')}/>
+			</Menu>);
 		
         return (
             <div>
@@ -395,7 +405,9 @@ class TableReport extends React.Component{
                         <div className="mb-1">
                         <ButtonGroup minimal={true}>
                             <Button icon="refresh" onClick={this.refreshData}></Button>
-                            <Button icon="download"  onClick={this.onDownloadClick}></Button>
+							<Popover content={downloadFileTypesMenu} position={Position.BOTTOM}>
+								<Button icon="download"></Button>
+							</Popover>
                             <Toaster {...this.state} ref={this.refHandlers.toaster} />
                             <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
                         </ButtonGroup>

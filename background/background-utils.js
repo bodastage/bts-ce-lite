@@ -7,7 +7,7 @@ const isDev = window.require('electron-is-dev');
 const { app, process } = window.require('electron').remote;
 const createCsvWriter = window.require('csv-writer').createObjectCsvWriter;
 const SQLITE3_DB_NAME = 'boda-lite.sqlite3';
-
+var Excel = window.require('exceljs');
 	
 let basepath = app.getAppPath();
 
@@ -244,7 +244,7 @@ function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGGridFilt
 * @param string query SQL query text
 */
 async function generateCSVFromQuery(csvFileName, outputFolder, query){
-	
+	const fileName = csvFileName + '.csv'
 	try{
 		let results = await runQuery(query);
 		
@@ -254,19 +254,74 @@ async function generateCSVFromQuery(csvFileName, outputFolder, query){
 		});
 		
 		const csvWriter = createCsvWriter({
-			path: path.join(outputFolder, csvFileName),
+			path: path.join(outputFolder, fileName),
 			header: header
 		});
 		
 		await csvWriter.writeRecords(results.rows);
 		
 		//Return paht to report file
-		return path.join(outputFolder, csvFileName);
+		return path.join(outputFolder, fileName);
 	}catch(e){
+		log.error(e);
 		return false;
 	}
 	
 }
+
+/**
+* Generae Excel file from SQL query
+*
+* @param string csvFileName
+* @param string outputFolder
+* @param string query SQL query text
+*/
+async function generateExcelFromQuery(excelFileName, outputFolder, query){
+	
+	try{
+		const fileName = excelFileName + '.xlsx'
+		var options = {
+		  filename: path.join(outputFolder, fileName),
+		  useStyles: true
+		};
+		
+
+		const workbook = new Excel.Workbook();
+		workbook.creator = 'Bodastage Solutions';
+		const worksheet = workbook.addWorksheet(excelFileName);
+		
+		let results = await runQuery(query);
+		
+		let headers = []
+		results.fields.forEach((v,i) => {
+			headers.push({key: v.name, header: v.name})
+		});
+		
+		worksheet.columns = headers;
+		
+		results.rows.forEach((row,i) => {
+			worksheet.addRow(row).commit();
+		});
+
+		await workbook.xlsx.writeFile(path.join(outputFolder, fileName));
+		
+		return path.join(outputFolder, fileName);
+	}catch(err){
+		log.error(err)
+		return false;
+	}
+	
+
+}
+
+async function generateExcelOrCSV(fileName, outputFolder, query, format){
+	if(format === 'excel'){
+		return await generateExcelFromQuery(fileName, outputFolder, query);
+	}
+	
+	return await generateCSVFromQuery(fileName, outputFolder, query);
+}
+
 
 /**
 *
@@ -370,3 +425,4 @@ exports.getSQLiteReportInfo = getSQLiteReportInfo;
 exports.runQuery = runQuery;
 exports.generateCSVFromQuery = generateCSVFromQuery;
 exports.loadCMDataViaStream = loadCMDataViaStream;
+exports.generateExcelOrCSV = generateExcelOrCSV;
