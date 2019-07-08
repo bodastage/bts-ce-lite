@@ -319,6 +319,7 @@ uncompressFolder = (folderName) => {
 *	s/<class name=\"(.*)\"/<class name=\"\U\1\"/ig;
 *	s/<class name=\"(.*)_MSCSERVER/<class name=\"\1/ig;
 *	s/<class name=\"(.*)_ENODEB\"/<class name=\"\1\"/ig;
+*   s/<class name=\"ENODEB([^\"]+)/<class name=\"\U\1/ig;
 *	s/<class name=\"(.*)3900/<class name=\"\1/ig;
 *	" /mediation/data/cm/huawei/raw/gexport/*.xml
 *
@@ -335,6 +336,7 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 		/<class name=\"(.*)\"/ig,
 		/<class name=\"(.*)_MSCSERVER/ig,
 		/<class name=\"(.*)_ENODEB\"/ig,
+		/<class name=\"ENODEB([^\"]+)\"/,
 		/<class name=\"(.*)3900/
 	  ],
 	  to: [
@@ -345,6 +347,7 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)\"/)[1].toUpperCase() + "\"",
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)_MSCSERVER/)[1],
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)_ENODEB\"/)[1] + "\"",
+		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"ENODEB([^\"]+)\"/)[1] + "\"",
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)3900/)[1]
 	  ],
 	};
@@ -714,7 +717,6 @@ async function  executeTask(task, options){
 	try{
 		if(task === 'download_report'){
 			const reportFile = await utils.generateExcelOrCSV(options.filename, options.outputFolder, options.query, options.format);
-			console.log(reportFile);
 			sendLogToUI('download_report','success', reportFile);
 		}
 	}catch(err){
