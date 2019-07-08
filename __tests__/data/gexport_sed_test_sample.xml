@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bulkCmConfigDataFile>
+    <fileHeader/>
+    <configData>
+        <class name="UUFF">
+            <object technique="CDMA" vendor="Huawei" version="1234567899">
+                <class name="ONION">
+                    <object>
+                        <parameter name="Goat" value="0"/>
+					</object>
+				</class>
+                <class name="ENODEBCAROT">
+                    <object>
+                        <parameter name="FooAndBar" value="0"/>
+                        <parameter name="Fish" value="257"/>
+					</object>
+				</class>
+                <class name="ENODEB">
+                    <object>
+                        <parameter name="Foo" value="0"/>
+					</object>
+				</class>
+                <class name="ENODEBBEANS">
+                    <object>
+                        <parameter name="Boo" value="9"/>
+					</object>
+				</class>
+                <class name="ENODEBGARLIC">
+                    <object>
+                        <parameter name="FooBar" value="222"/>
+					</object>
+				</class>
+		</class>
+	</configData>
+</bulkCmConfigDataFile>

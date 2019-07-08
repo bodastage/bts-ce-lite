@@ -345,13 +345,14 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 	const client = new Client({
 		connectionString: connectionString,
 	});
-		
-	client.connect((err) => {
-		if(err){
-			log.error(err);
-			return err;
-		}
-	});
+	
+	await client.connect();
+	
+	//Connection failed
+	if(client.processID === null){
+		throw Error('Failed to connect to database');
+		return false;
+	}
 	
 	if(typeof beforeLoad === 'function'){
 		beforeLoad();

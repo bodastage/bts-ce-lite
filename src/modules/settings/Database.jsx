@@ -120,7 +120,6 @@ class Database extends React.Component{
 				this.props.dispatch(showDBUpdateError(obj.message));
 				ipcRenderer.removeListener("parse-cm-request", this.setupDBListener);
 				this.props.dispatch(stopDBSettingsUpdate());
-				this.setupDBListener = null;
 				
 			}
 
@@ -129,7 +128,6 @@ class Database extends React.Component{
 				this.props.dispatch(showDBUpdateSuccess( obj.message));
 				ipcRenderer.removeListener("parse-cm-request", this.setupDBListener);
 				this.props.dispatch(stopDBSettingsUpdate());
-				this.setupDBListener = null;
 
 			}
 		}
@@ -180,7 +178,7 @@ class Database extends React.Component{
 				{ this.props.db.updating ? <ProgressBar className="mt-2" intent={Intent.PRIMARY}/> : "" }
 
 									
-						<form onSubmit={this.updateDatabaseSetting}>
+						<form onSubmit={this.updateDatabaseSetting} className="mt-2">
 						
 							<div className="form-group row">
 								<label htmlFor="inputHostname" className="col-sm-2 col-form-label">Hostname</label>

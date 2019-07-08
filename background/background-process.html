@@ -688,7 +688,7 @@ async function  executeTask(task, options){
 		}
 		
 		if(task === 'load_cm_data'){
-			await utils.loadCMDataViaStream(
+			const status = await utils.loadCMDataViaStream(
 				options.vendor, 
 				options.format, 
 				options.csvFolder,
@@ -707,9 +707,11 @@ async function  executeTask(task, options){
 					sendLogToUI('load_cm_data','success', 'Loading completed successfully.')
 			});
 			
+			
 		}
 	}catch(err){
-		sendLogToUI('load_cm_data','error', err);
+		log.error(err.toString());
+		sendLogToUI('load_cm_data','error', err.toString());
 	}
 	
 	
