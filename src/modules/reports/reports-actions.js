@@ -249,7 +249,7 @@ export function getReportFields(reportId){
 				.catch(e => {
 					//@TODO: Error notice
 					log.error(e);
-					return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while executing query to get fields. See log for detials."));
+					return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while executing query. See log for detials."));
 					//return dispatch(receiveReportFields(reportId, []));	
 				})
 				.then(() => client.end());
