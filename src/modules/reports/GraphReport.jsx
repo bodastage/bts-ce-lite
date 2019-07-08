@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
 import { SizeMe } from 'react-sizeme'
-import { Icon, ButtonGroup, Button, Intent, Toaster, Callout } from "@blueprintjs/core";
+import { Icon, ButtonGroup, Button, Intent, Toaster, Callout,
+		 Dialog, Classes } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -18,6 +19,9 @@ class GraphReport extends React.Component{
         
         this.updatePlotData.bind(this)
 		this.refreshData = this.refreshData.bind(this)
+		
+		this.handleDialogOpen = this.handleDialogOpen.bind(this)
+		this.handleDialogClose = this.handleDialogClose.bind(this)
 
         //Plot data and options/settings
         this.plotData = []
@@ -31,6 +35,9 @@ class GraphReport extends React.Component{
         this.props.dispatch(getGraphData(this.props.options.reportId));
     }
     
+    handleDialogOpen = () => this.setState({ isDialogOpen: true });
+    handleDialogClose = () => this.setState({ isDialogOpen: false });
+	
     /**
      * Create toask reference
      */
@@ -112,21 +119,45 @@ class GraphReport extends React.Component{
 		
 		
         return (
-		<div>		
-				<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
-				<div style={{width:"100%"}}>
-					<SizeMe>
-						{({ size }) => <Plot
-							data={this.plotData}
-							layout={this.layoutOptions}
-							config={{displaylogo:false}}
-							responsive={true}
-							useResizeHandler={true}
-						/>}
+		<div>	
+			<ButtonGroup minimal={true} className="float-right">
+				<Button icon="refresh" onClick={this.refreshData} ></Button>
+				<Button icon="info-sign" onClick={this.handleDialogOpen} ></Button>
+			</ButtonGroup>
+			
+			<div style={{width:"100%"}}>
+				<SizeMe>
+					{({ size }) => <Plot
+						data={this.plotData}
+						layout={this.layoutOptions}
+						config={{displaylogo:false}}
+						responsive={true}
+						useResizeHandler={true}
+					/>}
 
-					</SizeMe>
-				</div>
+				</SizeMe>
+			</div>
 			<Toaster {...this.state} ref={this.refHandlers.toaster} />
+			
+				{ typeof this.props.reportInfo === 'undefined' ? "" :
+				<Dialog
+				isOpen={this.state.isDialogOpen}
+				onClose={this.handleDialogClose}
+				title={this.props.reportInfo.name}
+				icon="info-sign"
+				>
+					<div className={Classes.DIALOG_BODY}>
+						<pre>
+						{this.props.reportInfo.query}
+						</pre>
+					</div>
+					<div className={Classes.DIALOG_FOOTER}>
+						<div className={Classes.DIALOG_FOOTER_ACTIONS}>
+							<Button onClick={this.handleDialogClose}>Close</Button>
+						</div>
+					</div>
+				</Dialog>
+				}
 		</div>	
 		);
     }

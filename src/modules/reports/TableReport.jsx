@@ -337,7 +337,6 @@ class TableReport extends React.Component{
 				
 				//Count is the last row
 				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
-				console.log("count:", count);
 				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
 				
 				params.successCallback(queryResult.rows, count); 
@@ -454,6 +453,7 @@ class TableReport extends React.Component{
 				isOpen={this.state.isDialogOpen}
 				onClose={this.handleDialogClose}
 				title={this.props.reportInfo.name}
+				icon="info-sign"
 				>
 					<div className={Classes.DIALOG_BODY}>
 						<pre>
