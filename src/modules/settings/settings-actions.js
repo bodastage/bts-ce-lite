@@ -121,7 +121,7 @@ export function checkConnection(settings){
     return (dispatch, getState) => {
 		dispatch(startDBSettingsUpdate());
 		
-		const connectionString = `postgresql://${settings.username}:${settings.password}@${settings.hostname}:${settings.port}/boda`
+		const connectionString = `postgresql://${settings.username}:${settings.password}@${settings.hostname}:${settings.port}/postgres`
 		
 		const client = new Client({
 		  connectionString: connectionString,
