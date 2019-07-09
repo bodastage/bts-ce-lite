@@ -4,7 +4,7 @@ import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
 import { SizeMe } from 'react-sizeme'
 import { Icon, ButtonGroup, Button, Intent, Toaster, Callout,
-		 Dialog, Classes } from "@blueprintjs/core";
+		 Dialog, Classes, ResizeSensor  } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -16,7 +16,7 @@ class GraphReport extends React.Component{
         this.state = {
             width: window.innerWidth - 500
         }
-        
+        this.handleResize = this.handleResize.bind(this)
         this.updatePlotData.bind(this)
 		this.refreshData = this.refreshData.bind(this)
 		
@@ -58,6 +58,12 @@ class GraphReport extends React.Component{
 			message: "Refreshing report...",
         });
 	}
+	
+	handleResize = (entries) => {
+		const width = entries[0].contentRect.width;
+		this.setState({width: width})
+	}
+	
     /**
      * Update plot data with the values from the query and any new options
      * 
@@ -96,6 +102,9 @@ class GraphReport extends React.Component{
         
         return  newOptions;
     }
+	
+
+	 
     
     render(){
         let plotTitle = 'Loading...'
@@ -116,8 +125,7 @@ class GraphReport extends React.Component{
 				</div>		
 				);
         }
-		
-		
+
         return (
 		<div>	
 			<ButtonGroup minimal={true} className="float-right">
@@ -125,18 +133,18 @@ class GraphReport extends React.Component{
 				<Button icon="info-sign" onClick={this.handleDialogOpen} ></Button>
 			</ButtonGroup>
 			
-			<div style={{width:"100%"}}>
-				<SizeMe>
-					{({ size }) => <Plot
+			<ResizeSensor onResize={this.handleResize}>
+				<div style={{ width: "100%" }}>
+					<Plot
 						data={this.plotData}
-						layout={this.layoutOptions}
+						layout={{...this.layoutOptions, width: this.state.width, autosize: false}}
 						config={{displaylogo:false}}
 						responsive={true}
 						useResizeHandler={true}
-					/>}
-
-				</SizeMe>
-			</div>
+					/>	
+				</div>
+			</ResizeSensor>
+			
 			<Toaster {...this.state} ref={this.refHandlers.toaster} />
 			
 				{ typeof this.props.reportInfo === 'undefined' ? "" :
