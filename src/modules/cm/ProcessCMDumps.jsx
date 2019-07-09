@@ -137,6 +137,11 @@ class ProcessCMDumps extends React.Component {
 			return;
 		}
 		
+		if(this.state.outputFolderText === this.state.inputFileText){
+			this.setState({errorMessage: `Input and output folders should be different.`})
+			return;
+		}
+		
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		const payload = {
 				"vendor": this.state.currentVendor,
