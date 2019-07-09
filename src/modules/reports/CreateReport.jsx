@@ -338,7 +338,9 @@ class CreateReport extends React.Component{
      * @returns
      */
     addPlotTrace(type){
-        
+		//Show nothing if there is no preview data
+        if(this.previewData.length === 0) return; 
+		
         if(type === 'bar'){
             //Use the first field as the x and y data source on addtion of bar chart
             let xField = this.props.fields.length > 0 ? this.props.fields[0] : null;

@@ -219,8 +219,7 @@
     "files": [
       "./build/**/*",
       "./src/electron-start.js",
-      "./background/background-process.html",
-      "./background/background-utils.js"
+      "./background/**/*"
     ],
     "extraResources": [
       "libraries",

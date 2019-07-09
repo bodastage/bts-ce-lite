@@ -7,6 +7,7 @@ const isDev = window.require('electron-is-dev');
 const { app, process } = window.require('electron').remote;
 const createCsvWriter = window.require('csv-writer').createObjectCsvWriter;
 const SQLITE3_DB_NAME = 'boda-lite.sqlite3';
+const moTransform = window.require('./mo-name-transform');
 var Excel = window.require('exceljs');
 	
 let basepath = app.getAppPath();
@@ -364,44 +365,64 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		let fileName = items[i];
 		let filePath = path.join(csvFolder, items[i]);
 		let moName = items[i].replace(/.csv$/i,'');
+		
+		//Remap MO name e.g UCELLSETUP to UCELL inorder to load to appropriate table 
+		if(typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
+			 moName = moTransform.HUAWEI_MO_MAP[moName];
+			log.info(`${fileName.replace(".csv","") transformed to ${moName}}${moTransform.HUAWEI_MO_MAP[moName]}`);
+		}
+		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
-
+		
+		
+		
 		let copyFromStream = null;
 		try{
-			copyFromStream = client.query(copyFrom(`COPY ${table} (data) FROM STDIN`));
+			copyFromStream = await client.query(copyFrom(`COPY ${table} (data) FROM STDIN`));
 		}catch(e){
 			if( copyFromStream !== null) copyFromStream.end();
-			
 			log.error(e);
 			return false;
 		}
 
+		copyFromStream.on('error', async (err) => {
+			log.error(`${err.toString()}`);
+		});
+		
 		
 		if(typeof beforeFileLoad === 'function'){
 			beforeFileLoad(table, fileName, csvFolder);
 		}
 
 		await new Promise((resolve, reject) => {
-			csv()
-			.fromFile(filePath)
-			.subscribe((json)=>{
-				const jsonString = JSON.stringify(json);
-				//log.info(jsonString);
-				try{
-					copyFromStream.write(jsonString + "\n");
-				}catch(err){
-					log.error(err);
-				}
+			try{//@TODO: Test whether this try block is necessary
+				csv()
+				.fromFile(filePath)
+				.subscribe((json)=>{
+					const jsonString = JSON.stringify(json);
+					//log.info(jsonString);
+					try{
+						copyFromStream.write(jsonString + "\n");
+					}catch(err){
+						log.error(err);
+					}
 
-			},(err) => {//onError
-				log.error(err);
+				},(err) => {//onError
+					log.error(err);
+					copyFromStream.end();
+					reject();
+				},
+				()=>{//onComplete
+					copyFromStream.end();
+					resolve(undefined);
+				}); 
+			}catch(e){
+
+				log.error(e.toString());
 				copyFromStream.end();
-				reject();
-			},
-			()=>{//onComplete
-				copyFromStream.end();
-				resolve(undefined);
-			}); 
+				reject(e)
+				
+			}
 			
 		});
 
@@ -415,10 +436,9 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 	if(typeof afterLoad === 'function'){
 		afterLoad();
 	}
+
 	
 }
-
-
 
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteDBConnectionDetails = getSQLiteDBConnectionDetails;

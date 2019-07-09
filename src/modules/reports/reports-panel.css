@@ -7,7 +7,8 @@ ul.rc-tree li.rc-tree-treenode-switcher-open:last-child {
 }
 
 
+
 .js-plotly-plot .plotly .modebar {
     left: 50%;
     transform: translateX(-50%);
-}
+} 

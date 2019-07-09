@@ -26,7 +26,7 @@ export const HUAWEI_2G_KEY_PARAMAETERS = `
 
 
 export const HUAWEI_3G_KEY_PARAMAETERS = `
-	SELECT 
+SELECT 
 	t1.data->>'DATETIME' AS "DATETIME", 
 	t2.data->>'SYSOBJECTID' AS "NENAME", 
 	'HUAWEI' AS "VENDOR", 
@@ -36,7 +36,7 @@ export const HUAWEI_3G_KEY_PARAMAETERS = `
 	t4.data->>'NODEBID' AS "SITEID", 
 	t1.data->>'CELLNAME' AS "CELLNAME", 
 	t1.data->>'ACTSTATUS' AS "ACTSTATUS", 
-	-- t1."ADMSTAT" AS "BLKSTATUS", 
+	t1.data->'ADMSTAT' AS "BLKSTATUS", 
 	t5.data->>'MCC' AS "MCC", 
 	t5.data->>'MNC' AS "MNC", 
 	t1.data->>'LAC' AS "LAC", 
@@ -48,12 +48,11 @@ export const HUAWEI_3G_KEY_PARAMAETERS = `
 	t1.data->>'PSCRAMBCODE' AS "PSCRAMBCODE", 
 	CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'LOCELL') AS "CGI_RAW", 
 	CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'LOCELL') AS "CGI" 
-	FROM huawei_cm."UCELL" t1 
+FROM huawei_cm."UCELL" t1 
 	INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FILENAME' = t2.data->>'FILENAME' 
-	INNER JOIN huawei_cm."RNCBASIC" t3 ON t3.data->>'RNCID' = t1.data->>'LOGICRNCID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
-	INNER JOIN huawei_cm."NODEBFUNCTION" t4 ON t1.data->>'FILENAME' = t1.data->>'FILENAME' 
-	INNER JOIN huawei_cm."CNOPERATOR" t5 ON t5.data->>'FILENAME' = t1.data->>'FILENAME' 
- 
+	INNER JOIN huawei_cm."URNCBASIC" t3 ON t3.data->>'RNCID' = t1.data->>'LOGICRNCID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
+	INNER JOIN huawei_cm."UNODEB" t4 ON t1.data->>'FILENAME' = t1.data->>'FILENAME' 
+	INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FILENAME' = t1.data->>'FILENAME'
 `
 
 export const HUAWEI_4G_KEY_PARAMAETERS = `
