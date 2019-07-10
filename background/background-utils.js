@@ -369,7 +369,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		//Remap MO name e.g UCELLSETUP to UCELL inorder to load to appropriate table 
 		if(typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
 			 moName = moTransform.HUAWEI_MO_MAP[moName];
-			log.info(`${fileName.replace(".csv","") transformed to ${moName}}${moTransform.HUAWEI_MO_MAP[moName]}`);
+			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}${moTransform.HUAWEI_MO_MAP[moName]}`);
 		}
 		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;

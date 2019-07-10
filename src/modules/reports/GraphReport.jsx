@@ -2,9 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
-import { SizeMe } from 'react-sizeme'
 import { Icon, ButtonGroup, Button, Intent, Toaster, Callout,
-		 Dialog, Classes, ResizeSensor  } from "@blueprintjs/core";
+		 Dialog, Classes, ResizeSensor, Spinner  } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -108,6 +107,17 @@ class GraphReport extends React.Component{
     
     render(){
         let plotTitle = 'Loading...'
+		
+        //Show spinner as we wait for data i.e. state.reports.reportsdata[id].data
+        if( this.props.reportInfo === null ){
+            return (
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend">Loading...</legend>
+						<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+				</fieldset>
+			);
+        }
+		
         if(this.props.reportInfo !== null){
             let plotOptions = this.props.reportInfo.options;
             this.plotData = this.updatePlotData(plotOptions.data)
@@ -195,7 +205,7 @@ function mapStateToProps(state, ownProps){
 	//If there is no data yet 
 	if(typeof state.reports.reportsdata[ownProps.options.reportId].data === 'undefined' ){
         return {
-            reportInfo: null,
+            reportInfo: null,	
             reportData: {},
             requesting: false,
             requestError:  null,

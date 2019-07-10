@@ -51,6 +51,8 @@ class ReportContainer extends React.Component{
 			
 		}
 		
+		console.log("this.props.reportInfo:", this.props.reportInfo)
+		
 		//@TODO: Refactor code and be consistenet. return options as object in action code 
         let reportOptions = this.props.reportInfo.options
 		if (typeof  reportOptions === 'string') reportOptions =  JSON.parse(this.props.reportInfo.options)
