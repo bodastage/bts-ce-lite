@@ -112,9 +112,7 @@ class GraphReport extends React.Component{
         if( this.props.requestError !== null ){
             return (
                 <div>
-					<a href="/#"><Icon icon="refresh" onClick={this.refreshData} className="float-right"></Icon></a>
                     <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
-					<Toaster {...this.state} ref={this.refHandlers.toaster} />
 				</div>		
 				);
         }
