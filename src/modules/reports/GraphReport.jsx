@@ -108,23 +108,6 @@ class GraphReport extends React.Component{
     render(){
         let plotTitle = 'Loading...'
 		
-        //Show spinner as we wait for data i.e. state.reports.reportsdata[id].data
-        if( this.props.reportInfo === null ){
-            return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend">Loading...</legend>
-						<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
-				</fieldset>
-			);
-        }
-		
-        if(this.props.reportInfo !== null){
-            let plotOptions = this.props.reportInfo.options;
-            this.plotData = this.updatePlotData(plotOptions.data)
-            this.layoutOptions = plotOptions.layout
-            plotTitle = this.props.reportInfo.name
-        }
-        
 		//If there is an error with the query
         if( this.props.requestError !== null ){
             return (
@@ -135,6 +118,24 @@ class GraphReport extends React.Component{
 				</div>		
 				);
         }
+		
+        //Show spinner as we wait for data i.e. state.reports.reportsdata[id].data
+        if( this.props.reportInfo === null ){
+            return (
+				<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+			);
+        }
+		
+
+
+		
+        if(this.props.reportInfo !== null){
+            let plotOptions = this.props.reportInfo.options;
+            this.plotData = this.updatePlotData(plotOptions.data)
+            this.layoutOptions = plotOptions.layout
+            plotTitle = this.props.reportInfo.name
+        }
+        
 
         return (
 		<div>	
@@ -192,6 +193,7 @@ function mapStateToProps(state, ownProps){
         };
     }
 	
+	console.log("state.reports.reportsdata[ownProps.options.reportId]", state.reports.reportsdata[ownProps.options.reportId]);
 	//Error 
 	if(state.reports.reportsdata[ownProps.options.reportId].requestError !== null){
 		return {
