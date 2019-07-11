@@ -1,4 +1,4 @@
-const ZTE_2G_KEY_PARAMAETERS = `
+export const ZTE_2G_KEY_PARAMAETERS = `
 SELECT 
 	t1.data->'userLabel' AS name,
 	t1.data->'cellIdentity' AS ci,
@@ -18,8 +18,9 @@ FROM zte_cm."GsmCell" t1
 `
 
 
-const ZTE_3G_KEY_PARAMAETERS = `
+export const ZTE_3G_KEY_PARAMAETERS = `
 SELECT 
+	t1.data->>'DATETIME' AS "DATETIME", 
 	t1.data->>'bchPower' AS "bchPower",
 	t1.data->>'cId' as ci,
 	t1.data->>'lac' AS "lac",
@@ -47,8 +48,9 @@ INNER JOIN zte_cm."RncFunction" t2 on  t2.data->>'SubNetwork_2_id' = t1.data->>'
 
 `
 
-const ZTE_4G_KEY_PARAMAETERS = `
+export const ZTE_4G_KEY_PARAMAETERS = `
 SELECT 
+	t1.data->>'DATETIME' AS "DATETIME", 
 	t1.data->>'EUtranCellFDD_id' as name,
 	t1.data->>'earfcnDl' as "earfcnDl",
 	t1.data->>'earfcnUl' as "earfcnUl",

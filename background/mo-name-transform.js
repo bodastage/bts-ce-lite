@@ -199,7 +199,58 @@ const HUAWEI_MO_MAP = {
 	'USERPRIORITY' : 'UUSERPRIORITY',
 	'VIPIMSI' : 'UVIPIMSI',
 	'WPSALGO' : 'UWPSALGO',
+}
+
+const ZTE_MO_MAP = {
+	//2G
+	'GBssFunction' : 'BssFunction',
+	'GSiteBaseBandShare' : 'SiteBaseBandShare',
+	'GMocnArea' : 'MocnArea',
+	'GBssIftaMa' : 'BssIftaMa',
+	'GGsmCell' : 'GsmCell',
+	'GCellIfta' : 'CellIfta',
+	'GHandoverControl' : 'HandoverControl',
+	'GScHandoverControl' : 'ScHandoverControl',
+	'GPsHandoverControl' : 'PsHandoverControl',
+	'GFhHandoverControl' : 'FhHandoverControl',
+	'GPsChannelSchedule' : 'PsChannelSchedule',
+	'GPowerControl' : 'PowerControl',
+	'GHoppingFrequency' : 'HoppingFrequency',
+	'GHoppingBaseband' : 'HoppingBaseband',
+	'GTrx' : 'Trx',
+	'GTs' : 'Ts',
+	'GExternalGsmCell' : 'ExternalGsmCell',
+	'GExternalUtranCellFDD' : 'ExternalUtranCellFDD',
+	'GExternalUtranCellTDDLcr' : 'ExternalUtranCellTDDLcr',
+	'GExternalEutranCellFDD' : 'ExternalEutranCellFDD',
+	'GExternalEutranCellTDD' : 'ExternalEutranCellTDD',
+	'GGsmRelation' : 'GsmRelation',
+	'GUtranRelation' : 'UtranRelation',
+	'GEutranRelation' : 'EutranRelation',
+	'GGsmVpcRelation' : 'GsmVpcRelation',
+	'GGsmIntfRelation' : 'GsmIntfRelation',
+	'GPriorityResel' : 'PriorityResel',
+	'GCellGroup' : 'CellGroup',
+	'GBssGLFShare' : 'BssGLFShare',
+	'GGLFShareECGI' : 'GLFShareECGI',
+	
+	//3g
+	'UUtranCellFDD' : 'UtranCellFDD',
+	'ULogicalCell' : 'LogicalCell',
+	'UExternalUtranCellFDD' : 'ExternalUtranCellFDD',
+	'UExternalGsmCell' : 'ExternalGsmCell',
+	'UExternalENBFunction' : 'ExternalENBFunction',
+	'UExternalEUtranCellFDD' : 'ExternalEUtranCellFDD',
+	'UExternalEUtranCellTDD' : 'ExternalEUtranCellTDD',
+	'UUtranRelation' : 'UtranRelation',
+	'UGsmRelation' : 'GsmRelation',
+	'UEUtranRelation' : 'EUtranRelation',
+	'UImsiSnacFilter' : 'ImsiSnacFilter',
+	'UMbms' : 'Mbms',
+	'UMbmsSa' : 'MbmsSa',
+	'UMbmsFreq' : 'MbmsFreq',
 
 }
 
 exports.HUAWEI_MO_MAP = HUAWEI_MO_MAP;
+exports.ZTE_MO_MAP = ZTE_MO_MAP;

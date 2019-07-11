@@ -1,4 +1,4 @@
-const ERICSSON_2G_KEY_PARAMAETERS = `
+export const ERICSSON_2G_KEY_PARAMAETERS = `
 WITH QRY_CHANNEL_GROUP_TRX AS (
 	SELECT 
 		t1.data->>'BSC_NAME' AS "NENAME", 
@@ -8,8 +8,7 @@ WITH QRY_CHANNEL_GROUP_TRX AS (
 	GROUP BY t1.data->>'BSC_NAME', t1.data->>'CELL_NAME'
 )
 SELECT
-   t1.data->>'DATETIME',
-   'VIVO' AS "REGIONAL",
+   t1.data->>'DATETIME' AS "DATETIME",
    'ERICSSON' AS "VENDOR",
    '2G' AS "TECHNOLOGY",
    'BSC' AS "NETYPE",
@@ -50,7 +49,7 @@ INNER JOIN ericsson_cm."BSC" t2 ON t1.data->>'BSC_NAME' = t2.data->>'BSC_NAME'
 `
 
 
-const ERICSSON_3G_KEY_PARAMAETERS = `
+export const ERICSSON_3G_KEY_PARAMAETERS = `
 SELECT t1.data->>'DATETIME' AS "DATETIME",
 	   'ERICSSON' AS "VENDOR",
 	   '3G' AS "TECHNOLOGY",
@@ -86,7 +85,7 @@ FROM ericsson_cm."UtranNetwork" t1
 
 `
 
-const ERICSSON_4G_KEY_PARAMAETERS = `
+export const ERICSSON_4G_KEY_PARAMAETERS = `
 SELECT 
 	t1.data->>'DATETIME' AS "DATETIME",
 	'ERICSSON' AS "VENDOR",
