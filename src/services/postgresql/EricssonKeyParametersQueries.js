@@ -1,5 +1,4 @@
 const ERICSSON_2G_KEY_PARAMAETERS = `
-
 WITH QRY_CHANNEL_GROUP_TRX AS (
 	SELECT 
 		t1.data->>'BSC_NAME' AS "NENAME", 
@@ -46,13 +45,12 @@ SELECT
 FROM ericsson_cm."INTERNAL_CELL" t1 
 INNER JOIN ericsson_cm."BSC" t2 ON t1.data->>'BSC_NAME' = t2.data->>'BSC_NAME'
   LEFT JOIN QRY_CHANNEL_GROUP_TRX t3
-  ON t1.data->>'CELL_NAME' = t3.data->>'CELLNAME'
-  AND t1.data->>'BSC_NAME' = t3.data->>'NENAME'
+  ON t1.data->>'CELL_NAME' = t3."CELLNAME"
+  AND t1.data->>'BSC_NAME' = t3."NENAME"
 `
 
 
 const ERICSSON_3G_KEY_PARAMAETERS = `
-
 SELECT t1.data->>'DATETIME' AS "DATETIME",
 	   'ERICSSON' AS "VENDOR",
 	   '3G' AS "TECHNOLOGY",
@@ -81,9 +79,9 @@ SELECT t1.data->>'DATETIME' AS "DATETIME",
 	   CONCAT(t1.data->>'plmnIdentity_mcc', '-', LPAD(t1.data->>'plmnIdentity_mnc', 2, '0'), '-',LPAD(t2.data->>'lac',5, '0'), '-', LPAD(t2.data->>'cId',5, '0')) AS CGI,
 	   CONCAT(t1.data->>'plmnIdentity_mcc', '-', t1.data->>'plmnIdentity_mnc', '-', t2.data->>'lac', '-', t2.data->>'cId') AS "CGI_RAW",
 	   '' AS "CGI_HEX"
-FROM ericsson_cm."vsDataUtranNetwork" t1
+FROM ericsson_cm."UtranNetwork" t1
 	INNER JOIN ericsson_cm."UtranCell"  t2 ON t2.data->>'SubNetwork_2_id'  = t1.data->>'SubNetwork_2_id'
-	LEFT JOIN ericsson_cm."vsDataRbsLocalCell" t3 ON t1.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
+	LEFT JOIN ericsson_cm."RbsLocalCell" t3 ON t1.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
 		AND t2.data->>'cId' = t3.data->>'localCellId'
 
 `
@@ -120,9 +118,7 @@ SELECT
 	t1.data->>'physicalLayerCellIdGroup' AS "PCI",
 	t1.data->>'tac' AS  "TAC",
 	t1.data->>'rachRootSequence'  AS "ROOTSEQ"
-FROM ericsson_cm."vsDataEUtranCellFDD" t1
-INNER JOIN ericsson_cm."vsDataENodeBFunction" t2 ON t2.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
-
-
+FROM ericsson_cm."EUtranCellFDD" t1
+INNER JOIN ericsson_cm."ENodeBFunction" t2 ON t2.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
 
 `
