@@ -513,7 +513,13 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	sendLogToUI('parse_cm_data','info', `Parsing files...`);
 	log.info("[parse_cm_job] Parsing files...")
 	
-	const child = spawn('java', ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder]);
+	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
+	
+	//Set the java heap to 1G if processing ZTE Plan template excel workbook
+	if( vendor.toLowerCase() === 'zte' && format === 'XLS') commandArgs.unshift('-Xms1G');
+	
+	const child = spawn('java', commandArgs);
+	log.info(`java ${commandArgs.join(" ")}`);
 	
 	child.stdout.on('data', (data) => {
 	  //console.log(data.toString());
