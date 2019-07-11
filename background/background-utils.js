@@ -1,6 +1,6 @@
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
-const { Client } = window.require('pg');
+const { Client, Pool } = window.require('pg');
 const copyFrom = require('pg-copy-streams').from;
 const path = window.require('path');
 const isDev = window.require('electron-is-dev');
@@ -343,17 +343,16 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 	const password = dbConDetails.password;
 	
 	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
-	const client = new Client({
-		connectionString: connectionString,
-	});
 	
-	await client.connect();
+	const pool = new Pool({
+	  connectionString: connectionString,
+	})
 	
-	//Connection failed
-	if(client.processID === null){
-		throw Error('Failed to connect to database');
-		return false;
-	}
+	pool.on('error', (err, client) => {
+		log.error(err.toString());
+		client.release();
+	})
+
 	
 	if(typeof beforeLoad === 'function'){
 		beforeLoad();
@@ -367,59 +366,107 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		let moName = items[i].replace(/.csv$/i,'');
 		
 		//Remap MO name e.g UCELLSETUP to UCELL inorder to load to appropriate table 
-		if(typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
+		if(vendor.toLowerCase() === 'huawei' && typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
 			 moName = moTransform.HUAWEI_MO_MAP[moName];
-			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}${moTransform.HUAWEI_MO_MAP[moName]}`);
+			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
+		}
+		
+		//Transform ZTE to import ZTE Plan Template data in correct tables
+		if(vendor.toLowerCase() === 'zte' && typeof moTransform.ZTE_MO_MAP[moName] !== 'undefined'){
+			 moName = moTransform.ZTE_MO_MAP[moName];
+			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
 		}
 		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
 		
-		
-		
+		let client = null;
 		let copyFromStream = null;
 		try{
-			copyFromStream = await client.query(copyFrom(`COPY ${table} (data) FROM STDIN`));
+			//Get client from pool
+			client = await pool.connect();
+			if(client.processID === null){
+				throw Error('Failed to connect to database');
+				return false;
+			}
+			
+			copyFromStream = await client.query(copyFrom(`COPY ${table} (data) FROM STDIN`,{writableHighWaterMark : 10*1024*1024})); //10mb
 		}catch(e){
 			if( copyFromStream !== null) copyFromStream.end();
-			log.error(e);
-			return false;
+			if( client !== null) client.release();
+			
+			log.error(`Pool_Connect_Query: ${e.toString()}`);
+			log.info(`Skipping loading of ${moName}`);
+			
+			//Process next file 
+			//@TODO: 
+			continue; 
 		}
 
 		copyFromStream.on('error', async (err) => {
-			log.error(`${err.toString()}`);
+			log.error(`copyFromStream.errorEvent: ${err.toString()}`);
+			
+			//By setting writeStatus to null, we are letting next write konw that there was an 
+			//error in the previous attempt so we should exit csvToJson
+			writeStatus = null;
+		});
+	
+		
+		//Write stream status used to handle backpressure on the write stream
+		let writeStatus = true;
+		copyFromStream.on('drain', (err) => {
+			log.info(`Write stream drained for ${moName}`);
+			writeStatus = true;
 		});
 		
-		
+		copyFromStream.on('finish', (err) => {
+			log.info(`Loading of  ${moName} is done.`);
+			writeStatus = true;
+			client.release();
+		});
+
 		if(typeof beforeFileLoad === 'function'){
 			beforeFileLoad(table, fileName, csvFolder);
 		}
-
+		
+		//log.info(`copyFromStream.writableHighWaterMark: ${copyFromStream.writableHighWaterMark}`);
+		
 		await new Promise((resolve, reject) => {
 			try{//@TODO: Test whether this try block is necessary
 				csv()
 				.fromFile(filePath)
-				.subscribe((json)=>{
+				.subscribe(async (json)=>{
+					// plan newline for enter in db 
 					const jsonString = JSON.stringify(json);
-					//log.info(jsonString);
-					try{
-						copyFromStream.write(jsonString + "\n");
-					}catch(err){
-						log.error(err);
+						
+					//Get out of subscribe if there was an error
+					if(writeStatus === null){
+						return;
+					}
+					
+					writeStatus = copyFromStream.write(jsonString + "\n");
+
+					//Sleep for 1s	if status is false i.e to wait for the writable stream buffer/queue to free					
+					while(writeStatus === false){
+						log.info(`Write status: ${writeStatus} for ${fileName}. Wait for 1 second for write buffer to clear.`);
+						await new Promise((rs, rj) => {  setTimeout(rs,1000);});
 					}
 
 				},(err) => {//onError
 					log.error(err);
 					copyFromStream.end();
+					client.release();
 					reject();
 				},
 				()=>{//onComplete
+					log.info(`End of csvToJson for ${fileName}.`)
 					copyFromStream.end();
 					resolve(undefined);
 				}); 
 			}catch(e){
-
-				log.error(e.toString());
+				writeStatus = true; // -- to stop while(writeStatus === false) from continuing endlessly
+				log.error(`$EndOfcsvToJson: {e.toString()}`);
 				copyFromStream.end();
+				client.release();
 				reject(e)
 				
 			}
@@ -437,6 +484,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		afterLoad();
 	}
 
+	await pool.end();
 	
 }
 
