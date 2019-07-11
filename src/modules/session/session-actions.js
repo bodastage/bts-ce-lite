@@ -2,8 +2,24 @@ import axios from '../../api/config';
 import 'url-search-params-polyfill';
 //import * as sqlite3 from 'sqlite3';
 import {createConnection} from "typeorm";
-import { HUAWEI_2G_KEY_PARAMAETERS, HUAWEI_3G_KEY_PARAMAETERS, HUAWEI_4G_KEY_PARAMAETERS } from '../../services/postgresql/HuaweiKeyParametersQueries.js';
-
+//@TODO: Move this into the db setup script to reduce size of the bundle 
+import { HUAWEI_2G_KEY_PARAMAETERS, 
+		 HUAWEI_3G_KEY_PARAMAETERS, 
+		 HUAWEI_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/HuaweiKeyParametersQueries.js';
+		
+import { ERICSSON_2G_KEY_PARAMAETERS, 
+		 ERICSSON_3G_KEY_PARAMAETERS, 
+		 ERICSSON_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/EricssonKeyParametersQueries.js';
+import { ZTE_2G_KEY_PARAMAETERS, 
+		 ZTE_3G_KEY_PARAMAETERS, 
+		 ZTE_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/ZTEKeyParametersQueries.js';
+import { NOKIA_2G_KEY_PARAMAETERS, 
+		 NOKIA_3G_KEY_PARAMAETERS, 
+		 NOKIA_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/NokiaKeyParametersQueries.js';
 import { SQLITE3_DB_PATH } from "./db-settings";
 
 const fs = window.require('fs');
@@ -185,18 +201,18 @@ export function checkDBSetupStatus(){
 				stmt = db.prepare("INSERT INTO reports  (name, notes, query, options, type, category_id, in_built)" +
 				" VALUES (?, ?, ?, ?, ?, ?, ?)" );
 				
-				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1, 1);
-				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1, 1);
-				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1, 1);
+				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', ERICSSON_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', ERICSSON_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', ERICSSON_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
 				stmt.run('Huawei 2G parameters','Huawei 2G parameters', HUAWEI_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
 				stmt.run('Huawei 3G parameters','Huawei 3G parameters', HUAWEI_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
 				stmt.run('Huawei 4G parameters','Huawei 4G parameters', HUAWEI_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1, 1);
-				stmt.run('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1, 1);
-				stmt.run('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1, 1);
-				stmt.run('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1, 1);
-				stmt.run('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1, 1);
-				stmt.run('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1, 1);
+				stmt.run('ZTE 2G parameters','ZTE 2G parameters', ZTE_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('ZTE 3G parameters','ZTE 3G parameters', ZTE_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('ZTE 4G parameters','ZTE 4G parameters', ZTE_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Nokia 2G parameters','Nokia 2G parameters', NOKIA_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Nokia 3G parameters','Nokia 3G parameters', NOKIA_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Nokia 4G parameters','Nokia 4G parameters', NOKIA_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
 				
 				stmt.finalize();
 				
