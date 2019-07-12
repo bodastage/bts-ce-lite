@@ -9,8 +9,25 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		CONFIRM_REPORT_CATEGORY_RECEIVED,
 		CLEAR_EDIT_RPT_CATEGORY,
 		//Table report 
-		NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE
+		NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE,
+		
+		//Composite reports 
+		ADD_TO_COMPOSITE_REPORT,
+		UPDATE_COMPOSITE_REPORT_LAYOUT
 		} from './reports-actions';
+
+		
+/*Initial composite report*/
+const InitialCompositeReport = {
+	//if number/integer, then we are in edit mode 
+	edit: null,
+
+	//{i: 'a', x: 0, y: 0, w: 2, h: 2},
+	//{i: 'b', x: 3, y: 0, w: 2, h: 2},
+	layout: [],
+	columns: 4, //4 columns initially,
+	reports: {} //key: reportId
+};
 
 let initialState = {
     
@@ -62,7 +79,10 @@ let initialState = {
      //Stores the sate of new category creation
     newCat:{},
     
-    editCat: null // edit category details her
+    editCat: null, // edit category details here
+	
+	//Composite report
+	compReport: InitialCompositeReport
 };
 
 
@@ -228,6 +248,25 @@ export default function reports(state = initialState, action){
                         }
                     }
                 }
+			case ADD_TO_COMPOSITE_REPORT:
+				 return {
+					 ...state,
+					 compReport: {
+						 ...state.compReport,
+						 layout: [...state.compReport.layout, action.options.layout],
+						 reports: {
+							 ...state.compReport.reports, 
+							 [action.key]: action.reportId }
+					 }
+				 }
+			case UPDATE_COMPOSITE_REPORT_LAYOUT:
+				return {
+					...state,
+					compReport: {
+						...state.compReport,
+						layout: action.layout
+					}
+				}
             default:
                 return state;
 		}

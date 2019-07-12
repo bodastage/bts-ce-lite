@@ -79,6 +79,15 @@ export const RECEIVE_GRAPH_DATA = 'RECEIVE_REPORT_DATA'
 */
 export const NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE = 'NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE' ;
 
+/*
+*Add a report to the composite report
+*/
+export const ADD_TO_COMPOSITE_REPORT = 'ADD_TO_COMPOSITE_REPORT';
+
+//Uupdate composite report during report creation 
+export const UPDATE_COMPOSITE_REPORT_LAYOUT = 'UPDATE_COMPOSITE_REPORT_LAYOUT';
+
+
 export function clearReportTreeError(){
     return {
         type: CLEAR_REPORT_TREE_ERROR
@@ -273,6 +282,7 @@ export function getReports(){
 		return db.all("SELECT \
 					r.rowid as id,  \
 					r.name as name, \
+					r.type as type, \
 					c.rowid as cat_id, \
 					c.name as cat_name, \
 					r.in_built as r_in_built, \
@@ -313,7 +323,8 @@ export function getReports(){
 				reports[catIndex].reports.push({
 					id: item.id,
 					name: item.name,
-					in_built: item.r_in_built
+					in_built: item.r_in_built,
+					type: item.type
 				})
 			});
 			
@@ -823,4 +834,117 @@ export function getGraphData(reportId){
 		});
         
     }
+}
+
+/**
+* Add report to composite report
+*
+* @param integer compReportId
+* @param integer reportId
+* @param object options layout
+*/
+export function addToCompositeReport(compReportId, reportId, options ){
+	if(typeof compReportId !== 'n') compReportId = null;
+	
+	//@TODO: Insert into db and report compReportId
+	const compRptId = 4;
+	const key = `a${compRptId}`
+	
+	return {
+		type: ADD_TO_COMPOSITE_REPORT,
+		compReportId: compRptId,
+		reportId: reportId,
+		options: { ...options, key: key}
+	}
+}
+
+/**
+* Update during report creation 
+*/
+export function updateCompositeLayout(layout){
+	
+	//@TODO: Update in te
+	return {
+		type: UPDATE_COMPOSITE_REPORT_LAYOUT,
+		layout: layout
+	}
+}
+
+export function saveCompositeReport(reportId, name, catId, options){
+	return (dispatch, getState) => {
+		//@TODO: action notifying start of saving 
+		
+		const opts = {...options, type: 'Composite'}
+		
+		let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		db.serialize(async () => {
+			try{
+								//Update if reportId not null
+				if(reportId !== null){
+					let stmt = db.prepare(
+						"UPDATE reports SET " +
+						" name = ?, notes = ?, category_id = ?, query = ?, options = ?, type = ?" +
+						" WHERE " + 
+						" rowid = ?");
+						
+					stmt.run([name, '', catId, '', JSON.stringify(opts), 'composite', reportId], async function(err){
+						if(err !== null){
+							log.error(err.toString())
+							//@TODO: Show error on create page 
+							//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
+							return ;
+						}
+						
+						const data = {
+							name: name,
+							category_id: catId,
+							notes: '',
+							query: '',
+							options: opts,
+							id: reportId
+						}
+						//Update the report tree incase the report name changed
+						await dispatch(getReports());
+						//return dispatch(confirmReportCreation(reportId, data));
+					}); 
+				}else{
+									//Insert/create new report
+					let stmt = db.prepare(
+						"INSERT INTO reports " +
+						" (name, notes, category_id, query, options, type)" +
+						" VALUES " + 
+						"(?,?,?,?,?,?)"
+					);
+					
+		
+					stmt.run([name, '', catId, '', JSON.stringify(opts), 'composite'], async function(err){
+						if(err !== null){
+							log.error(err.toString())
+							//@TODO: Show error on create page
+							//return dispatch(createReportPreviewError('Error creating report. Check log for details'));
+							return; 
+						}
+						
+						const reportId = this.lastID;
+						const data = {
+							name: name,
+							category_id: catId,
+							notes: '',
+							query: '',
+							options: opts
+						}
+						//Update the report tree incase the report name changed
+						await dispatch(getReports());
+						
+						//@TODO: Confirm report creation
+						//return dispatch(confirmReportCreation(reportId, data));
+						
+					});
+					stmt.finalize();
+				}
+			}catch(e){
+				
+			}
+		});
+	}
 }

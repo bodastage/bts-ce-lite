@@ -27,6 +27,8 @@ class GraphReport extends React.Component{
         this.layoutOptions = {width: this.state.width, height: null, autosize: false, title: null}
 		
 		this.toaster = new Toaster();
+		
+		this.height = window.innerHeight - Math.ceil(window.innerHeight/4);
 
     }       
     
@@ -59,7 +61,11 @@ class GraphReport extends React.Component{
 	}
 	
 	handleResize = (entries) => {
+		console.log("=============================================");
+		console.log("handleResize: ", entries);
+		
 		const width = entries[0].contentRect.width;
+		this.height = entries[0].contentRect.height - Math.ceil(entries[0].contentRect.height/4);
 		this.setState({width: width})
 	}
 	
@@ -108,6 +114,8 @@ class GraphReport extends React.Component{
     render(){
         let plotTitle = 'Loading...'
 		
+		const height = this.props.height;
+
 		//If there is an error with the query
         if( this.props.requestError !== null ){
             return (
@@ -143,10 +151,10 @@ class GraphReport extends React.Component{
 			</ButtonGroup>
 			
 			<ResizeSensor onResize={this.handleResize}>
-				<div style={{ width: "100%" }}>
+				<div style={{ width: "100%", height: height, display:"flex"}}>
 					<Plot
 						data={this.plotData}
-						layout={{...this.layoutOptions, width: this.state.width, autosize: false}}
+						layout={{...this.layoutOptions, width: this.state.width, height: height, autosize: false}}
 						config={{displaylogo:false}}
 						responsive={true}
 						useResizeHandler={true}
@@ -190,8 +198,7 @@ function mapStateToProps(state, ownProps){
             requestError:  null,
         };
     }
-	
-	console.log("state.reports.reportsdata[ownProps.options.reportId]", state.reports.reportsdata[ownProps.options.reportId]);
+
 	//Error 
 	if(state.reports.reportsdata[ownProps.options.reportId].requestError !== null){
 		return {

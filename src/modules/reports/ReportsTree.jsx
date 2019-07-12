@@ -101,7 +101,7 @@ class ReportsTree extends React.Component{
                 <Menu>
                     <MenuItem icon="th" text="View report" onClick={(ev) => {ev.preventDefault(); this.showReportDataTab(node.label, node.reportId);}}/>
 					{node.inBuilt === 1 ? "" : <MenuItem icon="graph-remove" text="Delete report" onClick={(ev) => {ev.preventDefault(); this.removeReport(node.reportId);}}/> }	
-					{node.inBuilt === 1 ? "" : <MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
+					{node.inBuilt === 1 || node.type === 'composite' ? "" : <MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
 					
                 </Menu>,
                 { left: e.clientX, top: e.clientY },
@@ -306,6 +306,7 @@ class ReportsTree extends React.Component{
                     icon: "document",
                     reportId: report.id,
                     catId: cat.cat_id,
+					type: report.type.toLowerCase(),
 					inBuilt: report.in_built
                 });
             }
@@ -385,7 +386,10 @@ class ReportsTree extends React.Component{
     }
 	
 	createCompositeReport = () => {
-		
+		let tabId  = 'create_composite_report';
+		this.props.dispatch(addTab(tabId, 'CreateCompositeReport', {
+			title: 'Create Composite Report'
+		}));
 	}
     render(){        
         

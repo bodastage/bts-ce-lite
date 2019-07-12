@@ -7,13 +7,9 @@ import GraphReport from './GraphReport';
 import CompositeReport from './CompositeReport';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-//const GraphReport = <div/>
-//const TableReport = <div />
-/**
- * This component display the reports
- * 
- */
-class ReportContainer extends React.Component{
+
+//Exact copy of the  ReportContainer component without the fieldsets 
+class CompositeReportContainer extends React.Component{
     static icon = "table";
     static label = "";
     
@@ -30,28 +26,19 @@ class ReportContainer extends React.Component{
     }
 	
 	
-	
     render(){
-		
-		console.log("reportOptions:", this.props.reportInfo);
-		
+
         //Show spinner as we wait for data
         if( this.props.reportInfo === null ){
             return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend">Loading...</legend>
-						<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
-				</fieldset>
+				<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
 			);
         }
 		
 		//if the report options are not set or are undefined
 		if( this.props.reportInfo.options === null || typeof this.props.reportInfo.options === 'undefined' ){
             return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend">Loading...</legend>
-						<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
-				</fieldset>
+				<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
 			);
 			
 		}
@@ -63,29 +50,20 @@ class ReportContainer extends React.Component{
 		
         if(reportOptions.type === 'Graph'){
             return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><Icon icon="timeline-bar-chart"/> {this.props.reportInfo.name}</legend>
-					<GraphReport options={this.props.options}/>
-				</fieldset>
+				<GraphReport options={this.props.options}/>
 			);
         }
 		
         if(reportOptions.type === 'Composite'){
             return (
-                <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><Icon icon="timeline-bar-chart"/> {this.props.reportInfo.name}</legend>
-					<CompositeReport options={this.props.options} reportInfo={this.props.reportInfo}/>
-				</fieldset>
+				<CompositeReport options={this.props.options} reportInfo={this.props.reportInfo}/>
 			);
         }
 		
 		
         //Table report is the default
         return (
-			<fieldset className="col-md-12 fieldset">    	
-				<legend className="legend"><FontAwesomeIcon icon="table"/> {this.props.options.title}</legend>
-				<TableReport options={this.props.options} reportInfo={this.props.reportInfo}/>
-			</fieldset>
+			<TableReport options={this.props.options} reportInfo={this.props.reportInfo}/>
 		);
 		
     }
@@ -104,4 +82,4 @@ function mapStateToProps(state, ownProps){
     };
 }
 
-export default connect(mapStateToProps)(ReportContainer);
+export default connect(mapStateToProps)(CompositeReportContainer);

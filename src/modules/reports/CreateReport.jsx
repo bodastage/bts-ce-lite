@@ -500,8 +500,6 @@ class CreateReport extends React.Component{
      * @returns {undefined}
      */       
     updateLayoutOptions = (newLayoutOptions) => {
-        console.log(`updateLayoutOptions(${newLayoutOptions})`)
-        console.log(newLayoutOptions)
         
         this.plotLayout = newLayoutOptions
         this.setState({plotReloadCount: this.state.plotReloadCount+1});
