@@ -61,8 +61,6 @@ class GraphReport extends React.Component{
 	}
 	
 	handleResize = (entries) => {
-		console.log("=============================================");
-		console.log("handleResize: ", entries);
 		
 		const width = entries[0].contentRect.width;
 		this.height = entries[0].contentRect.height - Math.ceil(entries[0].contentRect.height/4);

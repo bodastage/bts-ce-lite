@@ -277,11 +277,7 @@ class ProcessCMDumps extends React.Component {
 		//Add ellipsi.. on the left if folder name is given 
 		let inputFolderEllipsis = this.state.inputFileText === 'Choose folder...' ? "" : "file-text-dir-rtl";
 		let outputFolderEllipsis = this.state.outputFolderText === 'Choose folder...' ? "" : "file-text-dir-rtl"
-		
-		//Add ellipsi.. on the left if folder name is given 
-		let inputFolderEllipsis = this.state.inputFileText === 'Choose folder...' ? "" : "file-text-dir-rtl";
-		let outputFolderEllipsis = this.state.outputFolderText === 'Choose folder...' ? "" : "file-text-dir-rtl"
-		
+
         return (
             <div>
                 <h3><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</h3>

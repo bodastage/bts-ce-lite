@@ -38,6 +38,8 @@ export const CLEAR_NOTICES = 'CLEAR_NOTICES';
 export const RESET_STATE = 'RESET_STATE';
 
 export function resetState(){
+	
+	
 	return {
 		type: RESET_STATE
 	};
@@ -113,6 +115,19 @@ export function waitForDatabaseSetup(notice){
     };
 }
 
+export function clearSQLiteDB(){
+    return (dispatch, getState) => {
+		
+		var stats = fs.statSync(SQLITE3_DB_PATH);
+			
+		if(fs.existsSync(SQLITE3_DB_PATH) && stats.size === 0 ){
+			fs.unlinkSync(SQLITE3_DB_PATH);
+			log.info(`Deleting boda-lite.sqlite3 because it's size is 0`);
+		}
+		
+		dispatch(resetState());
+	}
+}
 /**
  * Check if the database is ready
  */
@@ -120,11 +135,22 @@ export function checkDBSetupStatus(){
     return (dispatch, getState) => {
         
 		try{ 
+		
+			var stats = fs.statSync(SQLITE3_DB_PATH);
+			
 			//Database already exists
-			if(fs.existsSync(SQLITE3_DB_PATH)){
+			if(fs.existsSync(SQLITE3_DB_PATH) && stats.size > 0 ){
 				dispatch(clearNotices());
 				return;
 			}
+			
+			if(fs.existsSync(SQLITE3_DB_PATH)){
+				fs.unlinkSync(SQLITE3_DB_PATH);
+				log.info(`Deleting boda-lite.sqlite3 because it's size is 0`);
+			}
+			
+			
+			
 			
 			//@TODO: Move this logic to a different file 
 			let db = new sqlite3.Database(SQLITE3_DB_PATH);
