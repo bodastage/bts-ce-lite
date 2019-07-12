@@ -244,6 +244,26 @@ class CreateCompositeReport extends React.Component {
 		//layout.push({i: 'z', x: 0, y: 0, w: 2, h: 2});
 		
 		let currentGridBoxes = this.props.options.layout.map((val) => {
+			
+			console.log("this.props.reportsInfo[val.i]:", this.props.reportsInfo[val.i])
+			if(typeof this.props.reportsInfo[val.i] === 'undefined'){
+				this.props.dispatch(getReportInfo(val.i));
+				return (
+				<div key={val["i"]} className="rgl-border">
+					<div className="card-header ">Loading ...
+						<a href="#" title="Remove report">
+							<Icon icon="delete" className="float-right ml-2" onClick={(e) => { e.preventDefault(); this.removeReport(val.i);}}/>
+						</a>&nbsp;
+					</div>
+					<div className="rgl-body">
+						<div className="mt-2 pb-3" style={{height: this.state.rowHeight*val.h-20}}>
+							<Spinner size="20"/>
+						</div>
+					</div>
+				</div>
+				);
+			}
+			
 			return (
 			<div key={val["i"]} className="rgl-border">
 				<div className="card-header ">{this.props.reportsInfo[val.i].name} 
@@ -251,8 +271,8 @@ class CreateCompositeReport extends React.Component {
 						<Icon icon="delete" className="float-right ml-2" onClick={(e) => { e.preventDefault(); this.removeReport(val.i);}}/>
 					</a>&nbsp;
 				</div>
-				<div>
-					<div className="rgl-body mt-2 pb-3" style={{height: this.state.rowHeight*val.h-20}}>
+				<div className="rgl-body">
+					<div className="mt-2 pb-3" style={{height: this.state.rowHeight*val.h-20}}>
 						<CompositeReportContainer options={{reportId: val.i, title: this.props.reportsInfo[val.i].name}}/>
 					</div>
 				</div>

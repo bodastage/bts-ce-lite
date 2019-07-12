@@ -20,6 +20,6 @@
 	padding: 2px;
 }
 
-.rgl-border .rgl-body:hover{
-	overflowY: "scroll"
+.rgl-body{
+	overflow-y: scroll !important;
 }

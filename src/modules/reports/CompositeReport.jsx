@@ -58,8 +58,8 @@ class CreateCompositeReport extends React.Component {
 			return (
 			<div key={val["i"]} className="rgl-border">
 				<div className="card-header ">{this.props.reportsInfo[val.i] ? this.props.reportsInfo[val.i].name : "Loading..."}</div>
-				<div>
-					<div className="mt-2">
+				<div className="rgl-body">
+					<div className="mt-2" style={{height: this.state.rowHeight*val.h-20}}>
 						<CompositeReportContainer options={{reportId: val.i, title: "Composite Report"}}/>
 					</div>
 				</div>
@@ -74,7 +74,7 @@ class CreateCompositeReport extends React.Component {
               draggableHandle=".card-header"
               layout={layout} 
               cols={4} 
-              margin={[5,5]}
+              margin={[2,2]}
               rowHeight={this.state.rowHeight} width={this.state.width}>
               {gridBoxes}
             </GridLayout>
