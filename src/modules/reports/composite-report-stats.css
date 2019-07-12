@@ -7,7 +7,6 @@
 .rgl-border {
 	border: 1px solid rgba(0,0,0,.125);
 	border-radius: .25rem;
-	/*overflow-y: auto;*/
 	 overflow: hidden;
 }
 
@@ -21,5 +20,5 @@
 }
 
 .rgl-body{
-	overflow-y: scroll !important;
+	/*overflow-y: scroll !important;*/
 }

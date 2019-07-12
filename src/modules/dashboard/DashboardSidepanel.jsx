@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import  './dashboard.css';
 import { connect } from 'react-redux';
-import { addTab } from '../layout/uilayout-actions';
+import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import { Intent   } from "@blueprintjs/core";
 
 const log = window.require('electron-log');
@@ -14,6 +14,7 @@ class DashboardSidePanel extends React.Component {
         super(props);
         
         this.addTab = this.addTab.bind(this);
+		this.setSidePanel = this.setSidePanel.bind(this);
 
     }
     
@@ -38,6 +39,13 @@ class DashboardSidePanel extends React.Component {
         this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
     }
     
+	
+	setSidePanel = (sidePanel) => (e) => { 
+		e.preventDefault();
+		
+		this.props.dispatch(setSidePanel(sidePanel));
+	}
+	
     render(){
         return (
         <div>
@@ -47,7 +55,7 @@ class DashboardSidePanel extends React.Component {
                                             title: 'Process CM dumps'
                                 })}> <FontAwesomeIcon icon="asterisk" /> Process CM dumps</a>  
 
-            <a title="Reports" className="dropdown-item" href="#" ><FontAwesomeIcon icon="table"/> Reports</a>
+            <a title="Reports" className="dropdown-item" href="#" onClick={this.setSidePanel('ReportsTree')}> <FontAwesomeIcon icon="table"/> Reports</a>
 
                                 
                 <span className="dropdown-item-text legend w-100">System</span>
@@ -64,7 +72,8 @@ class DashboardSidePanel extends React.Component {
 								
 			<a className="dropdown-item" title="Log file" href="#/" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/> Log file</a>
                                 
-                <a className="dropdown-item" href="#" title="Settings" ><FontAwesomeIcon icon="cog"/>  Settings</a>
+                <a className="dropdown-item" href="#" title="Settings" onClick={this.addTab({
+                                component: 'Settings', title: 'Settings'})} ><FontAwesomeIcon icon="cog"/>  Settings</a>
         </div>
         );
         

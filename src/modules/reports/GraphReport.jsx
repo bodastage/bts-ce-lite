@@ -63,7 +63,9 @@ class GraphReport extends React.Component{
 	handleResize = (entries) => {
 		
 		const width = entries[0].contentRect.width;
+		const heigth = entries[0].contentRect.height;
 		this.height = entries[0].contentRect.height - Math.ceil(entries[0].contentRect.height/4);
+		
 		this.setState({width: width})
 	}
 	
@@ -149,10 +151,10 @@ class GraphReport extends React.Component{
 			</ButtonGroup>
 			
 			<ResizeSensor onResize={this.handleResize}>
-				<div style={{ width: "100%", height: height, display:"flex"}}>
+				<div style={{ width: "100%", display:"flex", height: "inherit" }}>
 					<Plot
 						data={this.plotData}
-						layout={{...this.layoutOptions, width: this.state.width, height: height, autosize: false}}
+						layout={{...this.layoutOptions, width: this.state.width, height: "100%"}}
 						config={{displaylogo:false}}
 						responsive={true}
 						useResizeHandler={true}
