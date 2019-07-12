@@ -5,7 +5,7 @@ import UILayout from './modules/layout/UILayout';
 import { connect } from 'react-redux';
 import ErrorBoundary from './modules/layout/ErrorBoundary';
 import VERSION from './version';
-import { logOutOfApp, resetState } from './modules/session/session-actions'
+import { logOutOfApp, resetState, clearSQLiteDB } from './modules/session/session-actions'
 
 
 const log = window.require('electron-log');
@@ -17,7 +17,8 @@ class App extends React.Component {
   }
   
   async componentDidMount(){
-	  console.log(`VERSION: ${VERSION} this.props.version: ${this.props.version}`);
+	  //Recreate sqlitedb if it is 0
+	  //this.props.dispatch(clearSQLiteDB());
 	  
 	  //@TODO: Reset state if the version is different
 	  if(VERSION !== this.props.version){
