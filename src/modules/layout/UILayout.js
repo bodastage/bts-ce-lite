@@ -51,12 +51,7 @@ class UILayout extends React.Component {
 				
                 <MenuItem icon="th" text="Reports" />
 				<MenuDivider />
-                <MenuItem icon="cog" text="Settings" 
-                    onClick={this.addTab({
-                                component: 'Settings',
-                                title: 'Settings'
-                                })}
-                />
+                <MenuItem icon="cog" text="Settings" />
             </Menu>
             );
     
