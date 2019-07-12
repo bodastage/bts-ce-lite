@@ -274,15 +274,18 @@ class ProcessCMDumps extends React.Component {
 			
 		}
 
+		
 		//Add ellipsi.. on the left if folder name is given 
 		let inputFolderEllipsis = this.state.inputFileText === 'Choose folder...' ? "" : "file-text-dir-rtl";
 		let outputFolderEllipsis = this.state.outputFolderText === 'Choose folder...' ? "" : "file-text-dir-rtl"
-
+		
         return (
-            <div>
-                <h3><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</h3>
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend"><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</legend>
+					
+			
+			<div>
 
-                <div className="card mb-2">
 				{ this.state.processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1"/>) : ""}
 				{errorNotice}
 				{successNotice}
@@ -322,7 +325,16 @@ class ProcessCMDumps extends React.Component {
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.outputFolderText)}/>
 						</div>
 					  </div>
-
+					  
+					  <div className="form-group row">
+						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
+						<div className="col-sm-8">
+						  <Switch checked={this.state.loadIntoDB} label="Load into database" onChange={this.handleLoadIntoDBChange} disabled={this.state.processing}/>
+						</div>
+						<div className="col-sm-2">
+							
+						</div>
+					  </div>
 					  
 					  
 					  <div className="form-group row">
@@ -335,12 +347,12 @@ class ProcessCMDumps extends React.Component {
 					</form>
 
                   </div>
-				  
-                </div>
+
 				
                     <Button icon="play" text="Process" className={Classes.INTENT_PRIMARY}  onClick={this.processDumps} disabled={this.state.processing}/> &nbsp;
 					<Button text="Clear" onClick={this.clearForm} disabled={this.state.processing}/>
             </div>    
+              </fieldset>
         );
     }
 }

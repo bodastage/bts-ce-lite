@@ -59,7 +59,7 @@ class CreateCompositeReport extends React.Component {
 			<div key={val["i"]} className="rgl-border">
 				<div className="card-header ">{this.props.reportsInfo[val.i] ? this.props.reportsInfo[val.i].name : "Loading..."}</div>
 				<div className="rgl-body">
-					<div className="mt-2" style={{height: this.state.rowHeight*val.h-20}}>
+					<div className="mt-2 p-2" style={{height: this.state.rowHeight*val.h-25}}>
 						<CompositeReportContainer options={{reportId: val.i, title: "Composite Report"}}/>
 					</div>
 				</div>

@@ -245,7 +245,6 @@ class CreateCompositeReport extends React.Component {
 		
 		let currentGridBoxes = this.props.options.layout.map((val) => {
 			
-			console.log("this.props.reportsInfo[val.i]:", this.props.reportsInfo[val.i])
 			if(typeof this.props.reportsInfo[val.i] === 'undefined'){
 				this.props.dispatch(getReportInfo(val.i));
 				return (
@@ -387,7 +386,6 @@ function mapStateToProps(state, ownProps){
 		});
 	});
 	
-	console.log("reports:", reports);
     return {
 		options: state.reports.compReport,
 		reports: reports,

@@ -11,7 +11,7 @@ import { Classes } from '@blueprintjs/core';
 import classNames from 'classnames';
 import logo from '../../images/boda-lite-logo-trimmed.png';
 import { Button, Alignment, Menu, MenuDivider, MenuItem, Popover, Position, Navbar } from "@blueprintjs/core";
-import { addTab } from '../layout/uilayout-actions';
+import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import './layout.less';
@@ -22,6 +22,7 @@ class UILayout extends React.Component {
             super(props);
             
             this.logout = this.logout.bind(this);
+			this.setSidePanel = this.setSidePanel.bind(this);
 
 	}
 	
@@ -38,6 +39,11 @@ class UILayout extends React.Component {
 		});
 	}
     
+	setSidePanel = (sidePanel) => (e) => { 
+		e.preventDefault();
+		
+		this.props.dispatch(setSidePanel(sidePanel));
+	}
         renderNavBar() {
             
             const moduleMenu = (
@@ -49,9 +55,10 @@ class UILayout extends React.Component {
                                 })}
                 />
 				
-                <MenuItem icon="th" text="Reports" />
+                <MenuItem icon="th" text="Reports" onClick={this.setSidePanel('ReportsTree')}/>
 				<MenuDivider />
-                <MenuItem icon="cog" text="Settings" />
+                <MenuItem icon="cog" text="Settings" onClick={this.addTab({
+                                component: 'Settings', title: 'Settings'})}/>
             </Menu>
             );
     
