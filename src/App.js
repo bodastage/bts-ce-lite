@@ -4,6 +4,9 @@ import LoginForm from './modules/session/LoginForm';
 import UILayout from './modules/layout/UILayout';
 import { connect } from 'react-redux';
 import ErrorBoundary from './modules/layout/ErrorBoundary';
+import VERSION from './version';
+import { logOutOfApp, resetState } from './modules/session/session-actions'
+
 
 const log = window.require('electron-log');
 
@@ -13,8 +16,16 @@ class App extends React.Component {
 	  this.state = { error: null, errorInfo: null };
   }
   
+  async componentDidMount(){
+	  console.log(`VERSION: ${VERSION} this.props.version: ${this.props.version}`);
+	  
+	  //@TODO: Reset state if the version is different
+	  if(VERSION !== this.props.version){
+			this.props.dispatch(resetState());
+	  }
+  }
+  
   componentDidCatch(error, errorInfo) {
-	log.info(error.toString());
 	
 	this.setState({
 	  error: error,
@@ -42,7 +53,8 @@ class App extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    authenticated: state.session.authenticated
+    authenticated: state.session.authenticated,
+	version: state.session.version
   }
 }
 

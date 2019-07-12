@@ -17,6 +17,9 @@ const unzip = window.require('unzipper');
 const unrar = window.require("node-unrar-js");
 const fstream = window.require("fstream");
 //const sync = window.require('sync');
+const csv=window.require('csvtojson');
+const utils = window.require('./background-utils');
+
 
 log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
 
@@ -316,6 +319,7 @@ uncompressFolder = (folderName) => {
 *	s/<class name=\"(.*)\"/<class name=\"\U\1\"/ig;
 *	s/<class name=\"(.*)_MSCSERVER/<class name=\"\1/ig;
 *	s/<class name=\"(.*)_ENODEB\"/<class name=\"\1\"/ig;
+*   s/<class name=\"ENODEB([^\"]+)/<class name=\"\U\1/ig;
 *	s/<class name=\"(.*)3900/<class name=\"\1/ig;
 *	" /mediation/data/cm/huawei/raw/gexport/*.xml
 *
@@ -332,6 +336,7 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 		/<class name=\"(.*)\"/ig,
 		/<class name=\"(.*)_MSCSERVER/ig,
 		/<class name=\"(.*)_ENODEB\"/ig,
+		/<class name=\"ENODEB([^\"]+)\"/,
 		/<class name=\"(.*)3900/
 	  ],
 	  to: [
@@ -342,6 +347,7 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)\"/)[1].toUpperCase() + "\"",
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)_MSCSERVER/)[1],
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)_ENODEB\"/)[1] + "\"",
+		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"ENODEB([^\"]+)\"/)[1] + "\"",
 		(matchStr) => "<class name=\"" + matchStr.match(/<class name=\"(.*)3900/)[1]
 	  ],
 	};
@@ -449,8 +455,6 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 
 
 processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
-
-
 	
 	let basepath = app.getAppPath();
 
@@ -460,15 +464,6 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	
 	const parser = VENDOR_PARSERS[vendor][format]
 	const parserPath = path.join(basepath,'libraries',parser)
-	
-	//Uncompress files for other vendor format combinations except huawei gexport 
-	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
-	//uncompressing what does not need to be uncompressed 
-	if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
-		sendLogToUI('parse_cm_data','info',`Uncompressing files...` );
-		log.info(`[parse_cm_job] Uncompressing files...`)
-		uncompressFolder(inputFolder);
-	}
 	
 	
 	//Clean Huawei GExport files 
@@ -505,11 +500,26 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 		}
 		
 	}
+	//Uncompress files for other vendor format combinations except huawei gexport 
+	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
+	//uncompressing what does not need to be uncompressed 
+	//else if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
+	else{
+		sendLogToUI('parse_cm_data','info',`Uncompressing files...` );
+		log.info(`[parse_cm_job] Uncompressing files...`)
+		uncompressFolder(inputFolder);
+	}
 	
 	sendLogToUI('parse_cm_data','info', `Parsing files...`);
 	log.info("[parse_cm_job] Parsing files...")
 	
-	const child = spawn('java', ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder]);
+	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
+	
+	//Set the java heap to 1G if processing ZTE Plan template excel workbook
+	if( vendor.toLowerCase() === 'zte' && format === 'XLS') commandArgs.unshift('-Xms1G');
+	
+	const child = spawn('java', commandArgs);
+	log.info(`java ${commandArgs.join(" ")}`);
 	
 	child.stdout.on('data', (data) => {
 	  //console.log(data.toString());
@@ -541,7 +551,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 * @param string format
 * @param string csvFolder
 */
-function loadCMData(vendor, format, csvFolder){
+async function loadCMData(vendor, format, csvFolder){
 	log.info(`vendor:${vendor} format:${format}, ${csvFolder}`);
 	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
@@ -552,19 +562,61 @@ function loadCMData(vendor, format, csvFolder){
 		let fileName = items[i];
 		let filePath = path.join(csvFolder, items[i]);
 		let moName = items[i].replace(/.csv$/i,'');
-		let collection = `${vendor}_cm_${moName}`.toLowerCase();
+		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
+		let table2 = `${vendor}_cm.\\"${moName}\\"`;
 		
-		sendLogToUI('load_cm_data','info', `Loading ${fileName} into boda.${collection}`);
+		sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${table}`);
 		
-		const child = spawnSync('mongoimport', ['-d', 'boda', '-c',collection, '--type','csv', '--headerline', '--file', filePath]);
+				
+		const child = spawn('psql', ['-U', 'bodastage', '-h', 'localhost', '-p', '5432', '-d', 'boda', '-c', `"COPY ${table2} (data) FROM STDIN;"` ],{
+			env: {'PGPASSWORD':'password'},
+			shell: true
+		});
 		
-		log.info(`mongoimport -d boda -c ${collection} --type csv --headerline --file ${filePath}`);
+		child.stderr.on('data', (data) => {
+		  console.log(`grep stderr: ${data}`);
+		  log.error(data)
+		});
 		
-		if(child.error){
-			throw child.error.toString();
-		}else{
-			log.info(child.stdout.toString());	
-		}
+		child.stdin.on('data', (data) => {
+		  console.log(`child.stdin.on.data: ${data}`);
+		});
+		
+		
+		await new Promise((resolve, reject) => {
+			csv()
+			.fromFile(filePath)
+			.subscribe((json)=>{
+				const jsonString = JSON.stringify(json);
+				//console.log(`json:`, json);
+				//log.log(`json:`, json);
+				//log.log(`jsonString:`, jsonString);
+				
+				child.stdin.write(jsonString + '\n');
+
+				log.info(`echo ${jsonString} | psql -U bodastage -h localhost -p 5432 -d boda -c "COPY ${table2} (data) FROM STDIN;"`);				
+				
+				if(child.error){
+					throw child.error.toString();
+				}else{
+					log.info(child.stdout.toString());	
+				}
+			},(err) => {//onError
+				console.error(err);
+				child.stdin.end();
+				reject();
+			},
+			()=>{//onComplete
+				child.stdin.end();
+				resolve(undefined);
+				console.log(`csv.fromStream.subscribe.end`);
+				//end cild spawn
+			}); 
+			
+		});
+
+		
+		
 		
 	}
 	sendLogToUI('load_cm_data','success', `Completed loading data.`);
@@ -572,21 +624,120 @@ function loadCMData(vendor, format, csvFolder){
 }
 	
 
-/*
+
+async function generateCSVReport(reportId, outputFolder){
+	let reportInfo = await utils.getSQLiteReportInfo(reportId);
+	console.log("reportInfo", reportInfo);
+	let csvFileName = reportInfo.name.replace(/\s+/g,"_") + ".csv";
+	console.log(csvFileName, outputFolder, reportInfo.query);
+	const reportFile = await utils.generateCSVFromQuery(csvFileName, outputFolder, reportInfo.query);
+	sendLogToUI('download_report','success', reportFile);
+}
+	
+	
+/**
+* Run database setup script
 *
-*
+* @param string hostname 
+* @param string port 
+* @param string username 
+* @param string password
 */	
-function executeTask(task, options){
+function setupBodaDatabase(hostname, port, username, password){
+
+	return new Promise((resolve, reject) => {
+		try{
+			let basepath = app.getAppPath();
+
+			if (!isDev) {
+			  basepath = process.resourcesPath
+			} 
+			
+			const sqlFile  = path.join(basepath, 'db', 'scripts', 'create_pg_database.sql');
+			const child = spawnSync('psql', ['-U', username, '-h', hostname, '-p', port, '-f', sqlFile ],{
+				env: {'PGPASSWORD': password},
+				shell: true
+			});
+			
+			log.info(`psql -U ${username} -h ${hostname} -p ${port} -f ${sqlFile}`);
+			
+			if(child.status != 0){
+				log.error(`[backgroup_job:setupBodaDatabase] error:${child.output.toString()}`);
+				sendLogToUI('setup_database','error', child.output.toString());
+				//throw Error(child.output.toString());
+				//reject(undefined);
+			}else{
+				log.info(child.output.toString())
+				//resolve();
+				sendLogToUI('setup_database','success', 'Database setup completed.');
+			}
+		}catch(e){
+			sendLogToUI('setup_database','error', e);
+		}
+	});
+
+}
+
+
+/*
+* Run backgroup task
+*
+*@param string task
+*@param object options
+*/	
+async function  executeTask(task, options){
+	log.info("executeTask(task, options) task:",task," options:", options);
+	
 	try {
 		if(task === 'parse_cm_data'){
 			processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
 		}
 		
 		if(task === 'load_cm_data'){
-			loadCMData(options.vendor, options.format, options.csvFolder);
+			const status = await utils.loadCMDataViaStream(
+				options.vendor, 
+				options.format, 
+				options.csvFolder,
+				(tableName, fileName, csvFolder) => { //beforeFileLoad
+					//sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${tableName}...`);
+					log.info(`Loading ${fileName} into ${tableName}...`);
+				}, 
+				(tableName, fileName, csvFolder) => { //afterFileLoad
+					//sendLogToUI('load_cm_data','info', `Loaded ${fileName} into ${tableName}.`);
+					//log.info(`Loaded ${fileName} into ${tableName}.`);
+				}, 
+				function beforeLoad(){
+					sendLogToUI('load_cm_data','info', 'Loading csv files into database...');
+				}, 
+				function afterLoad(){
+					sendLogToUI('load_cm_data','success', 'Loading completed successfully.')
+			});
+			
+			
 		}
 	}catch(err){
-		sendLogToUI('load_cm_data','error', err);
+		log.error(err.toString());
+		sendLogToUI('load_cm_data','error', err.toString());
+	}
+	
+	
+	//Generate Reports
+	try{
+		if(task === 'download_report'){
+			const reportFile = await utils.generateExcelOrCSV(options.filename, options.outputFolder, options.query, options.format);
+			sendLogToUI('download_report','success', reportFile);
+		}
+	}catch(err){
+		sendLogToUI('download_report','error', err);
+	}
+	
+	//Setup database -- 
+	try{
+		if(task === 'setup_database'){
+			setupBodaDatabase(options.hostname, options.port, options.username, options.password);
+		}
+	}catch(err){
+		sendLogToUI('setup_database','error', err);
 	}
 }
 

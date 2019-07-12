@@ -9,14 +9,19 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 
 import axios from '../../api/config';
-import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert } from "@blueprintjs/core"; 
+import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert,
+		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { addTab, closeTab } from '../layout/uilayout-actions';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
+import { runQuery, getSQLiteReportInfo, getSortAndFilteredQuery } from './DBQueryHelper.js';
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
-const MongoClient = window.require('mongodb').MongoClient;
+const { Client } = window.require('pg');
+const { remote, ipcRenderer} = window.require("electron")
+const { app, shell } = window.require('electron').remote;
+const path = window.require('path')
 
 //Maximum number of times to check if the file is being generated 
 //for download
@@ -47,6 +52,11 @@ class TableReport extends React.Component{
         this.clearDownloadProgress = this.clearDownloadProgress.bind(this)
         this.handleAlertClose = this.handleAlertClose.bind(this)
         
+		this.handleDialogOpen = this.handleDialogOpen.bind(this)
+		this.handleDialogClose = this.handleDialogClose.bind(this)
+		this.dismissNotice = this.dismissNotice.bind(this)
+		this.setNotice = this.setNotice.bind(this)
+		
         this.state = {
             columnDefs: [],
             rowData: [
@@ -54,7 +64,7 @@ class TableReport extends React.Component{
             rowBuffer: 0,
             rowSelection: "multiple",
             rowModelType: "infinite",
-            paginationPageSize: 100,
+            paginationPageSize: 50,
             cacheOverflowSize: 2,
             maxConcurrentDatasourceRequests: 2,
             infiniteInitialRowCount: 1,
@@ -67,7 +77,19 @@ class TableReport extends React.Component{
             canOutsideClickCancel: false,
             isOpen: false,
             isOpenError: false,
-            isAlertOpen: false
+            isAlertOpen: false,
+			
+			//Report detials dialog 
+			isDialogOpen: false,
+			
+			//Processing
+			processing: false,
+			
+			popoverIsOpen: false,
+			
+			notice: null, //{type:info|success|error|warning, message: ...}
+			
+			
             
             
         };
@@ -75,8 +97,12 @@ class TableReport extends React.Component{
         //This is filled when a download is triggered
         this.downloadUrl = "";
         this.downloadFilename="";
+		this.downloadReportListener = null;
         
         this.agTblReload = 1; //used to reload the aggrid table
+		
+		//Filtered query to be used by download
+		this.filteredSortedQuery = null;
     }
     
     refreshData = () => {
@@ -128,19 +154,77 @@ class TableReport extends React.Component{
  
     
     componentDidMount() {
+		console.log('Mounting TableReport...');
         if(this.props.fields.length === 0 ){
             this.props.dispatch(getReportFields(this.props.options.reportId));
         }
         
     }
     
+	setNotice = (type,message) => {this.setState({notice: {type: type, message: message}})}
+	
     /**
      * Trigger the download 
      * 
+	 * @param string format csv|excel
      * @returns {undefined}
      */
-    onDownloadClick(){
+    onDownloadClick = (format) => (e) => {
+		e.preventDefault();
+		
+        this.toaster.show({
+                icon: "download",
+                intent: Intent.INFO,
+                message: "Downloading report...",
+        });
+		
+		this.setState({processing: true});
+		
+		let fileName = this.props.reportInfo.name.replace(/\s+/g,"_");
+		
+		let payload = {
+			reportId: this.props.options.reportId, //deprecate
+			query: this.filteredSortedQuery,
+			filename: fileName, //Name of the file to be downloaded  without extension
+			outputFolder: app.getPath('downloads'),
+			format: format
+		}
+		
+		ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
+		
+		this.downloadReportListener = (event, task, args) => {
 
+			const obj = JSON.parse(args)
+			
+			if(task !== 'download_report') return;
+			
+			if(obj.status === 'error' && task === 'download_report' ){
+				this.setState({
+						notice: {type: 'error', message: obj.message},
+						processing: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
+			}
+			
+			if(obj.status === 'info' && task === 'download_report' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'download_report' ){
+				let reportFile = path.join(app.getPath('downloads'),'');
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: `File generated at ${obj.message}`
+							},
+						processing: false
+						});
+				shell.showItemInFolder(obj.message);
+				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
+			}
+		}
+		
+		ipcRenderer.on('parse-cm-request', this.downloadReportListener);
     }
     
     /*
@@ -205,9 +289,12 @@ class TableReport extends React.Component{
         
         for(var key in this.props.fields){
             let columnName = this.props.fields[key]
-            this.columnDef.push(
-                {headerName: columnName, field: columnName,  
-                 filter: "agTextColumnFilter"},);
+            this.columnDef.push({
+				headerName: columnName, 
+				field: columnName,  
+                filter: "agTextColumnFilter",
+				filterParams:{caseSensitive: true}
+			});
         }
     }
 
@@ -217,7 +304,7 @@ class TableReport extends React.Component{
      * @param {type} params
      * @returns {undefined}
      */
-    onGridReady(params) {
+     onGridReady(params) {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
         let _columnApi =  params.columnApi;
@@ -225,82 +312,43 @@ class TableReport extends React.Component{
         let _fields = this.props.fields;
         let _dispatch = this.props.dispatch;
         let reportId = this.props.options.reportId;
+		let that = this;
 		
 		if(typeof this.props.reportInfo === 'undefined') return;
 		
 		let query = this.props.reportInfo.query ;
-        
+
         let dataSource = {  
             rowCount: null,
-            getRows:  function(params) {
-                let page = params.startRow;
+            getRows:  async function(params) {
+                let offset = params.startRow;
                 let length= params.endRow - params.startRow;
 
-				//@TODO: Move this logic to a seperate file
-				//@TODO: Pick from sqlite db the connection details
-				//@TODO: Call this once at the start of the ready function 
-				let db = new sqlite3.Database(SQLITE3_DB_PATH);
-				db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
-					if(err !== null){
-						log.error(row);
-						//@TODO: Show table data log error
-						return;
-					}
-					
-					const hostname = row[0].hostname;
-					const port = row[0].port;
-					const username = row[0].username;
-					const password = row[0].password;
-
-					const url = `mongodb://${hostname}:${port}/boda`;
-
-					MongoClient.connect(url, { useNewUrlParser: true }, async function(err, mongodb) {
-						if(err !== null){
-							log.error(`Failed to connect to ${url}. ${err}`);
-							params.successCallback([], 0);
-							return;
-							//@TODO: Create failure notifiation action
-							//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
-						}
-					  
-					
-						//let lastRow = await mongodb.db().collection('huawei_cm_gcell').estimatedDocumentCount() ;
-						let lastRow = await eval("mongodb.db().collection('huawei_cm_gcell').estimatedDocumentCount() ;");
-						console.log(query);
-						try{
-							/*
-							mongodb.db().collection('huawei_cm_gcell')
-							.find({},
-								{
-									limit: length, 
-									skip: page,
-								})
-							.toArray((err, docs) => {
-							  params.successCallback(docs, lastRow);
-							});
-							*/
-							
-							eval(query).toArray((err, docs) => {
-							  params.successCallback(docs, lastRow);
-							});
-						  
-							mongodb.close();
-						}catch(e){
-							log.error(`Failed fetch data ${err}`);
-							params.successCallback([], 0);
-							return;
-						}  
-						  
-					});//eof:MongoClient
+				if(_fields.length === 0) {
+					params.successCallback([], 0); 
+					return;
+				}
 				
-				});//eof:db.all
+				let filteredSortedQuery = getSortAndFilteredQuery(query,  _fields, 
+						params.sortModel, params.filterModel, _columnApi.getAllColumns());
+						
+				//Updated the this.filteredSortedQuery	for download	
+				that.filteredSortedQuery = filteredSortedQuery;
 				
-
+				//Count is the last row
+				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
+				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
+				
+				params.successCallback(queryResult.rows, count); 
 				
             }
         };
         this.gridApi.setDatasource(dataSource);
     }
+	
+	dismissNotice = () => {
+		this.setState({notice: null});
+	}
     
     /**
      * Create toask reference
@@ -309,27 +357,58 @@ class TableReport extends React.Component{
         toaster: (ref) => (this.toaster = ref),
     };
     
-//    handleEscapeKeyChange = handleBooleanChange(canEscapeKeyCancel => this.setState({ canEscapeKeyCancel }));
-//    handleOutsideClickChange = handleBooleanChange(click => this.setState({ canOutsideClickCancel: click }));
-    
+    handleDialogOpen = () => this.setState({ isDialogOpen: true });
+    handleDialogClose = () => this.setState({ isDialogOpen: false });
+	
     render(){
         this.updateColumnDefs();
         
         //Download alert
         const { isOpen, isOpenError, ...alertProps } = this.state;
 
+		let notice = null;
+		if(this.state.notice !== null ){ 
+			notice = (<div className={`alert alert-${this.state.notice.type} m-1 p-2`} role="alert">{this.state.notice.message}
+					<button type="button" className="close"  aria-label="Close" onClick={this.dismissNotice}>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>)
+		}
+		
+        //Show spinner as we wait for fields
+        if( this.props.fields.length === 0 && this.props.requestError === null ){
+            return <Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+        }
+		
+		//If there is an error and the fields are zero, then there may be an issue with the query
+        if( this.props.fields.length === 0 && this.props.requestError !== null ){
+            return (<div>
+                    <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
+					<Toaster {...this.state} ref={this.refHandlers.toaster} />
+					</div>
+				);
+        }
+		
+		//Download file types 
+		const downloadFileTypesMenu = (<Menu>
+				<MenuItem icon={<span><FontAwesomeIcon icon="file-csv"/></span>} text="CSV" onClick={this.onDownloadClick('csv')}/>
+				<MenuItem icon={<span><FontAwesomeIcon icon="file-excel"/></span>} text="EXCEL" onClick={this.onDownloadClick('excel')}/>
+			</Menu>);
+		
         return (
             <div>
-    
-            <h3><FontAwesomeIcon icon={TableReport.icon}/> {this.props.options.title}</h3>        
-                <div className="card">
-                    <div className="card-body p-2">
+						{notice}
+						
+						{this.state.processing === false? "" : <ProgressBar intent={Intent.PRIMARY}/>}
+						
                         <div className="mb-1">
                         <ButtonGroup minimal={true}>
                             <Button icon="refresh" onClick={this.refreshData}></Button>
-                            <Button icon="download" onClick={this.onDownloadClick} ></Button>
+							<Popover content={downloadFileTypesMenu} position={Position.BOTTOM}>
+								<Button icon="download"></Button>
+							</Popover>
                             <Toaster {...this.state} ref={this.refHandlers.toaster} />
-                            <Button icon="info-sign"></Button>
+                            <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
                         </ButtonGroup>
 
                         </div>
@@ -352,16 +431,12 @@ class TableReport extends React.Component{
                                 enableServerSideSorting={true}
                                 enableServerSideFilter={true}
                                 onGridReady={this.onGridReady.bind(this)}
-
                                 >
                             </AgGridReact>
 
                         </div>
 
 
-                    </div>
-                </div>
-                
                 <Alert
                     {...alertProps}
                     confirmButtonText="Okay"
@@ -372,7 +447,26 @@ class TableReport extends React.Component{
                         Or pick it from the reports folder.
                     </p>
                 </Alert>
-                
+
+				{ typeof this.props.reportInfo === 'undefined' ? "" :
+				<Dialog
+				isOpen={this.state.isDialogOpen}
+				onClose={this.handleDialogClose}
+				title={this.props.reportInfo.name}
+				icon="info-sign"
+				>
+					<div className={Classes.DIALOG_BODY}>
+						<pre>
+						{this.props.reportInfo.query}
+						</pre>
+					</div>
+					<div className={Classes.DIALOG_FOOTER}>
+						<div className={Classes.DIALOG_FOOTER_ACTIONS}>
+							<Button onClick={this.handleDialogClose}>Close</Button>
+						</div>
+					</div>
+				</Dialog>
+				}
             </div>
         );
     }

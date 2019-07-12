@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import { START_DB_SETTINGS_UPDATE, SHOW_DB_UPDATE_ERROR, SHOW_DB_UPDATE_SUCCESS,
-UPDATE_STATE_DB_SETTINGS, CLEAR_DB_UPDATE_ERROR, CLEAR_DB_UPDATE_SUCCESS } from './settings-actions';
+UPDATE_STATE_DB_SETTINGS, CLEAR_DB_UPDATE_ERROR, CLEAR_DB_UPDATE_SUCCESS,
+STOP_DB_SETTINGS_UPDATE } from './settings-actions';
 
 let initialState = {
 	db: {
@@ -17,6 +18,11 @@ function settings(state = initialState, action) {
             return {
 				...state,
 				db: { ...state.db, updating: true}
+			};
+        case STOP_DB_SETTINGS_UPDATE:
+            return {
+				...state,
+				db: { ...state.db, updating: false}
 			};
 		case SHOW_DB_UPDATE_ERROR:
 			return {

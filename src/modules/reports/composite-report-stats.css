@@ -1,0 +1,25 @@
+.site-stats-keys-table td{
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+	padding-top: 0px !important;
+}
+
+.rgl-border {
+	border: 1px solid rgba(0,0,0,.125);
+	border-radius: .25rem;
+	/*overflow-y: auto;*/
+	 overflow: hidden;
+}
+
+.rgl-border .card-header {
+	padding: .35rem 1.25rem;
+	border: 1px solid rgba(0,0,0,.125);
+}
+
+.rgl-border .card-body {
+	padding: 2px;
+}
+
+.rgl-body{
+	overflow-y: scroll !important;
+}

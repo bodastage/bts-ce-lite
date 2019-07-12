@@ -1,8 +1,25 @@
 import axios from '../../api/config';
 import 'url-search-params-polyfill';
 //import * as sqlite3 from 'sqlite3';
-//import {createConnection} from "typeorm";
-
+import {createConnection} from "typeorm";
+//@TODO: Move this into the db setup script to reduce size of the bundle 
+import { HUAWEI_2G_KEY_PARAMAETERS, 
+		 HUAWEI_3G_KEY_PARAMAETERS, 
+		 HUAWEI_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/HuaweiKeyParametersQueries.js';
+		
+import { ERICSSON_2G_KEY_PARAMAETERS, 
+		 ERICSSON_3G_KEY_PARAMAETERS, 
+		 ERICSSON_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/EricssonKeyParametersQueries.js';
+import { ZTE_2G_KEY_PARAMAETERS, 
+		 ZTE_3G_KEY_PARAMAETERS, 
+		 ZTE_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/ZTEKeyParametersQueries.js';
+import { NOKIA_2G_KEY_PARAMAETERS, 
+		 NOKIA_3G_KEY_PARAMAETERS, 
+		 NOKIA_4G_KEY_PARAMAETERS } 
+		from '../../services/postgresql/NokiaKeyParametersQueries.js';
 import { SQLITE3_DB_PATH } from "./db-settings";
 
 const fs = window.require('fs');
@@ -18,7 +35,13 @@ export const CLEAR_OLD_SESSION = 'CLEAR_OLD_SESSION';
 export const CHECK_DB_SETUP_STATUS = 'CHECK_DB_SETUP_STATUS';
 export const CONFIRM_DB_READY = 'CONFIRM_DB_READY';
 export const CLEAR_NOTICES = 'CLEAR_NOTICES';
+export const RESET_STATE = 'RESET_STATE';
 
+export function resetState(){
+	return {
+		type: RESET_STATE
+	};
+}
 
 export function clearNotices(){
 	return {
@@ -136,7 +159,9 @@ export function checkDBSetupStatus(){
 					  
 				stmt = db.prepare("INSERT INTO databases " +
 				" (hostname, port, username, password, name, db_type)" +
-				" VALUES ('27.0.0.1','27017','','','boda','mongodb')"
+				" VALUES " +
+				" ('127.0.0.1','5432','bodastage','password','boda','postgresql')," + 
+				" ('127.0.0.1','5432','postgres','postgres','postgres','postgresql')"
 				);
 				
 				stmt.run();
@@ -146,7 +171,8 @@ export function checkDBSetupStatus(){
 				db.run("CREATE TABLE rpt_categories (" +
 					  "		name TEXT NOT NULL UNIQUE, " + 
 					  "		notes TEXT NOT NULL," +
-					  "		parent_id INTEGER NOT NULL" +
+					  "		parent_id INTEGER NOT NULL," +
+					  "		in_built INTEGER DEFAULT 0" +
 					  ")");
 					  
 				//Create reports table 
@@ -156,39 +182,38 @@ export function checkDBSetupStatus(){
 					  "		query TEXT NOT NULL," + 
 					  "		options TEXT NOT NULL," + 
 					  "		type TEXT NOT NULL," + //table|pie|bar|scatter|compound
-					  "		category_id INTEGER NOT NULL" + 
+					  "		category_id INTEGER NOT NULL," + 
+					  "		in_built INTEGER DEFAULT 0" + //1-inbuilt, 0-not inbuilt
 					  ")");
 				
 				//Insert default categories
 				stmt = db.prepare("INSERT INTO rpt_categories " +
-				" (name, notes, parent_id)" +
+				" (name, notes, parent_id, in_built)" +
 				" VALUES " + 
-				"('Key Parameters','Key parameter reports',0),"+
-				"('Network Entities','Network Entities reports',0)"
+				"('Key Parameters','Key parameter reports',0, 1),"+
+				"('Network Entities','Network Entities reports',0, 1)"
 				);
 				
 				stmt.run();
 				stmt.finalize();
 				
 				//Insert default reports
-				stmt = db.prepare("INSERT INTO reports " +
-				" (name, notes, query, options, type, category_id)" +
-				" VALUES " + 
-				"('Ericsson 2G parameters','Ericsson 2G parameters', '', '{}', 'table',1)," +
-				"('Ericsson 3G parameters','Ericsson 3G parameters', '', '{}', 'table',1)," +
-				"('Ericsson 4G parameters','Ericsson 4G parameters', '', '{}', 'table',1)," +
-				`('Huawei 2G parameters','Huawei 2G parameters', 'mongodb.db().collection("huawei_cm_gcell").find({},{limit: length, skip: page,})', '{}', 'table',1),` +
-				"('Huawei 3G parameters','Huawei 3G parameters', '', '{}', 'table',1)," +
-				"('Huawei 4G parameters','Huawei 4G parameters', '', '{}', 'table',1)," +
-				"('ZTE 2G parameters','ZTE 2G parameters', '', '{}', 'table',1)," +
-				"('ZTE 3G parameters','ZTE 3G parameters', '', '{}', 'table',1)," +
-				"('ZTE 4G parameters','ZTE 4G parameters', '', '{}', 'table',1)," + 
-				"('Nokia 2G parameters','Nokia 2G parameters', '', '{}', 'table',1)," +
-				"('Nokia 3G parameters','Nokia 3G parameters', '', '{}', 'table',1)," +
-				"('Nokia 4G parameters','Nokia 4G parameters', '', '{}', 'table',1)"
-				);
+				stmt = db.prepare("INSERT INTO reports  (name, notes, query, options, type, category_id, in_built)" +
+				" VALUES (?, ?, ?, ?, ?, ?, ?)" );
 				
-				stmt.run();
+				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', ERICSSON_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', ERICSSON_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', ERICSSON_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Huawei 2G parameters','Huawei 2G parameters', HUAWEI_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Huawei 3G parameters','Huawei 3G parameters', HUAWEI_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Huawei 4G parameters','Huawei 4G parameters', HUAWEI_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('ZTE 2G parameters','ZTE 2G parameters', ZTE_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('ZTE 3G parameters','ZTE 3G parameters', ZTE_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('ZTE 4G parameters','ZTE 4G parameters', ZTE_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Nokia 2G parameters','Nokia 2G parameters', NOKIA_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Nokia 3G parameters','Nokia 3G parameters', NOKIA_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Nokia 4G parameters','Nokia 4G parameters', NOKIA_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				
 				stmt.finalize();
 				
 				dispatch(clearNotices());
@@ -209,8 +234,6 @@ export function attemptAuthentication(loginDetails){
 		db.all("SELECT * FROM users WHERE email = ? AND password = ?", 
 			[loginDetails.username, loginDetails.password] , (err, row) => {
 				if(err !== null){
-					log.info(loginDetails);
-					log.info(row);
 					dispatch(markLoginAsFailed(err.toString()));
 					return;
 				}
@@ -231,6 +254,5 @@ export function attemptAuthentication(loginDetails){
 	
     }
 }
-
 
 export default { logIntoApp, logOutOfApp, authenticateUser, attemptAuthentication };

@@ -1,0 +1,8 @@
+.option-section h6 { width:100%; text-align:left; border-bottom: 1px solid #ccc; line-height:0.1em; margin:10px 0 20px; } 
+.option-section h6 span { 
+    background:#fff; 
+    /*padding:0 10px;*/ 
+}
+
+
+.option-section{ margin-bottom: 2px;}

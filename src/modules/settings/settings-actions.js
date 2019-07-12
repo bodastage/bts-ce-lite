@@ -2,7 +2,7 @@ import { SQLITE3_DB_PATH } from "../session/db-settings";
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
-const MongoClient = window.require('mongodb').MongoClient;
+const { Client } = window.require('pg');
 
 export const START_DB_SETTINGS_UPDATE = 'START_DB_SETTINGS_UPDATE';
 export const SHOW_DB_UPDATE_SUCCESS = 'SHOW_DB_UPDATE_SUCCESS';
@@ -11,7 +11,15 @@ export const SHOW_DB_UPDATE_ERROR = 'SHOW_DB_UPDATE_ERROR';
 export const UPDATE_STATE_DB_SETTINGS = 'UPDATE_STATE_DB_SETTINGS';
 export const CLEAR_DB_UPDATE_ERROR = 'CLEAR_DB_UPDATE_ERROR';
 export const CLEAR_DB_UPDATE_SUCCESS = 'CLEAR_DB_UPDATE_SUCCESS';
+export const STOP_DB_SETTINGS_UPDATE = 'STOP_DB_SETTINGS_UPDATE';
 
+
+
+export function stopDBSettingsUpdate(){
+	return {
+		type: STOP_DB_SETTINGS_UPDATE
+	}
+}
 
 export function clearDBUpdateSuccess(){
 	return {
@@ -37,8 +45,7 @@ export function getDBSettings(){
 		startDBSettingsUpdate();
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
-				console.log(row);
+		db.all("SELECT * FROM databases WHERE name = ?", ["postgres"] , (err, row) => {
 				if(err !== null){
 					log.error(row);
 					dispatch(showDBUpdateError(err.toString()));
@@ -94,7 +101,7 @@ export function updateDBSettings(settings){
 							 settings.username, 
 							 settings.password]
 
-				query += " WHERE name = 'boda'";
+				query += " WHERE name = 'postgres'";
 				
 				var stmt = db.prepare(query,values);
 					
@@ -114,19 +121,24 @@ export function checkConnection(settings){
     return (dispatch, getState) => {
 		dispatch(startDBSettingsUpdate());
 		
-		const url = `mongodb://${settings.hostname}:${settings.port}/boda`;
+		const connectionString = `postgresql://${settings.username}:${settings.password}@${settings.hostname}:${settings.port}/postgres`
+		
+		const client = new Client({
+		  connectionString: connectionString,
+		})
+		
+		client.connect((err) => {
+			if(err !== null){
+				dispatch(showDBUpdateError(`Failed to connect to ${connectionString}. ${err}`));
+				log.error(`Failed to connect to ${connectionString}. ${err}`)
+				return;
+			}
 
-		MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
-		  if(err !== null){
-		  dispatch(showDBUpdateError(`Failed to connect to ${url}. ${err}`));
-		  log.error(`Failed to connect to ${url}. ${err}`)
-			  return;
-		  }
-		  
-		  dispatch(showDBUpdateSuccess("Connected successfully to server"));
+			dispatch(showDBUpdateSuccess("Connected successfully to server"));
 
-		  client.close();
+			client.end();
 		});
+
 	}
 	
 }

@@ -2,7 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
-import { SizeMe } from 'react-sizeme'
+import { Icon, ButtonGroup, Button, Intent, Toaster, Callout,
+		 Dialog, Classes, ResizeSensor, Spinner  } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
     static icon = "table";
@@ -14,12 +15,20 @@ class GraphReport extends React.Component{
         this.state = {
             width: window.innerWidth - 500
         }
-        
+        this.handleResize = this.handleResize.bind(this)
         this.updatePlotData.bind(this)
+		this.refreshData = this.refreshData.bind(this)
+		
+		this.handleDialogOpen = this.handleDialogOpen.bind(this)
+		this.handleDialogClose = this.handleDialogClose.bind(this)
 
         //Plot data and options/settings
         this.plotData = []
         this.layoutOptions = {width: this.state.width, height: null, autosize: false, title: null}
+		
+		this.toaster = new Toaster();
+		
+		this.height = window.innerHeight - Math.ceil(window.innerHeight/4);
 
     }       
     
@@ -27,6 +36,39 @@ class GraphReport extends React.Component{
         this.props.dispatch(getGraphData(this.props.options.reportId));
     }
     
+    handleDialogOpen = () => this.setState({ isDialogOpen: true });
+    handleDialogClose = () => this.setState({ isDialogOpen: false });
+	
+    /**
+     * Create toask reference
+     */
+    refHandlers = {
+        toaster: (ref) => (this.toaster = ref),
+    };
+	
+	/**
+	* Refresh graph data
+	*/
+	refreshData(){
+		this.props.dispatch(getGraphData(this.props.options.reportId));
+		
+		
+        this.toaster.show({
+			icon: "info-sign",
+			intent: Intent.INFO,
+			message: "Refreshing report...",
+        });
+	}
+	
+	handleResize = (entries) => {
+		console.log("=============================================");
+		console.log("handleResize: ", entries);
+		
+		const width = entries[0].contentRect.width;
+		this.height = entries[0].contentRect.height - Math.ceil(entries[0].contentRect.height/4);
+		this.setState({width: width})
+	}
+	
     /**
      * Update plot data with the values from the query and any new options
      * 
@@ -34,6 +76,7 @@ class GraphReport extends React.Component{
      * @returns
      */
     updatePlotData(newOptions){
+
         //Remove empty slots
         newOptions = newOptions.filter((v) => v!==undefined )
         for(let i in newOptions){
@@ -64,33 +107,84 @@ class GraphReport extends React.Component{
         
         return  newOptions;
     }
+	
+
+	 
     
     render(){
         let plotTitle = 'Loading...'
+		
+		const height = this.props.height;
+
+		//If there is an error with the query
+        if( this.props.requestError !== null ){
+            return (
+                <div>
+                    <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
+				</div>		
+				);
+        }
+		
+        //Show spinner as we wait for data i.e. state.reports.reportsdata[id].data
+        if( this.props.reportInfo === null ){
+            return (
+				<Spinner size={Spinner.SIZE_LARGE} className="mt-5"/>
+			);
+        }
+		
+
+
+		
         if(this.props.reportInfo !== null){
-            let plotOptions = JSON.parse(this.props.reportInfo.options)
+            let plotOptions = this.props.reportInfo.options;
             this.plotData = this.updatePlotData(plotOptions.data)
             this.layoutOptions = plotOptions.layout
             plotTitle = this.props.reportInfo.name
         }
         
-        console.log("this.plotData:", this.plotData)
-        console.log("this.layoutOptions:", this.layoutOptions)
-        
-        return (
-        <div style={{width:"100%"}}>
-            <SizeMe>
-                {({ size }) => <Plot
-                    data={this.plotData}
-                    layout={this.layoutOptions}
-                    config={{displaylogo:false}}
-                    responsive={true}
-                    useResizeHandler={true}
-                />}
 
-            </SizeMe>
-        </div>)
-        ;
+        return (
+		<div>	
+			<ButtonGroup minimal={true} className="float-right">
+				<Button icon="refresh" onClick={this.refreshData} ></Button>
+				<Button icon="info-sign" onClick={this.handleDialogOpen} ></Button>
+			</ButtonGroup>
+			
+			<ResizeSensor onResize={this.handleResize}>
+				<div style={{ width: "100%", height: height, display:"flex"}}>
+					<Plot
+						data={this.plotData}
+						layout={{...this.layoutOptions, width: this.state.width, height: height, autosize: false}}
+						config={{displaylogo:false}}
+						responsive={true}
+						useResizeHandler={true}
+					/>	
+				</div>
+			</ResizeSensor>
+			
+			<Toaster {...this.state} ref={this.refHandlers.toaster} />
+			
+				{ typeof this.props.reportInfo === 'undefined' ? "" :
+				<Dialog
+				isOpen={this.state.isDialogOpen}
+				onClose={this.handleDialogClose}
+				title={this.props.reportInfo.name}
+				icon="info-sign"
+				>
+					<div className={Classes.DIALOG_BODY}>
+						<pre>
+						{this.props.reportInfo.query}
+						</pre>
+					</div>
+					<div className={Classes.DIALOG_FOOTER}>
+						<div className={Classes.DIALOG_FOOTER_ACTIONS}>
+							<Button onClick={this.handleDialogClose}>Close</Button>
+						</div>
+					</div>
+				</Dialog>
+				}
+		</div>	
+		);
     }
 }
 
@@ -99,13 +193,37 @@ function mapStateToProps(state, ownProps){
     if ( typeof state.reports.reportsdata[ownProps.options.reportId] === 'undefined'){
         return {
             reportInfo: null,
-            data: []
+            reportData: {},
+            requesting: false,
+            requestError:  null,
         };
     }
+
+	//Error 
+	if(state.reports.reportsdata[ownProps.options.reportId].requestError !== null){
+		return {
+            reportInfo: null,
+            reportData: {},
+            requesting: false,
+			requestError: state.reports.reportsdata[ownProps.options.reportId].requestError,
+		}
+	}
+	
+	//If there is no data yet 
+	if(typeof state.reports.reportsdata[ownProps.options.reportId].data === 'undefined' ){
+        return {
+            reportInfo: null,	
+            reportData: {},
+            requesting: false,
+            requestError:  null,
+        };
+	}
     
     return {
         reportInfo: state.reports.reportsInfo[ownProps.options.reportId],
-        reportData: state.reports.reportsdata[ownProps.options.reportId]
+        reportData: state.reports.reportsdata[ownProps.options.reportId],
+		requesting: state.reports.reportsdata[ownProps.options.reportId].requesting,
+		requestError: state.reports.reportsdata[ownProps.options.reportId].requestError,
     };
 }
 

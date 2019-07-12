@@ -7,7 +7,8 @@ import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
 import Timer from './Timer';
 import { saveCMParsingFolders, updateProcessCMTimer } from './cm-actions';
 
-import './process.css';
+//styles
+import  './process.css';
 
 const { remote, ipcRenderer} = window.require("electron")
 const { app, process, shell } = window.require('electron').remote;
@@ -55,6 +56,9 @@ class ProcessCMDumps extends React.Component {
 		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
 		this.currentTimerValue = "00:00:00";
+		
+		
+		this.processFilesListener = null;
 		
 	}
 	
@@ -133,6 +137,11 @@ class ProcessCMDumps extends React.Component {
 			return;
 		}
 		
+		if(this.state.outputFolderText === this.state.inputFileText){
+			this.setState({errorMessage: `Input and output folders should be different.`})
+			return;
+		}
+		
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		const payload = {
 				"vendor": this.state.currentVendor,
@@ -145,14 +154,16 @@ class ProcessCMDumps extends React.Component {
 		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
-		ipcRenderer.on('parse-cm-request', (event, task, args) => {
+		this.processFilesListener = (event, task, args) => {
 			
-			log.info(`[process_cm_dumps] Received message from IPC channel "parse-cm-request with message ${args}"`)	
+			log.info(`Received message from IPC channel "parse-cm-request with message ${args}"`)	
 			
 			const obj = JSON.parse(args)
 			
 			if(obj.status === 'success' && task === 'parse_cm_data' && !this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
+				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				this.processFilesListener = null;
 			}
 			
 			if(obj.status === 'success' && task === 'parse_cm_data' &&  this.state.loadIntoDB){
@@ -163,36 +174,38 @@ class ProcessCMDumps extends React.Component {
 					"format": this.state.currentFormat,
 					"csvFolder": this.state.outputFolderText
 				}
-			
 				ipcRenderer.send('parse-cm-request', 'load_cm_data', JSON.stringify(loadPayload))				
 			}
 			
 			if(obj.status === 'success' && task === 'load_cm_data' && this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false});		
+				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				this.processFilesListener = null;
 			}
 			
 			
 			
-			if(obj.status === 'error'){
-				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false})					
+			if(obj.status === 'error' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
+				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false});
+				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				this.processFilesListener = null;
 			}
 			
-			if(obj.status === 'info'){
+			if(obj.status === 'info' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
 				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})
 				
 			}
 
-		})
+		}
 		
+		ipcRenderer.on('parse-cm-request', this.processFilesListener);
 		return;
-
 	}
 	
 	dismissErrorMessage = () => { this.setState({errorMessage: null})}
 	
 	dismissSuccessMessage = () => { this.setState({successMessage: null})}
 	
-		
 	/**
 	* Launch given folder path in file explorer
 	*
@@ -265,6 +278,10 @@ class ProcessCMDumps extends React.Component {
 		let inputFolderEllipsis = this.state.inputFileText === 'Choose folder...' ? "" : "file-text-dir-rtl";
 		let outputFolderEllipsis = this.state.outputFolderText === 'Choose folder...' ? "" : "file-text-dir-rtl"
 		
+		//Add ellipsi.. on the left if folder name is given 
+		let inputFolderEllipsis = this.state.inputFileText === 'Choose folder...' ? "" : "file-text-dir-rtl";
+		let outputFolderEllipsis = this.state.outputFolderText === 'Choose folder...' ? "" : "file-text-dir-rtl"
+		
         return (
             <div>
                 <h3><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</h3>
@@ -293,7 +310,7 @@ class ProcessCMDumps extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
 						<div className="col-sm-8">
-						  	<FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
+						  <FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)} disabled={this.state.processing}/>
