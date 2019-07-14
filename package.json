@@ -17,7 +17,7 @@
     "electron:pack": "build --dir",
     "pack": "npx electron-builder build --dir -c.extraMetadata.main=src/electron-start.js",
     "dist-all": "npx electron-builder build --x64 --macos --win --linux -c.extraMetadata.main=src/electron-start.js",
-    "dist": "npx electron-builder",
+    "electron:dist": "npm run react:build && npx electron-builder",
     "postinstall": "npx electron-builder install-app-deps",
     "electron:linux-snap": "npm run react:build && build --linux snap",
     "electron:local": "npm run react:build && electron .",
