@@ -9,6 +9,10 @@ const createCsvWriter = window.require('csv-writer').createObjectCsvWriter;
 const SQLITE3_DB_NAME = 'boda-lite.sqlite3';
 const moTransform = window.require('./mo-name-transform');
 var Excel = window.require('exceljs');
+const fixPath = window.require('fix-path');
+
+//Fix PATH env variable on Mac OSX
+if(process.platform === 'darwin') fixPath();
 	
 let basepath = app.getAppPath();
 

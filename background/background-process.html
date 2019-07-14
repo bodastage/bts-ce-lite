@@ -19,7 +19,10 @@ const fstream = window.require("fstream");
 //const sync = window.require('sync');
 const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
+const fixPath = window.require('fix-path');
 
+//Fix PATH env variable on Mac OSX
+if(process.platform === 'darwin') fixPath();
 
 log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
 
