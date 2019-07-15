@@ -21,10 +21,26 @@ const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
 const fixPath = window.require('fix-path');
 
+log.info(process.env.PATH)
 //Fix PATH env variable on Mac OSX
-if(process.platform === 'darwin') fixPath();
+//@TODO: This did not fix the issue
+if(process.platform === 'darwin'){ 
+	fixPath(); 
+	
+	//Append path to postgres
+	process.env.PATH = [
+		'/Library/PostgreSQL/10/bin',
+		'/Library/PostgreSQL/11/bin',
+		'/Library/PostgreSQL/12/bin',
+		process.env.PATH
+	].join(':');
+	
+}
 
-log.info(`[parse_cm_job] Starting hidden window to parse cm files away from renderer process`)
+log.info(`[parse_cm_job] Starting hidden window to run as background process`)
+log.info(`PATH: ${process.env.PATH}`)
+
+//process.env.PATH = ""
 
 const VENDOR_PARSERS = {
 	'ERICSSON': {
@@ -570,7 +586,7 @@ async function loadCMData(vendor, format, csvFolder){
 		
 		sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${table}`);
 		
-				
+		//@TODO: pick database settings from sqlite db
 		const child = spawn('psql', ['-U', 'bodastage', '-h', 'localhost', '-p', '5432', '-d', 'boda', '-c', `"COPY ${table2} (data) FROM STDIN;"` ],{
 			env: {'PGPASSWORD':'password'},
 			shell: true

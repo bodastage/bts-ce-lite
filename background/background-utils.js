@@ -12,7 +12,18 @@ var Excel = window.require('exceljs');
 const fixPath = window.require('fix-path');
 
 //Fix PATH env variable on Mac OSX
-if(process.platform === 'darwin') fixPath();
+if(process.platform === 'darwin'){ 
+	fixPath(); 
+	
+	//Append path to postgres binaries on Mac OSX
+	process.env.PATH = [
+		'/Library/PostgreSQL/10/bin',
+		'/Library/PostgreSQL/11/bin',
+		'/Library/PostgreSQL/12/bin',
+		process.env.PATH
+	].join(':');
+	
+}
 	
 let basepath = app.getAppPath();
 
