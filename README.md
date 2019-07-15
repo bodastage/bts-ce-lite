@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bodastage/bts-ce-lite.svg?branch=master)](https://travis-ci.org/bodastage/bts-ce-lite)
+
 # Boda-Lite
 
 Boda-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
