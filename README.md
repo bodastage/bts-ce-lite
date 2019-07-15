@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bodastage/bts-ce-lite.svg?branch=master)](https://travis-ci.org/bodastage/bts-ce-lite)
+[![Build Status](https://travis-ci.org/bodastage/bts-ce-lite.svg?branch=master)](https://travis-ci.org/bodastage/bts-ce-lite) ![GitHub release](https://img.shields.io/github/release/bodastage/bts-ce-lite.svg)  ![GitHub All Releases](https://img.shields.io/github/downloads/bodastage/bts-ce-lite/total.svg) [![GitHub license](https://img.shields.io/github/license/bodastage/bts-ce-lite.svg)](https://github.com/bodastage/bts-ce-lite/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/bodastage/bts-ce-lite.svg)](https://github.com/bodastage/bts-ce-lite/issues)
 
 # Boda-Lite
 
