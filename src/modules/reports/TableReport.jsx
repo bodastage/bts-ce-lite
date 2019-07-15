@@ -1,31 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getReportFields,
-          deleteReport, clearReportCreateState,
-         getReportInfo, } from './reports-actions';
+import { getReportFields } from './reports-actions';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
-
-import axios from '../../api/config';
-import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster, Alert,
+import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
 		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position } from "@blueprintjs/core"; 
 import classNames from 'classnames';
-import { addTab, closeTab } from '../layout/uilayout-actions';
-import { SQLITE3_DB_PATH } from "../session/db-settings";
-import { runQuery, getSQLiteReportInfo, getSortAndFilteredQuery } from './DBQueryHelper.js';
-
-const sqlite3 = window.require('sqlite3').verbose()
-const log = window.require('electron-log');
-const { Client } = window.require('pg');
-const { remote, ipcRenderer} = window.require("electron")
+import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
+const { ipcRenderer} = window.require("electron")
 const { app, shell } = window.require('electron').remote;
-const path = window.require('path')
-
-//Maximum number of times to check if the file is being generated 
-//for download
-const MAX_STATUS_CHECKS = 3;
 
 class TableReport extends React.Component{
     static icon = "table";
@@ -211,7 +196,6 @@ class TableReport extends React.Component{
 			}
 			
 			if(obj.status === "success" && task === 'download_report' ){
-				let reportFile = path.join(app.getPath('downloads'),'');
 				this.setState({
 						notice: {
 							type: 'success', 
@@ -308,10 +292,7 @@ class TableReport extends React.Component{
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
         let _columnApi =  params.columnApi;
-        let token = this.props.token;
         let _fields = this.props.fields;
-        let _dispatch = this.props.dispatch;
-        let reportId = this.props.options.reportId;
 		let that = this;
 		
 		if(typeof this.props.reportInfo === 'undefined') return;
@@ -362,9 +343,6 @@ class TableReport extends React.Component{
 	
     render(){
         this.updateColumnDefs();
-        
-        //Download alert
-        const { isOpen, isOpenError, ...alertProps } = this.state;
 
 		let notice = null;
 		if(this.state.notice !== null ){ 
@@ -435,18 +413,6 @@ class TableReport extends React.Component{
                             </AgGridReact>
 
                         </div>
-
-
-                <Alert
-                    {...alertProps}
-                    confirmButtonText="Okay"
-                    isOpen={this.state.isAlertOpen}
-                    onClose={this.handleAlertClose}>
-                    <p>
-                        Download file: <a target='_blank' href={'//'+window.location.hostname + ':8181' + this.downloadUrl} download>{this.downloadFilename}</a> <br />
-                        Or pick it from the reports folder.
-                    </p>
-                </Alert>
 
 				{ typeof this.props.reportInfo === 'undefined' ? "" :
 				<Dialog

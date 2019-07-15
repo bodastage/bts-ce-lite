@@ -3,10 +3,8 @@ import React from 'react'
 import logo from '../../images/boda-lite-logo.png';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import * as sessionActions from './session-actions';
 import  './LoginForm.css';
 import Loading from './Loading';
-import axios from 'axios';
 import { attemptAuthentication, clearAuthError, clearOldSession, checkDBSetupStatus } from '../session/session-actions';
 import { Button, Intent, FormGroup, InputGroup } from "@blueprintjs/core";
 import VERSION from '../../version';
@@ -133,7 +131,7 @@ class LoginForm extends React.Component {
         <Button type="submit" text="Sign in" intent={Intent.PRIMARY} disabled={this.props.authenticating}/> &nbsp;
                     
                     {typeof this.props.userDetails !== 'undefined' && this.props.userDetails !== null? 
-                        <a href="#" onClick={this.clearOldSession}> as different user</a>
+                        <a href="/#" onClick={this.clearOldSession}> as different user</a>
                     :''}
                 </form>
 
@@ -141,6 +139,13 @@ class LoginForm extends React.Component {
             );
     }
 }
+
+LoginForm.propTypes = {
+    authenticating: PropTypes.bool,
+    loginError: PropTypes.string,
+    userDetails: PropTypes.object,
+    waitingForDB: PropTypes.string
+};
 
 function mapStateToProps(state) {
   return {

@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 import { getGraphData } from './reports-actions';
-import { Icon, ButtonGroup, Button, Intent, Toaster, Callout,
+import { ButtonGroup, Button, Intent, Toaster, Callout,
 		 Dialog, Classes, ResizeSensor, Spinner  } from "@blueprintjs/core";
 
 class GraphReport extends React.Component{
@@ -63,7 +63,6 @@ class GraphReport extends React.Component{
 	handleResize = (entries) => {
 		
 		const width = entries[0].contentRect.width;
-		const heigth = entries[0].contentRect.height;
 		this.height = entries[0].contentRect.height - Math.ceil(entries[0].contentRect.height/4);
 		
 		this.setState({width: width})
@@ -112,9 +111,9 @@ class GraphReport extends React.Component{
 	 
     
     render(){
-        let plotTitle = 'Loading...'
+        //let plotTitle = 'Loading...'
 		
-		const height = this.props.height;
+		//const height = this.props.height;
 
 		//If there is an error with the query
         if( this.props.requestError !== null ){
@@ -139,7 +138,7 @@ class GraphReport extends React.Component{
             let plotOptions = this.props.reportInfo.options;
             this.plotData = this.updatePlotData(plotOptions.data)
             this.layoutOptions = plotOptions.layout
-            plotTitle = this.props.reportInfo.name
+            //plotTitle = this.props.reportInfo.name
         }
         
 

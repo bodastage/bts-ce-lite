@@ -1,23 +1,19 @@
 import React from 'react';
-import { render } from 'react-dom';
-import brace from 'brace';
 import AceEditor from 'react-ace';
 import { connect } from 'react-redux';
 import 'brace/mode/sql';
 import 'brace/theme/github';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ResizeSensor, FormGroup, InputGroup, Button, TextArea, Intent, Spinner,
+import { FormGroup, InputGroup, Button, TextArea, Intent, Spinner,
          Callout, Menu, MenuItem, ProgressBar, HTMLSelect , Popover, Position } from "@blueprintjs/core";
-import { Select, ItemListRenderer } from "@blueprintjs/select";
+import { Select } from "@blueprintjs/select";
 import { AgGridReact } from 'ag-grid-react';
-import axios from '../../api/config';
-import { requestCreateReportFields, clearPreviewReportError,
-         createReportPreviewError, clearReportCreateState, 
-         createOrUpdateReport, getReport, getReportInfo } from './reports-actions';
+import { requestCreateReportFields, clearPreviewReportError,  
+         createOrUpdateReport, getReportInfo } from './reports-actions';
 import Plot from 'react-plotly.js';
 import './create-report-styles.css'
 import { GraphOptionsContainer } from './GraphOptions'
-import { runQuery, getSQLiteReportInfo, getSortAndFilteredQuery } from './DBQueryHelper.js';
+import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 
 
 class CreateReport extends React.Component{
@@ -95,7 +91,7 @@ class CreateReport extends React.Component{
         
         //This is an edit instance
         if( typeof this.props.options.reportId !== 'undefined' ){
-            const reportId = this.props.options.reportId;
+//            const reportId = this.props.options.reportId;
 //            this.props.dispatch(getReport(reportId));
             this.fetchingReportInfo = true;
         }
@@ -279,13 +275,8 @@ class CreateReport extends React.Component{
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
         let _columnApi =  params.columnApi;
-        let token = this.props.token;
         let _fields = this.props.fields;
-        let _dispatch = this.props.dispatch;
-        let reportId = this.props.options.reportId;
-        let that = this;
         
-		const reportName = this.reportName;
 		const query = this.aceEditorValue;
         
         let dataSource = {  
@@ -507,10 +498,10 @@ class CreateReport extends React.Component{
     
     
     render(){
-        const { spinnerSize, spinnerHasValue, spinnerIntent, spinnerValue, columns, loadPreview, category } = this.state;
+        const { spinnerSize, spinnerIntent, loadPreview, category } = this.state;
         const tabTitle = this.props.options.title;
         
-        let defaultName = this.reportName;
+        //let defaultName = this.reportName;
         let defaultNotes = this.reportNotes;
         let activeItem   = this.state.category;
         
@@ -522,7 +513,7 @@ class CreateReport extends React.Component{
             //This is changed to force re-rendering of the inputGroup and textarea
             this.nameRedraw +=  1;
             
-            defaultName =  this.props.reportInfo.name;
+            //defaultName =  this.props.reportInfo.name;
             defaultNotes = this.props.reportInfo.notes;
             activeItem = {id: this.props.reportInfo.category_id, name: 'Category'}
             

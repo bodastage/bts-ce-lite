@@ -21,7 +21,7 @@ if(process.platform === 'darwin'){
 		'/Library/PostgreSQL/11/bin',
 		'/Library/PostgreSQL/12/bin',
 		process.env.PATH
-	].join(':');
+	].join(path.delimiter);
 	
 }
 	

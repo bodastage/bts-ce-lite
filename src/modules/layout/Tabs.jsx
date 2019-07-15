@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dashboard from '../dashboard/Dashboard';
 import ProcessCMDumps from '../cm/ProcessCMDumps';
 import { closeTab, setActiveTab } from './uilayout-actions';
-import { Breadcrumb, OverflowList, Boundary, Position, Classes, MenuItem, 
+import { OverflowList, Boundary, Position, Classes, MenuItem, 
     Popover, Menu, Icon } from "@blueprintjs/core";
 import Help from '../help/Help';
 import UserProfile from '../profile/UserProfile';
@@ -111,12 +111,11 @@ class Tabs extends React.Component {
             );
         }
         
-        const { collapseFrom, width } = this.state;
+        const { collapseFrom } = this.state;
         let items = [];
         for (var tabId in this.props.tabs){
             const Tag = Components[ this.props.tabs[tabId].component];
             const options = this.props.tabs[tabId].options;
-            const activeClass = ""; 
             items.push(
                 {   href: "#", 
                     icon: <FontAwesomeIcon icon={Tag.icon}/>, 

@@ -1,10 +1,9 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { connect } from 'react-redux';
-import { Button, Card, Elevation, ResizeSensor, Spinner, Icon } from "@blueprintjs/core";
+import { ResizeSensor } from "@blueprintjs/core";
 import '../../../node_modules/react-grid-layout/css/styles.css'
 import '../../../node_modules/react-resizable/css/styles.css'
-import GridLayout , { WidthProvider, Responsive  } from 'react-grid-layout';
+import GridLayout from 'react-grid-layout';
 import './composite-report-stats.css'
 import { getReportInfo } from './reports-actions';
 import CompositeReportContainer from './CompositeReportContainer';

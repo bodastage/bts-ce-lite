@@ -10,7 +10,6 @@ import * as serviceWorker from './serviceWorker';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
-import icons from 'glyphicons'
 
 
 //Blueprintjs
@@ -21,7 +20,6 @@ import 'reflect-metadata';
 
 // Icons
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
 	faQuestionCircle, faUser, faSitemap, faWrench, faPuzzlePiece,faSync,
 	faStopCircle, faUniversity, faCogs, faPowerOff, faArrowRight, faList,

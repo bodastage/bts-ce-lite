@@ -1,16 +1,15 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { connect } from 'react-redux';
-import { Button, Card, Elevation, ResizeSensor, Spinner, Icon, Intent,
+import { Button, ResizeSensor, Spinner, Icon, Intent,
 		 MenuItem, Menu, FormGroup, InputGroup } from "@blueprintjs/core";
-import { Select, ItemListRenderer } from "@blueprintjs/select";
+import { Select } from "@blueprintjs/select";
 import '../../../node_modules/react-grid-layout/css/styles.css'
 import '../../../node_modules/react-resizable/css/styles.css'
-import GridLayout , { WidthProvider, Responsive  } from 'react-grid-layout';
+import GridLayout from 'react-grid-layout';
 import './composite-report-stats.css'
 import { getReportInfo, addToCompositeReport, updateCompositeLayout,
 		saveCompositeReport } from './reports-actions';
-import TableReport from './TableReport';
 import CompositeReportContainer from './CompositeReportContainer';
 
 class CreateCompositeReport extends React.Component {
@@ -250,7 +249,7 @@ class CreateCompositeReport extends React.Component {
 				return (
 				<div key={val["i"]} className="rgl-border">
 					<div className="card-header ">Loading ...
-						<a href="#" title="Remove report">
+						<a href="/#" title="Remove report">
 							<Icon icon="delete" className="float-right ml-2" onClick={(e) => { e.preventDefault(); this.removeReport(val.i);}}/>
 						</a>&nbsp;
 					</div>
@@ -266,7 +265,7 @@ class CreateCompositeReport extends React.Component {
 			return (
 			<div key={val["i"]} className="rgl-border">
 				<div className="card-header ">{this.props.reportsInfo[val.i].name} 
-					<a href="#" title="Remove report">
+					<a href="/#" title="Remove report">
 						<Icon icon="delete" className="float-right ml-2" onClick={(e) => { e.preventDefault(); this.removeReport(val.i);}}/>
 					</a>&nbsp;
 				</div>

@@ -1,21 +1,17 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FormGroup, InputGroup, Intent, Button, FileInput, HTMLSelect, 
-		 ProgressBar, Classes, Icon, Switch   } from "@blueprintjs/core";
-import { VENDOR_CM_FORMSTS, VENDOR_PARSERS } from './VendorCM.js'
+import { Intent, Button, FileInput, HTMLSelect, 
+		 ProgressBar, Classes, Switch   } from "@blueprintjs/core";
+import { VENDOR_CM_FORMSTS } from './VendorCM.js'
 import Timer from './Timer';
-import { saveCMParsingFolders, updateProcessCMTimer } from './cm-actions';
+import { saveCMParsingFolders } from './cm-actions';
 
 //styles
 import  './process.css';
 
-const { remote, ipcRenderer} = window.require("electron")
-const { app, process, shell } = window.require('electron').remote;
-const { spawn } = window.require('child_process') 
-const path = window.require('path')
-const isDev = window.require('electron-is-dev');
-const replace = window.require('replace-in-file');
+const { ipcRenderer} = window.require("electron")
+const { shell } = window.require('electron').remote; 
 const fs = window.require('fs');
 const log = window.require('electron-log');
 

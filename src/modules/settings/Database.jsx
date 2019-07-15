@@ -2,14 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { setSidePanel } from '../layout/uilayout-actions';
-import { Button, Intent, ProgressBar, Dialog, Collapse, Classes, Icon, Callout } from "@blueprintjs/core";
+import { Button, Intent, ProgressBar, Collapse, Callout } from "@blueprintjs/core";
 import { updateDBSettings, getDBSettings, clearDBUpdateError, clearDBUpdateSuccess, 
 		 checkConnection, showDBUpdateError, showDBUpdateSuccess, stopDBSettingsUpdate, 
 		 startDBSettingsUpdate } from './settings-actions';
 
-const path = window.require('path')
 const { ipcRenderer} = window.require("electron")
-const { app, process, shell } = window.require('electron').remote;
+const { shell } = window.require('electron').remote;
 const log = window.require('electron-log');
 
 class Database extends React.Component{
@@ -209,9 +208,9 @@ class Database extends React.Component{
 							</div>
 						  
 
-						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating} disabled={this.props.db.updating}/> &nbsp;
-						  <Button type="button" intent={Intent.SUCCESS} icon="play"  text="Setup database"  disabled={this.props.updating} onClick={this.setupDB} disabled={this.props.db.updating}/> &nbsp;
-						  <Button type="button" text="Test connection"  disabled={this.props.updating} onClick={this.testDBConnection} disabled={this.props.db.updating}/> &nbsp;
+						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating || this.props.db.updating} /> &nbsp;
+						  <Button type="button" intent={Intent.SUCCESS} icon="play"  text="Setup database"  disabled={this.props.updating || this.props.db.updating} onClick={this.setupDB} /> &nbsp;
+						  <Button type="button" text="Test connection"  disabled={this.props.updating || this.props.db.updating} onClick={this.testDBConnection} /> &nbsp;
 						  <Button type="button" text="How to install PostgreSQL"  minimal={true} disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenCollapse();}}/> &nbsp;
 						  
 						  <Collapse isOpen={this.state.collapseOpen} className="mt-2">

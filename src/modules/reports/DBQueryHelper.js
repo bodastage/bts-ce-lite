@@ -134,7 +134,7 @@ export function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGG
 			
             if( typeof filterModel.operator === 'undefined'){
                 let filterType = filterModel.type;
-                let filterValue= filterModel.filter;
+                //let filterValue= filterModel.filter;
 				
                 if( filterType === 'contains' ){
 					newQuery += ` qt."${col}" LIKE '%${value}%' `
@@ -213,11 +213,10 @@ export function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGG
 	
 	//Sorting
     if(AGGridSortModel.length > 0 ){
-		let sortCount = 0;
+
         AGGridSortModel.forEach(function(model, idx){
             let col = model.colId;
             let dir = model.sort;
-            let colIdx = columnNames.indexOf(col);
 			
 			if( idx === 0) {
 				newQuery += ` ORDER BY `

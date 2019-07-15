@@ -2,13 +2,6 @@ import * as React from 'react';
 import ReactStopwatch from 'react-stopwatch';
 
 export default class Timer extends  React.Component  {
-	constructor(props){
-		super(props);
-	}
-	
-	componentWillUnmount(){
-		
-	}
 	
 	render(){
 		if(this.props.visible === false) return ""

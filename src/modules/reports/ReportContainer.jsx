@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Intent, Spinner, Icon } from "@blueprintjs/core";
+import { Spinner, Icon } from "@blueprintjs/core";
 import { getReportInfo } from './reports-actions';
 import TableReport from './TableReport';
 import GraphReport from './GraphReport';
@@ -16,11 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 class ReportContainer extends React.Component{
     static icon = "table";
     static label = "";
-    
-    constructor(props){
-        super(props);
-    }
-    
+	
     componentDidMount() {
         
         //If there are no fields then there is no info about the report downloaded yet

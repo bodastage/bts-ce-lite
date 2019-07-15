@@ -21,7 +21,6 @@ const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
 const fixPath = window.require('fix-path');
 
-log.info(process.env.PATH)
 //Fix PATH env variable on Mac OSX
 //@TODO: This did not fix the issue
 if(process.platform === 'darwin'){ 
@@ -33,7 +32,7 @@ if(process.platform === 'darwin'){
 		'/Library/PostgreSQL/11/bin',
 		'/Library/PostgreSQL/12/bin',
 		process.env.PATH
-	].join(':');
+	].join(path.delimiter);
 	
 }
 
