@@ -10,6 +10,7 @@ const SQLITE3_DB_NAME = 'boda-lite.sqlite3';
 const moTransform = window.require('./mo-name-transform');
 var Excel = window.require('exceljs');
 const fixPath = window.require('fix-path');
+const fs = window.require('fs');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -554,6 +555,27 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 	
 }
 
+
+/**
+* Returns the path to the psql command on MacOs
+*/
+export function getPathToPsqlOnMacOSX(){
+	if( process.platform === 'darwin'){
+		//Enterprise DB installation
+		if (fs.existsSync('/Library/PostgreSQL/10/bin/psql')) return "/Library/PostgreSQL/10/bin/psql";
+		if (fs.existsSync('/Library/PostgreSQL/11/bin/psql')) return "/Library/PostgreSQL/11/bin/psql";
+		if (fs.existsSync('/Library/PostgreSQL/12/bin/psql')) return "/Library/PostgreSQL/12/bin/psql";
+		
+		//PostgresApp
+		///Applications/Postgres.app/Contents/Versions/latest/bin
+		if (fs.existsSync('/Applications/Postgres.app/Contents/Versions/latest/bin/psql')) return "/Applications/Postgres.app/Contents/Versions/latest/bin/psql";
+	
+	}
+	
+	return "psql";
+	
+}
+
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteDBConnectionDetails = getSQLiteDBConnectionDetails;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
@@ -561,3 +583,4 @@ exports.runQuery = runQuery;
 exports.generateCSVFromQuery = generateCSVFromQuery;
 exports.loadCMDataViaStream = loadCMDataViaStream;
 exports.generateExcelOrCSV = generateExcelOrCSV;
+exports.getPathToPsqlOnMacOSX = getPathToPsqlOnMacOSX;

@@ -415,10 +415,10 @@ class ReportsTree extends React.Component{
 		<span className="dropdown-item-text legend w-100 mb-2">
 			<FontAwesomeIcon icon={ReportsTree.icon}/> Reports
 			
-			<a href="/#" title="Reload report tree"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
-			<a href="/#" title="Create report category"><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
-			<a href="/#" title="Create report"><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
-			<a href="/#" title="Create composite report"><Icon icon="new-object" className="float-right ml-2" onClick={this.createCompositeReport}/></a> &nbsp;
+			<a href="/#" title="Reload report tree" onClick={e => e.preventDefault()}><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
+			<a href="/#" title="Create report category" onClick={e => e.preventDefault()}><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
+			<a href="/#" title="Create report" onClick={e => e.preventDefault()}><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
+			<a href="/#" title="Create composite report" onClick={e => e.preventDefault()}><Icon icon="new-object" className="float-right ml-2" onClick={this.createCompositeReport}/></a> &nbsp;
 		</span>
 
                 <div>
