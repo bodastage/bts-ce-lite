@@ -19,6 +19,8 @@ class DashboardSidePanel extends React.Component {
     }
     
 	showLogFile = (e) => {
+		e.preventDefault();
+		
 		const logPath = log.transports.file.findLogPath()
 		if (!fs.existsSync(logPath)) {
 			log.warn(`[dashboard] ${logPath} does not exist.`)

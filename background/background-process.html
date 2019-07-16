@@ -21,25 +21,8 @@ const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
 const fixPath = window.require('fix-path');
 
-//Fix PATH env variable on Mac OSX
-//@TODO: This did not fix the issue
-if(process.platform === 'darwin'){ 
-	fixPath(); 
-	
-	//Append path to postgres
-	process.env.PATH = [
-		'/Library/PostgreSQL/10/bin',
-		'/Library/PostgreSQL/11/bin',
-		'/Library/PostgreSQL/12/bin',
-		process.env.PATH
-	].join(path.delimiter);
-	
-}
-
 log.info(`[parse_cm_job] Starting hidden window to run as background process`)
 log.info(`PATH: ${process.env.PATH}`)
-
-//process.env.PATH = ""
 
 const VENDOR_PARSERS = {
 	'ERICSSON': {
@@ -671,13 +654,19 @@ function setupBodaDatabase(hostname, port, username, password){
 			  basepath = process.resourcesPath
 			} 
 			
+			let psql = "psql";
+			
+			if(process.platform === 'darwin'){
+				psql = utils.getPathToPsqlOnMacOSX();
+			}
+			
 			const sqlFile  = path.join(basepath, 'db', 'scripts', 'create_pg_database.sql');
-			const child = spawnSync('psql', ['-U', username, '-h', hostname, '-p', port, '-f', sqlFile ],{
+			const child = spawnSync(psql, ['-U', username, '-h', hostname, '-p', port, '-f', sqlFile ],{
 				env: {'PGPASSWORD': password},
 				shell: true
 			});
 			
-			log.info(`psql -U ${username} -h ${hostname} -p ${port} -f ${sqlFile}`);
+			log.info(`${psql} -U ${username} -h ${hostname} -p ${port} -f ${sqlFile}`);
 			
 			if(child.status != 0){
 				log.error(`[backgroup_job:setupBodaDatabase] error:${child.output.toString()}`);
