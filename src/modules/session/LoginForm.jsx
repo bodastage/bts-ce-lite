@@ -2,7 +2,7 @@ import React from 'react'
 //import logo from '../../images/logo.svg';
 import logo from '../../images/boda-lite-logo.png';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 import  './LoginForm.css';
 import Loading from './Loading';
 import { attemptAuthentication, clearAuthError, clearOldSession, checkDBSetupStatus } from '../session/session-actions';
@@ -140,12 +140,14 @@ class LoginForm extends React.Component {
     }
 }
 
+/*
 LoginForm.propTypes = {
     authenticating: PropTypes.bool,
     loginError: PropTypes.string,
     userDetails: PropTypes.object,
     waitingForDB: PropTypes.string
 };
+*/
 
 function mapStateToProps(state) {
   return {

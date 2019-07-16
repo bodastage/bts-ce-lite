@@ -134,12 +134,17 @@ export function checkDBSetupStatus(){
         
 		try{ 
 		
-			var stats = fs.statSync(SQLITE3_DB_PATH);
+
 			
 			//Database already exists
-			if(fs.existsSync(SQLITE3_DB_PATH) && stats.size > 0 ){
-				dispatch(clearNotices());
-				return;
+			if(fs.existsSync(SQLITE3_DB_PATH) ){
+				
+				var stats = fs.statSync(SQLITE3_DB_PATH);
+				if(stats.size > 0 ){
+					dispatch(clearNotices());
+					return;					
+				}
+
 			}
 			
 			if(fs.existsSync(SQLITE3_DB_PATH)){
