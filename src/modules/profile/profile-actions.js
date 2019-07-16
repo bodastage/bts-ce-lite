@@ -1,7 +1,5 @@
-import axios, { ERROR_CODES } from '../../api/config';
 import { SQLITE3_DB_PATH } from "../session/db-settings";
 const sqlite3 = window.require('sqlite3').verbose()
-const log = window.require('electron-log');
 
 export const SEND_PROFILE_UPDATE_REQUEST = 'SEND_PROFILE_UPDATE_REQUEST';
 

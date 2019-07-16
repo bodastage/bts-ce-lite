@@ -1,21 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Intent, Spinner, Icon } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 import { getReportInfo } from './reports-actions';
 import TableReport from './TableReport';
 import GraphReport from './GraphReport';
 import CompositeReport from './CompositeReport';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 //Exact copy of the  ReportContainer component without the fieldsets 
 class CompositeReportContainer extends React.Component{
     static icon = "table";
     static label = "";
-    
-    constructor(props){
-        super(props);
-    }
     
     componentDidMount() {
         

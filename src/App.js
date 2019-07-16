@@ -1,14 +1,10 @@
 import React from 'react';
-import configureStore from './configure-store';
 import LoginForm from './modules/session/LoginForm';
 import UILayout from './modules/layout/UILayout';
 import { connect } from 'react-redux';
 import ErrorBoundary from './modules/layout/ErrorBoundary';
 import VERSION from './version';
-import { logOutOfApp, resetState, clearSQLiteDB } from './modules/session/session-actions'
-
-
-const log = window.require('electron-log');
+import { resetState } from './modules/session/session-actions'
 
 class App extends React.Component {
   constructor(props){

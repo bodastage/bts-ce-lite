@@ -6,7 +6,7 @@ import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import { Intent   } from "@blueprintjs/core";
 
 const log = window.require('electron-log');
-const { app, process, shell } = window.require('electron').remote;
+const { shell } = window.require('electron').remote;
 const fs = window.require('fs');
 
 class DashboardSidePanel extends React.Component {
@@ -25,7 +25,7 @@ class DashboardSidePanel extends React.Component {
 			this.toaster.show({
                 icon: "info-sign",
                 intent: Intent.WARNING,
-                message: "${logPath} does nit exist.",
+                message: `${logPath} does not exist.`,
 			});
 			return;
 		}
@@ -50,29 +50,29 @@ class DashboardSidePanel extends React.Component {
         return (
         <div>
             <span className="dropdown-item-text legend w-100">Radio Access Network</span>
-            <a title="Process CM dumps" className="dropdown-item" href="#" onClick={this.addTab({
+            <a title="Process CM dumps" className="dropdown-item" href="/#" onClick={this.addTab({
                                             component: 'ProcessCMDumps',
                                             title: 'Process CM dumps'
                                 })}> <FontAwesomeIcon icon="asterisk" /> Process CM dumps</a>  
 
-            <a title="Reports" className="dropdown-item" href="#" onClick={this.setSidePanel('ReportsTree')}> <FontAwesomeIcon icon="table"/> Reports</a>
+            <a title="Reports" className="dropdown-item" href="/#" onClick={this.setSidePanel('ReportsTree')}> <FontAwesomeIcon icon="table"/> Reports</a>
 
                                 
                 <span className="dropdown-item-text legend w-100">System</span>
 
-                <a className="dropdown-item" title="Profile" href="#" 
+                <a className="dropdown-item" title="Profile" href="/#" 
 				onClick={this.addTab({
                         component: 'UserProfile', 
                         title:'Profile'})}
                     >
                     <FontAwesomeIcon icon="user"/> Profile</a>
                                 
-                <a className="dropdown-item" href="#" title="Help" onClick={this.addTab({
+                <a className="dropdown-item" href="/#" title="Help" onClick={this.addTab({
                                 component: 'Help', title: 'Help'})}><FontAwesomeIcon icon="question-circle"/>  Help</a>
 								
-			<a className="dropdown-item" title="Log file" href="#/" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/> Log file</a>
+			<a className="dropdown-item" title="Log file" href="/#" onClick={this.showLogFile.bind(this)}><FontAwesomeIcon icon="file-alt"/> Log file</a>
                                 
-                <a className="dropdown-item" href="#" title="Settings" onClick={this.addTab({
+                <a className="dropdown-item" href="/#" title="Settings" onClick={this.addTab({
                                 component: 'Settings', title: 'Settings'})} ><FontAwesomeIcon icon="cog"/>  Settings</a>
         </div>
         );

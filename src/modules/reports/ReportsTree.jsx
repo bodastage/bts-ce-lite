@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getReports, setReportFilter, deleteReport, getReportInfo,
          clearReportTreeError } from './reports-actions';
 import { addTab, closeTab } from '../layout/uilayout-actions';
-import { Classes, Icon, ITreeNode, Tooltip, Tree, FormGroup, InputGroup, 
-         ContextMenu, ContextMenuTarget, Menu, MenuDivider, MenuItem,
+import { Classes, Icon, Tree, FormGroup, InputGroup, 
+         ContextMenu, Menu, MenuItem,
         ProgressBar, Dialog, TextArea, Intent, Spinner, Button} 
 		from "@blueprintjs/core";
 import './reports-panel.css';
@@ -183,6 +183,7 @@ class ReportsTree extends React.Component{
             case 'text':this.filterText = value;break;
             case 'reports':this.filterReports = value;break;
             case 'categories':this.filterCategories = value;break;
+			default: this.filterText = value;break;
         }
         
         this.updateFilter();
@@ -261,7 +262,7 @@ class ReportsTree extends React.Component{
         const filterText = this.state.text;
         let filterOnReports = this.state.reports
         const filterOnCategories = this.state.categories;
-        const noFilter = filterOnReports && filterOnCategories && (filterText === '');
+        //const noFilter = filterOnReports && filterOnCategories && (filterText === '');
 		
 		//If nothing is selected, filter on reports
 		if( !filterOnReports && !filterOnCategories && filterText !== "") filterOnReports = true
@@ -414,10 +415,10 @@ class ReportsTree extends React.Component{
 		<span className="dropdown-item-text legend w-100 mb-2">
 			<FontAwesomeIcon icon={ReportsTree.icon}/> Reports
 			
-			<a href="#" title="Reload report tree"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
-			<a href="#" title="Create report category"><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
-			<a href="#" title="Create report"><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
-			<a href="#" title="Create composite report"><Icon icon="new-object" className="float-right ml-2" onClick={this.createCompositeReport}/></a> &nbsp;
+			<a href="/#" title="Reload report tree"><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
+			<a href="/#" title="Create report category"><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
+			<a href="/#" title="Create report"><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
+			<a href="/#" title="Create composite report"><Icon icon="new-object" className="float-right ml-2" onClick={this.createCompositeReport}/></a> &nbsp;
 		</span>
 
                 <div>

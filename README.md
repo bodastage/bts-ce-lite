@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bodastage/bts-ce-lite.svg?branch=master)](https://travis-ci.org/bodastage/bts-ce-lite) ![GitHub release](https://img.shields.io/github/release/bodastage/bts-ce-lite.svg)  ![GitHub All Releases](https://img.shields.io/github/downloads/bodastage/bts-ce-lite/total.svg) [![GitHub license](https://img.shields.io/github/license/bodastage/bts-ce-lite.svg)](https://github.com/bodastage/bts-ce-lite/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/bodastage/bts-ce-lite.svg)](https://github.com/bodastage/bts-ce-lite/issues)
+
 # Boda-Lite
 
 Boda-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/bts-ce). It is a cross 
@@ -5,7 +7,7 @@ platform telecommunication management desktop app.
 
 ## Features
 * Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
-* Reports
+* Reports module that supports tabular, graphs, and composite(dashboard-like) reports
 
 ## Built with 
 * [Electron](https://electronjs.org)

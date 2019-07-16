@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import  './dashboard.css';
 import { connect } from 'react-redux';
 import { addTab, setSidePanel } from '../layout/uilayout-actions';
-import { Icon, Toaster, Intent } from "@blueprintjs/core";
+import { Toaster, Intent } from "@blueprintjs/core";
 
 const { shell } = window.require('electron').remote;
 const log = window.require('electron-log');
@@ -44,7 +44,7 @@ class Dashboard extends React.Component {
 			this.toaster.show({
                 icon: "info-sign",
                 intent: Intent.WARNING,
-                message: "${logPath} does nit exist.",
+                message: `${logPath} does not exist.`,
 			});
 			return;
 		}

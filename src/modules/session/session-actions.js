@@ -1,7 +1,5 @@
-import axios from '../../api/config';
 import 'url-search-params-polyfill';
 //import * as sqlite3 from 'sqlite3';
-import {createConnection} from "typeorm";
 //@TODO: Move this into the db setup script to reduce size of the bundle 
 import { HUAWEI_2G_KEY_PARAMAETERS, 
 		 HUAWEI_3G_KEY_PARAMAETERS, 
@@ -136,12 +134,17 @@ export function checkDBSetupStatus(){
         
 		try{ 
 		
-			var stats = fs.statSync(SQLITE3_DB_PATH);
+
 			
 			//Database already exists
-			if(fs.existsSync(SQLITE3_DB_PATH) && stats.size > 0 ){
-				dispatch(clearNotices());
-				return;
+			if(fs.existsSync(SQLITE3_DB_PATH) ){
+				
+				var stats = fs.statSync(SQLITE3_DB_PATH);
+				if(stats.size > 0 ){
+					dispatch(clearNotices());
+					return;					
+				}
+
 			}
 			
 			if(fs.existsSync(SQLITE3_DB_PATH)){

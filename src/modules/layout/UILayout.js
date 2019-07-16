@@ -1,12 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Header from './Header';
-import Dashboard from '../dashboard/Dashboard';
 import Tabs from './Tabs';
-import * as UILayoutActions from './uilayout-actions';
 import SidePanel from './SidePanel';
 import  './UILayout.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Classes } from '@blueprintjs/core';
 import classNames from 'classnames';
 import logo from '../../images/boda-lite-logo-trimmed.png';

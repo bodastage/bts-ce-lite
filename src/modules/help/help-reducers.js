@@ -1,5 +1,3 @@
-import { SHOW_HELP } from './help-actions';
-
 let initialState = {
 };
 

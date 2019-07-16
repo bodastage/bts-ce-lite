@@ -1,6 +1,6 @@
 {
   "name": "Boda-Lite",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Boda-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -124,6 +124,7 @@
     "reflect-metadata": "^0.1.13",
     "replace-in-file": "https://github.com/erssebaggala/replace-in-file.git#add_replace_stream",
     "rw-stream": "https://github.com/erssebaggala/rw-stream.git#truncate_file",
+    "shell-path": "^2.1.0",
     "sqlite3": "^4.0.9",
     "terser-webpack-plugin": "1.2.2",
     "typeorm": "^0.2.18",

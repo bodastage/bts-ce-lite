@@ -28,7 +28,7 @@ export default function uiLayout(state = initialState, action) {
             
             let tabs = {};
             for(var tabId in state.tabs){
-                if( tabId != action.id ){
+                if( tabId !== action.id ){
                     tabs[tabId] = state.tabs[tabId];
                 }
             }

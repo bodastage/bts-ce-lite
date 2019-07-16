@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button, Label, HTMLSelect, FormGroup, Intent, Icon, Collapse, InputGroup
 } from "@blueprintjs/core";
-import { SketchPicker } from 'react-color';
 import './GraphOptions.css';
 
 //Show Bar chart options

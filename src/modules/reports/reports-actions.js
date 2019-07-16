@@ -1,5 +1,5 @@
 import { SQLITE3_DB_PATH } from "../session/db-settings";
-import { runQuery, getQueryFieldsInfo, getSQLiteReportInfo } from './DBQueryHelper.js';
+import { runQuery, getQueryFieldsInfo } from './DBQueryHelper.js';
 
 const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
@@ -279,16 +279,16 @@ export function getReports(){
 		
 		
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		return db.all("SELECT \
-					r.rowid as id,  \
-					r.name as name, \
-					r.type as type, \
-					c.rowid as cat_id, \
-					c.name as cat_name, \
-					r.in_built as r_in_built, \
-					c.in_built as c_in_built \
-				FROM rpt_categories c \
-				LEFT join reports r  ON r.category_id = c.rowid		",  (err, rows) => {
+		return db.all(`SELECT 
+					r.rowid as id,  
+					r.name as name, 
+					r.type as type, 
+					c.rowid as cat_id, 
+					c.name as cat_name, 
+					r.in_built as r_in_built, 
+					c.in_built as c_in_built 
+				FROM rpt_categories c 
+				LEFT join reports r  ON r.category_id = c.rowid		`,  (err, rows) => {
 					
 			if(err !== null){
 				log.error(err);
@@ -439,12 +439,7 @@ export  function saveCategory(catName, catNotes, catId){
 							log.error(err.toString())
 							return dispatch(notifyReportCategoryCreationError('Error updating report. Check log for details'));
 						}
-						
-						const data = {
-							name: catName,
-							id: catId,
-							notes: catNotes
-						}
+
 						//Update the report tree incase the report name changed
 						await dispatch(getReports());
 						return dispatch(confirmReportCategoryCreation());
@@ -844,7 +839,7 @@ export function getGraphData(reportId){
 * @param object options layout
 */
 export function addToCompositeReport(compReportId, reportId, options ){
-	if(typeof compReportId !== 'n') compReportId = null;
+	if(typeof compReportId !== 'number') compReportId = null;
 	
 	//@TODO: Insert into db and report compReportId
 	const compRptId = 4;
@@ -895,14 +890,6 @@ export function saveCompositeReport(reportId, name, catId, options){
 							return ;
 						}
 						
-						const data = {
-							name: name,
-							category_id: catId,
-							notes: '',
-							query: '',
-							options: opts,
-							id: reportId
-						}
 						//Update the report tree incase the report name changed
 						await dispatch(getReports());
 						//return dispatch(confirmReportCreation(reportId, data));
@@ -924,15 +911,7 @@ export function saveCompositeReport(reportId, name, catId, options){
 							//return dispatch(createReportPreviewError('Error creating report. Check log for details'));
 							return; 
 						}
-						
-						const reportId = this.lastID;
-						const data = {
-							name: name,
-							category_id: catId,
-							notes: '',
-							query: '',
-							options: opts
-						}
+
 						//Update the report tree incase the report name changed
 						await dispatch(getReports());
 						

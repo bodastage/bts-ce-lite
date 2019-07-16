@@ -41,16 +41,16 @@ class Header extends React.Component {
               </h5>
               
               <nav className="my-2 my-md-0 mr-md-3">
-                <a className="text-dark" href="#" onClick={this.addTab({
+                <a className="text-dark" href="/#" onClick={this.addTab({
                     component: 'dashboard', title: 'Dashboard'})}><FontAwesomeIcon icon="home" className="mb-1"/> Dashboard</a>
-                <a className="p-2 text-secondary" href="#" onClick={this.setSidePanel} title="Modules"><FontAwesomeIcon icon="plug" className="mb-1"/> Modules</a>
-                <a className="p-2 text-secondary" href="#" onClick={this.addTab({
+                <a className="p-2 text-secondary" href="/#" onClick={this.setSidePanel} title="Modules"><FontAwesomeIcon icon="plug" className="mb-1"/> Modules</a>
+                <a className="p-2 text-secondary" href="/#" onClick={this.addTab({
                     component: 'Settings', title: 'Settings'})}><FontAwesomeIcon icon="cog" className="mb-1"/> Settings</a>
-                <a className="p-2 text-secondary" href="#" onClick={this.addTab({
+                <a className="p-2 text-secondary" href="/#" onClick={this.addTab({
                     component: 'Help', title: 'Help'})}><FontAwesomeIcon icon="question-circle" className="mb-1"/> Help</a>
-                <a className="p-2 text-secondary" href="#" onClick={this.addTab({
+                <a className="p-2 text-secondary" href="/#" onClick={this.addTab({
                     component: 'UserProfile', title: 'Profile'})}><FontAwesomeIcon icon="user" className="mb-1"/> {this.props.userDetails.first_name}</a>
-                <a className="p-2 text-secondary" href="#"><FontAwesomeIcon icon="power-off" className="mb-1" onClick={this.logout}/></a>
+                <a className="p-2 text-secondary" href="/#"><FontAwesomeIcon icon="power-off" className="mb-1" onClick={this.logout}/></a>
                 
               </nav>
             </div> 
