@@ -17,7 +17,7 @@ SELECT
 	t1.data->>'locationAreaIdMNC' as mnc
 FROM nokia_cm."BTS" t1
 INNER JOIN nokia_cm."TRX" t2 ON
-    t1.data->>'DISTNAME' = SUBSTRING(t2.data->>'DISTNAME', '.*BTS-\d+')
+    t1.data->>'DISTNAME' = SUBSTRING(t2.data->>'DISTNAME', '.*BTS-\\d+')
 INNER JOIN nokia_cm."BCF" t3 ON 
 	t3.data->>'FILENAME' = t1.data->>'FILENAME' 
 	AND CONCAT(TRIM(t3.data->>'DISTNAME'), '/BTS-',TRIM(t1.data->>'segmentId')) = TRIM(t1.data->>'DISTNAME')
@@ -48,7 +48,7 @@ SELECT
 FROM nokia_cm."WCEL" t1
 INNER JOIN nokia_cm."WBTS" t2 ON
 	t2.data->>'FILENAME' = t1.data->>'FILENAME' 
-    AND TRIM(t2.data->>'DISTNAME') = SUBSTRING(t1.data->>'DISTNAME','.*WBTS-\d+')
+    AND TRIM(t2.data->>'DISTNAME') = SUBSTRING(t1.data->>'DISTNAME','.*WBTS-\\d+')
 `
 
 //eslint-disable-next-line
