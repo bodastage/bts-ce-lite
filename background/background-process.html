@@ -229,7 +229,7 @@ unCompressFile = (fileName, targetFolder) => {
 	if(process.platform === "win32"){
 		let sevenZip = path.join(libPath,'libraries','7z.exe');
 
-		const child = spawnSync(sevenZip, ['e', fileName,"-o"+targetFolder]);
+		const child = spawnSync(sevenZip, ['e', fileName,"-o"+targetFolder, "-y"]);
 		
 		log.info(`${sevenZip} e ${fileName} -o${targetFolder}`);
 
