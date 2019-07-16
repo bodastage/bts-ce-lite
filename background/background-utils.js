@@ -375,7 +375,19 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 
 	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
-	for (let i=0; i<items.length; i++) {
+	//This will be used to wait for the loading to complete before existing the function 
+	let csvFileCount = items.length;
+	
+	//50 mb
+	const highWaterMark = 50 * 1024 * 1024;
+	
+	//Time to wait for load to complete 
+	const waitTime = 1; //1 second 
+	
+	//Maximum times to check
+	const maxLoadWait = 10; // x waitTime 
+	
+	for (let i=0; i< items.length; i++) {
 		let fileName = items[i];
 		let filePath = path.join(csvFolder, items[i]);
 		let moName = items[i].replace(/.csv$/i,'');
@@ -394,17 +406,20 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
 		
+		//Use to wait for each file to load
+		let fileIsLoading = true;
+		
 		let client = null;
 		let copyFromStream = null;
 		try{
 			//Get client from pool
 			client = await pool.connect();
 			if(client.processID === null){
-				throw Error('Failed to connect to database');
+				log.error('Failed to connect to database');
 				return false;
 			}
 			
-			copyFromStream = await client.query(copyFrom(`COPY ${table} (data) FROM STDIN`,{writableHighWaterMark : 10*1024*1024})); //10mb
+			copyFromStream = await client.query(copyFrom(`COPY ${table} (data) FROM STDIN`,{writableHighWaterMark : highWaterMark}));
 		}catch(e){
 			if( copyFromStream !== null) copyFromStream.end();
 			if( client !== null) client.release();
@@ -412,13 +427,21 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 			log.error(`Pool_Connect_Query: ${e.toString()}`);
 			log.info(`Skipping loading of ${moName}`);
 			
+			//reduce the file count 
+			++csvFileCount;
+			fileIsLoading = false;
+			
 			//Process next file 
 			//@TODO: 
 			continue; 
 		}
 
 		copyFromStream.on('error', async (err) => {
-			log.error(`copyFromStream.errorEvent: ${err.toString()}`);
+			log.error(`copyFromStream.errorEvent: ${err.toString()}.  [${fileName}]`);
+			
+			//Reduce load  file count
+			//--csvFileCount;
+			fileIsLoading = false;
 			
 			//By setting writeStatus to null, we are letting next write konw that there was an 
 			//error in the previous attempt so we should exit csvToJson
@@ -434,9 +457,14 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 		});
 		
 		copyFromStream.on('finish', (err) => {
-			log.info(`Loading of  ${moName} is done.`);
+			//reduce process file count 
+			--csvFileCount;
+			
+			log.info(`Loading of  ${moName} is done. ${csvFileCount} files left.`);
 			writeStatus = true;
-			client.release();
+		
+			fileIsLoading = false;
+
 		});
 
 		if(typeof beforeFileLoad === 'function'){
@@ -467,9 +495,8 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 					}
 
 				},(err) => {//onError
-					log.error(err);
+					log.error(`csvJoJson.onError: ${err.toString()}`);
 					copyFromStream.end();
-					client.release();
 					reject();
 				},
 				()=>{//onComplete
@@ -479,26 +506,41 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 				}); 
 			}catch(e){
 				writeStatus = true; // -- to stop while(writeStatus === false) from continuing endlessly
-				log.error(`$EndOfcsvToJson: {e.toString()}`);
+				log.error(`Catch:csvToJson Error: {e.toString()}`);
 				copyFromStream.end();
-				client.release();
+				fileIsLoading = false;
 				reject(e)
 				
 			}
 			
 		});
 
+		//Wait for loading to complete. The csvToJson can complete before 
+		await new Promise(async (rs, rj) => {
+			while(fileIsLoading === true ){
+				log.info(`Waiting for ${waitTime} seconds for loading of ${fileName} to complete...`);
+				await new Promise((rs, rj) => {  setTimeout(rs, waitTime * 1000); });
+			}
+			
+			//Release client i.e. return to pool
+			client.release();
+			rs(undefined);
+			
+		});
 		
 		if(typeof afterFileLoad === 'function'){
 			afterFileLoad(table, fileName, csvFolder);
 		}
+		
 	}
-	
-	
+
 	if(typeof afterLoad === 'function'){
 		afterLoad();
 	}
 
+	
+
+	
 	await pool.end();
 	
 }

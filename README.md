@@ -7,7 +7,7 @@ platform telecommunication management desktop app.
 
 ## Features
 * Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
-* Reports
+* Reports module that supports tabular, graphs, and composite(dashboard-like) reports
 
 ## Built with 
 * [Electron](https://electronjs.org)
