@@ -716,7 +716,8 @@ async function  executeTask(task, options){
 				options.vendor, 
 				options.format, 
 				options.csvFolder,
-				(tableName, fileName, csvFolder) => { //beforeFileLoad
+				options.truncateTables,
+				(tableName, fileName, csvFolder, ) => { //beforeFileLoad
 					//sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${tableName}...`);
 					log.info(`Loading ${fileName} into ${tableName}...`);
 				}, 

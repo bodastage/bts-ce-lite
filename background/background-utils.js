@@ -344,10 +344,11 @@ async function generateExcelOrCSV(fileName, outputFolder, query, format){
 * @param veondor string vendor 
 * @param format string format 
 * @param csvFolder string 
+* @param truncateTables boolean Truncate tables before load. Values are true or false
 * @param callbacks {beforeFileLoad, afterFileLoad, beforeLoad, afterLoad}
 *
 */
-async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
+async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
 	
 	
 	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
@@ -371,6 +372,10 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 	
 	if(typeof beforeLoad === 'function'){
 		beforeLoad();
+	}
+	
+	if(truncateTables === true) {
+		log.info("Truncate tables before loading is set to true.")
 	}
 
 	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
@@ -418,6 +423,10 @@ async function loadCMDataViaStream(vendor, format, csvFolder, beforeFileLoad, af
 				log.error('Failed to connect to database');
 				return false;
 			}
+			
+			//Truncate 
+			if(truncateTables === true) await client.query(`TRUNCATE ${table} RESTART IDENTITY CASCADE`);
+			
 			
 			copyFromStream = await client.query(copyFrom(`COPY ${table} (data) FROM STDIN`,{writableHighWaterMark : highWaterMark}));
 		}catch(e){

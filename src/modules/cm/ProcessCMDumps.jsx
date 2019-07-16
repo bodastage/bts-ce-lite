@@ -38,7 +38,12 @@ class ProcessCMDumps extends React.Component {
 			errorMessage: null,
 			successMessage: null,
 			infoMessage: null,
-			loadIntoDB: false
+			
+			//Load parsed csv files into database
+			loadIntoDB: false,
+			
+			//Clear tables before load
+			clearTables: false
 		}
 		
 		this.vendorFormats = VENDOR_CM_FORMSTS
@@ -48,6 +53,7 @@ class ProcessCMDumps extends React.Component {
 		this.dismissSuccessMessage = this.dismissSuccessMessage.bind(this)
 		this.areFormInputsValid = this.areFormInputsValid.bind(this)
 		this.handleLoadIntoDBChange = this.handleLoadIntoDBChange.bind(this);
+		this.handlClearTablesChange = this.handlClearTablesChange.bind(this);
 		this.clearForm = this.clearForm.bind(this)
 		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
 		
@@ -112,6 +118,9 @@ class ProcessCMDumps extends React.Component {
 		this.setState({loadIntoDB: !this.state.loadIntoDB})
 	}
 	
+	handlClearTablesChange = () => {
+		this.setState({clearTables: !this.state.clearTables});
+	}
 	
 	processDumps = () => {
 		
@@ -168,7 +177,8 @@ class ProcessCMDumps extends React.Component {
 				const loadPayload = {
 					"vendor": this.state.currentVendor,
 					"format": this.state.currentFormat,
-					"csvFolder": this.state.outputFolderText
+					"csvFolder": this.state.outputFolderText,
+					"truncateTables": this.state.clearTables
 				}
 				ipcRenderer.send('parse-cm-request', 'load_cm_data', JSON.stringify(loadPayload))				
 			}
@@ -325,7 +335,8 @@ class ProcessCMDumps extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
 						<div className="col-sm-8">
-						  <Switch checked={this.state.loadIntoDB} label="Load into database" onChange={this.handleLoadIntoDBChange} disabled={this.state.processing}/>
+						  <Switch checked={this.state.loadIntoDB} label="Load into database" onChange={this.handleLoadIntoDBChange} disabled={this.state.processing}/> 
+						  <Switch checked={this.state.clearTables} label="Clear tables before loading" onChange={this.handlClearTablesChange} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							
