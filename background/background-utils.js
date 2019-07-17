@@ -438,7 +438,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			log.info(`Skipping loading of ${moName}`);
 			
 			//reduce the file count 
-			++csvFileCount;
+			--csvFileCount;
 			fileIsLoading = false;
 			
 			//Process next file 
@@ -548,9 +548,6 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 		afterLoad();
 	}
 
-	
-
-	
 	await pool.end();
 	
 }
@@ -558,6 +555,8 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 
 /**
 * Returns the path to the psql command on MacOs
+* 
+* @returns string Path to psql
 */
 function getPathToPsqlOnMacOSX(){
 	if( process.platform === 'darwin'){
