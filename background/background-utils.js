@@ -559,7 +559,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 /**
 * Returns the path to the psql command on MacOs
 */
-export function getPathToPsqlOnMacOSX(){
+function getPathToPsqlOnMacOSX(){
 	if( process.platform === 'darwin'){
 		//Enterprise DB installation
 		if (fs.existsSync('/Library/PostgreSQL/10/bin/psql')) return "/Library/PostgreSQL/10/bin/psql";
