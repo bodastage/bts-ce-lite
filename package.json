@@ -38,7 +38,8 @@
     "telecommunication",
     "bodastage-solutions",
     "boda-ce-lite",
-    "boda-lite"
+    "boda-lite",
+    "bts-ce-lite"
   ],
   "eslintConfig": {
     "extends": "react-app"
