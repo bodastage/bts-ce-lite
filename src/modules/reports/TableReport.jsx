@@ -6,7 +6,8 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
-		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position } from "@blueprintjs/core"; 
+		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position,
+		 HTMLSelect } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 const { ipcRenderer} = window.require("electron")
@@ -74,8 +75,6 @@ class TableReport extends React.Component{
 			
 			notice: null, //{type:info|success|error|warning, message: ...}
 			
-			
-            
             
         };
         
@@ -88,6 +87,15 @@ class TableReport extends React.Component{
 		
 		//Filtered query to be used by download
 		this.filteredSortedQuery = null;
+		
+		//Options for the number of rows to select on the aggrid
+		this.numDisplayRowsOptions = [
+			'20',
+			'50',
+			'100',
+			'200',
+			'500'
+		];
     }
     
     refreshData = () => {
@@ -261,6 +269,13 @@ class TableReport extends React.Component{
         }, 1000);
     }
 
+	/**
+	* 
+	*/
+	selectNumRowsToDisplay = (event) => {
+       this.setState({paginationPageSize: event.currentTarget.value});
+	   this.agTblReload = this.agTblReload + 1;
+	}
     
     /**
      * Update the column definitions for the aggrid table
@@ -332,7 +347,7 @@ class TableReport extends React.Component{
 	}
     
     /**
-     * Create toask reference
+     * Create toast reference
      */
     refHandlers = {
         toaster: (ref) => (this.toaster = ref),
@@ -388,6 +403,8 @@ class TableReport extends React.Component{
                             <Toaster {...this.state} ref={this.refHandlers.toaster} />
                             <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
                         </ButtonGroup>
+						
+						<HTMLSelect options={this.numDisplayRowsOptions} onChange={this.selectNumRowsToDisplay.bind(this)} value={this.state.paginationPageSize} className="float-right"></HTMLSelect>
 
                         </div>
                         <div className="ag-theme-balham" style={{width: '100%', height: "100%", boxSizing: "border-box"}}>
