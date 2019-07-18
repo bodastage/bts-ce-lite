@@ -90,7 +90,8 @@ class TableReport extends React.Component{
 		
 		//Options for the number of rows to select on the aggrid
 		this.numDisplayRowsOptions = [
-			'20',
+			'10',
+			'25',
 			'50',
 			'100',
 			'200',
@@ -174,6 +175,9 @@ class TableReport extends React.Component{
 		this.setState({processing: true});
 		
 		let fileName = this.props.reportInfo.name.replace(/\s+/g,"_");
+		
+		//Sanitize download file name
+		fileName = fileName.replace(/['"+]/g,"");
 		
 		let payload = {
 			reportId: this.props.options.reportId, //deprecate
