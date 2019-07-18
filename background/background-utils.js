@@ -383,6 +383,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 	
 	//This will be used to wait for the loading to complete before existing the function 
 	let csvFileCount = items.length;
+	let filesNotLoaded = 0; //Keep count of files not loaded
 	
 	//50 mb
 	const highWaterMark = 50 * 1024 * 1024;
@@ -437,9 +438,12 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			log.error(`Pool_Connect_Query: ${e.toString()}`);
 			log.info(`Skipping loading of ${moName}`);
 			
-			//reduce the file count 
+			//reduce the file count the needs to be processed 
 			--csvFileCount;
 			fileIsLoading = false;
+			
+			//Increament the count of files that have not been processed
+			++filesNotLoaded;
 			
 			//Process next file 
 			//@TODO: 
@@ -470,7 +474,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			//reduce process file count 
 			--csvFileCount;
 			
-			log.info(`Loading of  ${moName} is done. ${csvFileCount} csv files left.`);
+			log.info(`Loading of  ${moName} is done. ${csvFileCount} csv files remaining to be processed.`);
 			writeStatus = true;
 		
 			fileIsLoading = false;
@@ -544,9 +548,12 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 		
 	}
 
+	log.info(`${filesNotLoaded} files not loaded.`)
+	
 	if(typeof afterLoad === 'function'){
 		afterLoad();
 	}
+
 
 	await pool.end();
 	
