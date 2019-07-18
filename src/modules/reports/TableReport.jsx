@@ -57,7 +57,14 @@ class TableReport extends React.Component{
             maxBlocksInCache: 2,
             overlayLoadingTemplate: '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>',
             overlayNoRowsTemplate: "<span style=\"padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;\">This is a custom 'no rows' overlay</span>",
-
+			
+			//Default column definitions
+			defaultColDef: {
+				filter: true, // set filtering on for all cols
+				sortable: true,
+				resizable: true
+			},
+			
             //Download Alert state
             canEscapeKeyCancel: false,
             canOutsideClickCancel: false,
@@ -416,8 +423,8 @@ class TableReport extends React.Component{
                                 key={"create-table-key-" + this.agTblReload}
                                 pagination={true}
 								domLayout="autoHeight"
+								defaultColDef={this.state.defaultColDef}
                                 columnDefs={this.columnDef}
-                                enableColResize={true}
                                 rowBuffer={this.state.rowBuffer}
                                 rowSelection={this.state.rowSelection}
                                 rowDeselection={true}
@@ -427,8 +434,6 @@ class TableReport extends React.Component{
                                 maxConcurrentDatasourceRequests={this.state.maxConcurrentDatasourceRequests}
                                 infiniteInitialRowCount={this.state.infiniteInitialRowCount}
                                 maxBlocksInCache={this.state.maxBlocksInCache}
-                                enableServerSideSorting={true}
-                                enableServerSideFilter={true}
                                 onGridReady={this.onGridReady.bind(this)}
                                 >
                             </AgGridReact>

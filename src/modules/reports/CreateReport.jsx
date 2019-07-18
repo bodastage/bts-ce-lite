@@ -43,6 +43,13 @@ class CreateReport extends React.Component{
             maxConcurrentDatasourceRequests: 2,
             infiniteInitialRowCount: 1,
             maxBlocksInCache: 2,
+			
+			//Default column definitions
+			defaultColDef: {
+				filter: true, // set filtering on for all cols
+				sortable: true,
+				resizable: true
+			},
             
             //Download Alert state
             canEscapeKeyCancel: false,
@@ -562,8 +569,8 @@ class CreateReport extends React.Component{
                                 pagination={true}
                                 gridAutoHeight={true}
                                 columnDefs={this.columnDef}
+								defaultColDef={this.state.defaultColDef}
                                 components={this.state.components}
-                                enableColResize={true}
                                 rowBuffer={this.state.rowBuffer}
                                 rowSelection={this.state.rowSelection}
                                 rowDeselection={true}
@@ -573,8 +580,6 @@ class CreateReport extends React.Component{
                                 maxConcurrentDatasourceRequests={this.state.maxConcurrentDatasourceRequests}
                                 infiniteInitialRowCount={this.state.infiniteInitialRowCount}
                                 maxBlocksInCache={this.state.maxBlocksInCache}
-                                enableServerSideSorting={true}
-                                enableServerSideFilter={true}
                                 onGridReady={this.onGridReady.bind(this)}
                                 onModelUpdated={this.handleModelUpdated.bind(this)}
                                 >
