@@ -470,7 +470,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			//reduce process file count 
 			--csvFileCount;
 			
-			log.info(`Loading of  ${moName} is done. ${csvFileCount} files left.`);
+			log.info(`Loading of  ${moName} is done. ${csvFileCount} csv files left.`);
 			writeStatus = true;
 		
 			fileIsLoading = false;
@@ -533,7 +533,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			}
 			
 			//Release client i.e. return to pool
-			client.release();
+			await client.release();
 			rs(undefined);
 			
 		});
