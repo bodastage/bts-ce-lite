@@ -492,15 +492,21 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 				csv()
 				.fromFile(filePath)
 				.subscribe(async (json)=>{
-					// plan newline for enter in db 
+					// Remove """ from json 
 					const jsonString = JSON.stringify(json);
-						
+					
+					//Escape backslash in jsonString
+					//Example scenario is "\"SubNetwork=ONRM_ROOT_MO_R\"" becomes ""SubNetwork=ONRM_ROOT_MO_R"" which causes an error on insertion.
+					//The replacement below escapes the backslash to preserve it ib the jsonString for insertion
+					var re = new RegExp(String.fromCharCode(92, 92), 'g');
+					const sanitizedJsonString= jsonString.replace(re,String.fromCharCode(92,92));
+
 					//Get out of subscribe if there was an error
 					if(writeStatus === null){
 						return;
 					}
 					
-					writeStatus = copyFromStream.write(jsonString + "\n");
+					writeStatus = copyFromStream.write(sanitizedJsonString + "\n");
 
 					//Sleep for 1s	if status is false i.e to wait for the writable stream buffer/queue to free					
 					while(writeStatus === false){
