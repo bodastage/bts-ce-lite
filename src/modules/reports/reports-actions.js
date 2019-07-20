@@ -87,6 +87,21 @@ export const ADD_TO_COMPOSITE_REPORT = 'ADD_TO_COMPOSITE_REPORT';
 //Uupdate composite report during report creation 
 export const UPDATE_COMPOSITE_REPORT_LAYOUT = 'UPDATE_COMPOSITE_REPORT_LAYOUT';
 
+//Clear the state used to create and edit a composite report 
+export const CLEAR_CREATE_COMP_RPT_STATE  = 'CLEAR_CREATE_COMP_RPT_STATE';
+
+//Load composite report info for editting 
+export const LOAD_COMP_RPT_INFO_FOR_EDIT = 'LOAD_REPORT_INFO_FOR_EDIT';
+
+//Confirm composite report is created
+export const CONFIRM_COMP_RPT_CREATION = 'CONFIRM_COMP_RPT_CREATION';
+
+export function loadCompReportInfoForEdit(reportId){
+	return {
+		type: LOAD_COMP_RPT_INFO_FOR_EDIT,
+		reportId: reportId
+	}
+}
 
 export function clearReportTreeError(){
     return {
@@ -183,8 +198,7 @@ export function getReportInfo(reportId){
 			}
 			let reportInfo = rows[0]
 			reportInfo.options = JSON.parse(rows[0].options)
-			return dispatch(receiveReport(reportId, reportInfo));
-			
+			dispatch(receiveReport(reportId, reportInfo));
 		});
     }
 }
@@ -276,8 +290,7 @@ export function getReportFields(reportId){
 export function getReports(){
     return (dispatch, getState) => {
         dispatch(requestReports());
-		
-		
+	
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
 		return db.all(`SELECT 
 					r.rowid as id,  
@@ -292,7 +305,7 @@ export function getReports(){
 					
 			if(err !== null){
 				log.error(err);
-				return dispatch(notifyReportRequestError(err.toString()));
+				dispatch(notifyReportRequestError(err.toString()));
 			}
 
 			/*
@@ -328,12 +341,10 @@ export function getReports(){
 				})
 			});
 			
-			return dispatch(receiveReports(reports));
+			dispatch(receiveReports(reports));
 			
-				
 		});
-        
-        
+			
     }
 }
 
@@ -890,12 +901,21 @@ export function saveCompositeReport(reportId, name, catId, options){
 							return ;
 						}
 						
+						const reportInfo = getState().reports.reportsInfo[reportId]
+						const data = {
+							...reportInfo,
+							name: name,
+							category_id: catId,
+							options: options
+						};
+						
 						//Update the report tree incase the report name changed
-						await dispatch(getReports());
-						//return dispatch(confirmReportCreation(reportId, data));
+						dispatch(getReportInfo(reportId));
+						dispatch(getReports());
+						dispatch(confirmCompReportCreation(reportId, data));
 					}); 
 				}else{
-									//Insert/create new report
+					//Insert/create new report
 					let stmt = db.prepare(
 						"INSERT INTO reports " +
 						" (name, notes, category_id, query, options, type)" +
@@ -913,7 +933,7 @@ export function saveCompositeReport(reportId, name, catId, options){
 						}
 
 						//Update the report tree incase the report name changed
-						await dispatch(getReports());
+						dispatch(getReports());
 						
 						//@TODO: Confirm report creation
 						//return dispatch(confirmReportCreation(reportId, data));
@@ -926,4 +946,35 @@ export function saveCompositeReport(reportId, name, catId, options){
 			}
 		});
 	}
+}
+
+/**
+* Clear the state of the create composite report 
+*
+*/
+export function clearCreateCompReportState(){
+    return {
+        type: CLEAR_CREATE_COMP_RPT_STATE
+    }
+}
+
+
+/**
+* Get composite report info and load in state.compReport
+*/
+export function getCompReportInfoForEdit(reportId){
+	return (dispatch, getState) => {
+		dispatch(getReportInfo(reportId));
+		
+		//This should be called after call to getReportINfo has completed
+		//dispatch(loadCompReportInfoForEdit(reportId))
+	}	
+}
+
+export function confirmCompReportCreation(reportId, data){
+	return {
+		type: CONFIRM_COMP_RPT_CREATION,
+		data: data,
+		reportId: reportId
+	};
 }

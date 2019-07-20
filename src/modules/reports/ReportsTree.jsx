@@ -10,7 +10,7 @@ import { Classes, Icon, Tree, FormGroup, InputGroup,
 		from "@blueprintjs/core";
 import './reports-panel.css';
 import { saveCategory, clearReportCreateState, removeCategory, getCategory,
-		clearEditCategoryState } 
+		clearEditCategoryState, clearCreateCompReportState } 
 	from "./reports-actions"
 
 
@@ -101,7 +101,9 @@ class ReportsTree extends React.Component{
                 <Menu>
                     <MenuItem icon="th" text="View report" onClick={(ev) => {ev.preventDefault(); this.showReportDataTab(node.label, node.reportId);}}/>
 					{node.inBuilt === 1 ? "" : <MenuItem icon="graph-remove" text="Delete report" onClick={(ev) => {ev.preventDefault(); this.removeReport(node.reportId);}}/> }	
-					{node.inBuilt === 1 || node.type === 'composite' ? "" : <MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
+					{node.inBuilt === 1 || node.type === 'composite' ? 
+						<MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.createCompositeReport(node.reportId)}} />					: 
+						<MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
 					
                 </Menu>,
                 { left: e.clientX, top: e.clientY },
@@ -233,7 +235,6 @@ class ReportsTree extends React.Component{
     
     componentDidMount(){
         this.props.dispatch(getReports());
-        
         this.updateNodes();
     }
     
@@ -386,11 +387,26 @@ class ReportsTree extends React.Component{
         this.isSaving  = true;
     }
 	
-	createCompositeReport = () => {
+	createCompositeReport = (reportId) => {
 		let tabId  = 'create_composite_report';
-		this.props.dispatch(addTab(tabId, 'CreateCompositeReport', {
-			title: 'Create Composite Report'
-		}));
+		
+        //Close any open create tab
+        //This is to fix a bug caused by create and edit using the same component
+        this.props.dispatch(closeTab(tabId));
+        this.props.dispatch(clearCreateCompReportState());
+        
+        //The delay is to ensure the previous close has time to clean up
+        setTimeout(()=>{
+			this.props.dispatch(addTab(tabId, 'CreateCompositeReport', {
+				title: typeof reportId === 'number' ? "Edit Composite Report" : "Create Composite Report",
+				options: {
+					reportId: typeof reportId === 'number' ? reportId : null 
+				}
+			}));
+			
+        },10)
+	
+		
 	}
     render(){        
         
