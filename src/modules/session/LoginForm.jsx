@@ -36,7 +36,8 @@ class LoginForm extends React.Component {
         
     }
     
-    clearOldSession(){
+    clearOldSession = () => (e) => {
+		e.preventDefault();
         this.props.dispatch(clearOldSession())
     }
     

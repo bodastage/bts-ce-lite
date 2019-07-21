@@ -56,13 +56,13 @@ function createWindow () {
 	}
 
 	
-  // and load the index.html of the app.
+   // and load the index.html of the app.
    //mainWindow.loadFile('index.html')
 
-  // Open the DevTools.
-	mainWindow.webContents.openDevTools()
+	// Open the DevTools.
+	//mainWindow.webContents.openDevTools()
 
-  // Emitted when the window is closed.
+	//Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
