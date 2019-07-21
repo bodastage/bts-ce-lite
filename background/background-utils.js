@@ -385,8 +385,8 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 	let csvFileCount = items.length;
 	let filesNotLoaded = 0; //Keep count of files not loaded
 	
-	//50 mb
-	const highWaterMark = 50 * 1024 * 1024;
+	//100 mb
+	const highWaterMark = 100 * 1024 * 1024;
 	
 	//Time to wait for load to complete 
 	const waitTime = 1; //1 second 
