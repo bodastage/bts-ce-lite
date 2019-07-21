@@ -259,7 +259,7 @@
     },
 	"deb": {
       "synopsis": "Boda-Lite Desktop App",
-      "afterInstall": "build/debian-after-install.sh",
+      "afterInstall": "build/debian-after-install.sh"
     },
     "win": {
       "target": [ 
