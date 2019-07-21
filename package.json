@@ -1,6 +1,6 @@
 {
   "name": "Boda-Lite",
-  "version": "0.3.0",
+  "version": "0.2.3",
   "description": "Boda-Lite is a telecommunication network management application",
   "private": true,
   "homepage": "./",
@@ -231,6 +231,7 @@
       "main": "./src/electron-start.js"
     },
     "dmg": {
+	  "icon": "build/icon.icns",
       "contents": [
         {
           "x": 110,
@@ -245,13 +246,27 @@
       ]
     },
     "linux": {
+	  "category": "Science",
       "target": [
         "AppImage",
-        "deb"
-      ]
+        "deb",
+		"zip",
+		"snap",
+		"rpm"
+      ],
+	  "synopsis ": "Boda-Lite Desktop App",
+	  "description": "Boda-Lite is a telecommunication network management desktop client.",
+    },
+	"deb": {
+      "synopsis": "Boda-Lite Desktop App",
+      "afterInstall": "build/debian-after-install.sh",
     },
     "win": {
-      "target": "NSIS",
+      "target": [ 
+	  "nsis",
+	  "portable",
+	  "zip"
+	  ]
       "icon": "build/icon.ico"
     },
     "directories": {
