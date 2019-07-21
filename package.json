@@ -266,7 +266,7 @@
 	  "nsis",
 	  "portable",
 	  "zip"
-	  ]
+	  ],
       "icon": "build/icon.ico"
     },
     "directories": {
