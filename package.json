@@ -254,7 +254,7 @@
 		"snap",
 		"rpm"
       ],
-	  "synopsis ": "Boda-Lite Desktop App",
+	  "synopsis": "Boda-Lite Desktop App",
 	  "description": "Boda-Lite is a telecommunication network management desktop client."
     },
 	"deb": {
