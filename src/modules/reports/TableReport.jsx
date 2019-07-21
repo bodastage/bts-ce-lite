@@ -6,8 +6,8 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
-		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position,
-		 HTMLSelect } from "@blueprintjs/core"; 
+		 Dialog, Popover, PopoverInteractionKind,  Spinner, Callout, 
+		 Menu, MenuItem, Position, HTMLSelect } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 const { ipcRenderer} = window.require("electron")
@@ -29,13 +29,11 @@ class TableReport extends React.Component{
         this.progressToastCount = 0;
          
         this.onDownloadClick = this.onDownloadClick.bind(this);
-        this.handleProgressToast = this.handleProgressToast.bind(this);
 
 
         this.handleErrorOpen = this.handleErrorOpen.bind(this);
         this.handleErrorClose = this.handleErrorClose.bind(this);
         this.refreshData = this.refreshData.bind(this);
-        this.clearDownloadProgress = this.clearDownloadProgress.bind(this)
         this.handleAlertClose = this.handleAlertClose.bind(this)
         
 		this.handleDialogOpen = this.handleDialogOpen.bind(this)
@@ -62,7 +60,21 @@ class TableReport extends React.Component{
 			defaultColDef: {
 				filter: true, // set filtering on for all cols
 				sortable: true,
-				resizable: true
+				resizable: true,
+				headerComponentParams : {
+				template:
+					'<div class="ag-cell-label-container" role="presentation">' +
+					'  <span ref="eMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
+					'  <div ref="eLabel" class="ag-header-cell-label" role="presentation">' +
+					'    <span ref="eSortOrder" class="ag-header-icon ag-sort-order" ></span>' +
+					'    <span ref="eSortAsc" class="ag-header-icon ag-sort-ascending-icon" ></span>' +
+					'    <span ref="eSortDesc" class="ag-header-icon ag-sort-descending-icon" ></span>' +
+					'    <span ref="eSortNone" class="ag-header-icon ag-sort-none-icon" ></span>' +
+					'    <span ref="eText" class="ag-header-cell-text" role="columnheader"></span>' +
+					'    <span ref="eFilter" class="ag-header-icon ag-filter-icon"></span>' +
+					'  </div>' +
+					'</div>'
+				}
 			},
 			
             //Download Alert state
@@ -134,24 +146,6 @@ class TableReport extends React.Component{
     handleAlertClose = () => {
        this.setState({isAlertOpen: false}) 
     }
-    
-    /**
-     * Dismiss the download progress toast
-     * 
-     * @returns {undefined}
-     */
-    clearDownloadProgress(){
-        clearTimeout(this.downloadInterval);
-        clearInterval(this.progressToastInterval);
-
-        this.downloadUrl = null;
-        this.downloadFilename = null;
-        
-        this.progressToastCount = 101;
-        //this.toaster.dismiss();
- 
-    }
-    
  
     
     componentDidMount() {
@@ -247,37 +241,6 @@ class TableReport extends React.Component{
             ),
             timeout: amount < 100 ? 0 : 2000,
         };
-    }
-    
-    /**
-     * Set up and start download progress toast
-     * 
-     * @returns {undefined}
-     */
-    handleProgressToast = () => {
-        this.progressToastCount = 0;
-        this.progressToastKey = this.toaster.show(this.renderDownloadProgress(0));
-        this.progressToastInterval = setInterval(() => {
-            if(this.props.download !== null ){ 
-                if(this.props.download.status.toUpperCase() === 'FINISHED' ||
-                   this.props.download.status.toUpperCase() === 'FAILED'
-                    ){
-                    clearInterval(this.progressToastInterval);
-                    return;
-                }
-            }
-            
-            if (this.toaster === null || this.progressToastCount > 100) {
-                clearInterval(this.progressToastInterval);
-            } else {
-                //Don't reach 100
-                if(this.progressToastCount + 20 < 100) { 
-                    this.progressToastCount += Math.random() * 20;
-                    this.toaster.show(this.renderDownloadProgress(this.progressToastCount), this.progressToastKey);
-                }
-                
-            }
-        }, 1000);
     }
 
 	/**
@@ -413,6 +376,8 @@ class TableReport extends React.Component{
 							</Popover>
                             <Toaster {...this.state} ref={this.refHandlers.toaster} />
                             <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
+							
+							
                         </ButtonGroup>
 						
 						<HTMLSelect options={this.numDisplayRowsOptions} onChange={this.selectNumRowsToDisplay.bind(this)} value={this.state.paginationPageSize} className="float-right"></HTMLSelect>

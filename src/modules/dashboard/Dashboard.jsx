@@ -76,6 +76,13 @@ class Dashboard extends React.Component {
                             </div>
 							
                             <div className="col-md-2">
+								<div className="icon-display"><a title="GIS" href="#/gis" 
+									onClick={this.addTab({
+                                component: 'GISMap',
+                                title: 'GIS'
+                                })}> 
+									<FontAwesomeIcon icon="globe-africa"/></a></div>
+                                <div className="icon-label">GIS</div>
                             </div>
 
                             <div className="col-md-2">

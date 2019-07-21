@@ -29,8 +29,6 @@ class ReportContainer extends React.Component{
 	
     render(){
 		
-		console.log("reportOptions:", this.props.reportInfo);
-		
         //Show spinner as we wait for data
         if( this.props.reportInfo === null ){
             return (
@@ -69,7 +67,7 @@ class ReportContainer extends React.Component{
         if(reportOptions.type === 'Composite'){
             return (
                 <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><Icon icon="timeline-bar-chart"/> {this.props.reportInfo.name}</legend>
+                    <legend className="legend"><Icon icon="control"/> {this.props.reportInfo.name}</legend>
 					<CompositeReport options={this.props.options} reportInfo={this.props.reportInfo}/>
 				</fieldset>
 			);

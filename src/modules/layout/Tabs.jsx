@@ -13,6 +13,7 @@ import Database from '../settings/Database';
 import ReportContainer from '../reports/ReportContainer';
 import CreateReport from '../reports/CreateReport';
 import CreateCompositeReport from '../reports/CreateCompositeReport';
+import GISMap from '../gis/GISMap';
 
 const Components = {
     "Help": Help,
@@ -23,7 +24,8 @@ const Components = {
 	"Database": Database,
 	"ReportContainer": ReportContainer,
 	"CreateReport": CreateReport,
-	"CreateCompositeReport": CreateCompositeReport
+	"CreateCompositeReport": CreateCompositeReport,
+	"GISMap": GISMap
     };
 
 class Tabs extends React.Component {

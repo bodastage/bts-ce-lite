@@ -52,6 +52,7 @@ class UILayout extends React.Component {
                 />
 				
                 <MenuItem icon="th" text="Reports" onClick={this.setSidePanel('ReportsTree')}/>
+				<MenuItem icon="globe" text="GIS"/>
 				<MenuDivider />
                 <MenuItem icon="cog" text="Settings" onClick={this.addTab({
                                 component: 'Settings', title: 'Settings'})}/>
