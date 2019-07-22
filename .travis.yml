@@ -34,7 +34,8 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install rpm; fi
 
 install:
-  - yarn
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then npm install --global windows-build-tools; fi 
+  - yarn install --network-timeout 1000000 
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then yarn release; fi

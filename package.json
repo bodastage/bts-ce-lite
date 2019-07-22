@@ -247,6 +247,7 @@
     },
     "linux": {
 	  "category": "Science",
+	  "packageCategory": "Science",
       "target": [
         "AppImage",
         "deb",
@@ -254,6 +255,7 @@
 		"snap",
 		"rpm"
       ],
+	  "icon": "./build/icon.icns",
 	  "synopsis": "Boda-Lite Desktop App",
 	  "description": "Boda-Lite is a telecommunication network management desktop client."
     },
