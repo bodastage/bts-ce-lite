@@ -17,7 +17,6 @@ FROM zte_cm."GsmCell" t1
 
 `
 
-
 export const ZTE_3G_KEY_PARAMAETERS = `
 SELECT 
 	t1.data->>'varDateTime' AS "DATETIME", 
