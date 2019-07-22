@@ -13,6 +13,7 @@ init:
 install:
   - ps: Install-Product node 10 x64
   - yarn global add windows-build-tools
+  - resetvars.bat
   - yarn install --network-timeout 1000000 
 
 build_script:
