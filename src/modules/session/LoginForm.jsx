@@ -21,7 +21,7 @@ class LoginForm extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.dismissError = this.dismissError.bind(this);
-        this.clearOldSession = this.clearOldSession.bind(this);
+        this.handleLoginAdDifferentUser = this.handleLoginAdDifferentUser.bind(this);
 
     }
     
@@ -36,8 +36,9 @@ class LoginForm extends React.Component {
         
     }
     
-    clearOldSession = () => (e) => {
-		e.preventDefault();
+    handleLoginAdDifferentUser = () => {
+		//console.log(e);
+		//e.preventDefault();
         this.props.dispatch(clearOldSession())
     }
     
@@ -132,7 +133,7 @@ class LoginForm extends React.Component {
         <Button type="submit" text="Sign in" intent={Intent.PRIMARY} disabled={this.props.authenticating}/> &nbsp;
                     
                     {typeof this.props.userDetails !== 'undefined' && this.props.userDetails !== null? 
-                        <a href="/#" onClick={this.clearOldSession}> as different user</a>
+                        <a href="/#" onClick={(e) => { e.preventDefault(); this.handleLoginAdDifferentUser();}}> as different user</a>
                     :''}
                 </form>
 
