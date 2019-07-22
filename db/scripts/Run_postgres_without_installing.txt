@@ -1,0 +1,12 @@
+# Running postgres without installing 
+1.Download  PostgreSQL
+	db\scripts\download_postgres.bat
+2.Initialize  database
+	PostreSQL\pgsql\bin\initdb.exe -D ..\data --username=postgres --auth=trust
+3. Start database 
+	PostreSQL\pgsql\bin\pg_ctl.exe start -D ../data
+	PostreSQL\pgsql\bin\pg_ctl.exe start -D ../data -l logfile.log
+3.Log in to test connection 
+	psql -username=postgres
+4.Optionally, give user password
+	ALTER USER postgres WITH PASSWORD 'boda';

@@ -383,9 +383,10 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 	
 	//This will be used to wait for the loading to complete before existing the function 
 	let csvFileCount = items.length;
+	let filesNotLoaded = 0; //Keep count of files not loaded
 	
-	//50 mb
-	const highWaterMark = 50 * 1024 * 1024;
+	//100 mb
+	const highWaterMark = 100 * 1024 * 1024;
 	
 	//Time to wait for load to complete 
 	const waitTime = 1; //1 second 
@@ -437,9 +438,12 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			log.error(`Pool_Connect_Query: ${e.toString()}`);
 			log.info(`Skipping loading of ${moName}`);
 			
-			//reduce the file count 
-			++csvFileCount;
+			//reduce the file count the needs to be processed 
+			--csvFileCount;
 			fileIsLoading = false;
+			
+			//Increament the count of files that have not been processed
+			++filesNotLoaded;
 			
 			//Process next file 
 			//@TODO: 
@@ -470,7 +474,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			//reduce process file count 
 			--csvFileCount;
 			
-			log.info(`Loading of  ${moName} is done. ${csvFileCount} files left.`);
+			log.info(`Loading of  ${moName} is done. ${csvFileCount} csv files remaining to be processed.`);
 			writeStatus = true;
 		
 			fileIsLoading = false;
@@ -488,15 +492,21 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 				csv()
 				.fromFile(filePath)
 				.subscribe(async (json)=>{
-					// plan newline for enter in db 
+					// Remove """ from json 
 					const jsonString = JSON.stringify(json);
-						
+					
+					//Escape backslash in jsonString
+					//Example scenario is "\"SubNetwork=ONRM_ROOT_MO_R\"" becomes ""SubNetwork=ONRM_ROOT_MO_R"" which causes an error on insertion.
+					//The replacement below escapes the backslash to preserve it ib the jsonString for insertion
+					var re = new RegExp(String.fromCharCode(92, 92), 'g');
+					const sanitizedJsonString= jsonString.replace(re,String.fromCharCode(92,92));
+
 					//Get out of subscribe if there was an error
 					if(writeStatus === null){
 						return;
 					}
 					
-					writeStatus = copyFromStream.write(jsonString + "\n");
+					writeStatus = copyFromStream.write(sanitizedJsonString + "\n");
 
 					//Sleep for 1s	if status is false i.e to wait for the writable stream buffer/queue to free					
 					while(writeStatus === false){
@@ -533,7 +543,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			}
 			
 			//Release client i.e. return to pool
-			client.release();
+			await client.release();
 			rs(undefined);
 			
 		});
@@ -544,13 +554,13 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 		
 	}
 
+	log.info(`${filesNotLoaded} files not loaded.`)
+	
 	if(typeof afterLoad === 'function'){
 		afterLoad();
 	}
 
-	
 
-	
 	await pool.end();
 	
 }
@@ -558,6 +568,8 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 
 /**
 * Returns the path to the psql command on MacOs
+* 
+* @returns string Path to psql
 */
 function getPathToPsqlOnMacOSX(){
 	if( process.platform === 'darwin'){

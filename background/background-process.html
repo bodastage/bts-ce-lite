@@ -523,7 +523,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	log.info(`java ${commandArgs.join(" ")}`);
 	
 	child.stdout.on('data', (data) => {
-	  //console.log(data.toString());
+	  log.info(data.toString());
 	});
 
 	child.stderr.on('data', (data) => {
@@ -538,7 +538,6 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 		}else{
 			log.error(`Something went wrong`);
 			sendLogToUI('parse_cm_data','error', `Something went wrong`);
-			
 		}
 	});
 

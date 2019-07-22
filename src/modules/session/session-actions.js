@@ -18,6 +18,8 @@ import { NOKIA_2G_KEY_PARAMAETERS,
 		 NOKIA_3G_KEY_PARAMAETERS, 
 		 NOKIA_4G_KEY_PARAMAETERS } 
 		from '../../services/postgresql/NokiaKeyParametersQueries.js';
+import { NETWORK_CELLS, NETWORK_NODES, NETWORK_SITES } 
+		from '../../services/postgresql/NetworkEntities.js';
 import { SQLITE3_DB_PATH } from "./db-settings";
 
 const fs = window.require('fs');
@@ -242,6 +244,9 @@ export function checkDBSetupStatus(){
 				stmt.run('Nokia 2G parameters','Nokia 2G parameters', NOKIA_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
 				stmt.run('Nokia 3G parameters','Nokia 3G parameters', NOKIA_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
 				stmt.run('Nokia 4G parameters','Nokia 4G parameters', NOKIA_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
+				stmt.run('Network Cells','Network Cells', NETWORK_CELLS, '{}', 'table',2, 1);
+				stmt.run('Network Sites','Network Sites', NETWORK_SITES, '{}', 'table',2, 1);
+				stmt.run('Network Nodes','Network Nodes', NETWORK_NODES, '{}', 'table',2, 1);
 				
 				stmt.finalize();
 				

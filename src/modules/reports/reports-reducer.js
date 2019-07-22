@@ -11,9 +11,17 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		//Table report 
 		NOTIFY_RECEIVE_REPORT_FIELDS_FAILURE,
 		
+		//Clear state.compReport before editing or creating new report
+		CLEAR_CREATE_COMP_RPT_STATE,
+		
 		//Composite reports 
 		ADD_TO_COMPOSITE_REPORT,
-		UPDATE_COMPOSITE_REPORT_LAYOUT
+		UPDATE_COMPOSITE_REPORT_LAYOUT,
+		
+		//Load comp reprt info edit 
+		LOAD_COMP_RPT_INFO_FOR_EDIT,
+		
+		CONFIRM_COMP_RPT_CREATION
 		} from './reports-actions';
 
 		
@@ -26,7 +34,8 @@ const InitialCompositeReport = {
 	//{i: 'b', x: 3, y: 0, w: 2, h: 2},
 	layout: [],
 	columns: 4, //4 columns initially,
-	reports: {} //key: reportId
+	name: "Composite report",
+	catId: null
 };
 
 let initialState = {
@@ -265,6 +274,30 @@ export default function reports(state = initialState, action){
 					compReport: {
 						...state.compReport,
 						layout: action.layout
+					}
+				}
+			case CLEAR_CREATE_COMP_RPT_STATE:
+				return {
+					...state,
+					compReport: InitialCompositeReport
+				}
+			case LOAD_COMP_RPT_INFO_FOR_EDIT:
+				return {
+					...state,
+					compReport: {
+						edit: action.reportId,
+						layout: state.reportsInfo[action.reportId].options.layout,
+						columns: 4,
+						name: state.reportsInfo[action.reportId].options.name,
+						catId: state.reportsInfo[action.reportId].options.catId,
+					}
+				}
+			case CONFIRM_COMP_RPT_CREATION:
+				return {
+					...state,
+					reportsInfo: {
+						...state.reports.reportsInfo,
+						[action.reportId]: action.data
 					}
 				}
             default:

@@ -8,8 +8,9 @@ import '../../../node_modules/react-grid-layout/css/styles.css'
 import '../../../node_modules/react-resizable/css/styles.css'
 import GridLayout from 'react-grid-layout';
 import './composite-report-stats.css'
-import { getReportInfo, addToCompositeReport, updateCompositeLayout,
-		saveCompositeReport } from './reports-actions';
+import { getReportInfo, getCompReportInfoForEdit, addToCompositeReport, updateCompositeLayout,
+		saveCompositeReport, loadCompReportInfoForEdit, clearCreateCompReportState } 
+		from './reports-actions';
 import CompositeReportContainer from './CompositeReportContainer';
 
 class CreateCompositeReport extends React.Component {
@@ -31,8 +32,8 @@ class CreateCompositeReport extends React.Component {
             fields: [],
             countsUpdated: false,
 			
-			//
-			name: "Composite report",
+			//@TODO: This is not used. Should be removed.
+			name: this.props.options.name || "Composite report",
 			notes: "Composite report notes ",
 			
 			category: this.props.categories[0],
@@ -54,11 +55,30 @@ class CreateCompositeReport extends React.Component {
         this.handleCategoryValueChange = this.handleCategoryValueChange.bind(this)
                 
 				
-		this.reportName = "Composite report";
+		this.reportName = "Composite report" || this.props.options.title;
+		
+		//
+		//
+		if(typeof this.props.options.options.reportId === 'number'){
+			const reportId = this.props.options.options.reportId;
+			
+			this.state.category = this.props.categories.filter( v => v.id === this.props.reportsInfo[reportId].category_id)[0]
+			this.reportName = this.props.reportsInfo[reportId].name;
+		}else{
+			this.state.category = this.props.categories[0]
+		}
    }
 
     componentDidMount(){
-		this.props.dispatch(getReportInfo(4));
+		if( typeof this.props.options.options.reportId === 'number' ){
+			this.props.dispatch(getCompReportInfoForEdit(this.props.options.options.reportId))
+		}
+	}
+	
+	componetDidUnmount(){
+		if( typeof this.props.options.options.reportId === 'number' ){
+			this.props.dispatch(clearCreateCompReportState())
+		}
 	}
 	
 	handleNameChange(event){
@@ -183,7 +203,6 @@ class CreateCompositeReport extends React.Component {
 	*
 	*/
 	addReport(){
-		console.log("report:", this.state.report);
 		if(typeof this.state.report === 'undefined') return; //@todo: show error message 
 
 		
@@ -195,24 +214,25 @@ class CreateCompositeReport extends React.Component {
 		
 		const options = {
 			layout: {i: `${reportId}`, x: 0, y: 0, w: 2, h: 2},
-			name: this.state.name
+			name: this.state.name,
+			type: 'Composite'
 		}
 		
 		this.props.dispatch(addToCompositeReport(compReportId, reportId, options));
 	}
 	
 	removeReport(key){
-		console.log("key:", key);
 		const lyt = this.props.options.layout.filter((v) => v.i !== "z" && v.i !== key);
-		console.log("lyt:", lyt);
-		
-		console.log("lyt:", lyt);
 		this.props.dispatch(updateCompositeLayout(lyt));
 	}
 	
 	
 	saveReport(){
-		const compReportId = null;
+		let compReportId = null;
+		if( typeof this.props.options.options.reportId === 'number' ){
+			compReportId = this.props.options.options.reportId
+		}
+			
 		const name = this.reportName;  
 		const catId = this.state.category.id 
 		const options = {
@@ -234,9 +254,8 @@ class CreateCompositeReport extends React.Component {
 		const colCount = this.props.options.columns;
 		
 		let activeItem   = this.state.category;
-		const category   = this.state.category;
+		let category   = this.state.category;
 		
-
 
 		//Add box with add button
 		//let rows = this.layout.length === 0 ? 0 : layout.length/colCount;
@@ -312,15 +331,38 @@ class CreateCompositeReport extends React.Component {
 		const layout = [...this.props.options.layout, {i: 'z', x: 0, y: addBoxRow, w: 2, h: 2}];
 		//layout.push({i: 'b', x: 3, y: 0, w: 2, h: 2})
 		
+		//When editing, show spinner as we wait for the report info to be loaded in the state
+		if(typeof this.props.options.options.reportId === 'number' && this.props.options.edit === null ){
+			const reportId = this.props.options.options.reportId;
+			if(typeof this.props.reportsInfo[reportId] !== 'undefined'){
+				if(typeof this.props.reportsInfo[reportId].id !== 'undefined'){
+					this.props.dispatch(loadCompReportInfoForEdit(reportId));
+				}
+			}
 
+			return (
+			<fieldset className="col-md-12 fieldset">    	
+				<legend className="legend"><Icon icon="control"/> {this.props.options.title}</legend>
+				<Spinner />
+			</fieldset>
+			);
+		}
 		
 		
-		//console.log("layout:", layout);
+		if(typeof this.props.options.options.reportId === 'number'){
+			const reportId = this.props.options.options.reportId;
+			
+			//this.state.category = this.props.categories.filter( v => v.id === this.props.reportsInfo[reportId].category_id)[0]
+			this.reportName = this.props.reportsInfo[reportId].name;
+		}else{
+			//this.state.category = this.props.categories[0]
+		}
+		
 		
        return (
 
 			<fieldset className="col-md-12 fieldset">    	
-				<legend className="legend"><FontAwesomeIcon icon="table"/> Create composite report</legend>
+				<legend className="legend"><Icon icon="control"/> {this.props.options.title}</legend>
                     
            <div>
 		   
@@ -342,7 +384,7 @@ class CreateCompositeReport extends React.Component {
                         itemRenderer={this.categoryItemRenderer}
                         itemPredicate={this.categoryItemPredicate}
                         onItemSelect={this.handleCategoryValueChange}
-                        activeItem={activeItem}
+                        activeItem={this.state.category}
                         initialContent={<MenuItem disabled={true} text="Category" />}
                             > &nbsp;
                         <Button
@@ -384,9 +426,9 @@ function mapStateToProps(state, ownProps){
 			reports.push({ id: rpt.id, name: cat.cat_name + "/" + rpt.name });
 		});
 	});
-	
+
     return {
-		options: state.reports.compReport,
+		options: { ...state.reports.compReport, ...ownProps.options},
 		reports: reports,
 		categories: state.reports.reports.map(r => ({id: r.cat_id, name: r.cat_name}) ),
 		reportsInfo: state.reports.reportsInfo

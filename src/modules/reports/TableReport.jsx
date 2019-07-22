@@ -6,7 +6,8 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
-		 Dialog, Popover, Spinner, Callout, Menu, MenuItem, Position } from "@blueprintjs/core"; 
+		 Dialog, Popover, PopoverInteractionKind,  Spinner, Callout, 
+		 Menu, MenuItem, Position, HTMLSelect } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 const { ipcRenderer} = window.require("electron")
@@ -28,13 +29,11 @@ class TableReport extends React.Component{
         this.progressToastCount = 0;
          
         this.onDownloadClick = this.onDownloadClick.bind(this);
-        this.handleProgressToast = this.handleProgressToast.bind(this);
 
 
         this.handleErrorOpen = this.handleErrorOpen.bind(this);
         this.handleErrorClose = this.handleErrorClose.bind(this);
         this.refreshData = this.refreshData.bind(this);
-        this.clearDownloadProgress = this.clearDownloadProgress.bind(this)
         this.handleAlertClose = this.handleAlertClose.bind(this)
         
 		this.handleDialogOpen = this.handleDialogOpen.bind(this)
@@ -56,7 +55,28 @@ class TableReport extends React.Component{
             maxBlocksInCache: 2,
             overlayLoadingTemplate: '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>',
             overlayNoRowsTemplate: "<span style=\"padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;\">This is a custom 'no rows' overlay</span>",
-
+			
+			//Default column definitions
+			defaultColDef: {
+				filter: true, // set filtering on for all cols
+				sortable: true,
+				resizable: true,
+				headerComponentParams : {
+				template:
+					'<div class="ag-cell-label-container" role="presentation">' +
+					'  <span ref="eMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
+					'  <div ref="eLabel" class="ag-header-cell-label" role="presentation">' +
+					'    <span ref="eSortOrder" class="ag-header-icon ag-sort-order" ></span>' +
+					'    <span ref="eSortAsc" class="ag-header-icon ag-sort-ascending-icon" ></span>' +
+					'    <span ref="eSortDesc" class="ag-header-icon ag-sort-descending-icon" ></span>' +
+					'    <span ref="eSortNone" class="ag-header-icon ag-sort-none-icon" ></span>' +
+					'    <span ref="eText" class="ag-header-cell-text" role="columnheader"></span>' +
+					'    <span ref="eFilter" class="ag-header-icon ag-filter-icon"></span>' +
+					'  </div>' +
+					'</div>'
+				}
+			},
+			
             //Download Alert state
             canEscapeKeyCancel: false,
             canOutsideClickCancel: false,
@@ -74,8 +94,6 @@ class TableReport extends React.Component{
 			
 			notice: null, //{type:info|success|error|warning, message: ...}
 			
-			
-            
             
         };
         
@@ -88,6 +106,16 @@ class TableReport extends React.Component{
 		
 		//Filtered query to be used by download
 		this.filteredSortedQuery = null;
+		
+		//Options for the number of rows to select on the aggrid
+		this.numDisplayRowsOptions = [
+			'10',
+			'25',
+			'50',
+			'100',
+			'200',
+			'500'
+		];
     }
     
     refreshData = () => {
@@ -118,24 +146,6 @@ class TableReport extends React.Component{
     handleAlertClose = () => {
        this.setState({isAlertOpen: false}) 
     }
-    
-    /**
-     * Dismiss the download progress toast
-     * 
-     * @returns {undefined}
-     */
-    clearDownloadProgress(){
-        clearTimeout(this.downloadInterval);
-        clearInterval(this.progressToastInterval);
-
-        this.downloadUrl = null;
-        this.downloadFilename = null;
-        
-        this.progressToastCount = 101;
-        //this.toaster.dismiss();
- 
-    }
-    
  
     
     componentDidMount() {
@@ -166,6 +176,9 @@ class TableReport extends React.Component{
 		this.setState({processing: true});
 		
 		let fileName = this.props.reportInfo.name.replace(/\s+/g,"_");
+		
+		//Sanitize download file name
+		fileName = fileName.replace(/['"+]/g,"");
 		
 		let payload = {
 			reportId: this.props.options.reportId, //deprecate
@@ -229,38 +242,14 @@ class TableReport extends React.Component{
             timeout: amount < 100 ? 0 : 2000,
         };
     }
-    
-    /**
-     * Set up and start download progress toast
-     * 
-     * @returns {undefined}
-     */
-    handleProgressToast = () => {
-        this.progressToastCount = 0;
-        this.progressToastKey = this.toaster.show(this.renderDownloadProgress(0));
-        this.progressToastInterval = setInterval(() => {
-            if(this.props.download !== null ){ 
-                if(this.props.download.status.toUpperCase() === 'FINISHED' ||
-                   this.props.download.status.toUpperCase() === 'FAILED'
-                    ){
-                    clearInterval(this.progressToastInterval);
-                    return;
-                }
-            }
-            
-            if (this.toaster === null || this.progressToastCount > 100) {
-                clearInterval(this.progressToastInterval);
-            } else {
-                //Don't reach 100
-                if(this.progressToastCount + 20 < 100) { 
-                    this.progressToastCount += Math.random() * 20;
-                    this.toaster.show(this.renderDownloadProgress(this.progressToastCount), this.progressToastKey);
-                }
-                
-            }
-        }, 1000);
-    }
 
+	/**
+	* 
+	*/
+	selectNumRowsToDisplay = (event) => {
+       this.setState({paginationPageSize: event.currentTarget.value});
+	   this.agTblReload = this.agTblReload + 1;
+	}
     
     /**
      * Update the column definitions for the aggrid table
@@ -332,7 +321,7 @@ class TableReport extends React.Component{
 	}
     
     /**
-     * Create toask reference
+     * Create toast reference
      */
     refHandlers = {
         toaster: (ref) => (this.toaster = ref),
@@ -387,7 +376,11 @@ class TableReport extends React.Component{
 							</Popover>
                             <Toaster {...this.state} ref={this.refHandlers.toaster} />
                             <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
+							
+							
                         </ButtonGroup>
+						
+						<HTMLSelect options={this.numDisplayRowsOptions} onChange={this.selectNumRowsToDisplay.bind(this)} value={this.state.paginationPageSize} className="float-right"></HTMLSelect>
 
                         </div>
                         <div className="ag-theme-balham" style={{width: '100%', height: "100%", boxSizing: "border-box"}}>
@@ -395,8 +388,8 @@ class TableReport extends React.Component{
                                 key={"create-table-key-" + this.agTblReload}
                                 pagination={true}
 								domLayout="autoHeight"
+								defaultColDef={this.state.defaultColDef}
                                 columnDefs={this.columnDef}
-                                enableColResize={true}
                                 rowBuffer={this.state.rowBuffer}
                                 rowSelection={this.state.rowSelection}
                                 rowDeselection={true}
@@ -406,8 +399,6 @@ class TableReport extends React.Component{
                                 maxConcurrentDatasourceRequests={this.state.maxConcurrentDatasourceRequests}
                                 infiniteInitialRowCount={this.state.infiniteInitialRowCount}
                                 maxBlocksInCache={this.state.maxBlocksInCache}
-                                enableServerSideSorting={true}
-                                enableServerSideFilter={true}
                                 onGridReady={this.onGridReady.bind(this)}
                                 >
                             </AgGridReact>

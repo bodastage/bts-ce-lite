@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 
-class GIS extends React.Component{
+class GISMap extends React.Component{
     static icon = "globe-africa";
     static label = "GIS";
     constructor(props){
@@ -59,15 +59,15 @@ class GIS extends React.Component{
         const map = this.refs.map.leafletElement;
         setTimeout(function(){
             map.invalidateSize();
-        },500);
+        },1);
     }
     
     render(){
         const position = [this.state.lat, this.state.lng]
         const height = this.state.height;
         return (
-        <div>
-            <h3><FontAwesomeIcon icon="globe-africa"/> GIS</h3>
+			<fieldset className="col-md-12 fieldset">    	
+				<legend className="legend"><FontAwesomeIcon icon="globe-africa"/> GIS</legend>
             
             <div className="card">
                 <div className="card-body p-2" >
@@ -86,9 +86,9 @@ class GIS extends React.Component{
                     </div>
                 </div>
             </div>
-        </div>
+        </fieldset>
         );
     }
 }
 
-export default connect()(GIS);
+export default connect()(GISMap);
