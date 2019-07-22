@@ -35,7 +35,7 @@ before_install:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then npm install --global --production windows-build-tools --vs2015; fi 
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./db/scripts/download_postgres.bat; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then powershell -ExecutionPolicy ByPass -File db/scripts/travis_download_pg.ps1; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./resetvars.bat; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then PATH=$PATH:`pwd`/PostgreSQL/pgsql/bin; fi
   - yarn install --network-timeout 1000000 
