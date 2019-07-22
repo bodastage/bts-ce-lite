@@ -46,7 +46,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then yarn release --win; fi
 
 before_cache:
-  - rm -rf $HOME/.cache/electron-builder/wine
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then rm -rf $HOME/.cache/electron-builder/wine; fi
 
 branches:
   except:
