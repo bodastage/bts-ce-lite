@@ -21,27 +21,13 @@ const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
 const fixPath = window.require('fix-path');
 
+const vendorFormats = window.require('./vendor-formats');
+const VENDOR_CM_PARSERS = vendorFormats.VENDOR_CM_PARSERS;
+
 log.info(`[parse_cm_job] Starting hidden window to run as background process`)
 log.info(`PATH: ${process.env.PATH}`)
 
-const VENDOR_PARSERS = {
-	'ERICSSON': {
-		'BULKCM': 'boda-bulkcmparser.jar',
-		'CNAIV2': 'boda-ericssoncnaiparser.jar',
-	},
-	'HUAWEI': {
-		'GEXPORT_XML': 'boda-huaweicmobjectparser.jar',
-		'CFGMML': 'boda-huaweimmlparser.jar',
-		'NBI_XML': 'boda-huaweicmxmlparser.jar'
-	},
-	'ZTE': {
-		'BULKCM': 'boda-bulkcmparser.jar',
-		'XLS': 'boda_ztexlscmparser.jar',
-	},
-	'NOKIA': {
-		'RAML': 'boda-nokiacmdataparser.jar'
-	}
-}
+
 
 /*
 * Extract rar file into targetFolder
@@ -463,7 +449,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	  basepath = process.resourcesPath
 	} 
 	
-	const parser = VENDOR_PARSERS[vendor][format]
+	const parser = VENDOR_CM_PARSERS[vendor][format]
 	const parserPath = path.join(basepath,'libraries',parser)
 	
 	
