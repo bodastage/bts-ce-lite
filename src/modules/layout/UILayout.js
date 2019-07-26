@@ -44,10 +44,10 @@ class UILayout extends React.Component {
             
             const moduleMenu = (
             <Menu>
-                <MenuItem icon="asterisk" text="Process CM dumps" 
+                <MenuItem icon="asterisk" text="Parse and Import" 
                     onClick={this.addTab({
-                                component: 'ProcessCMDumps',
-                                title: 'Process CM dumps'
+                                component: 'ParseAndImport',
+                                title: 'Parse and Import'
                                 })}
                 />
 				

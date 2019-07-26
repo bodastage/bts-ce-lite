@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dashboard from '../dashboard/Dashboard';
-import ProcessCMDumps from '../cm/ProcessCMDumps';
+import ParseAndImport from '../cm/ParseAndImport';
 import { closeTab, setActiveTab } from './uilayout-actions';
 import { OverflowList, Boundary, Position, Classes, MenuItem, 
     Popover, Menu, Icon } from "@blueprintjs/core";
@@ -18,7 +18,7 @@ import GISMap from '../gis/GISMap';
 const Components = {
     "Help": Help,
     "Dashboard": Dashboard,
-	"ProcessCMDumps": ProcessCMDumps,
+	"ParseAndImport": ParseAndImport,
 	"UserProfile": UserProfile,
 	"Settings": Settings,
 	"Database": Database,

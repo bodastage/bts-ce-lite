@@ -62,10 +62,10 @@ class Dashboard extends React.Component {
                             <div className="col-md-2">
                             <div className="icon-display"><a title="Process CM dumps" href="#/parsecmdumps" 
                                 onClick={this.addTab({
-                                component: 'ProcessCMDumps',
-                                title: 'Process CM dumps'
+                                component: 'ParseAndImport',
+                                title: 'Parse and Import'
                                 })}> <FontAwesomeIcon icon="asterisk"/></a></div>
-                                <div className="icon-label">Process CM dumps</div>
+                                <div className="icon-label">Parse and Import</div>
                             </div>
 
                             <div className="col-md-2">

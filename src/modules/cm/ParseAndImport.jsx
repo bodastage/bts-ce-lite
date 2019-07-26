@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Intent, Button, FileInput, HTMLSelect, 
 		 ProgressBar, Classes, Switch   } from "@blueprintjs/core";
-import { VENDOR_CM_FORMSTS } from './VendorCM.js'
+import { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS } from './VendorFormats.js'
 import Timer from './Timer';
 import { saveCMParsingFolders } from './cm-actions';
 
@@ -17,10 +17,10 @@ const log = window.require('electron-log');
 
 
 /**
-* Process CM data dumps
+* Parse and import 
 *
 */
-class ProcessCMDumps extends React.Component {
+class ParseAndImport extends React.Component {
         
      static icon = "asterisk";
      static label = "Process CM Dumps"
@@ -31,8 +31,10 @@ class ProcessCMDumps extends React.Component {
 		this.state = {
 			inputFileText: this.props.inputFolder === null ? "Choose folder..." : this.props.inputFolder,
 			outputFolderText: this.props.outputFolder === null ? "Choose folder..." : this.props.outputFolder,
-			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA'],
+			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA', 'BODASTAGE'],
+			dataTypes: ['CM','PM', 'FM'],
 			currentVendor: 'ERICSSON',
+			currentDataType: 'CM',
 			currentFormat: 'BULKCM',
 			processing: false,
 			errorMessage: null,
@@ -46,7 +48,7 @@ class ProcessCMDumps extends React.Component {
 			clearTables: false
 		}
 		
-		this.vendorFormats = VENDOR_CM_FORMSTS
+		this.vendorFormats = VENDOR_CM_FORMATS
 		
 		this.processDumps = this.processDumps.bind(this)
 		this.dismissErrorMessage = this.dismissErrorMessage.bind(this)
@@ -56,6 +58,7 @@ class ProcessCMDumps extends React.Component {
 		this.handlClearTablesChange = this.handlClearTablesChange.bind(this);
 		this.clearForm = this.clearForm.bind(this)
 		this.launchFolderExplorer = this.launchFolderExplorer.bind(this)
+		this.onDataTypeSelectChange = this.onDataTypeSelectChange.bind(this)
 		
 		this.currentTimerValue = "00:00:00";
 		
@@ -92,7 +95,40 @@ class ProcessCMDumps extends React.Component {
 	onVendorSelectChange =(e) => {
 		this.setState(
 		{	currentVendor: e.target.value, 
-			currentFormat: VENDOR_CM_FORMSTS[e.target.value][0]}
+			currentFormat: VENDOR_CM_FORMATS[e.target.value][0]}
+		)
+	}
+	
+	/**
+	* Update the data type in state when the domain select field is selected
+	*/
+	onDataTypeSelectChange =(e) => {
+		
+		const currentDataType = e.target.value;
+		let currentFormat = null;
+		if ( currentDataType === 'CM') { 
+			if (VENDOR_CM_FORMATS.length > 0) currentFormat = VENDOR_CM_FORMATS[e.target.value][0];
+			else currentFormat = "";
+			
+			this.vendorFormats = VENDOR_CM_FORMATS;
+		
+		}
+		if ( currentDataType === 'PM') {
+			if (VENDOR_PM_FORMATS.length > 0) currentFormat = VENDOR_PM_FORMATS[e.target.value][0];
+			else currentFormat = "";
+			
+			this.vendorFormats = VENDOR_PM_FORMATS;
+		}
+		if ( currentDataType === 'FM'){ 
+			if (VENDOR_FM_FORMATS.length > 0) currentFormat = currentFormat = VENDOR_FM_FORMATS[e.target.value][0];			
+			else currentFormat = "";
+			
+			this.vendorFormats = VENDOR_FM_FORMATS;
+		}
+		
+		this.setState(
+		{	currentDataType: currentDataType, 
+			currentFormat: currentFormat}
 		)
 	}
 	
@@ -287,7 +323,7 @@ class ProcessCMDumps extends React.Component {
 		
         return (
                 <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><FontAwesomeIcon icon="asterisk"/> Process CM Dumps</legend>
+                    <legend className="legend"><FontAwesomeIcon icon="asterisk"/> Parse and Import</legend>
 					
 			
 			<div>
@@ -301,17 +337,20 @@ class ProcessCMDumps extends React.Component {
                    
 					<form>
 					  <div className="form-group row">
-						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vendor</label>
+						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Data Type</label>
 						<div className="col-sm-10">
-						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange} disabled={this.state.processing}/>
+						  <HTMLSelect options={this.state.dataTypes} id="select_data_type" value={this.state.currentDataType} onChange={this.onDataTypeSelectChange} disabled={this.state.processing} className="mr-2"/>
 						</div>
 					  </div>
+					  
 					  <div className="form-group row">
-						<label htmlFor="select_file_format" className="col-sm-2 col-form-label">Format</label>
+						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vendor/Format</label>
 						<div className="col-sm-10">
-						  <HTMLSelect id="select_file_format"options={VENDOR_CM_FORMSTS[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange} disabled={this.state.processing}/>
+						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange} disabled={this.state.processing} className="mr-2"/>
+						  <HTMLSelect id="select_file_format"options={this.vendorFormats[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange} disabled={this.state.processing}/>
 						</div>
 					  </div>
+
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
 						<div className="col-sm-8">
@@ -372,4 +411,4 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps)(ProcessCMDumps);
+export default connect(mapStateToProps)(ParseAndImport);

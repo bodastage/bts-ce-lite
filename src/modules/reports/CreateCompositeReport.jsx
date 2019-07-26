@@ -328,7 +328,7 @@ class CreateCompositeReport extends React.Component {
 		];
 		
 		const addBoxRow = this.props.options.layout.length === 0 ? 0 : Math.ceil(this.props.options.layout.length/colCount) + 1
-		const layout = [...this.props.options.layout, {i: 'z', x: 0, y: addBoxRow, w: 2, h: 2}];
+		const layout = [...this.props.options.layout, {i: 'z', x: 0, y: addBoxRow, w: 2, h: 1}];
 		//layout.push({i: 'b', x: 3, y: 0, w: 2, h: 2})
 		
 		//When editing, show spinner as we wait for the report info to be loaded in the state
