@@ -588,6 +588,80 @@ function getPathToPsqlOnMacOSX(){
 	
 }
 
+/*
+* Run database migrations
+* 
+* @param string hostname 
+* @param string port 
+* @param string username 
+* @param string password 
+*
+* @since 0.3.0
+*/
+async function runMigrations(hostname, port, username, password){
+	
+	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/postgres`;
+	const client = new Client({
+		connectionString: connectionString,
+	});
+		
+	client.connect((err) => {
+		if(err){
+			return err;
+		}
+	});
+		
+	try{
+		let results = await
+		new Promise( async (resolve, reject) => {
+			let res = await client.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = 'boda'");
+			res  = await client.query("DROP DATABASE IF EXISTS boda");
+			res  = await client.query("DROP ROLE IF EXISTS bodastage");
+			res  = await client.query("CREATE USER bodastage WITH PASSWORD 'password'");
+			res  = await client.query("CREATE DATABASE boda owner bodastage");
+			
+			client.end();
+			if(typeof res.err !== 'undefined') reject("Error occured"); else resolve("Database and role created successfully.");
+			
+		});	
+	}catch(e){
+		return {status: 'error', message: 'Error occurred while running migrations. See log for details'}	
+	}
+	
+	//Get app base path
+	let basePath = app.getAppPath();
+	if (!isDev) basePath = process.resourcesPath;	
+	
+	//Create boda database 
+	const dbCon  = await getSQLiteDBConnectionDetails('boda');
+	const bodaConnStr = `postgresql://${dbCon.username}:${dbCon.password}@${dbCon.hostname}:${dbCon.port}/boda`;
+	const migrationDir = path.join(basePath,'db','migrations');
+	const options = {
+			databaseUrl: bodaConnStr ,
+			dir:  migrationDir,
+			direction: 'up',
+			count: Infinity,
+			migrationsTable: 'pgmigrations',
+			log: log.log			
+		};
+	
+	log.info(`Migration directory: ${migrationDir}`)
+	
+	
+	const migrationRunner = window.require('node-pg-migrate');
+	
+	try {
+		await migrationRunner(options);
+	} catch(e) {
+		log.error(e.toString());
+		return {status: 'error', message: 'Error occurred while running migrations. See log for details'}	
+	}
+	
+	return {status: 'success', message: 'Database setup/upgrade completed successfully'}
+	
+	
+}
+
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteDBConnectionDetails = getSQLiteDBConnectionDetails;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
@@ -596,3 +670,4 @@ exports.generateCSVFromQuery = generateCSVFromQuery;
 exports.loadCMDataViaStream = loadCMDataViaStream;
 exports.generateExcelOrCSV = generateExcelOrCSV;
 exports.getPathToPsqlOnMacOSX = getPathToPsqlOnMacOSX;
+exports.runMigrations = runMigrations;
