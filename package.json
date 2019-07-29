@@ -5,6 +5,7 @@
   "private": true,
   "homepage": "./",
   "scripts": {
+    "migrate": "./node_modules/.bin/node-pg-migrate",
     "electron": "electron .",
     "electron-dev-unix": "ELECTRON_START_URL=http://localhost:3000 electron .",
     "electron-dev": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
@@ -90,6 +91,7 @@
     "leaflet-semicircle": "^2.0.2",
     "mini-css-extract-plugin": "0.5.0",
     "mongodb-extjson": "^3.0.3",
+    "node-pg-migrate": "^3.21.1",
     "node-stream-zip": "^1.8.0",
     "node-unrar-js": "^0.8.1",
     "optimize-css-assets-webpack-plugin": "5.0.1",
@@ -128,7 +130,6 @@
     "shell-path": "^2.1.0",
     "sqlite3": "^4.0.9",
     "terser-webpack-plugin": "1.2.2",
-    "typeorm": "^0.2.18",
     "unzipper": "^0.10.0",
     "url-loader": "1.1.2",
     "url-search-params-polyfill": "^4.0.1",
@@ -231,7 +232,7 @@
       "main": "./src/electron-start.js"
     },
     "dmg": {
-	  "icon": "build/icon.icns",
+      "icon": "build/icon.icns",
       "contents": [
         {
           "x": 110,
@@ -246,29 +247,29 @@
       ]
     },
     "linux": {
-	  "category": "Science",
-	  "packageCategory": "Science",
+      "category": "Science",
+      "packageCategory": "Science",
       "target": [
         "AppImage",
         "deb",
-		"zip",
-		"snap",
-		"rpm"
+        "zip",
+        "snap",
+        "rpm"
       ],
-	  "icon": "./build/icon.icns",
-	  "synopsis": "Boda-Lite Desktop App",
-	  "description": "Boda-Lite is a telecommunication network management desktop client."
+      "icon": "./build/icon.icns",
+      "synopsis": "Boda-Lite Desktop App",
+      "description": "Boda-Lite is a telecommunication network management desktop client."
     },
-	"deb": {
+    "deb": {
       "synopsis": "Boda-Lite Desktop App",
       "afterInstall": "build/debian-after-install.sh"
     },
     "win": {
-      "target": [ 
-	  "nsis",
-	  "portable",
-	  "zip"
-	  ],
+      "target": [
+        "nsis",
+        "portable",
+        "zip"
+      ],
       "icon": "build/icon.ico"
     },
     "directories": {

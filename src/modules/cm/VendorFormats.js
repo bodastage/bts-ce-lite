@@ -15,10 +15,10 @@ export const VENDOR_PM_FORMATS = {
 }
 
 export const VENDOR_FM_FORMATS = {
-	'ERICSSON': ['BULKCM'],
-	'HUAWEI': ['NBI_XML'],
-	'ZTE': ['BULKCM','XLS'],
-	'NOKIA': ['RAML'],
+	'ERICSSON': [],
+	'HUAWEI': [],
+	'ZTE': [],
+	'NOKIA': [],
 	'BODASTAGE': []
 }
 

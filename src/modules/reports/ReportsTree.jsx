@@ -10,7 +10,8 @@ import { Classes, Icon, Tree, FormGroup, InputGroup,
 		from "@blueprintjs/core";
 import './reports-panel.css';
 import { saveCategory, clearReportCreateState, removeCategory, getCategory,
-		clearEditCategoryState, clearCreateCompReportState } 
+		clearEditCategoryState, clearCreateCompReportState, 
+		clearNewCategoryState } 
 	from "./reports-actions"
 
 
@@ -374,6 +375,7 @@ class ReportsTree extends React.Component{
     
     openCreateCategoryDialog = () => { 
 		this.props.dispatch(clearEditCategoryState());
+		this.props.dispatch(clearNewCategoryState());
 		this.catName = "";
 		this.catNotes = "";
 		this.catDialogTitle = "Add report category";

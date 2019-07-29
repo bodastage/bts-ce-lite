@@ -21,7 +21,13 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		//Load comp reprt info edit 
 		LOAD_COMP_RPT_INFO_FOR_EDIT,
 		
-		CONFIRM_COMP_RPT_CREATION
+		CONFIRM_COMP_RPT_CREATION,
+		
+		//
+		CLEAR_REPORT_TREE_ERROR,
+		
+		//Clear
+		CLEAR_NEW_RPT_CATEGORY
 		} from './reports-actions';
 
 		
@@ -232,6 +238,11 @@ export default function reports(state = initialState, action){
                     ...state,
                     editCat: null
                 }
+            case CLEAR_NEW_RPT_CATEGORY:
+                return {
+                    ...state,
+                    newCat: { requesting: null}
+                }
             case NOTIFY_REPORT_CATEGORY_RENAME_ERROR:
                 return {
                     ...state,
@@ -300,6 +311,11 @@ export default function reports(state = initialState, action){
 						[action.reportId]: action.data
 					}
 				}
+            case CLEAR_REPORT_TREE_ERROR:
+                return {
+                    ...state,
+                    requestError: null
+                }
             default:
                 return state;
 		}

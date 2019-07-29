@@ -1,5 +1,4 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { connect } from 'react-redux';
 import { Button, ResizeSensor, Spinner, Icon, Intent,
 		 MenuItem, Menu, FormGroup, InputGroup } from "@blueprintjs/core";
@@ -253,7 +252,7 @@ class CreateCompositeReport extends React.Component {
 
 		const colCount = this.props.options.columns;
 		
-		let activeItem   = this.state.category;
+		//let activeItem   = this.state.category;
 		let category   = this.state.category;
 		
 

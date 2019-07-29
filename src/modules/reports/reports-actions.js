@@ -1,9 +1,5 @@
-import { SQLITE3_DB_PATH } from "../session/db-settings";
 import { runQuery, getQueryFieldsInfo } from './DBQueryHelper.js';
-
-const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
-const { Client } = window.require('pg');
 
 
 export const REQUEST_REPORTS = 'REQUEST_REPORTS';
@@ -51,6 +47,9 @@ export const CONFIRM_REPORT_CATEGORY_RECEIVED = 'CONFIRM_REPORT_CATEGORY_RECEIVE
  * @type StringClears the state.edit_cat state
  */
 export const CLEAR_EDIT_RPT_CATEGORY = 'CLEAR_EDIT_RPT_CATEGORY';
+
+//Clear new category state i.e reports.newCat
+export const CLEAR_NEW_RPT_CATEGORY = 'CLEAR_NEW_RPT_CATEGORY';
 
 
 export const CREATE_RPT_REQUEST_FIELDS = 'CREATE_RPT_REQUEST_FIELDS';
@@ -186,20 +185,19 @@ export function receiveReport(reportId, reportInfo){
 
 //Get details for a single report
 export function getReportInfo(reportId){
-    return (dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(requestReport(reportId));
+		const query = `SELECT t.* FROM reports.reports t WHERE t.id = ${reportId}`;
+		const results = await runQuery(query);
+
+		if(typeof results.error !== 'undefined'){
+			log.error(results.error);
+			dispatch(notifyReportRequestError(results.error));
+			return;
+		}
 		
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT t.rowid as id, t.* FROM reports t WHERE t.rowid = ?", [reportId], (err, rows) => {
-			if(err !== null){
-				log.error(err);
-				dispatch(notifyReportRequestError(err.toString()));
-				return;
-			}
-			let reportInfo = rows[0]
-			reportInfo.options = JSON.parse(rows[0].options)
-			dispatch(receiveReport(reportId, reportInfo));
-		});
+		let reportInfo = results.rows[0]
+		dispatch(receiveReport(reportId, reportInfo));
     }
 }
 
@@ -220,134 +218,91 @@ export function notifyReceiveReportFieldsFailure(reportId, error){
 * @param String reportId
 */
 export function getReportFields(reportId){
-    return (dispatch, getState) => {
+    return  async(dispatch, getState) => {
         dispatch(requestReportFields(reportId));
 		
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM databases WHERE name = ?", ["boda"] , (err, row) => {
-			if(err !== null){
-				log.error(row);
-				return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
-			}
-			
-			const hostname = row[0].hostname;
-			const port = row[0].port;
-			const username = row[0].username;
-			const password = row[0].password;
-			
-			//get report details 
-			db.all("SELECT * FROM reports r WHERE rowid = ?",[reportId], (rErr, rRows) => {
-				if(rErr !== null){
-					log.error(rErr);
-					return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error getting report info. See log for detials."));
-				}
-				
-				let query = rRows[0].query;
-				
-				//For now let's get the fields from the first records returned from the query 
-				//@TODO: Pick from sqlite db the connection details
-				//const url = `mongodb://127.0.0.1:27017/boda`;
-				
-				const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`
-				
-				const client = new Client({
-				  connectionString: connectionString,
-				});
-				
-				client.connect((err) => {
-					if(err){
-						log.error(`Failed to connect to ${connectionString}. ${err}`);
-						return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while connecting to database. See log for detials."));
-						//return dispatch(receiveReportFields(reportId, []));
-						//@TODO: Create failure notifiation action
-						//return dispatch(notifyReceiveReportFieldsFailure(reportId, `Failed to connect to ${url}. ${err}`));
-					}
-				});
-				
-			client.query(`SELECT * FROM (${query}) t LIMIT 0`)
-				.then( result => {
-					let fields = result.fields.map((v,i) => v.name );
-					return dispatch(receiveReportFields(reportId, fields));
-				} )
-				.catch(e => {
-					//@TODO: Error notice
-					log.error(e);
-					return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while executing query. See log for detials."));
-					//return dispatch(receiveReportFields(reportId, []));	
-				})
-				.then(() => client.end());
-				
-			});//db.all()
-			
-
-			
-		});//db.all- get db connection details
-
+		//@TODO: only select query
+		const query = `SELECT * FROM reports.reports r WHERE r.id =${reportId}`;
+		const results = await runQuery(query);
+		
+		//@TODO: Handle connection error 
+		
+		let query2 = results.rows[0].query;
+		
+		const results2 = await runQuery(`SELECT * FROM (${query2}) t LIMIT 0`);
+		//@TODO: Check for connection error and 
+		if(typeof results2.error !== 'undefined'){
+			log.error(results2.error);
+			return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while getting reports fileds. See log for detials."));
+		}
+		
+		let fields = results2.fields.map((v,i) => v.name );
+		return dispatch(receiveReportFields(reportId, fields));
 
     }
 }
 
 export function getReports(){
-    return (dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(requestReports());
 	
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		return db.all(`SELECT 
-					r.rowid as id,  
+		const query = `SELECT 
+					r.id as id,  
 					r.name as name, 
 					r.type as type, 
-					c.rowid as cat_id, 
+					c.id as cat_id, 
 					c.name as cat_name, 
 					r.in_built as r_in_built, 
 					c.in_built as c_in_built 
-				FROM rpt_categories c 
-				LEFT join reports r  ON r.category_id = c.rowid		`,  (err, rows) => {
-					
-			if(err !== null){
-				log.error(err);
-				dispatch(notifyReportRequestError(err.toString()));
-			}
-
-			/*
-			* Holds an list/array of categories and  for each category there is an list/array of reports
-			*/
-			let reports = []
-			let catIndexMap = {} //Map of category names to ids
+				FROM reports.categories c 
+				LEFT join reports.reports r  ON r.category_id = c.id`;
 			
-			rows.forEach((item, index) => {
-				
-				if(typeof catIndexMap[item.cat_name] === 'undefined'){ //this is a new category
-					reports.push({
-						cat_id: item.cat_id,
-						cat_name: item.cat_name,
-						in_built: item.c_in_built,
-						reports: []
-					})
-					
-					let catIndex = reports.length - 1
-					catIndexMap[item.cat_name] = catIndex;
-				}
-				
-				//No report info
-				if(item.id === null) return;
-				
-				//At this point we already have the category so we update the report list
-				let catIndex = catIndexMap[item.cat_name];
-				reports[catIndex].reports.push({
-					id: item.id,
-					name: item.name,
-					in_built: item.r_in_built,
-					type: item.type
+		const results = await runQuery(query);
+		if(typeof results.error !== 'undefined'){
+			log.error(results.error);
+			return dispatch(notifyReportRequestError(results.error));
+		}
+		
+		/*
+		* Holds an list/array of categories and  for each category there is an list/array of reports
+		*/
+		let reports = [];
+		let catIndexMap = {}; //Map of category names to ids
+		
+		results.rows.forEach((item, index) => {
+			
+			if(typeof catIndexMap[item.cat_name] === 'undefined'){ //this is a new category
+				reports.push({
+					cat_id: item.cat_id,
+					cat_name: item.cat_name,
+					in_built: item.c_in_built,
+					reports: []
 				})
-			});
+				
+				let catIndex = reports.length - 1
+				catIndexMap[item.cat_name] = catIndex;
+			}
+				
+			//No report info
+			if(item.id === null) return;
 			
-			dispatch(receiveReports(reports));
-			
+			//At this point we already have the category so we update the report list
+			let catIndex = catIndexMap[item.cat_name];
+			reports[catIndex].reports.push({
+				id: item.id,
+				name: item.name,
+				in_built: item.r_in_built,
+				type: item.type
+			})
 		});
+		
+		dispatch(receiveReports(reports));
 			
     }
 }
 
+
+//@TODO: Remove if not being used
 /**
  * Request report details 
  * 
@@ -399,6 +354,11 @@ export function clearEditCategoryState(){
     }
 }
 
+export function clearNewCategoryState(){
+    return {
+        type: CLEAR_NEW_RPT_CATEGORY
+    }
+}
 
 export function sendCreateReportCategoryRequest(){
     return {
@@ -430,59 +390,47 @@ export function sendDeleteReportCategoryRequest(){
  * @returns {undefined}
  */
 export  function saveCategory(catName, catNotes, catId){
-    return(dispatch, getState) => {
+    return async ( dispatch, getState) => {
         dispatch(sendCreateReportCategoryRequest());
-        
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(async () => {
-			try{
-				//Update if category id not null
-				if(catId !== null){
+		
+		try{
+			//Update if category id not null
+			if(catId !== null){
 
-					let stmt = db.prepare(
-						"UPDATE rpt_categories SET " +
-						" name = ?, notes = ? " +
-						" WHERE " + 
-						" rowid = ?");
-						
-					stmt.run([catName, catNotes, catId], async function(err){
-						if(err !== null){
-							log.error(err.toString())
-							return dispatch(notifyReportCategoryCreationError('Error updating report. Check log for details'));
-						}
-
-						//Update the report tree incase the report name changed
-						await dispatch(getReports());
-						return dispatch(confirmReportCategoryCreation());
-					});
-
-				}else{
-					let stmt = db.prepare(
-						"INSERT INTO rpt_categories " +
-						" (name, notes, parent_id)" +
-						" VALUES " + 
-						"(?,?,0)"
-					);
-
-					stmt.run([catName, catNotes], (err) => {
-						if(err !== null){
-							log.error(err.toString())
-							return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
-						}
-						
-					
-						dispatch(getReports());
-						return dispatch(confirmReportCategoryCreation());
-					});
-					stmt.finalize();
-
-					
+				let qry = `
+					UPDATE reports.categories t SET 
+					name = $$${catName}$$, notes = $$${catNotes}$$
+					WHERE
+					id = ${catId}`;
+				const result = await runQuery(qry);
+				if(typeof result.error !== 'undefined'){
+					log.error(result.error)
+					return dispatch(notifyReportCategoryCreationError('Error updating report. Check log for details'));
 				}
 
-			}catch(e){
-				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
-			}
-		});
+			}else{
+				let qry = `
+					INSERT INTO reports.categories 
+					 (name, notes, parent_id)
+					 VALUES
+					($$${catName}$$, $$${catNotes}$$,0)
+					`;
+
+				const result = await runQuery(qry);
+				if(typeof result.error !== 'undefined'){
+					log.error(result.error)
+					return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
+				}
+			}			
+
+			//Update the report tree incase the report name changed
+			dispatch(getReports());
+			return dispatch(confirmReportCategoryCreation());
+
+		}catch(e){
+			return dispatch(notifyReportCategoryCreationError('Error during category saving.'));
+		}
+		
     }
 }
 
@@ -506,27 +454,23 @@ export function sendDeleteCategoryRequest(){
  * @returns {Function}* 
  */
 export function removeCategory(catId){
-    return(dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(sendDeleteCategoryRequest());
-        
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(() => {
-			try{
-				db.run("DELETE FROM rpt_categories WHERE rowid = ? ", catId, (err) => {
-					if(err !== null){
-						log.error(err.toString());
-						return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
-					}
-					
-					return dispatch(notifyReportCategoryCreationError("Error while deleting category."));
-				});
-				
-				dispatch(getReports());
-				return dispatch(confirmReportCategoryDeletion({}));
-			}catch(e){
-				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+        		
+		try{
+			const query = `DELETE FROM reports.categories WHERE id = ${catId}`;
+			const results = await runQuery(query);
+			
+			if(typeof results.error !== 'undefined'){
+				log.error(results.error);
+				return dispatch(notifyReportCategoryCreationError("Error while deleting category."));
 			}
-		});
+			
+			dispatch(getReports());
+			return dispatch(confirmReportCategoryDeletion({}));
+		}catch(e){
+			return dispatch(notifyReportCategoryCreationError('Error during category deletion.'));
+		}
     }
 }
 
@@ -573,19 +517,20 @@ export function confirmReportCategoryReceived(categoryId, data){
  * @returns {Function}
  */
 export function getCategory(categoryId){
-    return(dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(requestReportCategory(categoryId))
         
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM rpt_categories WHERE rowid = ? ", categoryId, (err, rows ) => {
-			if(err !== null){
-				log.error(err.toString());
-				return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
-			}
-			
-			return dispatch(confirmReportCategoryReceived(categoryId, rows[0]));
-			
-		});
+		const query = `SELECT * FROM reports.categories c WHERE id = ${categoryId} `;
+		const results = await runQuery(query);
+		//@TODO: Check result status
+		
+		if(typeof results.error !== 'undefined'){
+			log.error(results.error);
+			return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
+		}
+		
+		return dispatch(confirmReportCategoryReceived(categoryId, results.rows[0]));
+
     }
 }
 
@@ -612,84 +557,86 @@ export function confirmReportCreation(reportId, reportInfo){
 }
 
 export function createOrUpdateReport({name, category_id, notes, qry, reportId, options}){
-   return (dispatch, getState) => {
+   return async (dispatch, getState) => {
         dispatch(createReportRequest());
 
 		const reportType = typeof options.type === 'undefined' ? 'Table': options.type;
 
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(async () => {
 			try{
 
-				//Update if reportId not null
-				if(reportId !== null){
-					let stmt = db.prepare(
-						"UPDATE reports SET " +
-						" name = ?, notes = ?, category_id = ?, query = ?, options = ?, type = ?" +
-						" WHERE " + 
-						" rowid = ?");
-						
-					stmt.run([name, notes, category_id, qry, JSON.stringify(options), reportType, reportId], async function(err){
-						if(err !== null){
-							log.error(err.toString())
-							return dispatch(createReportPreviewError('Error updating report. Check log for details'));
-						}
-						
-						const data = {
-							name: name,
-							category_id: category_id,
-							notes: notes,
-							query: qry,
-							options: options,
-							id: reportId
-						}
-						//Update the report tree incase the report name changed
-						await dispatch(getReports());
-						return dispatch(confirmReportCreation(reportId, data));
-					});
+			//Update if reportId not null
+			if(reportId !== null){
+				let query = `
+					UPDATE reports.reports SET 
+					name = $$${name}$$, 
+					notes = $$${notes}$$, 
+					category_id = ${category_id}, 
+					query = $$${qry}$$, 
+					options = $$${JSON.stringify(options)}$$, 
+					type = '${reportType}' 
+					WHERE " + 
+					id = ${reportId}`;
+					
+				const results = await runQuery(query);
 
-				}else{
-				
-					//Insert/create new report
-					let stmt = db.prepare(
-						"INSERT INTO reports " +
-						" (name, notes, category_id, query, options, type)" +
-						" VALUES " + 
-						"(?,?,?,?,?,?)"
-					);
-					
-		
-					stmt.run([name, notes, category_id, qry, JSON.stringify(options), reportType], async function(err){
-						if(err !== null){
-							log.error(err.toString())
-							return dispatch(createReportPreviewError('Error creating report. Check log for details'));
-						}
-						
-						const reportId = this.lastID;
-						const data = {
-							name: name,
-							category_id: category_id,
-							notes: notes,
-							query: qry,
-							options: options
-						}
-						//Update the report tree incase the report name changed
-						await dispatch(getReports());
-						
-						return dispatch(confirmReportCreation(reportId, data));
-						
-					});
-					stmt.finalize();
-					
+				if(typeof results.error !== 'undefined'){
+					log.error(results.error)
+					return dispatch(createReportPreviewError('Error updating report. Check log for details'));
 				}
-
-
-
 				
-			}catch(e){
-				return dispatch(createReportPreviewError('Error during category creation.'));
+				const data = {
+					name: name,
+					category_id: category_id,
+					notes: notes,
+					query: qry,
+					options: options,
+					id: reportId
+				}
+				//Update the report tree incase the report name changed
+				dispatch(getReports());
+				return dispatch(confirmReportCreation(reportId, data));
+
+			}else{
+			
+				//Insert/create new report
+				let query = `
+					INSERT INTO reports.reports
+					(name, notes, category_id, query, options, type)
+					VALUES
+					($$${name}$$, $$${notes}$$, ${category_id}, $$${qry}$$, $$${JSON.stringify(options)}$$, '${reportType}')
+					RETURNING id;
+				`;
+				
+				console.log(qry);
+				const results = await runQuery(query);
+				
+				console.log("+++++++++++++++++++++++++++++");
+				console.log(results);
+
+				if(typeof results.error !== 'undefined'){
+					log.error(results.error)
+					return dispatch(createReportPreviewError('Error updating report. Check log for details'));
+				}
+	
+					
+				const reportId = results.rows[0].id;
+				const data = {
+					name: name,
+					category_id: category_id,
+					notes: notes,
+					query: qry,
+					options: options
+				}
+				//Update the report tree incase the report name changed
+				dispatch(getReports());
+				
+				return dispatch(confirmReportCreation(reportId, data));
+
 			}
-		});
+
+		}catch(e){
+			return dispatch(createReportPreviewError('Report creationg error. ' + e.toString()));
+		}
         
     }
 }
@@ -767,27 +714,27 @@ export function confirmReportDeletion(reportId){
 
 
 export function deleteReport(reportId){
-    return (dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(requestReportDeletion());
-       
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(() => {
-			try{
-				db.run("DELETE FROM reports WHERE rowid = ? ", reportId, (err) => {
-					if(err !== null){
-						log.error(err.toString());
-						return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
-					}
-					
-					return dispatch(confirmReportDeletion("Report successfully deleted."));
-				});
-				
-				dispatch(getReports());
-			}catch(e){
-				log.error(e.toString());
-				return dispatch(notifyReportCategoryCreationError('Error during category creation.'));
+
+		try{
+			const query = `DELETE FROM reports.reports WHERE id =  ${reportId}`;
+			const results = await runQuery(query);
+			
+			if(typeof results.error !== 'undefined'){
+				log.error(results.error);
+				dispatch(notifyReportRequestError(results.error));
+				return;
 			}
-		});
+			
+			dispatch(confirmReportDeletion("Report successfully deleted."));
+			
+			dispatch(getReports());
+		}catch(e){
+			log.error(e.toString());
+			return dispatch(notifyReportRequestError('Error during report creation.'));
+		}
+		
     }
 }
 
@@ -817,28 +764,30 @@ export function receiveGraphData(reportId, reportData){
 }
 
 export function getGraphData(reportId){
-    return(dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(requestGraphData(reportId))
         
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM reports WHERE rowid = ? ", reportId, async (err, rows ) => {
-			if(err !== null){
-				log.error(err.toString());
-				return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
-			}
-			
-			const query = rows[0].query;
-			try{
-				const results = await runQuery(query);
-				return dispatch(receiveGraphData(reportId, results.rows));
-			}catch(err2){
-				log.error(err2);
-				return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
-			}
+		const query = `SELECT t.* FROM reports.reports t WHERE t.id = ${reportId}`;
+		const qResults = await runQuery(query);
 
+		const rptQry = qResults.rows[0].query;
+		
+		if(typeof qResults.error !== 'undefined'){
+			log.error(qResults.error);
 			
-		});
-        
+			//@TODO: Confirm that this is not the correct notify action
+			dispatch(notifyReportRequestError(qResults.error));
+			return;
+		}
+		
+		try{
+			const results = await runQuery(rptQry);
+			return dispatch(receiveGraphData(reportId, results.rows));
+		}catch(err2){
+			log.error(err2);
+			//@TODO: Confirm that this is not the correct notify action
+			return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
+		}
     }
 }
 
@@ -853,12 +802,11 @@ export function addToCompositeReport(compReportId, reportId, options ){
 	if(typeof compReportId !== 'number') compReportId = null;
 	
 	//@TODO: Insert into db and report compReportId
-	const compRptId = 4;
-	const key = `a${compRptId}`
+	const key = `a${compReportId||"999"}`
 	
 	return {
 		type: ADD_TO_COMPOSITE_REPORT,
-		compReportId: compRptId,
+		compReportId: compReportId,
 		reportId: reportId,
 		options: { ...options, key: key}
 	}
@@ -877,74 +825,69 @@ export function updateCompositeLayout(layout){
 }
 
 export function saveCompositeReport(reportId, name, catId, options){
-	return (dispatch, getState) => {
+	return async (dispatch, getState) => {
 		//@TODO: action notifying start of saving 
 		
 		const opts = {...options, type: 'Composite'}
 		
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(async () => {
-			try{
-								//Update if reportId not null
-				if(reportId !== null){
-					let stmt = db.prepare(
-						"UPDATE reports SET " +
-						" name = ?, notes = ?, category_id = ?, query = ?, options = ?, type = ?" +
-						" WHERE " + 
-						" rowid = ?");
-						
-					stmt.run([name, '', catId, '', JSON.stringify(opts), 'composite', reportId], async function(err){
-						if(err !== null){
-							log.error(err.toString())
-							//@TODO: Show error on create page 
-							//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
-							return ;
-						}
-						
-						const reportInfo = getState().reports.reportsInfo[reportId]
-						const data = {
-							...reportInfo,
-							name: name,
-							category_id: catId,
-							options: options
-						};
-						
-						//Update the report tree incase the report name changed
-						dispatch(getReportInfo(reportId));
-						dispatch(getReports());
-						dispatch(confirmCompReportCreation(reportId, data));
-					}); 
-				}else{
-					//Insert/create new report
-					let stmt = db.prepare(
-						"INSERT INTO reports " +
-						" (name, notes, category_id, query, options, type)" +
-						" VALUES " + 
-						"(?,?,?,?,?,?)"
-					);
+		try{
+			//Update if reportId not null
+			if(reportId !== null){
+				let qry = `
+					UPDATE reports.reports SET " +
+					 name = $$${name}$$, 
+					 notes = '', 
+					 category_id = ${catId}, 
+					 options = $$${JSON.stringify(opts)}$$
+					 type = 'composite',
+					 query = ''
+					 WHERE  
+					 id = ${reportId}`;
 					
-		
-					stmt.run([name, '', catId, '', JSON.stringify(opts), 'composite'], async function(err){
-						if(err !== null){
-							log.error(err.toString())
-							//@TODO: Show error on create page
-							//return dispatch(createReportPreviewError('Error creating report. Check log for details'));
-							return; 
-						}
-
-						//Update the report tree incase the report name changed
-						dispatch(getReports());
-						
-						//@TODO: Confirm report creation
-						//return dispatch(confirmReportCreation(reportId, data));
-						
-					});
-					stmt.finalize();
+				const results = await runQuery(qry);
+				if(typeof results.error !== 'undefined'){
+					log.error(results.error);
+					//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
+					return;
 				}
-			}catch(e){
 				
+				const reportInfo = getState().reports.reportsInfo[reportId]
+				const data = {
+					...reportInfo,
+					name: name,
+					category_id: catId,
+					options: options
+				};
+				
+				//Update the report tree incase the report name changed
+				dispatch(getReportInfo(reportId));
+				dispatch(getReports());
+				dispatch(confirmCompReportCreation(reportId, data));
+
+			}else{
+				//Insert/create new report
+				let qry = `
+					INSERT INTO reports.reports 
+					(name, notes, category_id, query, options, type) 
+					VALUES 
+					($$${name}$$, '', ${catId}, '', $$${JSON.stringify(opts)}$$, 'composite')
+					RETURNING id
+				`;
+				
+				const results = await runQuery(qry);
+				if(typeof results.error !== 'undefined'){
+					log.error(results.error);
+					//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
+					return;
+				}
+				
+				//Update the report tree incase the report name changed
+				dispatch(getReports());
+
 			}
-		});
+		}catch(e){
+			
+		}
 	}
 }
 
