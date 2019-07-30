@@ -1,20 +1,3 @@
-const PgLiteral = window.require('node-pg-migrate').PgLiteral;
-
-exports.shorthands = {
-		idx: { type: 'uuid', primaryKey: true},
-		load_datetime: { 
-			type: "timestamp", 
-			notNull: true, 
-			default: new PgLiteral('current_timestamp')
-		},
-		data: {type: "jsonb", notNull: true},
-		createdAt: { 
-			type: "timestamp", 
-			notNull: true, 
-			default: new PgLiteral('current_timestamp')
-		}
-};
-
 exports.up = (pgm) => {
 	pgm.createTable({schema: "ericsson_cm", name: "UTRAN_NREL"}, {id: "id", load_datetime: "load_datetime", data: "data"});
 	pgm.createTable({schema: "ericsson_cm", name: "UTRAN_EXTERNAL_CELL"}, {id: "id", load_datetime: "load_datetime", data: "data"});

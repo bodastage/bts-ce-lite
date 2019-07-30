@@ -11,6 +11,7 @@ const moTransform = window.require('./mo-name-transform');
 var Excel = window.require('exceljs');
 const fixPath = window.require('fix-path');
 const fs = window.require('fs');
+const bcf = window.require('./boda-cell-file');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -563,8 +564,9 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 
 	await pool.end();
 	
+	return {status: "success", message: "Loading completed."}
+	
 }
-
 
 /**
 * Returns the path to the psql command on MacOs
@@ -610,7 +612,8 @@ async function runMigrations(hostname, port, username, password){
 			return err;
 		}
 	});
-		
+	
+	//@TODO: Check if user wants to recreate database or just update
 	try{
 		let results = await
 		new Promise( async (resolve, reject) => {
@@ -662,6 +665,196 @@ async function runMigrations(hostname, port, username, password){
 	
 }
 
+/*
+* Parse network dumps and traces
+*
+* @param string dataType Type of data being loaded 
+* @param string vendor Vendor
+* @param string format format 
+* @param string inputFolder   
+* @param boolean outputFolder
+* @param function beforeFileParse
+* @param function afterFileParse
+* @param function beforeParse
+* @param function afterParse
+*
+* @since 0.3.0
+*/
+async function parseData(dataType, vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
+	
+	if(dataType === 'PM'){
+		return {status: 'success', message: 'PM processing not yet implemented.'}
+	}
+	
+	if(dataType === 'FM'){
+		return {status: 'success', message: 'FM processing not yet implemented.'}
+	}
+	
+	if(dataType === 'CM'){
+		if( vendor === 'BODASTAGE') return {status: 'success', message: 'No parsing necessary for the Boda cell file.'}
+		return {status: 'success', message: 'CM processing not yet implemented.'}
+	}
+	
+	
+	return {status: 'error', message: 'Unknown data type'}
+}
+
+/*
+* Load Boda Cell File
+*
+* @param string input folder
+* @param boolean truncateTables
+*
+* @since 0.3.0
+*/
+async function loadBodaCellFile(inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
+	//1.Load cells 
+	// -get columns from first row
+	// -validate that the key parameter columns exist 
+	// -
+	//2.add nbrs
+
+			
+	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+
+	const hostname = dbConDetails.hostname;
+	const port = dbConDetails.port;
+	const username = dbConDetails.username;
+	const password = dbConDetails.password;
+	
+	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+	
+	const pool = new Pool({
+	  connectionString: connectionString,
+	})
+	
+	pool.on('error', (err, client) => {
+		log.error(err.toString());
+		client.release();
+	})
+
+	
+	if(typeof beforeLoad === 'function'){
+		beforeLoad();
+	}
+	
+	if(truncateTables === true) {
+		log.info("Truncate tables before loading is set to true.")
+		
+		client = await pool.connect();
+		if(client.processID === null){
+			log.error('Failed to connect to database');
+			return {status: "error", message: 'Failed to connect to database during boda cell file loading'};
+		}
+		
+		await client.query(`TRUNCATE plan_network."2g_cells" RESTART IDENTITY CASCADE`);
+		await client.query(`TRUNCATE plan_network."3g_cells" RESTART IDENTITY CASCADE`);
+		await client.query(`TRUNCATE plan_network."4g_cells" RESTART IDENTITY CASCADE`);
+		
+		client.release();
+	}
+	
+	
+	fileList = fs.readdirSync(inputFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	
+	for (let i=0; i< fileList.length; i++) {
+		let fileName = fileList[i];
+		let filePath = path.join(inputFolder, fileList[i]);
+		
+		client = await pool.connect();
+		if(client.processID === null){
+			log.error('Failed to connect to database');
+			return {status: "error", message: 'Failed to connect to database during boda cell file loading'};
+		}
+		
+		
+		let parameterList = [];
+		//This is used to capture load error in onError Event
+		let loadError = null;
+		
+		await new Promise((resolve, reject) => {
+			csv({output: "csv", noheader:true, trim:true})
+			.fromFile(filePath)
+			.subscribe(async (csvRow, index)=>{
+				
+				//Header column 
+				if(index === 0){
+					parameterList = csvRow;
+					return;
+				}
+				
+				//Insert cell parameters 
+				const sql = bcf.generateParameterInsertQuery(parameterList, csvRow);
+				log.log(sql);
+				await client.query(sql);
+				
+				//Insert relations
+				const nbrSQL = bcf.generateNbrInsertQuery(parameterList, csvRow);
+				log.log(nbrSQL);
+				if (nbrSQL !== null) await client.query(nbrSQL);
+				
+			},(err) => {//onError
+				log.error(`csvJoJson.onError: ${err.toString()}`);
+				client.release();
+				loadError = `Error while loading ${fileName}`;
+				resolve();
+			},
+			()=>{//onComplete
+				log.info(`End of csvToJson for ${fileName}.`)
+				client.release();
+				resolve();
+			});
+		});//eof: promise
+		
+		//Return error status if loadError is not null
+		if(loadError !== null) return {status: 'error', message: loadError}; 
+		
+	}
+
+	if(typeof afterLoad === 'function'){
+		afterLoad();
+	}
+	
+	return {status: 'success', message: 'Boda Cell File successfully loaded.'}
+}
+
+/*
+* Load network dumps/traces
+*
+* @param string dataType Type of data being loaded 
+* @param string vendor Vendor
+* @param string format format 
+* @param string inputFolder   
+* @param boolean truncateTables Truncate tables before load. Values are true or false
+* @param function beforeFileLoad
+* @param function afterFileLoad
+* @param function beforeLoad
+* @param function afterLoad
+*
+* @since 0.3.0
+*/
+async function loadData(dataType, vendor, format, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
+	if(dataType === 'CM' && vendor !== 'BODASTAGE'){
+		return await loadCMDataViaStream(vendor, format, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad);
+	}
+
+	//Loda boda cell file
+	if(dataType === 'CM' && vendor === 'BODASTAGE'){
+		return await loadBodaCellFile(inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad);
+	}
+	
+	if(dataType === 'PM' ){
+		return {status: 'success', message: 'PM functionality is not ready!'}
+	}
+	
+	if(dataType === 'FM' ){
+		return {status: 'success', message: 'FM functionality is not ready!'}
+	}
+	
+	return {status: 'error', message: 'Unknown data type'}
+}
+
+
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteDBConnectionDetails = getSQLiteDBConnectionDetails;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
@@ -671,3 +864,5 @@ exports.loadCMDataViaStream = loadCMDataViaStream;
 exports.generateExcelOrCSV = generateExcelOrCSV;
 exports.getPathToPsqlOnMacOSX = getPathToPsqlOnMacOSX;
 exports.runMigrations = runMigrations;
+exports.loadData = loadData;
+exports.parseData = parseData;

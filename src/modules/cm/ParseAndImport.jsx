@@ -185,13 +185,14 @@ class ParseAndImport extends React.Component {
 		
 		this.setState({processing: true, errorMessage: null, successMessage: null})
 		const payload = {
+				"dataType": this.state.currentDataType,
 				"vendor": this.state.currentVendor,
 				"format": this.state.currentFormat,
 				"inputFolder": this.state.inputFileText,
 				"outputFolder": this.state.outputFolderText
 			}
 
-		ipcRenderer.send('parse-cm-request', 'parse_cm_data', JSON.stringify(payload));
+		ipcRenderer.send('parse-cm-request', 'parse_data', JSON.stringify(payload));
 		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
@@ -201,25 +202,26 @@ class ParseAndImport extends React.Component {
 			
 			const obj = JSON.parse(args)
 			
-			if(obj.status === 'success' && task === 'parse_cm_data' && !this.state.loadIntoDB){
+			if(obj.status === 'success' && task === 'parse_data' && !this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
 				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
 				this.processFilesListener = null;
 			}
 			
-			if(obj.status === 'success' && task === 'parse_cm_data' &&  this.state.loadIntoDB){
+			if(obj.status === 'success' && task === 'parse_data' &&  this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: null, infoMessage:obj.message, processing: true});	
 
 				const loadPayload = {
+					"dataType": this.state.currentDataType,
 					"vendor": this.state.currentVendor,
 					"format": this.state.currentFormat,
 					"csvFolder": this.state.outputFolderText,
 					"truncateTables": this.state.clearTables
 				}
-				ipcRenderer.send('parse-cm-request', 'load_cm_data', JSON.stringify(loadPayload))				
+				ipcRenderer.send('parse-cm-request', 'load_data', JSON.stringify(loadPayload))				
 			}
 			
-			if(obj.status === 'success' && task === 'load_cm_data' && this.state.loadIntoDB){
+			if(obj.status === 'success' && task === 'load_data' && this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false});		
 				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
 				this.processFilesListener = null;
@@ -227,13 +229,13 @@ class ParseAndImport extends React.Component {
 			
 			
 			
-			if(obj.status === 'error' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
+			if(obj.status === 'error' && (task === 'load_data' || task === 'parse_data') ){
 				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false});
 				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
 				this.processFilesListener = null;
 			}
 			
-			if(obj.status === 'info' && (task === 'load_cm_data' || task === 'parse_cm_data') ){
+			if(obj.status === 'info' && (task === 'load_data' || task === 'parse_data') ){
 				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})
 				
 			}

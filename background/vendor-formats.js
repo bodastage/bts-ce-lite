@@ -3,7 +3,7 @@ const VENDOR_CM_FORMATS = {
 	'HUAWEI': ['GEXPORT_XML','NBI_XML','CFGMML'],
 	'ZTE': ['BULKCM','XLS'],
 	'NOKIA': ['RAML'],
-	'BODASTAGE': ['BCF']
+	'BODASTAGE': ['BCF_CSV']
 }
 
 const VENDOR_PM_FORMATS = {

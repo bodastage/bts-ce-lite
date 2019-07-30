@@ -1,4 +1,27 @@
-exports.shorthands = undefined;
+//require without window to run migrations on the cli
+//DATABASE_URL=postgres://bodastage:password@localhost:5432/boda yarn run migrate up -m db/migrations/
+
+const PgLiteral = typeof window !== 'undefined' ? window.require('node-pg-migrate').PgLiteral : require('node-pg-migrate').PgLiteral;
+
+exports.shorthands = {
+		idx: { type: 'uuid', primaryKey: true},
+		load_datetime: { 
+			type: "timestamp", 
+			notNull: true, 
+			default: new PgLiteral('current_timestamp')
+		},
+		data: {type: "jsonb", notNull: true},
+		createdAt: { 
+			type: "timestamp", 
+			notNull: true, 
+			default: new PgLiteral('current_timestamp')
+		},
+		createdBy: { 
+			type: "integer", 
+			notNull: true, 
+			default: 0
+		}
+};
 
 //@TODO: Run these migrations from postgres account separately
 exports.up = (pgm) => {
