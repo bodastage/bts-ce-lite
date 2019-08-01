@@ -58,8 +58,12 @@ class DashboardSidePanel extends React.Component {
                                 })}> <FontAwesomeIcon icon="asterisk" /> Parse and Import</a>  
 
             <a title="Reports" className="dropdown-item" href="/#" onClick={this.setSidePanel('ReportsTree')}> <FontAwesomeIcon icon="table"/> Reports</a>
-
-                                
+			
+            <a title="Process CM dumps" className="dropdown-item" href="/#" onClick={this.addTab({
+                                            component: 'GISMap',
+                                            title: 'GIS'
+                                })}> <FontAwesomeIcon icon="globe-africa" /> GIS</a>  
+           
                 <span className="dropdown-item-text legend w-100">System</span>
 
                 <a className="dropdown-item" title="Profile" href="/#" 

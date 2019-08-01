@@ -10495,10 +10495,25 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
-leaflet-semicircle@^2.0.2:
+leaflet-contextmenu@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/leaflet-contextmenu/-/leaflet-contextmenu-1.4.0.tgz#e2bda481af1026080eabaa32997e531fd44f605c"
+  integrity sha1-4r2kga8QJggOq6oymX5TH9RPYFw=
+
+leaflet-semicircle@^2.0.2, leaflet-semicircle@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/leaflet-semicircle/-/leaflet-semicircle-2.0.4.tgz#2c6e7d40cb59bb331d25edd4dd355c64afa2428e"
   integrity sha512-7FV9kGBMSQ1CNZYPxoPCEVpDpiIoh/owZV91BWUKYFik5WuaYij0zGEWOE0elTUlRyTHFJHW4rNfQJ2fqreqnA==
+
+leaflet.icon.glyph@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/leaflet.icon.glyph/-/leaflet.icon.glyph-0.2.1.tgz#2e1bc790bc459c9a6d36ad50dbc5373ad9d44697"
+  integrity sha512-a4uT38ydOgmrMXmAtAdyNhAfdz5yiTBlVVfZ+SI6f+gPFzdROvAN8b+LgfjTlOU2Jjbq5XvPXI6QKMsxnob+kQ==
+
+leaflet@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.3.1.tgz#86f336d2fb0e2d0ff446677049a5dc34cf0ea60e"
+  integrity sha512-adQOIzh+bfdridLM1xIgJ9VnJbAUY3wqs/ueF+ITla+PLQ1z47USdBKUf+iD9FuUA8RtlT6j6hZBfZoA6mW+XQ==
 
 leaflet@^1.3.3:
   version "1.4.0"
@@ -10791,6 +10806,11 @@ lockfile@^1.0.4:
   dependencies:
     signal-exit "^3.0.2"
 
+lodash-es@^4.0.0:
+  version "4.17.15"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.15.tgz#21bd96839354412f23d7a10340e5eac6ee455d78"
+  integrity sha512-rlrc3yU3+JNOpZ9zj5pQtxnx2THmvRykwL4Xlxoa8I9lHBlVbbyPhgyPMioxVZ4NqyxaVVtaJnzsyOidQIhyyQ==
+
 lodash-es@^4.2.1:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.11.tgz#145ab4a7ac5c5e52a3531fb4f310255a152b4be0"
@@ -10939,7 +10959,7 @@ lodash@4.17.11, "lodash@>=3.5 <5", lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.1
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
 
-lodash@~4.17.0:
+lodash@^4.0.0, lodash@~4.17.0:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -14799,10 +14819,52 @@ react-grid-layout@^0.16.6:
     react-draggable "3.x"
     react-resizable "1.x"
 
+react-icons@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-3.7.0.tgz#64fe46231fabfeea27895edeae6c3b78114b8c8f"
+  integrity sha512-7MyPwjIhuyW0D2N3s4DEd0hGPGFf0sK+IIRKhc1FvSpZNVmnUoGvHbmAwzGJU+3my+fvihVWgwU5SDtlAri56Q==
+  dependencies:
+    camelcase "^5.0.0"
+
 react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4, react-is@^16.8.6:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.8.6.tgz#5bbc1e2d29141c9fbdfed456343fe2bc430a6a16"
   integrity sha512-aUk3bHfZ2bRSVFFbbeVS4i+lNPZr3/WM5jT2J5omUVV1zzcs1nAaf3l51ctA5FFvCRbhrH0bdAsRRQddFJZPtA==
+
+react-leaflet-control@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/react-leaflet-control/-/react-leaflet-control-2.1.1.tgz#ed90006c9d285872a2788fe15c11fc30ad14cdb0"
+  integrity sha512-3fx4uSRFtDaFNa1yq62DCxdc9kR3Lk4V7R0lHqbKfPTEIOvPR7VFvk3xzcSnSB/0LAYO8R96Pwcs1c6knyL/Hw==
+
+react-leaflet-fullscreen-control@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/react-leaflet-fullscreen-control/-/react-leaflet-fullscreen-control-0.0.4.tgz#b2543cb5306f8936f4db2e7de4184b90e7b2eabb"
+  integrity sha1-slQ8tTBviTb02y595BhLkOey6rs=
+  dependencies:
+    leaflet "1.3.1"
+    react "^16.3.2"
+    react-leaflet "^1.9.1"
+
+react-leaflet-semicircle@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/react-leaflet-semicircle/-/react-leaflet-semicircle-2.0.5.tgz#af86bb0e7107a30ff7df6fd053b4dbc28a1f8ec3"
+  integrity sha512-aczcTmbgj6JrWY5y6+2fCIfOWhQa+Q84BM7Q2l8yi6/CBKlElL7f42RZJh9pGCjesRKu54eXKHZDLiVeWg6juw==
+  dependencies:
+    leaflet-semicircle "^2.0.4"
+
+react-leaflet-sidetabs@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-leaflet-sidetabs/-/react-leaflet-sidetabs-1.0.1.tgz#5bea3d1e5154a836a97a68b60b3fd4c8999e29e4"
+  integrity sha512-XXvIRFBf+vO7lYC+KCjhrdHkHROGloN9Om9S98TD7xwDEW9RmVo30jAYHCoicNEWguecpWogTS3xRrnMUxKV7w==
+
+react-leaflet@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/react-leaflet/-/react-leaflet-1.9.1.tgz#0a282d8d26f66ea2d719ebb8f4a5fa156b33b8c8"
+  integrity sha512-QiYpjyf1DHy0gLAR2958Mo5Wlu2u7FubIjapPpuUAQNFmjkVSteiDLlEdDpGswTHTyNAfKLS+u9PqvfipMDZKA==
+  dependencies:
+    lodash "^4.0.0"
+    lodash-es "^4.0.0"
+    warning "^3.0.0"
 
 react-leaflet@^2.0.0:
   version "2.2.1"
@@ -14962,7 +15024,7 @@ react-transition-group@^2.2.1:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
 
-react@^16.8.6:
+react@^16.3.2, react@^16.8.6:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react/-/react-16.8.6.tgz#ad6c3a9614fd3a4e9ef51117f54d888da01f2bbe"
   integrity sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
@@ -18470,6 +18532,13 @@ walker@^1.0.7, walker@~1.0.5:
   integrity sha1-L3+bj9ENZ3JisYqITijRlhjgKPs=
   dependencies:
     makeerror "1.0.x"
+
+warning@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/warning/-/warning-3.0.0.tgz#32e5377cb572de4ab04753bdf8821c01ed605b7c"
+  integrity sha1-MuU3fLVy3kqwR1O9+IIcAe1gW3w=
+  dependencies:
+    loose-envify "^1.0.0"
 
 warning@^4.0.2, warning@^4.0.3:
   version "4.0.3"

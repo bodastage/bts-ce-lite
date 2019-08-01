@@ -51,6 +51,17 @@ class Dashboard extends React.Component {
 		shell.openItem(logPath)
 	}
     
+	showGISModule= (options) => (e) => { 
+        e.preventDefault();
+		//show main map
+        let tabId = options.component;
+        this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
+		
+		//@TODO: Disable GIS side panel for now as we figure out what to add
+		//Show side panel
+		//this.props.dispatch(setSidePanel('GISLeftPanel'));
+	}
+	
     render(){   
         return (
 
@@ -77,7 +88,7 @@ class Dashboard extends React.Component {
 							
                             <div className="col-md-2">
 								<div className="icon-display"><a title="GIS" href="#/gis" 
-									onClick={this.addTab({
+									onClick={this.showGISModule({
                                 component: 'GISMap',
                                 title: 'GIS'
                                 })}> 
