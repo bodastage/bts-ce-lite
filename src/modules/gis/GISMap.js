@@ -1,18 +1,18 @@
 import React from 'react'
-import { Map, TileLayer, Popup, DivOverlay, Marker, Tooltip } from 'react-leaflet';
-import L from 'leaflet';
 import { connect } from 'react-redux';
+import { Map, TileLayer, Popup, Polyline, Marker, Tooltip } from 'react-leaflet';
+import L from 'leaflet';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'leaflet/dist/leaflet.css';
 import './gis.css';
 import { ResizeSensor, Popover, Button, Intent, PopoverInteractionKind, Icon } from "@blueprintjs/core";
-import { gisGetCells } from './gis-actions';
+import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation } from './gis-actions';
 import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
 import Control from 'react-leaflet-control';
 import { Sidebar, Tab } from 'react-leaflet-sidetabs';
-import { FiHome, FiChevronRight, FiSearch, FiSettings, FiRadio } from "react-icons/fi";
+import { FiHome, FiChevronRight, FiSearch, FiSettings, FiRadio, FiArrowRight, FiShare2 } from "react-icons/fi";
 import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
@@ -44,7 +44,8 @@ class GISMap extends React.Component{
         this.handleResize = this.handleResize.bind(this);
         this.click = this.click.bind(this);
 		this.refreshMap = this.refreshMap.bind(this);
-		this.showNbrsForCell = this.showNbrsForCell.bind(this);
+		this.showHideNbrsForCell = this.showHideNbrsForCell.bind(this);
+		this.showHideRelation = this.showHideRelation.bind(this);
 
     }
     
@@ -59,7 +60,16 @@ class GISMap extends React.Component{
     })
   }
   
-  showNbrsForCell(cellId){
+  showHideRelation(svrCI, nbrCI){
+	  this.props.dispatch(gisHideRelation(svrCI, nbrCI));
+  }
+  
+  showHideNbrsForCell(cellId){
+	if(typeof this.props.relations[cellId] === 'undefined'){
+		this.props.dispatch(gisGetNbrs(cellId));
+	}else{
+		this.props.dispatch(gisHideCellNbrs(cellId));
+	}
 	  
   }
   
@@ -68,6 +78,7 @@ class GISMap extends React.Component{
     }
     
     componentDidMount () {
+		this.map = this.refs.map.leafletElement;
         const map = this.refs.map.leafletElement;
         
         //By the time the GIS tab is shown, the GIS component has already
@@ -83,11 +94,12 @@ class GISMap extends React.Component{
 		
 		//Add context menu 
 		
-        
+        this.map = null;
     }
     
     componentDidUpdate(){
         const map = this.refs.map.leafletElement;
+		
         map.invalidateSize();
 		
 		//Disable disable dragging and zooming when working with the side panel
@@ -107,6 +119,7 @@ class GISMap extends React.Component{
 			map.scrollWheelZoom.enable();
 		});
 		
+		//map.ContextMenu .removeAllItems();
     }
 	
 	centerMap(e){
@@ -131,64 +144,119 @@ class GISMap extends React.Component{
         const position = [this.state.lat, this.state.lng]
         const height = this.state.height;
 		let center = [this.state.lat, this.state.lng]
-		
+
 		//Get the first cell
-		if(this.props.cells.length > 0 ){
-			center = [this.props.cells[0].latitude, this.props.cells[0].longitude];
+		if(Object.keys(this.props.cells).length > 0 ){
+			const someCI = Object.keys(this.props.cells)[0]
+			center = [this.props.cells[someCI].latitude, this.props.cells[someCI].longitude];
 		}
-				
-		const cellMarkers = this.props.cells.map((cell, i) => (
-			<React.Fragment key={cell.ci}>
-				<SemiCircle 
-					position={[cell.latitude, cell.longitude]}
-					radius={500 + i*100}
-					startAngle={cell.azimuth/2}
-					stopAngle={cell.azimuth}
-					weight={2}
-					key={cell.ci + "-cell"}
-					
-					contextmenu={true}
-					contextmenuItems={[{
-						text: 'Show neighbours',
-						callback: this.showNbrsForCell(cell.ci),
-						index: 0
-					}]}
-				>
-					<Popup className="bp3-popover bp3-popover-content-sizing">
-					<span><FaRss className="mb-1"/> {cell.cellname}</span> 
-					<div className="gis-cell-table-wrapper">
-						<div className="gis-cell-table-scroll">
-						<table className="table table-hover table-sm">
-						  <thead>
-							<tr>
-							  <th><span className="text">Parameter</span></th>
-							  <th><span className="text">Value</span></th>
-							</tr>
-						  </thead>
-						  <tbody>
-						   {
-							   Object.keys(cell)
-							   .map(p => (
+		
+		console.log("this.props.relations:", this.props.relations );
+		
+		const cellMarkers = Object.keys(this.props.cells).map((cellid, i) => {
+			const cell = this.props.cells[cellid];
+			console.log("typeof this.props.relations[cellid]", cellid, typeof this.props.relations[cellid])
+			return (
+				<React.Fragment key={cell.ci}>
+					<SemiCircle 
+						position={[cell.latitude, cell.longitude]}
+						radius={500 + i*100}
+						startAngle={cell.azimuth/2}
+						stopAngle={cell.azimuth}
+						weight={2}
+						key={cell.ci + "-cell"}
+						
+						contextmenu={true}
+						contextmenuItems={[{
+							text: 'Show/hide neighbours',
+							callback: () => this.showHideNbrsForCell(cell.ci),
+							index: 0
+						}, {
+							text: 'KPIs',
+							callback: () => {},
+							index: 1
+						},{
+							separator: true,
+							index: 2
+						}]}
+					>
+						<Popup className="bp3-popover bp3-popover-content-sizing">
+						<span><FaRss className="mb-1"/> {cell.cellname}</span> 
+						<div className="gis-cell-table-wrapper">
+							<div className="gis-cell-table-scroll">
+							<table className="table table-hover table-sm">
+							  <thead>
 								<tr>
-								  <td>{p}</td>
-								  <td>{cell[p]}</td>
+								  <th><span className="text">Parameter</span></th>
+								  <th><span className="text">Value</span></th>
 								</tr>
-								))
-						   }	
-						  </tbody>
-						</table>
+							  </thead>
+							  <tbody>
+							   {
+								   Object.keys(cell)
+								   .map((p, ip) => (
+									<tr key={"p-"+ip}>
+									  <td>{p}</td>
+									  <td>{cell[p]}</td>
+									</tr>
+									))
+							   }	
+							  </tbody>
+							</table>
+							</div>
 						</div>
-					</div>
+						</Popup>
+						<Tooltip>{`${cell.cellname}(${cell.ci})`}</Tooltip>
+					</SemiCircle>
+					<Marker 
+						position={[cell.latitude, cell.longitude]} 
+						zIndexOffset={100} 
+						icon={L.divIcon({className: '', html: renderToString(<FontAwesomeIcon icon="broadcast-tower" size="lg"/>) })}>
+					</Marker>
+				</React.Fragment>
+		)});
+		
+		
+		let relations = []
+		Object.keys(this.props.relations).forEach((svrCI, i) => {
+			relations = relations.concat(this.props.relations[svrCI])
+		});
+		
+		const relationLines =  relations
+		//Hide some relations
+		.filter(rln => this.props.hiddenRelations[rln.svr_ci + "-" + rln.nbr_ci] === undefined)
+		.map((rln, i) => {
+			return (
+				<React.Fragment key={rln.svr_ci + "-" + rln.nbr_ci}>
+					<Polyline 
+						color={"red"} 
+						positions={[
+							[this.props.cells[rln.svr_ci].latitude, this.props.cells[rln.svr_ci].longitude],
+							[this.props.cells[rln.nbr_ci].latitude, this.props.cells[rln.nbr_ci].longitude]
+						]}
+						
+						contextmenu={true}
+						contextmenuItems={[{
+							text: 'Hide relation',
+							callback: () => this.showHideRelation(rln.svr_ci, rln.nbr_ci),
+							index: 0
+						},{
+							separator: true,
+							index: 1
+						}]}
+					>
+					<Tooltip>{this.props.cells[rln.svr_ci].cellname + " > " + this.props.cells[rln.nbr_ci].cellname}</Tooltip>
+					<Popup className="bp3-popover bp3-popover-content-sizing">
+						<FiShare2 className="mb-1"/>	Relation parameters
 					</Popup>
-					<Tooltip>{cell.ci}</Tooltip>
-				</SemiCircle>
-				<Marker 
-					position={[cell.latitude, cell.longitude]} 
-					zIndexOffset={100} 
-					icon={L.divIcon({className: '', html: renderToString(<FontAwesomeIcon icon="broadcast-tower" size="lg"/>) })}>
-				</Marker>
-			</React.Fragment>
-		));
+					
+					
+					</Polyline>
+				</React.Fragment>
+			);
+		});
+		
+		
         return (
 			<fieldset className="col-md-12 fieldset">    	
 				<legend className="legend"><FontAwesomeIcon icon="globe-africa"/> GIS</legend>
@@ -217,8 +285,11 @@ class GISMap extends React.Component{
 							  attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
 							  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 							/>
+							
 							{cellMarkers}
 							
+							{relationLines}
+
 							<Control position="topleft" >
 								<div className="leaflet-control-layers p-2">
 									<Icon icon="refresh" onClick={this.refreshMap}/>
@@ -257,7 +328,10 @@ class GISMap extends React.Component{
 
 function mapStateToProps(state){
 	return {
-		cells: state.gis.cells || []
+		cells: state.gis.cells || {},
+		relations: state.gis.relations || {},
+		redraw: state.gis.redraw,
+		hiddenRelations: state.gis.hiddenRelations || {}
 	};
 }
 
