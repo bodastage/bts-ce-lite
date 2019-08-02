@@ -29,3 +29,16 @@
     vertical-align: top;
     border-top: 0px solid #dee2e6;
 }
+
+
+.map-container .sidebar-pane {
+    display: none;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    padding: 10px 10px;
+}
+
+.map-container .sidebar-header {
+	font-size: 11.4pt;
+}

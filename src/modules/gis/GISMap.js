@@ -5,7 +5,8 @@ import L from 'leaflet';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'leaflet/dist/leaflet.css';
 import './gis.css';
-import { ResizeSensor, Popover, Button, Intent, PopoverInteractionKind, Icon } from "@blueprintjs/core";
+import { ResizeSensor, Popover, Button, Intent, PopoverInteractionKind, Icon,
+		 FormGroup, InputGroup } from "@blueprintjs/core";
 import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation } from './gis-actions';
 import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
@@ -46,6 +47,7 @@ class GISMap extends React.Component{
 		this.refreshMap = this.refreshMap.bind(this);
 		this.showHideNbrsForCell = this.showHideNbrsForCell.bind(this);
 		this.showHideRelation = this.showHideRelation.bind(this);
+		this.handleFilterTextChangeEvent = this.handleFilterTextChangeEvent.bind(this)
 
     }
     
@@ -58,6 +60,14 @@ class GISMap extends React.Component{
       sideBarCollapsed: false,
       selectedTab: id,
     })
+  }
+  
+  /*
+  *
+  *
+  */
+  handleFilterTextChangeEvent = () => {
+	  
   }
   
   showHideRelation(svrCI, nbrCI){
@@ -104,7 +114,6 @@ class GISMap extends React.Component{
 		
 		//Disable disable dragging and zooming when working with the side panel
 		var div = L.DomUtil.get('gis_sidebar');
-		//L.DomEvent.on(div, 'mousewheel', L.DomEvent.stopPropagation);
 		L.DomEvent.on(div, 'mouseover', function(){
 			map.dragging.disable();
 			map.touchZoom.disable();
@@ -151,11 +160,8 @@ class GISMap extends React.Component{
 			center = [this.props.cells[someCI].latitude, this.props.cells[someCI].longitude];
 		}
 		
-		console.log("this.props.relations:", this.props.relations );
-		
 		const cellMarkers = Object.keys(this.props.cells).map((cellid, i) => {
 			const cell = this.props.cells[cellid];
-			console.log("typeof this.props.relations[cellid]", cellid, typeof this.props.relations[cellid])
 			return (
 				<React.Fragment key={cell.ci}>
 					<SemiCircle 
@@ -305,14 +311,28 @@ class GISMap extends React.Component{
 							  onOpen={this.onSideBarOpen.bind(this)}
 							  onClose={this.onSideBarClose.bind(this)}
 							>
-							   <Tab id="home" header="Home" icon={<FiHome />}>
-								<p>No place like home!</p>
+							   <Tab id="gis_search" header="Search" icon={<FiSearch />}>
+									<div className="mt-2">
+										<FormGroup
+											label=""
+											labelFor="search_network"
+										>
+											<InputGroup 
+												id="search_network" 
+												placeholder="Search network..." 
+												leftIcon="search" 
+												name="text"
+												type="text"
+												value={this.state.filterText} 
+												onChange={this.handleFilterTextChangeEvent}
+											/>
+										</FormGroup>
+									</div>
 							   </Tab>
-							   <Tab id="search" header="Search" icon={<FiSearch />}>
-								<p>The noblest search is the search for excellence!</p>
-							   </Tab>
-							   <Tab id="settings" header="Settings" anchor="bottom" icon={<FiSettings />}>
-								<p>We don't want privacy so much as privacy settings!</p>
+							   <Tab id="gis_settings" header="Settings" anchor="bottom" icon={<FiSettings />}>
+									<div className="mt-2">
+									
+									</div>
 							   </Tab>           
 							</Sidebar>
 							
