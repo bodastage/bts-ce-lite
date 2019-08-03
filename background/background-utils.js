@@ -412,6 +412,11 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
 		}
 		
+		//Transform Ericsson BSM inventory dump files 
+		if(vendor.toLowerCase("ericsson") && format === 'BSM'){
+			moName = 'invBSM';
+		}
+		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
 		
 		//Use to wait for each file to load
