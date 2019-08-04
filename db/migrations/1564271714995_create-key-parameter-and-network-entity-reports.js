@@ -405,17 +405,17 @@ huawei_cm."CELL" t1
 UNION
 -- ZTE 2G Cells
 SELECT 
-    t1.data->>'DATETIME' AS "DATETIME",
+    t1.data->>'DateTime' AS "DATETIME",
     'ZTE' as "VENDOR",
 	'2G' AS "TECH",
-    t1.data->>'GsmCell_id' AS "CELLID",
+    t1.data->>'cellIdentity' AS "CELLID",
     t1.data->>'userLabel' AS "CELLNAME"
 FROM 
 zte_cm."GsmCell" t1
 UNION
 -- ZTE 3G Cells
 SELECT 
-    t1.data->>'varDateTime' AS "DATE TIME",
+    t1.data->>'DateTime' AS "DATE TIME",
     'ZTE' as "VENDOR",
 	'3G' AS "TECH",
     t1.data->>'cid' AS "CELLID",
@@ -425,7 +425,7 @@ zte_cm."UtranCellFDD" t1
 UNION
 -- ZTE 4G Cells
 SELECT 
-    t1.data->>'varDateTime' AS "DATE TIME",
+    t1.data->>'DateTime' AS "DATE TIME",
     'ZTE' as "VENDOR",
 	'4G' AS "TECH",
     t1.data->>'cId' AS "CELLID",
@@ -462,7 +462,6 @@ SELECT
 		t1.data->>'name' AS "CELLNAME"
 
 FROM nokia_cm."LNBTS" t1
-
 `
 
 const NETWORK_SITES = `
