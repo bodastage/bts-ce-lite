@@ -17,6 +17,9 @@ export const GIS_CONFIRM_NBRS_RECEIVED = 'GIS_CONFIRM_NBRS_RECEIVED';
 export const GIS_HIDE_CELL_NBRS = 'GIS_HIDE_CELL_NBRS';
 
 export const GIS_HIDE_RELATION = 'GIS_HIDE_RELATION';
+export const GIS_SHOW_RELATION = 'GIS_SHOW_RELATION';
+
+export const GIS_CLEAR  = 'GIS_CLEAR';
 
 //Convert array to object
 const arrayToObject = (array, id) =>
@@ -152,5 +155,11 @@ export function gisHideRelation(svrCI, nbrCI){
 		type: GIS_HIDE_RELATION,
 		svr_ci: svrCI,
 		nbr_ci: nbrCI
+	}
+}
+
+export function gisClear(){
+	return {
+		type: GIS_CLEAR
 	}
 }

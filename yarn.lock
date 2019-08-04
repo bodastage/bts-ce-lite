@@ -10500,6 +10500,11 @@ leaflet-contextmenu@^1.4.0:
   resolved "https://registry.yarnpkg.com/leaflet-contextmenu/-/leaflet-contextmenu-1.4.0.tgz#e2bda481af1026080eabaa32997e531fd44f605c"
   integrity sha1-4r2kga8QJggOq6oymX5TH9RPYFw=
 
+leaflet-fullscreen@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/leaflet-fullscreen/-/leaflet-fullscreen-1.0.2.tgz#09c61c4bac45f63b2ee126afd87e5cd97650fc1b"
+  integrity sha1-CcYcS6xF9jsu4Sav2H5c2XZQ/Bs=
+
 leaflet-semicircle@^2.0.2, leaflet-semicircle@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/leaflet-semicircle/-/leaflet-semicircle-2.0.4.tgz#2c6e7d40cb59bb331d25edd4dd355c64afa2428e"

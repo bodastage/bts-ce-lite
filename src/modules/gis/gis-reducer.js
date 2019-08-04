@@ -4,7 +4,8 @@ import { GIS_CONFIRM_CELLS_RECEIVED, GIS_CONFIRM_NBRS_RECEIVED,
 		GIS_SHOW_SUCCESS,
 		GIS_SHOW_INFO,
 		GIS_HIDE_CELL_NBRS,
-		GIS_HIDE_RELATION} from './gis-actions';
+		GIS_HIDE_RELATION,
+		GIS_CLEAR} from './gis-actions';
 
 const initialState = {
 	cells: [],
@@ -12,7 +13,8 @@ const initialState = {
 	redraw : 0,
 	
 	//List of relations to hide
-	hiddenRelations: {}
+	hiddenRelations: {},
+	carrierLayer: {}
 };
 
 function gis(state = initialState, action) {
@@ -58,6 +60,8 @@ function gis(state = initialState, action) {
 					[action.svr_ci + "-" + action.nbr_ci]: {}
 				} 
 			}
+		case GIS_CLEAR:
+			return initialState;
         default:
             return state;	
 	}

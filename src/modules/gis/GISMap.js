@@ -6,8 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'leaflet/dist/leaflet.css';
 import './gis.css';
 import { ResizeSensor, Popover, Button, Intent, PopoverInteractionKind, Icon,
-		 FormGroup, InputGroup } from "@blueprintjs/core";
-import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation } from './gis-actions';
+		 FormGroup, InputGroup, Checkbox } from "@blueprintjs/core";
+import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation, gisClear } from './gis-actions';
 import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
@@ -18,7 +18,6 @@ import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
 import { renderToString } from 'react-dom/server'
-
 
 //Fix icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -39,7 +38,14 @@ class GISMap extends React.Component{
             zoom: 13,
             height: window.innerHeight-150,
 			sideBarCollapsed: true,
-			selectedTab: 'home'
+			selectedTab: 'home',
+			
+			filterText: "",
+			
+			//Technology filter
+			showGSMCells: true,
+			showUMTSCells: true,
+			showLTECells: true
         }
         
         this.handleResize = this.handleResize.bind(this);
@@ -48,7 +54,8 @@ class GISMap extends React.Component{
 		this.showHideNbrsForCell = this.showHideNbrsForCell.bind(this);
 		this.showHideRelation = this.showHideRelation.bind(this);
 		this.handleFilterTextChangeEvent = this.handleFilterTextChangeEvent.bind(this)
-
+		this.handleEnabledChange = this.handleEnabledChange.bind(this)
+		this.handleTechFilterCheckBox = this.handleTechFilterCheckBox.bind(this)
     }
     
   onSideBarClose() {
@@ -62,12 +69,41 @@ class GISMap extends React.Component{
     })
   }
   
+  handleTechFilterCheckBox = (event) => {
+	const name = event.target.name;
+	
+	//Toggle value 
+	this.setState({
+	  [name]: !this.state[name]
+	});
+		
+  }
+  
+  handleEnabledChange = (event) => {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.name;
+        		
+		console.log("handleEnabledChange:", value, name);
+				
+        this.setState({
+          [name]: value
+        });
+  }
+  
+  
   /*
   *
   *
   */
-  handleFilterTextChangeEvent = () => {
-	  
+  handleFilterTextChangeEvent = (event) => {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.name;
+        
+        this.setState({
+          [name]: value
+        });
   }
   
   showHideRelation(svrCI, nbrCI){
@@ -87,6 +123,9 @@ class GISMap extends React.Component{
         console.log(e)
     }
     
+	componentWillUnmount(){
+		this.props.dispatch(gisClear());
+	}
     componentDidMount () {
 		this.map = this.refs.map.leafletElement;
         const map = this.refs.map.leafletElement;
@@ -160,15 +199,43 @@ class GISMap extends React.Component{
 			center = [this.props.cells[someCI].latitude, this.props.cells[someCI].longitude];
 		}
 		
-		const cellMarkers = Object.keys(this.props.cells).map((cellid, i) => {
+		var that = this;
+		const cellMarkers = Object.keys(this.props.cells)
+		//Filter based on search text
+		.filter((cellid, i) => {
 			const cell = this.props.cells[cellid];
+				
+			//Technology 
+			let techMatch = false;
+			const cellTech = cell.technology.toLowerCase();
+			if(that.state.showGSMCells === true && cellTech === 'gsm') techMatch = techMatch || true;
+			if(that.state.showUMTSCells === true && cellTech === 'umts') techMatch = techMatch || true;;
+			if(that.state.showLTECells === true && cellTech === 'lte') techMatch = techMatch || true;;
+			if(techMatch === false) return false;
+			
+			//When no search text, show all 
+			if(that.state.filterText.length === 0 ) return true;
+			
+			try{
+				const re = new RegExp(that.state.filterText, 'i')
+				
+				if(cellid.match(re) || cell.cellname.match(re)) return true;
+			}catch(e){
+				//@TODO: 
+			}
+			
+			return false;
+		})
+		.map((cellid, i) => {
+			const cell = this.props.cells[cellid];
+			const beamWidth = parseInt(cell.antenna_beam) > 0 && parseInt(cell.antenna_beam) !== NaN ?  cell.antenna_beam : 30;
 			return (
 				<React.Fragment key={cell.ci}>
 					<SemiCircle 
 						position={[cell.latitude, cell.longitude]}
-						radius={500 + i*100}
-						startAngle={cell.azimuth/2}
-						stopAngle={cell.azimuth}
+						radius={500}
+						startAngle={cell.azimuth}
+						stopAngle={cell.azimuth + beamWidth}
 						weight={2}
 						key={cell.ci + "-cell"}
 						
@@ -262,6 +329,9 @@ class GISMap extends React.Component{
 			);
 		});
 		
+		const displayCellCount = cellMarkers.length;
+		
+		console.log("this.state.showGSMCells", this.state.showGSMCells);
 		
         return (
 			<fieldset className="col-md-12 fieldset">    	
@@ -277,6 +347,7 @@ class GISMap extends React.Component{
                     <ResizeSensor onResize={this.handleResize}>
 				
 						<Map ref='map' 
+							attributionControl={false}
 							center={center} 
 							zoom={this.state.zoom} 
 							style={{height: height + 'px'}} 
@@ -311,7 +382,7 @@ class GISMap extends React.Component{
 							  onOpen={this.onSideBarOpen.bind(this)}
 							  onClose={this.onSideBarClose.bind(this)}
 							>
-							   <Tab id="gis_search" header="Search" icon={<FiSearch />}>
+							   <Tab id="gis_search" header="Filter" icon={<FiSearch />}>
 									<div className="mt-2">
 										<FormGroup
 											label=""
@@ -321,12 +392,23 @@ class GISMap extends React.Component{
 												id="search_network" 
 												placeholder="Search network..." 
 												leftIcon="search" 
-												name="text"
+												name="filterText"
 												type="text"
 												value={this.state.filterText} 
 												onChange={this.handleFilterTextChangeEvent}
 											/>
 										</FormGroup>
+										<div className="bp3-text-small bp3-text-muted font-italic">{this.state.filterText.length > 0 ? `Found ${displayCellCount} cells.` : "" }</div>
+										
+										<div>
+											<h6 className="horizontal-line">
+												<span className="horizontal-line-text">Technology</span>
+											</h6>
+											<Checkbox inline={true} checked={this.state.showGSMCells} name="showGSMCells" label="GSM" onChange={this.handleTechFilterCheckBox} />
+											<Checkbox inline={true} checked={this.state.showUMTSCells} name="showUMTSCells" label="UMTS" onChange={this.handleTechFilterCheckBox} />
+											<Checkbox inline={true} checked={this.state.showLTECells} name="showLTECells" label="LTE" onChange={this.handleTechFilterCheckBox} />
+										</div>
+										
 									</div>
 							   </Tab>
 							   <Tab id="gis_settings" header="Settings" anchor="bottom" icon={<FiSettings />}>

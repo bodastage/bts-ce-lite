@@ -42,3 +42,24 @@
 .map-container .sidebar-header {
 	font-size: 11.4pt;
 }
+
+
+h6.horizontal-line {
+	 position: relative;
+}
+
+h6.horizontal-line span.horizontal-line-text {
+    background-color: white;
+    padding-right: 10px;
+}
+
+h6.horizontal-line:after {
+    content:"";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0.5em;
+    border-top: 1px solid black;
+    z-index: -1;
+}
