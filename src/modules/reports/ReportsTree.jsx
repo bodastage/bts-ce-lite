@@ -101,8 +101,8 @@ class ReportsTree extends React.Component{
             ContextMenu.show(
                 <Menu>
                     <MenuItem icon="th" text="View report" onClick={(ev) => {ev.preventDefault(); this.showReportDataTab(node.label, node.reportId);}}/>
-					{node.inBuilt === 1 ? "" : <MenuItem icon="graph-remove" text="Delete report" onClick={(ev) => {ev.preventDefault(); this.removeReport(node.reportId);}}/> }	
-					{node.inBuilt === 1 || node.type === 'composite' ? 
+					{node.inBuilt === true ? "" : <MenuItem icon="graph-remove" text="Delete report" onClick={(ev) => {ev.preventDefault(); this.removeReport(node.reportId);}}/> }	
+					{node.inBuilt === true || node.type === 'composite' ? 
 						<MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.createCompositeReport(node.reportId)}} />					: 
 						<MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
 					
@@ -115,7 +115,7 @@ class ReportsTree extends React.Component{
             ContextMenu.show(
                 <Menu>
                     <MenuItem icon="edit" text="Edit category" onClick={(ev) => {ev.preventDefault(); this.openEditCategoryDialog(node.catId)} } />                    
-                    {node.inBuilt === 1 ? "" : <MenuItem icon="delete" text="Delete category" onClick={(ev) => {ev.preventDefault(); this.deleteCategory(node.catId)} } /> }	
+                    {node.inBuilt === true ? "" : <MenuItem icon="delete" text="Delete category" onClick={(ev) => {ev.preventDefault(); this.deleteCategory(node.catId)} } /> }	
                 </Menu>,
                 { left: e.clientX, top: e.clientY },
                 () => this.setState({ isContextMenuOpen: false }),

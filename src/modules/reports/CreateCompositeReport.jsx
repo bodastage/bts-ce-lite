@@ -237,7 +237,7 @@ class CreateCompositeReport extends React.Component {
 		const options = {
 			layout: this.props.options.layout
 		}
-		
+
 		this.props.dispatch(saveCompositeReport(compReportId, name, catId, options));
 	}
 	/**

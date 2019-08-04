@@ -831,20 +831,22 @@ export function saveCompositeReport(reportId, name, catId, options){
 		const opts = {...options, type: 'Composite'}
 		
 		try{
+
 			//Update if reportId not null
 			if(reportId !== null){
 				let qry = `
-					UPDATE reports.reports SET " +
+					UPDATE reports.reports SET
 					 name = $$${name}$$, 
 					 notes = '', 
 					 category_id = ${catId}, 
-					 options = $$${JSON.stringify(opts)}$$
+					 options = $$${JSON.stringify(opts)}$$,
 					 type = 'composite',
 					 query = ''
 					 WHERE  
 					 id = ${reportId}`;
-					
+
 				const results = await runQuery(qry);
+
 				if(typeof results.error !== 'undefined'){
 					log.error(results.error);
 					//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
