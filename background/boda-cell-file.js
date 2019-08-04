@@ -67,6 +67,7 @@ const BCF_4G_PARAMS = {
 	node: {required: true},
 	pci: {},
 	euarfcn: {},
+	bandwidth: {},
 	ecgi: {},
 	mnc: {},
 	mcc: {},

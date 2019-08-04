@@ -131,6 +131,7 @@ exports.up = (pgm) => {
 			node: {type: "varchar(50)", comment: "MME or Pool"},
 			pci: {type: "integer", notNull: true},
 			euarfcn: {type: "integer", notNull: true},
+			bandwidth: {type: "integer"},
 			ecgi: {type: "varchar(200)"},
 			mnc: {type: "integer"},
 			mcc: {type: "integer"},
