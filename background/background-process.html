@@ -61,7 +61,7 @@ function sendLogToUI(task, level, message){
 * @param string targetFolder Name of destination folder
 */
 extractGzip =  (fileName, targetFolder) => {
-	console.log("Running extractGzip ....")
+	
 	const targetFile = path.join(targetFolder, path.basename(fileName).replace(".gz",""));
 	gunzip( fileName, targetFile);
 	
@@ -560,12 +560,11 @@ async function loadCMData(vendor, format, csvFolder){
 		});
 		
 		child.stderr.on('data', (data) => {
-		  console.log(`grep stderr: ${data}`);
 		  log.error(data)
 		});
 		
 		child.stdin.on('data', (data) => {
-		  console.log(`child.stdin.on.data: ${data}`);
+		  //console.log(`child.stdin.on.data: ${data}`);
 		});
 		
 		
@@ -595,7 +594,7 @@ async function loadCMData(vendor, format, csvFolder){
 			()=>{//onComplete
 				child.stdin.end();
 				resolve(undefined);
-				console.log(`csv.fromStream.subscribe.end`);
+				//console.log(`csv.fromStream.subscribe.end`);
 				//end cild spawn
 			}); 
 			
@@ -613,9 +612,8 @@ async function loadCMData(vendor, format, csvFolder){
 
 async function generateCSVReport(reportId, outputFolder){
 	let reportInfo = await utils.getSQLiteReportInfo(reportId);
-	console.log("reportInfo", reportInfo);
 	let csvFileName = reportInfo.name.replace(/\s+/g,"_") + ".csv";
-	console.log(csvFileName, outputFolder, reportInfo.query);
+	//console.log(csvFileName, outputFolder, reportInfo.query);
 	const reportFile = await utils.generateCSVFromQuery(csvFileName, outputFolder, reportInfo.query);
 	sendLogToUI('download_report','success', reportFile);
 }
@@ -687,6 +685,7 @@ async function  executeTask(task, options){
 			if(options.dataType === 'CM' && options.vendor !== 'BODASTAGE'){
 				processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
 			}else{
+
 				const rtn = await utils.parseData(
 						options.dataType, 
 						options.vendor, 

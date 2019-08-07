@@ -93,10 +93,33 @@ class ParseAndImport extends React.Component {
 	* Update the vendor in state when the vendor is selected
 	*/
 	onVendorSelectChange =(e) => {
+
+		let currentFormat = null;
+		if ( this.state.currentDataType === 'CM') { 
+			if (Object.keys(VENDOR_CM_FORMATS).length > 0) currentFormat = VENDOR_CM_FORMATS[e.target.value][0];
+			else currentFormat = "";
+			
+			this.vendorFormats = VENDOR_CM_FORMATS;
+		}
+		
+		if ( this.state.currentDataType === 'PM') {
+			if (Object.keys(VENDOR_PM_FORMATS).length > 0) currentFormat = VENDOR_PM_FORMATS[e.target.value][0];
+			else currentFormat = "";
+			
+			this.vendorFormats = VENDOR_PM_FORMATS;
+		}
+		
+		if ( this.state.currentDataType === 'FM'){ 
+			if (Object.keys(VENDOR_FM_FORMATS).length > 0) currentFormat = currentFormat = VENDOR_FM_FORMATS[e.target.value][0];			
+			else currentFormat = "";
+			
+			this.vendorFormats = VENDOR_FM_FORMATS;
+		}
+		
 		this.setState(
 		{	currentVendor: e.target.value, 
-			currentFormat: VENDOR_CM_FORMATS[e.target.value][0]}
-		)
+			currentFormat: currentFormat
+		})
 	}
 	
 	/**
@@ -107,20 +130,20 @@ class ParseAndImport extends React.Component {
 		const currentDataType = e.target.value;
 		let currentFormat = null;
 		if ( currentDataType === 'CM') { 
-			if (VENDOR_CM_FORMATS.length > 0) currentFormat = VENDOR_CM_FORMATS[e.target.value][0];
+			if (Object.keys(VENDOR_CM_FORMATS).length > 0) currentFormat = VENDOR_CM_FORMATS[this.state.currentVendor][0];
 			else currentFormat = "";
 			
 			this.vendorFormats = VENDOR_CM_FORMATS;
-		
 		}
+		
 		if ( currentDataType === 'PM') {
-			if (VENDOR_PM_FORMATS.length > 0) currentFormat = VENDOR_PM_FORMATS[e.target.value][0];
+			if (Object.keys(VENDOR_PM_FORMATS).length > 0) currentFormat = VENDOR_PM_FORMATS[this.state.currentVendor][0];
 			else currentFormat = "";
 			
 			this.vendorFormats = VENDOR_PM_FORMATS;
 		}
 		if ( currentDataType === 'FM'){ 
-			if (VENDOR_FM_FORMATS.length > 0) currentFormat = currentFormat = VENDOR_FM_FORMATS[e.target.value][0];			
+			if (Object.keys(VENDOR_FM_FORMATS).length > 0) currentFormat = currentFormat = VENDOR_FM_FORMATS[this.state.currentVendor][0];			
 			else currentFormat = "";
 			
 			this.vendorFormats = VENDOR_FM_FORMATS;
@@ -265,13 +288,11 @@ class ParseAndImport extends React.Component {
 		
 	}
 	
-	
 	updateTimerValue = (hours, minutes, seconds) => { 
 		let timerValue  = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-		console.log(`timerValue: ${timerValue}`)
+
 		//this.props.dispatch(updateProcessCMTimer(timerValue));
 		this.currentTimerValue = timerValue;
-		console.log(`Processing: ${this.state.processing}`);
 	} 
 	
 	clearForm = () => {

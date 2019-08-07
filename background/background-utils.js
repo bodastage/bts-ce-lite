@@ -12,6 +12,8 @@ var Excel = window.require('exceljs');
 const fixPath = window.require('fix-path');
 const fs = window.require('fs');
 const bcf = window.require('./boda-cell-file');
+const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
+		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -671,6 +673,47 @@ async function runMigrations(hostname, port, username, password){
 }
 
 /*
+* Parse measurement collection XML files 
+*
+* @param string inputFolder
+* @param string outputFolder
+*/
+function parseMeasuremenetCollectionXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
+	let basepath = app.getAppPath();
+
+	if (!isDev) {
+	  basepath = process.resourcesPath
+	} 
+	
+	const parser = VENDOR_PM_PARSERS[vendor][format]
+	const parserPath = path.join(basepath,'libraries',parser)
+	
+	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
+	
+	const child = spawnSync('java', commandArgs);
+	log.info(`java ${commandArgs.join(" ")}`);
+	
+	if(child.status != 0){
+		log.error(`[parseMeasuremenetCollectionXML] error:${child.output.toString()}`);
+		return {status: 'error', message: `Error parsing  ${vendor} PM ${format}`}
+	}else{
+		//log.info(child.output.toString())
+		
+	}
+	
+	return {status: 'success', message: `${vendor} PM files successfully parsed.`} 
+	
+}
+
+function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
+
+	if( vendor === 'ERICSSON' && format === 'MEAS_COLLEC_XML'){
+		return parseMeasuremenetCollectionXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
+	}
+	return {status: 'error', message: 'PM processing not yet implemented.'}
+}
+
+/*
 * Parse network dumps and traces
 *
 * @param string dataType Type of data being loaded 
@@ -688,7 +731,7 @@ async function runMigrations(hostname, port, username, password){
 async function parseData(dataType, vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
 	
 	if(dataType === 'PM'){
-		return {status: 'success', message: 'PM processing not yet implemented.'}
+		return parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse);
 	}
 	
 	if(dataType === 'FM'){
