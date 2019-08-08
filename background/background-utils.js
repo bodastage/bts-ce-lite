@@ -705,10 +705,45 @@ function parseMeasuremenetCollectionXML(vendor, format, inputFolder, outputFolde
 	
 }
 
+/*
+* Parse Huawei NE Based measurement collection XML files 
+*
+*/
+function parseHuaweiNeBasedMeasCollecXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
+	let basepath = app.getAppPath();
+
+	if (!isDev) {
+	  basepath = process.resourcesPath
+	} 
+	
+	const parser = VENDOR_PM_PARSERS[vendor][format]
+	const parserPath = path.join(basepath,'libraries',parser)
+	
+	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
+	
+	const child = spawnSync('java', commandArgs);
+	log.info(`java ${commandArgs.join(" ")}`);
+	
+	if(child.status != 0){
+		log.error(`[parseMeasuremenetCollectionXML] error:${child.output.toString()}`);
+		return {status: 'error', message: `Error parsing  ${vendor} PM ${format}`}
+	}else{
+		//log.info(child.output.toString())
+		
+	}
+	
+	return {status: 'success', message: `${vendor} PM files successfully parsed.`} 
+	
+}
+
 function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
 
 	if( vendor === 'ERICSSON' && format === 'MEAS_COLLEC_XML'){
 		return parseMeasuremenetCollectionXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
+	}
+	
+	if( vendor === 'HUAWEI' && format === 'NE_BASED_MEAS_COLLEC_XML'){
+		return parseHuaweiNeBasedMeasCollecXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
 	}
 	return {status: 'error', message: 'PM processing not yet implemented.'}
 }
@@ -953,7 +988,7 @@ async function loadEricssonMeasCollectXML(inputFolder, truncateTables, beforeFil
 							"meas_result",
 							"suspect"];
 							
-		let table = 'pm."ericsson"'
+		let table = 'pm."eri_meas_collec_xml"'
 		
 		try{
 			//Get client from pool
@@ -1067,11 +1102,190 @@ async function loadEricssonMeasCollectXML(inputFolder, truncateTables, beforeFil
 	
 }
 
+
+async function loadCSVFiles(table, tableFields, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
+
+	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+
+	const hostname = dbConDetails.hostname;
+	const port = dbConDetails.port;
+	const username = dbConDetails.username;
+	const password = dbConDetails.password;
+	
+	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+	
+	const pool = new Pool({
+	  connectionString: connectionString,
+	})
+	
+	pool.on('error', (err, client) => {
+		log.error(err.toString());
+		client.release();
+	})
+
+	
+	if(typeof beforeLoad === 'function'){
+		beforeLoad();
+	}
+	
+	if(truncateTables === true) {
+		log.info("Truncate tables before loading is set to true.")
+		
+		client = await pool.connect();
+		if(client.processID === null){
+			log.error('Failed to connect to database');
+			return {status: "error", message: 'Failed to connect to database during boda cell file loading'};
+		}
+		
+		await client.query(`TRUNCATE pm."ericsson" RESTART IDENTITY CASCADE`);
+		
+		client.release();
+	}
+	
+	
+	fileList = fs.readdirSync(inputFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	
+
+	//This will be used to wait for the loading to complete before existing the function 
+	let csvFileCount = fileList.length;
+	let filesNotLoaded = 0; //Keep count of files not loaded
+	
+	//100 mb
+	const highWaterMark = 100 * 1024 * 1024;
+	
+	//Time to wait for load to complete 
+	const waitTime = 1; //1 second 
+	
+	//Maximum times to check
+	const maxLoadWait = 10; // x waitTime 
+	
+	for (let i=0; i< fileList.length; i++) {
+		let fileName = fileList[i];
+		let filePath = path.join(inputFolder, fileList[i]);
+		
+		//Use to wait for each file to load
+		let fileIsLoading = true;
+		let client = null;
+		let copyFromStream = null;
+							
+		
+		try{
+			//Get client from pool
+			client = await pool.connect();
+			if(client.processID === null){
+				log.error('Failed to connect to database');
+				return false;
+			}
+			
+			//copyFromStream = await client.query(copyFrom(`COPY ${table} (${tableFields.join(',')}) FROM STDIN WITH (FORMAT csv)`,{writableHighWaterMark : highWaterMark}));
+			//log.info(`COPY ${table} (${tableFields.join(',')}) FROM STDIN WITH (FORMAT csv)`)
+			copyFromStream = await client.query(copyFrom(`COPY ${table} (${tableFields.join(',')}) FROM STDIN WITH (FORMAT csv, HEADER)`,{writableHighWaterMark : highWaterMark}));
+			log.info(`COPY ${table} (${tableFields.join(',')}) FROM STDIN WITH (FORMAT csv, HEADER)`)
+		}catch(e){
+			if( copyFromStream !== null) copyFromStream.end();
+			if( client !== null) client.release();
+			
+			log.error(`Pool_Connect_Query: ${e.toString()}`);
+			log.info(`Skipping loading of ${fileName}`);
+			
+			//reduce the file count the needs to be processed 
+			--csvFileCount;
+			fileIsLoading = false;
+			
+			//Increament the count of files that have not been processed
+			++filesNotLoaded;
+			
+			//Process next file 
+			//@TODO: 
+			continue; 
+		}
+		
+		copyFromStream.on('error', async (err) => {
+			log.error(`copyFromStream.errorEvent: ${err.toString()}.  [${fileName}]`);
+			
+			//Reduce load  file count
+			//--csvFileCount;
+			fileIsLoading = false;
+			
+			//By setting writeStatus to null, we are letting next write konw that there was an 
+			//error in the previous attempt so we should exit csvToJson
+			writeStatus = null;
+		});
+	
+	
+		//Write stream status used to handle backpressure on the write stream
+		let writeStatus = true;
+		copyFromStream.on('drain', (err) => {
+			log.info(`Write stream drained for ${fileName}`);
+			writeStatus = true;
+		});
+		
+		copyFromStream.on('end', (err) => {
+			//reduce process file count 
+			--csvFileCount;
+			
+			log.info(`Loading of  ${fileName} is done. ${csvFileCount} csv files remaining to be processed.`);
+			writeStatus = true;
+		
+			fileIsLoading = false;
+
+		});
+
+		if(typeof beforeFileLoad === 'function'){
+			beforeFileLoad(table, fileName, inputFolder);
+		}
+		
+		var fileStream = fs.createReadStream(filePath);
+		
+		fileStream.on('error', (err) => {
+			log.error(err)
+		});
+		
+		fileStream.pipe(copyFromStream);
+		
+		//Wait for loading to complete. The csvToJson can complete before 
+		await new Promise(async (rs, rj) => {
+			while(fileIsLoading === true ){
+				log.info(`Waiting for ${waitTime} seconds for loading of ${fileName} to complete...`);
+				await new Promise((rs, rj) => {  setTimeout(rs, waitTime * 1000); });
+			}
+			
+			//Release client i.e. return to pool
+			await client.release();
+			rs(undefined);
+			
+		});
+		
+		if(typeof afterFileLoad === 'function'){
+			afterFileLoad(table, fileName, inputFolder);
+		}
+	}
+
+	log.info(`${filesNotLoaded} files not loaded.`)
+	
+	if(typeof afterLoad === 'function'){
+		afterLoad();
+	}
+
+
+	await pool.end();
+	
+	return {status: "success", message: "Loading completed."}
+	
+}
+
 async function loadPMData(vendor, format, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
 	
 	if(vendor === 'ERICSSON' && format === 'MEAS_COLLEC_XML'){
 		return await  loadEricssonMeasCollectXML(inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad);
 	}
+	
+	if(vendor === 'HUAWEI' && format === 'NE_BASED_MEAS_COLLEC_XML'){
+		let table = 'pm.hua_ne_based_meas_collec_xml';
+		let tableFields = ['file_name','collection_begin_time','collection_end_time','file_format_version','vendor_name','element_type','managed_element','meas_infoid','gran_period_duration','gran_period_endtime','rep_period_duration','meas_objldn','counter_id','counter_value', 'suspect']
+		return loadCSVFiles(table, tableFields, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad)	
+	}
+	
 	return {status: 'success', message: 'PM functionality is not ready!'}
 }
 

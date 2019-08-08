@@ -409,6 +409,14 @@ class GISMap extends React.Component{
 											<Checkbox inline={true} checked={this.state.showLTECells} name="showLTECells" label="LTE" onChange={this.handleTechFilterCheckBox} />
 										</div>
 										
+										<div>
+											<h6 className="horizontal-line">
+												<span className="horizontal-line-text">Environment</span>
+											</h6>
+											<Checkbox inline={true} checked={this.state.showPlanEnv} name="showPlanEnv" label="Plan" onChange={this.handleTechFilterCheckBox} />
+											<Checkbox inline={true} checked={this.state.showLiveEnv} name="showLiveEnv" label="Live" onChange={this.handleTechFilterCheckBox} />
+										</div>
+										
 									</div>
 							   </Tab>
 							   <Tab id="gis_settings" header="Settings" anchor="bottom" icon={<FiSettings />}>

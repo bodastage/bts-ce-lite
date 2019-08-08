@@ -8,7 +8,7 @@ const VENDOR_CM_FORMATS = {
 
 const VENDOR_PM_FORMATS = {
 	'ERICSSON': ['MEAS_COLLEC_XML'],
-	'HUAWEI': ['GEXPORT_XML','NBI_XML','CFGMML'],
+	'HUAWEI': ['NE_BASED_MEAS_COLLEC_XML'],
 	'ZTE': ['BULKCM','XLS'],
 	'NOKIA': ['RAML'],
 	'BODASTAGE': []
@@ -47,6 +47,9 @@ const VENDOR_CM_PARSERS = {
 const VENDOR_PM_PARSERS = {
 	'ERICSSON': {
 		'MEAS_COLLEC_XML': 'boda-measdatacollectionparser.jar'
+	},
+	'HUAWEI':{
+		'NE_BASED_MEAS_COLLEC_XML': 'boda-huaweipmdataparser.jar'
 	}
 }
 
