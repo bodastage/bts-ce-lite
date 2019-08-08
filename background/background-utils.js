@@ -725,7 +725,7 @@ function parseHuaweiNeBasedMeasCollecXML(vendor, format, inputFolder, outputFold
 	log.info(`java ${commandArgs.join(" ")}`);
 	
 	if(child.status != 0){
-		log.error(`[parseMeasuremenetCollectionXML] error:${child.output.toString()}`);
+		log.error(`[parseHuaweiNeBasedMeasCollecXML] error:${child.output.toString()}`);
 		return {status: 'error', message: `Error parsing  ${vendor} PM ${format}`}
 	}else{
 		//log.info(child.output.toString())
@@ -734,6 +734,32 @@ function parseHuaweiNeBasedMeasCollecXML(vendor, format, inputFolder, outputFold
 	
 	return {status: 'success', message: `${vendor} PM files successfully parsed.`} 
 	
+}
+
+function parseNokiaPMXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
+	let basepath = app.getAppPath();
+
+	if (!isDev) {
+	  basepath = process.resourcesPath
+	} 
+	
+	const parser = VENDOR_PM_PARSERS[vendor][format]
+	const parserPath = path.join(basepath,'libraries',parser)
+	
+	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
+	
+	const child = spawnSync('java', commandArgs);
+	log.info(`java ${commandArgs.join(" ")}`);
+	
+	if(child.status != 0){
+		log.error(`[parseNokiaPMXML] error:${child.output.toString()}`);
+		return {status: 'error', message: `Error parsing  ${vendor} PM ${format}`}
+	}else{
+		//log.info(child.output.toString())
+		
+	}
+	
+	return {status: 'success', message: `${vendor} PM files successfully parsed.`} 
 }
 
 function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
@@ -745,6 +771,11 @@ function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse
 	if( vendor === 'HUAWEI' && format === 'NE_BASED_MEAS_COLLEC_XML'){
 		return parseHuaweiNeBasedMeasCollecXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
 	}
+	
+	if( vendor === 'NOKIA' && format === 'PM_XML'){
+		return parseNokiaPMXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
+	}
+	
 	return {status: 'error', message: 'PM processing not yet implemented.'}
 }
 
@@ -1283,6 +1314,12 @@ async function loadPMData(vendor, format, inputFolder, truncateTables, beforeFil
 	if(vendor === 'HUAWEI' && format === 'NE_BASED_MEAS_COLLEC_XML'){
 		let table = 'pm.hua_ne_based_meas_collec_xml';
 		let tableFields = ['file_name','collection_begin_time','collection_end_time','file_format_version','vendor_name','element_type','managed_element','meas_infoid','gran_period_duration','gran_period_endtime','rep_period_duration','meas_objldn','counter_id','counter_value', 'suspect']
+		return loadCSVFiles(table, tableFields, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad)	
+	}
+	
+	if(vendor === 'NOKIA' && format === 'PM_XML'){
+		let table = 'pm.nok_pm_xml';
+		let tableFields = ['filename','start_time','interval','base_id','local_moid','ne_type','measurement_type','counter_id','counter_value']
 		return loadCSVFiles(table, tableFields, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad)	
 	}
 	

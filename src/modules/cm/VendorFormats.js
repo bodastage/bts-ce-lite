@@ -10,7 +10,7 @@ export const VENDOR_PM_FORMATS = {
 	'ERICSSON': ['MEAS_COLLEC_XML'],
 	'HUAWEI': ['NE_BASED_MEAS_COLLEC_XML', 'MRF'],
 	'ZTE': ['MEAS_COLLEC_XML','EXCEL'],
-	'NOKIA': ['RAML'],
+	'NOKIA': ['PM_XML'],
 	'BODASTAGE': []
 }
 

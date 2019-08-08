@@ -65,9 +65,31 @@ exports.up = (pgm) => {
 			modified_by: "createdBy"
 		}
 	);	
+	
+	//Nokia PM XML
+	pgm.createTable(
+		{schema: "pm", name: "nok_pm_xml"}, 
+		{
+			id: "id",
+			filename: {type: "varchar(200)", notNull: true},
+			start_time: {type: "timestamp"},
+			interval: {type: "integer"},
+			base_id: {type: "varchar(200)"},
+			local_moid: {type: "varchar(200)"},
+			ne_type: {type: "varchar(100)"},
+			measurement_type: {type: "varchar(100)"},
+			counter_id: {type: "varchar(100)"},
+			counter_value: {type: "varchar(200)"},
+			created_at: "createdAt", 
+			modified_at: "createdAt", 
+			created_by: "createdBy",
+			modified_by: "createdBy"
+		}
+	);
 };
 
 exports.down = (pgm) => {
+	pgm.dropTable({schema: "pm", name: 'nok_pm_xml'}, {ifExists : true});
 	pgm.dropTable({schema: "pm", name: 'eri_meas_collec_xml'}, {ifExists : true});
 	pgm.dropTable({schema: "pm", name: 'hua_ne_based_meas_collec_xml'}, {ifExists : true});
 	

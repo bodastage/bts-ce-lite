@@ -50,6 +50,9 @@ const VENDOR_PM_PARSERS = {
 	},
 	'HUAWEI':{
 		'NE_BASED_MEAS_COLLEC_XML': 'boda-huaweipmdataparser.jar'
+	},
+	'NOKIA':{
+		'PM_XML': 'boda-nokiapmdataparser.jar'
 	}
 }
 
