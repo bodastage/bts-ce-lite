@@ -44,15 +44,18 @@ class UILayout extends React.Component {
             
             const moduleMenu = (
             <Menu>
-                <MenuItem icon="asterisk" text="Process CM dumps" 
+                <MenuItem icon="asterisk" text="Parse and Import" 
                     onClick={this.addTab({
-                                component: 'ProcessCMDumps',
-                                title: 'Process CM dumps'
+                                component: 'ParseAndImport',
+                                title: 'Parse and Import'
                                 })}
                 />
 				
                 <MenuItem icon="th" text="Reports" onClick={this.setSidePanel('ReportsTree')}/>
-				<MenuItem icon="globe" text="GIS"/>
+				<MenuItem 
+					icon="globe" 
+					text="GIS" 
+					onClick={this.addTab({component: 'GISMap',title: 'GIS'})}/>
 				<MenuDivider />
                 <MenuItem icon="cog" text="Settings" onClick={this.addTab({
                                 component: 'Settings', title: 'Settings'})}/>

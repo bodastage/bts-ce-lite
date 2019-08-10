@@ -84,7 +84,13 @@ export async function runQuery(query){
 			return err;
 		}
 	});
-		
+	
+	//console.log(client);
+	//if(client.processID === null){
+	//	log.error('Failed to connect to database');
+	//	return {error: 'Failed to connect to database'};
+	//}
+			
 	let results = await
 	new Promise((resolve, reject) => {
 		client.query(query)

@@ -1,5 +1,4 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { connect } from 'react-redux';
 import { Button, ResizeSensor, Spinner, Icon, Intent,
 		 MenuItem, Menu, FormGroup, InputGroup } from "@blueprintjs/core";
@@ -238,7 +237,7 @@ class CreateCompositeReport extends React.Component {
 		const options = {
 			layout: this.props.options.layout
 		}
-		
+
 		this.props.dispatch(saveCompositeReport(compReportId, name, catId, options));
 	}
 	/**
@@ -253,7 +252,7 @@ class CreateCompositeReport extends React.Component {
 
 		const colCount = this.props.options.columns;
 		
-		let activeItem   = this.state.category;
+		//let activeItem   = this.state.category;
 		let category   = this.state.category;
 		
 
@@ -328,7 +327,7 @@ class CreateCompositeReport extends React.Component {
 		];
 		
 		const addBoxRow = this.props.options.layout.length === 0 ? 0 : Math.ceil(this.props.options.layout.length/colCount) + 1
-		const layout = [...this.props.options.layout, {i: 'z', x: 0, y: addBoxRow, w: 2, h: 2}];
+		const layout = [...this.props.options.layout, {i: 'z', x: 0, y: addBoxRow, w: 2, h: 1}];
 		//layout.push({i: 'b', x: 3, y: 0, w: 2, h: 2})
 		
 		//When editing, show spinner as we wait for the report info to be loaded in the state

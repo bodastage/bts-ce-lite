@@ -53,13 +53,17 @@ class DashboardSidePanel extends React.Component {
         <div>
             <span className="dropdown-item-text legend w-100">Radio Access Network</span>
             <a title="Process CM dumps" className="dropdown-item" href="/#" onClick={this.addTab({
-                                            component: 'ProcessCMDumps',
-                                            title: 'Process CM dumps'
-                                })}> <FontAwesomeIcon icon="asterisk" /> Process CM dumps</a>  
+                                            component: 'ParseAndImport',
+                                            title: 'Parse and Import'
+                                })}> <FontAwesomeIcon icon="asterisk" /> Parse and Import</a>  
 
             <a title="Reports" className="dropdown-item" href="/#" onClick={this.setSidePanel('ReportsTree')}> <FontAwesomeIcon icon="table"/> Reports</a>
-
-                                
+			
+            <a title="Process CM dumps" className="dropdown-item" href="/#" onClick={this.addTab({
+                                            component: 'GISMap',
+                                            title: 'GIS'
+                                })}> <FontAwesomeIcon icon="globe-africa" /> GIS</a>  
+           
                 <span className="dropdown-item-text legend w-100">System</span>
 
                 <a className="dropdown-item" title="Profile" href="/#" 

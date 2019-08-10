@@ -8,6 +8,7 @@ platform telecommunication management desktop app.
 ## Features
 * Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
 * Reports module that supports tabular, graphs, and composite(dashboard-like) reports
+* Advanced GIS module
 
 ## Built with 
 * [Electron](https://electronjs.org)
@@ -15,6 +16,10 @@ platform telecommunication management desktop app.
 * [ReactJs](https://reactjs.org/)
 * [SQLite3](https://www.sqlite.org/index.html)
 
+## Screenshots 
+![BTS-CE-Lite Dashboard and Reports](/dashboard_and_reports.png?raw=true "Dashboard and Reports")
+
+![BTS-CE-Lite GIS](/gis.jpeg?raw=true "GIS")
 
 ## Getting help
 To report issues with the application or request new features use the issue tracker. For help and customizations send an email to info@bodastage.com.

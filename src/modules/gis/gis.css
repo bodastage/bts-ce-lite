@@ -1,0 +1,65 @@
+ .gis-text-labels {
+}
+
+.gis-cell-table-wrapper {
+	position:relative;
+}
+
+.gis-cell-table-scroll {
+  height:150px;
+  overflow:auto;  
+  margin-top:20px;
+}
+
+.gis-cell-table-wrapper table {
+  width:100%;   
+}
+
+.gis-cell-table-wrapper table thead th .text {
+  position:absolute;   
+  top:-20px;
+  z-index:2;
+  height:20px;
+  width:40%;
+}
+
+
+.gis-cell-table-wrapper table thead th{
+    padding: 0rem;
+    vertical-align: top;
+    border-top: 0px solid #dee2e6;
+}
+
+
+.map-container .sidebar-pane {
+    display: none;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    padding: 10px 10px;
+}
+
+.map-container .sidebar-header {
+	font-size: 11.4pt;
+}
+
+
+h6.horizontal-line {
+	 position: relative;
+}
+
+h6.horizontal-line span.horizontal-line-text {
+    background-color: white;
+    padding-right: 10px;
+}
+
+h6.horizontal-line:after {
+    content:"";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0.5em;
+    border-top: 1px solid black;
+    z-index: -1;
+}

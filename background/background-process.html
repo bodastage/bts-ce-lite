@@ -21,27 +21,13 @@ const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
 const fixPath = window.require('fix-path');
 
+const vendorFormats = window.require('./vendor-formats');
+const VENDOR_CM_PARSERS = vendorFormats.VENDOR_CM_PARSERS;
+
 log.info(`[parse_cm_job] Starting hidden window to run as background process`)
 log.info(`PATH: ${process.env.PATH}`)
 
-const VENDOR_PARSERS = {
-	'ERICSSON': {
-		'BULKCM': 'boda-bulkcmparser.jar',
-		'CNAIV2': 'boda-ericssoncnaiparser.jar',
-	},
-	'HUAWEI': {
-		'GEXPORT_XML': 'boda-huaweicmobjectparser.jar',
-		'CFGMML': 'boda-huaweimmlparser.jar',
-		'NBI_XML': 'boda-huaweicmxmlparser.jar'
-	},
-	'ZTE': {
-		'BULKCM': 'boda-bulkcmparser.jar',
-		'XLS': 'boda_ztexlscmparser.jar',
-	},
-	'NOKIA': {
-		'RAML': 'boda-nokiacmdataparser.jar'
-	}
-}
+
 
 /*
 * Extract rar file into targetFolder
@@ -75,7 +61,7 @@ function sendLogToUI(task, level, message){
 * @param string targetFolder Name of destination folder
 */
 extractGzip =  (fileName, targetFolder) => {
-	console.log("Running extractGzip ....")
+	
 	const targetFile = path.join(targetFolder, path.basename(fileName).replace(".gz",""));
 	gunzip( fileName, targetFile);
 	
@@ -133,7 +119,7 @@ getFileType = (filename) => {
 * @param string folderName
 */
 uncompressFiles = async (folderName) => {
-	sendLogToUI('parse_cm_data','info', `Uncompressing files in ${folderName} ... `);
+	sendLogToUI('parse_data','info', `Uncompressing files in ${folderName} ... `);
 	log.info(`[parse_cm_job] Uncompressing files in ${folderName} ...`)
 	let files = fs.readdirSync(folderName,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
@@ -151,7 +137,7 @@ uncompressFiles = async (folderName) => {
 					
 						gunzip( filePath, filePath.replace('.gz',''), function() {
 							log.info(`[parse_cm_job] Uncompressed  ${filename} successfully.`)
-							sendLogToUI('parse_cm_data','info', `Uncompressed  ${filename}. `);
+							sendLogToUI('parse_data','info', `Uncompressed  ${filename}. `);
 
 							resolve(`Uncompressed  ${filename}. `)
 						});
@@ -160,11 +146,11 @@ uncompressFiles = async (folderName) => {
 				);
 			}else{
 				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`);
-				sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+				sendLogToUI('parse_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
 			}
 		}catch(e){
 			log.info(`[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`)
-			sendLogToUI('parse_cm_data','error', `[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`);
+			sendLogToUI('parse_data','error', `[parse_cm_job] file:${filename} fType:${fType} error:${e.toString()}`);
 		}
 	}
 	
@@ -274,7 +260,7 @@ uncompressFolder = (folderName) => {
 		let fType = getFileType(filePath);
 		
 		if(typeof fType === 'undefined'){
-			sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+			sendLogToUI('parse_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
 			continue;
 		}
 		
@@ -290,7 +276,7 @@ uncompressFolder = (folderName) => {
 			fType.mime === 'application/x-gtar'
 			) {
 				log.info(`Uncompressing ${files[i]}...`);
-				sendLogToUI('parse_cm_data','info', `Uncompressing  ${files[i]}...`);
+				sendLogToUI('parse_data','info', `Uncompressing  ${files[i]}...`);
 				
 				unCompressFile(filePath,folderName);
 				
@@ -299,7 +285,7 @@ uncompressFolder = (folderName) => {
 				fs.renameSync(filePath, newPath)
 				
 			}else{
-				sendLogToUI('parse_cm_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
+				sendLogToUI('parse_data','info', `[parse_cm_job] Skip uncompressing of ${filePath}`);
 				log.info(`[parse_cm_job] Skip uncompressing of ${filePath}`);
 			}
 		}catch(e){
@@ -378,7 +364,7 @@ cleanHuaweiGExportWithSed = (inputFolder) => {
 		inputFile = path.join(inputFolder,f);
 		
 		log.info(`Cleaning ${f}...`);
-		sendLogToUI('parse_cm_data','info', `Cleaning  ${f}...`);
+		sendLogToUI('parse_data','info', `Cleaning  ${f}...`);
 		
 		const child = spawnSync(sed, ['-i', '-r', '-f', sedScript, inputFile]);
 		log.info(`${sed} -i -r -f ${sedScript} ${inputFile}`);
@@ -403,14 +389,14 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	const repeatedFilesFolder = path.join(pathToFolder,'repeated_files');
 	
 	log.info(`[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `)
-	sendLogToUI('parse_cm_data','info', `[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `);
+	sendLogToUI('parse_data','info', `[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `);
 	
 	if (!fs.existsSync(repeatedFilesFolder)) {
 		fs.mkdirSync(repeatedFilesFolder)	
 	}
 
 	log.info("[parse_cm_job] Starting removal of duplicate gexport files...")
-	sendLogToUI('parse_cm_data','info', `[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `);
+	sendLogToUI('parse_data','info', `[parse_cm_job] Creating folder for duplicate files: ${repeatedFilesFolder} ... `);
 	//Key - value pair of node and the most recent file
 	let nodeAndRecentFile = {};
 	
@@ -421,7 +407,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 		let gexportFilename = items[i];
 		let matches = gexportFilename.match(/(.*)_(\d+)\.xml.*/)
 		
-		sendLogToUI('parse_cm_data','info', `Checking whether ${gexportFilename} is a duplicate... `);
+		sendLogToUI('parse_data','info', `Checking whether ${gexportFilename} is a duplicate... `);
 		log.info(`[parse_cm_job] Checking whether ${gexportFilename} is a duplicate... `)
 		
 		if(matches === null) continue;
@@ -449,7 +435,7 @@ removeDublicateHuaweiGExportFiles = (pathToFolder) => {
 	
 	nodeAndRecentFile = {};
 	
-	sendLogToUI('parse_cm_data','info', `Duplicate file removal completed.`);
+	sendLogToUI('parse_data','info', `Duplicate file removal completed.`);
 	log.info(`[parse_cm_job] Duplicate file removal completed.`)
 	
 }
@@ -463,7 +449,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	  basepath = process.resourcesPath
 	} 
 	
-	const parser = VENDOR_PARSERS[vendor][format]
+	const parser = VENDOR_CM_PARSERS[vendor][format]
 	const parserPath = path.join(basepath,'libraries',parser)
 	
 	
@@ -473,12 +459,12 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			removeDublicateHuaweiGExportFiles(inputFolder)
 						
 			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
-			sendLogToUI('parse_cm_data','info',`Uncompressing files GExport XML files...` );
+			sendLogToUI('parse_data','info',`Uncompressing files GExport XML files...` );
 			
 			uncompressFolder(inputFolder);
 			
 			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
-			sendLogToUI('parse_cm_data','info',`Cleaning GExport XML files...`);
+			sendLogToUI('parse_data','info',`Cleaning GExport XML files...`);
 			
 			if(process.platform === "win32"){
 				//If windows test, with sed.exe 
@@ -488,15 +474,15 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			}
 			
 			log.info(`[parse_cm_job] Cleanup of GExport XML files completed.`);
-			sendLogToUI('parse_cm_data','info',`Cleanup of GExport XML files completed.`);
+			sendLogToUI('parse_data','info',`Cleanup of GExport XML files completed.`);
 			
 		}catch(error){
 			log.error('[parse_cm_job] Error occurred:', error);
 			if(typeof error === 'undefined'){
-				sendLogToUI('parse_cm_data','error', 'Error occured.');
+				sendLogToUI('parse_data','error', 'Error occured.');
 				return;
 			}
-			sendLogToUI('parse_cm_data','error',error.toString());
+			sendLogToUI('parse_data','error',error.toString());
 			return;
 		}
 		
@@ -506,12 +492,12 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	//uncompressing what does not need to be uncompressed 
 	//else if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
 	else{
-		sendLogToUI('parse_cm_data','info',`Uncompressing files...` );
+		sendLogToUI('parse_data','info',`Uncompressing files...` );
 		log.info(`[parse_cm_job] Uncompressing files...`)
 		uncompressFolder(inputFolder);
 	}
 	
-	sendLogToUI('parse_cm_data','info', `Parsing files...`);
+	sendLogToUI('parse_data','info', `Parsing files...`);
 	log.info("[parse_cm_job] Parsing files...")
 	
 	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
@@ -527,17 +513,17 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	});
 
 	child.stderr.on('data', (data) => {
-	  sendLogToUI('parse_cm_data','error', data.toString());
+	  sendLogToUI('parse_data','error', data.toString());
 	  log.info(`[parse_cm_job] ${data.toString()}`)
 	});
 	
 	child.on('exit', code => {
 		if(code === 0 ){
-			sendLogToUI('parse_cm_data','success', `Dump successfully parsed. Find csv files in ${outputFolder}`);
+			sendLogToUI('parse_data','success', `Dump successfully parsed. Find csv files in ${outputFolder}`);
 			log.info(`[parse_cm_job] Dump successfully parsed. Find csv files in ${outputFolder}`);
 		}else{
 			log.error(`Something went wrong`);
-			sendLogToUI('parse_cm_data','error', `Something went wrong`);
+			sendLogToUI('parse_data','error', `Something went wrong`);
 		}
 	});
 
@@ -556,7 +542,7 @@ async function loadCMData(vendor, format, csvFolder){
 	items = fs.readdirSync(csvFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
 	
 	log.info(`Loading ${vendor} ${format} files from ${csvFolder}`);
-	sendLogToUI('parse_cm_data', 'info', `Loading ${vendor} ${format} files from ${csvFolder}` );
+	sendLogToUI('parse_data', 'info', `Loading ${vendor} ${format} files from ${csvFolder}` );
 	
 	for (let i=0; i<items.length; i++) {
 		let fileName = items[i];
@@ -574,12 +560,11 @@ async function loadCMData(vendor, format, csvFolder){
 		});
 		
 		child.stderr.on('data', (data) => {
-		  console.log(`grep stderr: ${data}`);
 		  log.error(data)
 		});
 		
 		child.stdin.on('data', (data) => {
-		  console.log(`child.stdin.on.data: ${data}`);
+		  //console.log(`child.stdin.on.data: ${data}`);
 		});
 		
 		
@@ -609,7 +594,7 @@ async function loadCMData(vendor, format, csvFolder){
 			()=>{//onComplete
 				child.stdin.end();
 				resolve(undefined);
-				console.log(`csv.fromStream.subscribe.end`);
+				//console.log(`csv.fromStream.subscribe.end`);
 				//end cild spawn
 			}); 
 			
@@ -627,9 +612,8 @@ async function loadCMData(vendor, format, csvFolder){
 
 async function generateCSVReport(reportId, outputFolder){
 	let reportInfo = await utils.getSQLiteReportInfo(reportId);
-	console.log("reportInfo", reportInfo);
 	let csvFileName = reportInfo.name.replace(/\s+/g,"_") + ".csv";
-	console.log(csvFileName, outputFolder, reportInfo.query);
+	//console.log(csvFileName, outputFolder, reportInfo.query);
 	const reportFile = await utils.generateCSVFromQuery(csvFileName, outputFolder, reportInfo.query);
 	sendLogToUI('download_report','success', reportFile);
 }
@@ -695,30 +679,52 @@ async function  executeTask(task, options){
 	log.info("executeTask(task, options) task:",task," options:", options);
 	
 	try {
-		if(task === 'parse_cm_data'){
-			processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
+		if(task === 'parse_data'){
+		
+			//@TODO: Move CM parsing to backgroup-utils.js
+			if(options.dataType === 'CM' && options.vendor !== 'BODASTAGE'){
+				processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
+			}else{
+
+				const rtn = await utils.parseData(
+						options.dataType, 
+						options.vendor, 
+						options.format, 
+						options.inputFolder, 
+						options.outputFolder, 
+						//beforeFileParse
+						(fileName) => { log.info(`Parsing ${fileName} ...`); },
+						//afterFileParse
+						(fileName) => { log.info(`Parsing ${fileName} done.`); },
+						//beforeParse
+						(fileName) => { log.info(`Parsing ${fileName} done.`); },
+						//afterParse
+						(fileName) => { log.info(`Parsing ${fileName} done.`); }
+					);
+				sendLogToUI(task, rtn.status, rtn.message);
+			}
 		}
 		
-		if(task === 'load_cm_data'){
-			const status = await utils.loadCMDataViaStream(
+		//@TODO: Change cssvFolder to inputFolder because we may load different data formats besides csv
+		if(task === 'load_data'){
+			const result = await utils.loadData(
+				options.dataType || "CM", 
 				options.vendor, 
 				options.format, 
 				options.csvFolder,
 				options.truncateTables,
 				(tableName, fileName, csvFolder, ) => { //beforeFileLoad
-					//sendLogToUI('load_cm_data','info', `Loading ${fileName} into ${tableName}...`);
 					log.info(`Loading ${fileName} into ${tableName}...`);
 				}, 
-				(tableName, fileName, csvFolder) => { //afterFileLoad
-					//sendLogToUI('load_cm_data','info', `Loaded ${fileName} into ${tableName}.`);
-					//log.info(`Loaded ${fileName} into ${tableName}.`);
-				}, 
+				(tableName, fileName, csvFolder) => {}, 
 				function beforeLoad(){
-					sendLogToUI('load_cm_data','info', 'Loading csv files into database...');
+					sendLogToUI('load_data','info', 'Loading csv files into database...');
 				}, 
 				function afterLoad(){
-					sendLogToUI('load_cm_data','success', 'Loading completed successfully.')
+					//sendLogToUI('load_data','success', 'Loading completed successfully.');
 			});
+			
+			sendLogToUI(task, result.status, result.message);
 			
 			
 		}
@@ -741,7 +747,9 @@ async function  executeTask(task, options){
 	//Setup database -- 
 	try{
 		if(task === 'setup_database'){
-			setupBodaDatabase(options.hostname, options.port, options.username, options.password);
+			//setupBodaDatabase(options.hostname, options.port, options.username, options.password);
+			const result = await utils.runMigrations(options.hostname, options.port, options.username, options.password);
+			sendLogToUI('setup_database',result.status, result.message);
 		}
 	}catch(err){
 		sendLogToUI('setup_database','error', err);

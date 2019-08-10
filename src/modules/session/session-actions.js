@@ -1,25 +1,4 @@
 import 'url-search-params-polyfill';
-//import * as sqlite3 from 'sqlite3';
-//@TODO: Move this into the db setup script to reduce size of the bundle 
-import { HUAWEI_2G_KEY_PARAMAETERS, 
-		 HUAWEI_3G_KEY_PARAMAETERS, 
-		 HUAWEI_4G_KEY_PARAMAETERS } 
-		from '../../services/postgresql/HuaweiKeyParametersQueries.js';
-		
-import { ERICSSON_2G_KEY_PARAMAETERS, 
-		 ERICSSON_3G_KEY_PARAMAETERS, 
-		 ERICSSON_4G_KEY_PARAMAETERS } 
-		from '../../services/postgresql/EricssonKeyParametersQueries.js';
-import { ZTE_2G_KEY_PARAMAETERS, 
-		 ZTE_3G_KEY_PARAMAETERS, 
-		 ZTE_4G_KEY_PARAMAETERS } 
-		from '../../services/postgresql/ZTEKeyParametersQueries.js';
-import { NOKIA_2G_KEY_PARAMAETERS, 
-		 NOKIA_3G_KEY_PARAMAETERS, 
-		 NOKIA_4G_KEY_PARAMAETERS } 
-		from '../../services/postgresql/NokiaKeyParametersQueries.js';
-import { NETWORK_CELLS, NETWORK_NODES, NETWORK_SITES } 
-		from '../../services/postgresql/NetworkEntities.js';
 import { SQLITE3_DB_PATH } from "./db-settings";
 
 const fs = window.require('fs');
@@ -154,9 +133,6 @@ export function checkDBSetupStatus(){
 				log.info(`Deleting boda-lite.sqlite3 because it's size is 0`);
 			}
 			
-			
-			
-			
 			//@TODO: Move this logic to a different file 
 			let db = new sqlite3.Database(SQLITE3_DB_PATH);
 			db.serialize(function() {
@@ -198,63 +174,11 @@ export function checkDBSetupStatus(){
 				stmt.run();
 				stmt.finalize();
 				
-				//Create report categories
-				db.run("CREATE TABLE rpt_categories (" +
-					  "		name TEXT NOT NULL UNIQUE, " + 
-					  "		notes TEXT NOT NULL," +
-					  "		parent_id INTEGER NOT NULL," +
-					  "		in_built INTEGER DEFAULT 0" +
-					  ")");
-					  
-				//Create reports table 
-				db.run("CREATE TABLE reports (" +
-					  "		name TEXT NOT NULL UNIQUE, " + 
-					  "		notes TEXT NOT NULL," +
-					  "		query TEXT NOT NULL," + 
-					  "		options TEXT NOT NULL," + 
-					  "		type TEXT NOT NULL," + //table|pie|bar|scatter|compound
-					  "		category_id INTEGER NOT NULL," + 
-					  "		in_built INTEGER DEFAULT 0" + //1-inbuilt, 0-not inbuilt
-					  ")");
-				
-				//Insert default categories
-				stmt = db.prepare("INSERT INTO rpt_categories " +
-				" (name, notes, parent_id, in_built)" +
-				" VALUES " + 
-				"('Key Parameters','Key parameter reports',0, 1),"+
-				"('Network Entities','Network Entities reports',0, 1)"
-				);
-				
-				stmt.run();
-				stmt.finalize();
-				
-				//Insert default reports
-				stmt = db.prepare("INSERT INTO reports  (name, notes, query, options, type, category_id, in_built)" +
-				" VALUES (?, ?, ?, ?, ?, ?, ?)" );
-				
-				stmt.run('Ericsson 2G parameters','Ericsson 2G parameters', ERICSSON_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Ericsson 3G parameters','Ericsson 3G parameters', ERICSSON_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Ericsson 4G parameters','Ericsson 4G parameters', ERICSSON_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Huawei 2G parameters','Huawei 2G parameters', HUAWEI_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Huawei 3G parameters','Huawei 3G parameters', HUAWEI_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Huawei 4G parameters','Huawei 4G parameters', HUAWEI_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('ZTE 2G parameters','ZTE 2G parameters', ZTE_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('ZTE 3G parameters','ZTE 3G parameters', ZTE_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('ZTE 4G parameters','ZTE 4G parameters', ZTE_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Nokia 2G parameters','Nokia 2G parameters', NOKIA_2G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Nokia 3G parameters','Nokia 3G parameters', NOKIA_3G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Nokia 4G parameters','Nokia 4G parameters', NOKIA_4G_KEY_PARAMAETERS, '{}', 'table',1, 1);
-				stmt.run('Network Cells','Network Cells', NETWORK_CELLS, '{}', 'table',2, 1);
-				stmt.run('Network Sites','Network Sites', NETWORK_SITES, '{}', 'table',2, 1);
-				stmt.run('Network Nodes','Network Nodes', NETWORK_NODES, '{}', 'table',2, 1);
-				
-				stmt.finalize();
-				
 				dispatch(clearNotices());
 			});
 			
 		}catch(e){
-			console.log(e.toString());
+			log.log(e.toString());
 			dispatch(clearNotices());
 		}	
     }

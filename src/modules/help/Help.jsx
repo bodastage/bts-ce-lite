@@ -40,9 +40,15 @@ export default class Help extends React.Component {
 							</a>
 							</b> forum.
 						</li>
+                        
+						<li>The project source code is available on <b>
+						<a href="https://github.com/bodastage/bts-ce-lite" onClick={this.handleOnClick}
+						target="_blank" rel="noopener noreferrer"> Github</a></b></li>
+						
                         <li>Issues with the application should be logged at the project's <b>
 						<a href="https://github.com/bodastage/bts-ce-lite/issues" onClick={this.handleOnClick}
-						target="_blank" rel="noopener noreferrer"> github issue tracker</a></b></li>
+						target="_blank" rel="noopener noreferrer"> Github issue tracker</a></b></li>
+
                     </ul>    
 
                   </div>
