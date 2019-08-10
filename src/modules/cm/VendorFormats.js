@@ -3,6 +3,7 @@ export const VENDOR_CM_FORMATS = {
 	'HUAWEI': ['GEXPORT_XML','NBI_XML','CFGMML'],
 	'ZTE': ['BULKCM','XLS'],
 	'NOKIA': ['RAML'],
+	'MOTOROLA': ['CELL_X_EXPORT'],
 	'BODASTAGE': ['BCF_CSV']
 }
 
@@ -11,6 +12,7 @@ export const VENDOR_PM_FORMATS = {
 	'HUAWEI': ['NE_BASED_MEAS_COLLEC_XML', 'MRF'],
 	'ZTE': ['MEAS_COLLEC_XML','EXCEL'],
 	'NOKIA': ['PM_XML'],
+	'MOTOROLA': [],
 	'BODASTAGE': []
 }
 
@@ -19,5 +21,6 @@ export const VENDOR_FM_FORMATS = {
 	'HUAWEI': [],
 	'ZTE': [],
 	'NOKIA': [],
+	'MOTOROLA': [],
 	'BODASTAGE': []
 }

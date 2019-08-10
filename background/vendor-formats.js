@@ -41,6 +41,9 @@ const VENDOR_CM_PARSERS = {
 	},
 	'NOKIA': {
 		'RAML': 'boda-nokiacmdataparser.jar'
+	},
+	'MOTOROLA': {
+		'CELL_X_EXPORT': 'boda-motorolacellxexportparser.jar'
 	}
 }
 

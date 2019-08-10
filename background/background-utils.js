@@ -419,6 +419,11 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			moName = 'invBSM';
 		}
 		
+		//Load Motorola Cell X Export
+		if(vendor.toLowerCase("motorola") && format === 'CELL_X_EXPORT'){
+			moName = 'cell_x_export';
+		}
+		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
 		
 		//Use to wait for each file to load

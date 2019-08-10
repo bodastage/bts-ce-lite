@@ -31,7 +31,7 @@ class ParseAndImport extends React.Component {
 		this.state = {
 			inputFileText: this.props.inputFolder === null ? "Choose folder..." : this.props.inputFolder,
 			outputFolderText: this.props.outputFolder === null ? "Choose folder..." : this.props.outputFolder,
-			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA', 'BODASTAGE'],
+			vendors: ['ERICSSON', 'HUAWEI', 'ZTE', 'NOKIA', 'MOTOROLA', 'BODASTAGE'],
 			dataTypes: ['CM','PM', 'FM'],
 			currentVendor: 'ERICSSON',
 			currentDataType: 'CM',

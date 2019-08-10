@@ -31,10 +31,7 @@ exports.up = (pgm) => {
 			meas_type: {type: "varchar(100)"},
 			meas_result: {type: "varchar(100)"},
 			suspect: {type: "varchar(10)"},
-			created_at: "createdAt", 
-			modified_at: "createdAt", 
-			created_by: "createdBy",
-			modified_by: "createdBy"
+			date_loaded: "createdAt"
 		},
 		{ifNotExists : true}
 	);	
@@ -59,10 +56,7 @@ exports.up = (pgm) => {
 			counter_id: {type: "integer"},
 			counter_value: {type: "varchar(200)"},
 			suspect: {type: "varchar(10)"},
-			created_at: "createdAt", 
-			modified_at: "createdAt", 
-			created_by: "createdBy",
-			modified_by: "createdBy"
+			date_loaded: "createdAt"
 		}
 	);	
 	
@@ -80,10 +74,7 @@ exports.up = (pgm) => {
 			measurement_type: {type: "varchar(100)"},
 			counter_id: {type: "varchar(100)"},
 			counter_value: {type: "varchar(200)"},
-			created_at: "createdAt", 
-			modified_at: "createdAt", 
-			created_by: "createdBy",
-			modified_by: "createdBy"
+			date_loaded: "createdAt"
 		}
 	);
 };
