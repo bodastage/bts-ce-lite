@@ -12,14 +12,7 @@ exports.up = (pgm) => {
     pgm.createTable({schema: "huawei_cm", name: "MTP3LNK_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "SUBRACK_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "TRMMAP_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "BRD_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "CAB_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "ETHPORT_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "MSP_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "MTP3LKS_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "MTP3LNK_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "SUBRACK_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-    pgm.createTable({schema: "huawei_cm", name: "TRMMAP_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "UCELLCBS_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "UCELLHSDPA_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "UCELLHSUPA_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
@@ -28,8 +21,6 @@ exports.up = (pgm) => {
     pgm.createTable({schema: "huawei_cm", name: "USCCPCH_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "UTYPRAB_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "UTYPSRB_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-   
-	pgm.createTable({schema: "huawei_cm", name: "2GHASHKEY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "2GHASHKEY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "2GUSERIDANONSWITCH"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "3GHASHKEY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
@@ -2420,14 +2411,7 @@ exports.down = (pgm) => {
     pgm.dropTable({schema: "huawei_cm", name: "MTP3LNK_ACT"});
     pgm.dropTable({schema: "huawei_cm", name: "SUBRACK_MOD"});
     pgm.dropTable({schema: "huawei_cm", name: "TRMMAP_MOD"});
-    pgm.dropTable({schema: "huawei_cm", name: "BRD_MOD"});
-    pgm.dropTable({schema: "huawei_cm", name: "CAB_MOD"});
     pgm.dropTable({schema: "huawei_cm", name: "ETHPORT_ACT"});
-    pgm.dropTable({schema: "huawei_cm", name: "MSP_ACT"});
-    pgm.dropTable({schema: "huawei_cm", name: "MTP3LKS_ACT"});
-    pgm.dropTable({schema: "huawei_cm", name: "MTP3LNK_ACT"});
-    pgm.dropTable({schema: "huawei_cm", name: "SUBRACK_MOD"});
-    pgm.dropTable({schema: "huawei_cm", name: "TRMMAP_MOD"});
     pgm.dropTable({schema: "huawei_cm", name: "UCELLCBS_ACT"});
     pgm.dropTable({schema: "huawei_cm", name: "UCELLHSDPA_ACT"});
     pgm.dropTable({schema: "huawei_cm", name: "UCELLHSUPA_ACT"});

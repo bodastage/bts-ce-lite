@@ -206,7 +206,7 @@ exports.up = (pgm) => {
 			t4g.tac::varchar,
 			t4g.ecgi as "cgi",
 			t4g.euarfcn AS frequency,
-			t4g.bandwidth AS bandwidth,
+			t4g.bandwidth::varchar AS bandwidth,
 			t4g.antenna_beam,
 			t4g.latitude,
 			t4g.longitude,
