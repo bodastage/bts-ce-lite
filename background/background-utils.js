@@ -424,6 +424,11 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			moName = 'cell_x_export';
 		}
 		
+		//Transform AUTOBAK_XML mo names to uppercase
+		if(vendor.toLowerCase("huawei") && format === 'AUTOBAK_XML'){
+			moName = moName.toUpperCase();
+		}
+		
 		let table = `${vendor.toLowerCase()}_cm."${moName}"`;
 		
 		//Use to wait for each file to load
