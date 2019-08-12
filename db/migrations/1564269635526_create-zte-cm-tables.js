@@ -495,6 +495,8 @@ exports.up = (pgm) => {
     pgm.createTable({schema: "zte_cm", name: "VipUeList"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "zte_cm", name: "VsOam"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "zte_cm", name: "X2Ap"}, {id: "id", load_datetime: "load_datetime", data: "data"});
+	pgm.createTable({schema: "zte_cm", name: "SiteBaseBandShare"}, {id: "id", load_datetime: "load_datetime", data: "data"});
+	
 };
 
 exports.down = (pgm) => {;
@@ -994,4 +996,6 @@ exports.down = (pgm) => {;
     pgm.dropTable({schema: "zte_cm", name: 'VipUeList'});
     pgm.dropTable({schema: "zte_cm", name: 'VsOam'});
     pgm.dropTable({schema: "zte_cm", name: 'X2Ap'});
+	pgm.dropTable({schema: "zte_cm", name: 'SiteBaseBandShare'});
+	
 };
