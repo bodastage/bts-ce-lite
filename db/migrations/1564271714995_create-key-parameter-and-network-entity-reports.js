@@ -561,6 +561,14 @@ SELECT
     TRIM(t1.data->>'name' ) AS "SITENAME"
 FROM
 nokia_cm."WBTS" t1
+UNION
+-- Motorola 2G
+SELECT
+   'MOTOROLA' as "VENDOR",
+   '2G' as "TECH",
+   t1.data->>'site_name' as "SITENAME"
+FROM
+motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
 
 const NETWORK_NODES = `
