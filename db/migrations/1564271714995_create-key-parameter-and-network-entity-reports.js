@@ -650,6 +650,39 @@ inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncI
 inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 `;
 
+const NETWORK_2G2G_RELATIONS = '
+--Motorola 2G2G Relations
+SELECT
+'MOTOROLA' AS "SRV VENDOR",
+t1.data->>'source_lac' AS "SRV LAC",
+t1.data->>'source_ci' AS "SRV CELL ID",
+t1.data->>'dest_lac' AS "NBR LAC",
+t1.data->>'dest_ci' AS "NBR CELL ID"
+FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_bscic' is not null
+UNION
+--Huawei 2G2G Relations 
+SELECT
+'Huawei' as "SRV VENDOR",
+t2.data->>'LAC' as "SRV LAC",
+t2.data->>'CI' as "SRV CELL ID",
+t3.data->>'LAC' as "NBR LAC",
+t3.data->>'CI' as "NBR CELL ID"
+FROM huawei_cm."G2GNCELL" t1
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'CELLID'  
+UNION
+--Huawei 2G2G Ext Relations
+SELECT
+'Huawei' as "SRV VENDOR",
+t2.data->>'LAC' as "SRV LAC",
+t2.data->>'CI' as "SRV CELL ID",
+t3.data->>'LAC' as "NBR LAC",
+t3.data->>'CI' as "NBR CELL ID"
+FROM huawei_cm."G2GNCELL" t1
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
+';
+
 exports.up = (pgm) => {
 	pgm.sql(`
 INSERT INTO 
@@ -679,7 +712,8 @@ VALUES
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
-	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_RELATIONS}$$, '{}', 'table',2, true)
+	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_RELATIONS}$$, '{}', 'table',2, true),
+	('Network 2G2G RELATIONS','Network 2G2G RELATIONS', $$${NETWORK_2G2G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
 		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
@@ -696,7 +730,8 @@ VALUES
 		NETWORK_CELLS : NETWORK_CELLS,
 		NETWORK_SITES : NETWORK_SITES,
 		NETWORK_NODES : NETWORK_NODES,
-		NETWORK_3G3G_RELATIONS : NETWORK_3G3G_RELATIONS
+		NETWORK_3G3G_RELATIONS : NETWORK_3G3G_RELATIONS,
+		NETWORK_2G2G_RELATIONS : NETWORK_2G2G_RELATIONS
 	})
 };
 
