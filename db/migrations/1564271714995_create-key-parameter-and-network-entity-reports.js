@@ -128,8 +128,8 @@ const HUAWEI_2G_KEY_PARAMAETERS = `
 	t2.data->>'SYSOBJECTID' as "NENAME", 
 	'HUAWEI' AS "VENDOR", 
 	'2G' AS "TECHNOLOGY", 
-	t3.data->>'BTSNAME' AS "SITENAME", 
-	t3.data->>'BTSID' AS "SITEID", 
+	--t3.data->>'BTSNAME' AS "SITENAME", 
+	--t3.data->>'BTSID' AS "SITEID", 
 	t1.data->>'CELLNAME' AS "CELLNAME", 
 	t1.data->>'ACTSTATUS' AS "ACTSTATUS", 
 	t1.data->>'ADMSTAT' AS "BLKSTATUS", 
@@ -144,8 +144,8 @@ const HUAWEI_2G_KEY_PARAMAETERS = `
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI_RAW", 
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'CI') AS "CGI" 
 	FROM huawei_cm."GCELL" t1 
-	INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FILENAME' = t2.data->>'FILENAME' 
-	INNER JOIN huawei_cm."BTS" t3 ON t3.data->>'BTSID' = t1.data->>'BTSID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
+	INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'BSCID' = t2.data->>'BSCID' 
+	--INNER JOIN huawei_cm."BTS" t3 ON t3.data->>'BTSID' = t1.data->>'BTSID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
 `;
 
 
@@ -498,7 +498,7 @@ UNION
  UNION 
  SELECT 
     'HUAWEI' as "VENDOR",
-    '4G' AS "TECH",
+    '2G' AS "TECH",
     t1.data->>'BTSNAME' AS "SITENAME"
 from huawei_cm."BTS" t1
 UNION 
@@ -523,6 +523,13 @@ UNION
     '2G' AS "TECH",
 t1.data->>'userLabel' AS "SITENAME"
 from zte_cm."BtsSiteManager" t1
+UNION 
+-- ZTE 2G (xls)
+ SELECT 
+    'ZTE' as "VENDOR",
+    '2G' AS "TECH",
+t1.data->>'userLabel' AS "SITENAME"
+from zte_cm."SiteBaseBandShare" t1
 UNION 
 -- ZTE 3G
 SELECT 
@@ -580,7 +587,66 @@ SELECT
     'ERICSSON' AS "VENDOR",
     t1.data->>'MeContext_id' AS "SITENAME" 
 FROM ericsson_cm."RncFunction" t1
+union
+select
+    'MOTOROLA' AS "VENDOR",
+    t1.data->>'bss_name' AS "NODENAME"
+FROM motorola_cm."cell_x_export" t1
 
+`;
+
+const NETWORK_3G3G_RELATIONS = `
+--HUAWEI 3G3G RELATIONS 
+select 
+'Huawei' as "SVR Vendor",
+t1.data->>'RNCID' as "SVR RNCID",
+t1.data->>'CELLID' as "SVR CELLID",
+t6.data->>'CELLNAME' as "SVR Cell Name",
+t1.data->>'NCELLRNCID' as "NBR CELL RNCID", 
+t1.data->>'NCELLID' as "NBR CELLID",
+t2.data->>'CELLNAME' as "NBR cell name"
+from huawei_cm."UINTRAFREQNCELL" t1
+inner join huawei_cm."UCELL" t2 on t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'RNCID' = t1.data->>'NCELLRNCID'
+inner join huawei_cm."UCELL" t6 on t1.data->>'CELLID'= t6.data->>'CELLID'
+union
+--HUAWEI 3G3G EXT RELATIONS
+select
+'Huawei' as "SVR Vendor",
+t3.data->>'RNCID' as "SVR RNCID",
+t3.data->>'CELLID'as "SVR CELLID",
+t5.data->>'CELLNAME' as "SVR Cell Name",
+t3.data->>'NCELLRNCID' as "NBR CELL RNCID",
+t3.data->>'NCELLID' as "NBR CELLID" ,
+t4.data->>'CELLNAME' as "NBR Cellname"
+from huawei_cm."UINTRAFREQNCELL" t3
+inner join huawei_cm."UEXT3GCELL" t4 on  t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
+inner join huawei_cm."UCELL" t5 on t3.data->>'CELLID'= t5.data->>'CELLID'
+union
+--ZTE 3G3G RELATIONS
+select
+'ZTE' as "SVR Vendor",
+t1.data->>'rncid' as "SVR RNCID",
+t1.data->>'cid' as "SVR CELLID",
+t3.data->>'userLabel' as "SVR Cell Name",
+t1.data->>'nrncid' as "NBR CELL RNCID",
+t1.data->>'ncid' as "NBR CELLID" ,
+t2.data->>'userLabel' as "NBR Cellname"
+from zte_cm."UtranRelation" t1
+inner join zte_cm."UtranCellFDD" t2 on t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
+union
+--ZTE 3G3G EXT RELATIONS
+select
+'ZTE' as "SVR Vendor",
+t1.data->>'rncid' as "SVR RNCID",
+t1.data->>'cid' as "SVR CELLID",
+t3.data->>'userLabel' as "SVR Cell Name",
+t1.data->>'nrncid' as "NBR CELL RNCID",
+t1.data->>'ncid' as "NBR CELLID" ,
+t2.data->>'userLabel' as "NBR Cellname"
+from zte_cm."UtranRelation" t1
+inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 `;
 
 exports.up = (pgm) => {
@@ -611,7 +677,8 @@ VALUES
 	('Nokia 4G parameters','Nokia 4G parameters', $$${NOKIA_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
-	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true)
+	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
+	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
 		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
@@ -627,7 +694,8 @@ VALUES
 		NOKIA_4G_KEY_PARAMAETERS : NOKIA_4G_KEY_PARAMAETERS,
 		NETWORK_CELLS : NETWORK_CELLS,
 		NETWORK_SITES : NETWORK_SITES,
-		NETWORK_NODES : NETWORK_NODES
+		NETWORK_NODES : NETWORK_NODES,
+		NETWORK_3G3G_RELATIONS : NETWORK_3G3G_RELATIONS
 	})
 };
 
