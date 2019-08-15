@@ -128,8 +128,8 @@ const HUAWEI_2G_KEY_PARAMAETERS = `
 	t2.data->>'SYSOBJECTID' as "NENAME", 
 	'HUAWEI' AS "VENDOR", 
 	'2G' AS "TECHNOLOGY", 
-	t3.data->>'BTSNAME' AS "SITENAME", 
-	t3.data->>'BTSID' AS "SITEID", 
+	--t3.data->>'BTSNAME' AS "SITENAME", 
+	--t3.data->>'BTSID' AS "SITEID", 
 	t1.data->>'CELLNAME' AS "CELLNAME", 
 	t1.data->>'ACTSTATUS' AS "ACTSTATUS", 
 	t1.data->>'ADMSTAT' AS "BLKSTATUS", 
@@ -144,8 +144,8 @@ const HUAWEI_2G_KEY_PARAMAETERS = `
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI_RAW", 
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'CI') AS "CGI" 
 	FROM huawei_cm."GCELL" t1 
-	INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FILENAME' = t2.data->>'FILENAME' 
-	INNER JOIN huawei_cm."BTS" t3 ON t3.data->>'BTSID' = t1.data->>'BTSID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
+	INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'BSCID' = t2.data->>'BSCID' 
+	--INNER JOIN huawei_cm."BTS" t3 ON t3.data->>'BTSID' = t1.data->>'BTSID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
 `;
 
 
