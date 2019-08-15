@@ -1,3 +1,3 @@
-export const VERSION = "0.3.0-alpha.2";
+export const VERSION = "0.3.0-alpha.3";
 
 export default VERSION;
