@@ -595,7 +595,8 @@ FROM motorola_cm."cell_x_export" t1
 
 `;
 
-const NETWORK_3G-3G_Relations = `
+const NETWORK_3G3G_RELATIONS = `
+--HUAWEI 3G3G RELATIONS 
 select 
 'Huawei' as "SVR Vendor",
 t1.data->>'RNCID' as "SVR RNCID",
@@ -608,6 +609,7 @@ from huawei_cm."UINTRAFREQNCELL" t1
 inner join huawei_cm."UCELL" t2 on t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'RNCID' = t1.data->>'NCELLRNCID'
 inner join huawei_cm."UCELL" t6 on t1.data->>'CELLID'= t6.data->>'CELLID'
 union
+--HUAWEI 3G3G EXT RELATIONS
 select
 'Huawei' as "SVR Vendor",
 t3.data->>'RNCID' as "SVR RNCID",
@@ -620,6 +622,7 @@ from huawei_cm."UINTRAFREQNCELL" t3
 inner join huawei_cm."UEXT3GCELL" t4 on  t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
 inner join huawei_cm."UCELL" t5 on t3.data->>'CELLID'= t5.data->>'CELLID'
 union
+--ZTE 3G3G RELATIONS
 select
 'ZTE' as "SVR Vendor",
 t1.data->>'rncid' as "SVR RNCID",
@@ -674,7 +677,7 @@ VALUES
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
-	('Network 3G3G Relations','Network 3G3G Relations', $$${NETWORK_3G3G_Relations}$$, '{}', 'table',2, true)
+	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_Relations}$$, '{}', 'table',2, true)
 	`,{
 		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
@@ -691,7 +694,7 @@ VALUES
 		NETWORK_CELLS : NETWORK_CELLS,
 		NETWORK_SITES : NETWORK_SITES,
 		NETWORK_NODES : NETWORK_NODES,
-		NETWORK_3G3G_Relations : NETWORK_3G3G_Relations
+		NETWORK_3G3G_RELATIONS : NETWORK_3G3G_RELATIONS
 	})
 };
 
