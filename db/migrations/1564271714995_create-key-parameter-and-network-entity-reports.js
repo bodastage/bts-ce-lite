@@ -137,7 +137,7 @@ const HUAWEI_2G_KEY_PARAMAETERS = `
 	t1.data->>'MNC' AS "MNC", 
 	t1.data->>'LAC' AS "LAC", 
 	t1.data->>'CI' AS "CI", 
-	t1.data->>'BCCHNO' AS "BCCHNO", 
+	t4.data->>'FREQ' AS "BCCHNO", 
 	t1.data->>'NCC' AS "NCC", 
 	t1.data->>'BCC' AS "BCC", 
 	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC", 
@@ -145,7 +145,8 @@ const HUAWEI_2G_KEY_PARAMAETERS = `
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'CI') AS "CGI" 
 	FROM huawei_cm."GCELL" t1 
 	INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'BSCID' = t2.data->>'BSCID' 
-	--INNER JOIN huawei_cm."BTS" t3 ON t3.data->>'BTSID' = t1.data->>'BTSID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME' 
+	--INNER JOIN huawei_cm."BTS" t3 ON t3.data->>'BTSID' = t1.data->>'BTSID' AND t1.data->>'FILENAME' = t3.data->>'FILENAME'
+	INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' and t1.data->>'BSCID' = t4.data->>'BSCID' where t4.data->>'ISMAINBCCH' = 'YES'
 `;
 
 
