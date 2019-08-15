@@ -635,6 +635,7 @@ from zte_cm."UtranRelation" t1
 inner join zte_cm."UtranCellFDD" t2 on t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
 inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 union
+--ZTE 3G3G EXT RELATIONS
 select
 'ZTE' as "SVR Vendor",
 t1.data->>'rncid' as "SVR RNCID",
@@ -677,7 +678,7 @@ VALUES
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
-	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_Relations}$$, '{}', 'table',2, true)
+	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
 		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
