@@ -674,7 +674,7 @@ VALUES
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
-	('Network 3G-3G Relations','Network 3G-3G Relations', $$${NETWORK_3G-3G_Relations}$$, '{}', 'table',2, true)
+	('Network 3G3G Relations','Network 3G3G Relations', $$${NETWORK_3G3G_Relations}$$, '{}', 'table',2, true)
 	`,{
 		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
@@ -691,7 +691,7 @@ VALUES
 		NETWORK_CELLS : NETWORK_CELLS,
 		NETWORK_SITES : NETWORK_SITES,
 		NETWORK_NODES : NETWORK_NODES,
-		NETWORK_3G-3G_Relations : NETWORK_3G-3G_Relations
+		NETWORK_3G3G_Relations : NETWORK_3G3G_Relations
 	})
 };
 
