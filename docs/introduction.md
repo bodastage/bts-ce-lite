@@ -13,9 +13,9 @@ Below is a summary of the steps needed to install and start the application:
 * Go to settings > Database and click **Setup Database** to run the database setup scripts
 
 ## Features
-* Support of the main telecommunication vendors: Ericsson, Huawei, Nokia, ZTE, and Motorola
-* Parsing and import of configuration management(CM), performance management(PM), and fault management(FM) network dumps 
-* Reports module that supports tabular, various graphical reports, and composite/dashboard like reports
+* Support of the main telecommunication vendors: Ericsson, Huawei, Nokia, ZTE and Motorola
+* Parsing and import of configuration management(CM), performance management(PM) and fault management(FM) network dumps 
+* Reports module that supports tabular, various graphical reports and composite/dashboard like reports
 * Advanced GIS module
 * Importation of planning network data
 
@@ -23,7 +23,7 @@ Below is a summary of the steps needed to install and start the application:
 ## Planned functionality
 * Network baseline generation
 * Network Configuration Inconsistency reports 
-* Network writeback script generation for parameter changes, site comissions, cutovers, swaps, and configuration automation
+* Network writeback script generation for parameter changes, site comissions, cutovers, swaps and configuration automation
 * Network dump comparison
 * Key Performance Indicator (KPI) reports 
 * Cell Trace Processing
