@@ -39,7 +39,7 @@ submissions and documentation should be submitted through Git pull requests(PRs)
 	```
 10. Create pull request(PR). Go to you forked repo and create PR
 
-### Submit another chnage
+### Submit another changes
 
 1. checkout the master branch
 	```
