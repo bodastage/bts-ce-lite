@@ -697,7 +697,7 @@ t2.data->>'cellIdentity' as "SRV CELL ID",
 REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,(\d+),\d+','\1') AS "NBR LAC",
 REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,\d+,(\d+)','\1') AS "NBR CI"
 FROM zte_cm."GsmRelation" t1
-INNER JOIN ZTE_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId'
+INNER JOIN ZTE_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
 ';
 
 exports.up = (pgm) => {
