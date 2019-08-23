@@ -537,7 +537,7 @@ SELECT
     'ZTE' as "VENDOR",
     '3G' AS "TECH",
     t1.data->>'userLabel' AS "SITENAME"
-from zte_cm."ManagedElement" t1
+from zte_cm."ManagedElement" t1 where t1.data->>'NODEBID' is not null
 UNION
 -- Nokia 4G 
  SELECT 
@@ -689,7 +689,7 @@ t3.data->>'CI' as "NBR CELL ID"
 FROM huawei_cm."G2GNCELL" t1
 INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
---ZTE 2G-2G RELATIONS
+--ZTE 2G-2G RELATIONS (XLS)
 SELECT 
 'ZTE' as "SRV VENDOR",
 REGEXP_REPLACE(t2.data->>'refGLocationArea','\d+,\d+,(\d+),\d+','\1') AS "SRV LAC",
