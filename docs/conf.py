@@ -35,6 +35,9 @@ extensions = [
 	'sphinx_markdown_tables'
 ]
 
+# for Sphinx-1.3
+from recommonmark.parser import CommonMarkParser
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
