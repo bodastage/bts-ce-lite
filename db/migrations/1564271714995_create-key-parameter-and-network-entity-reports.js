@@ -658,7 +658,7 @@ inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncI
 inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 `;
 
-const NETWORK_2G2G_RELATIONS = '
+const NETWORK_2G2G_RELATIONS = `
 --Motorola 2G2G Relations
 SELECT
 'MOTOROLA' AS "SRV VENDOR",
@@ -689,7 +689,7 @@ t3.data->>'CI' as "NBR CELL ID"
 FROM huawei_cm."G2GNCELL" t1
 INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
-';
+`;
 
 exports.up = (pgm) => {
 	pgm.sql(`
