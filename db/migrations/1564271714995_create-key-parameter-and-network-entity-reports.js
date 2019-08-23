@@ -518,7 +518,7 @@ UNION
     FROM
  zte_cm."ENBFunction" t1
 UNION
- -- ZTE 2G 
+ -- ZTE 2G (Bulk_CM) 
  SELECT 
     'ZTE' as "VENDOR",
     '2G' AS "TECH",
@@ -532,12 +532,12 @@ UNION
 t1.data->>'userLabel' AS "SITENAME"
 from zte_cm."SiteBaseBandShare" t1
 UNION 
--- ZTE 3G
+-- ZTE 3G (Bulk_CM)
 SELECT 
     'ZTE' as "VENDOR",
     '3G' AS "TECH",
     t1.data->>'userLabel' AS "SITENAME"
-from zte_cm."NodeBFunction" t1
+from zte_cm."ManagedElement" t1
 UNION
 -- Nokia 4G 
  SELECT 
