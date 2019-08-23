@@ -1,5 +1,5 @@
 const VENDOR_CM_FORMATS = {
-	'ERICSSON': ['BULKCM','CNAIV2','BSM'],
+	'ERICSSON': ['BULKCM','CNAIV2','BSM','EAW'],
 	'HUAWEI': ['GEXPORT_XML','NBI_XML','CFGMML', 'AUTOBAK_XML'],
 	'ZTE': ['BULKCM','XLS'],
 	'NOKIA': ['RAML'],
@@ -28,7 +28,8 @@ const VENDOR_CM_PARSERS = {
 	'ERICSSON': {
 		'BULKCM': 'boda-bulkcmparser.jar',
 		'CNAIV2': 'boda-ericssoncnaiparser.jar',
-		'BSM': 'boda-ericssonbsmparser.jar'
+		'BSM': 'boda-ericssonbsmparser.jar',
+		'EAW': 'boda-ericssonaxeparser.jar'
 	},
 	'HUAWEI': {
 		'GEXPORT_XML': 'boda-huaweicmobjectparser.jar',
