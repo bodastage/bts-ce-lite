@@ -22,7 +22,7 @@ os:
 
 cache:
   yarn: true
-  timeout: 1000000
+  timeout: 1200
   directories:
     - node_modules
     - $HOME/.cache/electron
