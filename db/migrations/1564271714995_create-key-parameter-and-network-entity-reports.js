@@ -82,7 +82,6 @@ FROM ericsson_cm."UtranNetwork" t1
 	INNER JOIN ericsson_cm."UtranCell"  t2 ON t2.data->>'SubNetwork_2_id'  = t1.data->>'SubNetwork_2_id'
 	LEFT JOIN ericsson_cm."RbsLocalCell" t3 ON t1.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
 		AND t2.data->>'cId' = t3.data->>'localCellId'
-
 `
 
 const ERICSSON_4G_KEY_PARAMAETERS = `
@@ -119,7 +118,6 @@ SELECT
 	t1.data->>'rachRootSequence'  AS "ROOTSEQ"
 FROM ericsson_cm."EUtranCellFDD" t1
 INNER JOIN ericsson_cm."ENodeBFunction" t2 ON t2.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
-
 `;
 
 const HUAWEI_2G_KEY_PARAMAETERS = `
@@ -207,7 +205,6 @@ const HUAWEI_4G_KEY_PARAMAETERS = `
 	INNER JOIN huawei_cm."ENODEBFUNCTION" t4 ON t4.data->>'FILENAME' = t1.data->>'FILENAME'
 	INNER JOIN huawei_cm."CNOPERATOR" t5 ON t5.data->>'FILENAME' = t1.data->>'FILENAME'
 	INNER JOIN huawei_cm."CNOPERATORTA" t6 ON t6.data->>'FILENAME' = t1.data->>'FILENAME'
-
 `;
 
 const ZTE_2G_KEY_PARAMAETERS = `
@@ -226,7 +223,6 @@ SELECT
 	t1.data->>'mnc' as mnc,
 	t1.data->>'altitude' AS height
 FROM zte_cm."GsmCell" t1
-
 `;
 
 const ZTE_3G_KEY_PARAMAETERS = `
@@ -255,7 +251,6 @@ FROM zte_cm."UtranCellFDD" t1
 INNER JOIN zte_cm."LogicalCell" t2 on  t2.data->>'MEID' = t1.data->>'MEID' 
     AND t2.data->>'rncid' = t1.data->>'rncid'
     AND t2.data->>'cid' = t1.data->>'cid'
-
 `;
 
 const ZTE_4G_KEY_PARAMAETERS = `
@@ -441,7 +436,6 @@ SELECT
 	    '2G' AS "TECH",
 		t1.data->>'cellId' AS "CELLID",
 		t1.data->>'name' AS "CELLNAME"
-
 FROM nokia_cm."BTS" t1
 UNION
 -- Nokia 3G Cells
@@ -451,7 +445,6 @@ SELECT
 	    '3G' AS "TECH",
 		t1.data->>'CId' AS "CELLID",
 		t1.data->>'name' AS "CELLNAME"
-
 FROM nokia_cm."WCEL" t1
 UNION
 -- Nokia 4G Cells
@@ -461,7 +454,6 @@ SELECT
 	    '4G' AS "TECH",
 		t1.data->>'phyCellId' AS "CELLID",
 		t1.data->>'name' AS "CELLNAME"
-
 FROM nokia_cm."LNBTS" t1
 `
 
@@ -518,7 +510,7 @@ UNION
     FROM
  zte_cm."ENBFunction" t1
 UNION
- -- ZTE 2G (Bulk_CM) 
+ -- ZTE 2G (BULK_CM)
  SELECT 
     'ZTE' as "VENDOR",
     '2G' AS "TECH",
@@ -532,7 +524,7 @@ UNION
 t1.data->>'userLabel' AS "SITENAME"
 from zte_cm."SiteBaseBandShare" t1
 UNION 
--- ZTE 3G (Bulk_CM)
+-- ZTE 3G (BULK_CM)
 SELECT 
     'ZTE' as "VENDOR",
     '3G' AS "TECH",
@@ -601,7 +593,6 @@ select
     'MOTOROLA' AS "VENDOR",
     t1.data->>'bss_name' AS "NODENAME"
 FROM motorola_cm."cell_x_export" t1
-
 `;
 
 const NETWORK_3G3G_RELATIONS = `
@@ -658,7 +649,7 @@ inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncI
 inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 `;
 
-const NETWORK_2G2G_RELATIONS = '
+const NETWORK_2G2G_RELATIONS = `
 --Motorola 2G2G Relations
 SELECT
 'MOTOROLA' AS "SRV VENDOR",
@@ -689,16 +680,17 @@ t3.data->>'CI' as "NBR CELL ID"
 FROM huawei_cm."G2GNCELL" t1
 INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
+UNION
 --ZTE 2G-2G RELATIONS (XLS)
 SELECT 
 'ZTE' as "SRV VENDOR",
-REGEXP_REPLACE(t2.data->>'refGLocationArea','\d+,\d+,(\d+),\d+','\1') AS "SRV LAC",
+REGEXP_REPLACE(t2.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1') AS "SRV LAC",
 t2.data->>'cellIdentity' as "SRV CELL ID",
-REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,(\d+),\d+','\1') AS "NBR LAC",
-REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,\d+,(\d+)','\1') AS "NBR CI"
+REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1') AS "NBR LAC",
+REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1') AS "NBR CI"
 FROM zte_cm."GsmRelation" t1
-INNER JOIN ZTE_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
-';
+INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
+`;
 
 exports.up = (pgm) => {
 	pgm.sql(`
