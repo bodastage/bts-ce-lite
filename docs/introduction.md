@@ -30,4 +30,3 @@ Below is a summary of the steps needed to install and start the application:
 * Drive Test Post-processing
 * Optimization
 * Geo-reference analysis
-                                                                                        - [NEXT](installation.md) 
