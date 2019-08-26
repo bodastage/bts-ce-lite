@@ -6,7 +6,8 @@ Boda-Lite is a minimal feature version of [bts-ce](https://github.com/bodastage/
 platform telecommunication management desktop app.
 
 ## Features
-* Parsing telecommunication configuration management dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
+* Parsing and loading telecommunication configuration management(CM) dumps for various vendors(Ericsson, Huawei, Nokia, ZTE)
+* Parsing and loading telecommunication performance management(PM) network dumps
 * Reports module that supports tabular, graphs, and composite(dashboard-like) reports
 * Advanced GIS module
 

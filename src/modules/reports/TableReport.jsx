@@ -179,9 +179,13 @@ class TableReport extends React.Component{
 		//Sanitize download file name
 		fileName = fileName.replace(/['"+]/g,"");
 		
+		//Preserve column order in export 
+		const columnOrder = this.gridColumnApi.getColumnState().filter(v  => v.hide == false ).map( v => v.colId)
+		let downloadQuery = `SELECT "${columnOrder.join('","')}" FROM ( ${this.filteredSortedQuery} ) dq`
+
 		let payload = {
 			reportId: this.props.options.reportId, //deprecate
-			query: this.filteredSortedQuery,
+			query: downloadQuery,
 			filename: fileName, //Name of the file to be downloaded  without extension
 			outputFolder: app.getPath('downloads'),
 			format: format
@@ -284,7 +288,7 @@ class TableReport extends React.Component{
 		let that = this;
 		
 		if(typeof this.props.reportInfo === 'undefined') return;
-		
+				
 		let query = this.props.reportInfo.query ;
 
         let dataSource = {  
