@@ -690,7 +690,7 @@ FROM huawei_cm."G2GNCELL" t1
 INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
 UNION
---ZTE 2G-2G RELATIONS (BULK_CM)
+--ZTE 2G-2G RELATIONS (xls)
 SELECT 
 'ZTE' as "SRV VENDOR",
 REGEXP_REPLACE(t2.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1') AS "SRV LAC",
@@ -699,6 +699,22 @@ REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1') AS "NBR LA
 REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1') AS "NBR CI"
 FROM zte_cm."GsmRelation" t1
 INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
+UNION
+--ZTE 2G-2G RELATIONS (Bulk_CM) Own Neighbours
+SELECT
+'ZTE' AS "SRV VENDOR",
+t2.data->>'lac' AS "SRV LAC",
+t2.data->>'cellIdentity' as "SRV CELL ID",
+t3.data->>'lac' AS "NBR LAC",
+t3.data->>'cellIdentity' as "NBR CELL ID"
+from zte_cm."GsmRelation" t1
+-- Serving Cell
+INNER JOIN zte_cm."GsmCell" t2 
+    on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BssFunction_id'=t2.data->>'BssFunction_id' and t1.data->>'BtsSiteManager_id'=t2.data->>'BtsSiteManager_id' 
+    and t1.data->>'GsmCell_id'=t2.data->>'GsmCell_id'
+-- Nbr Cell
+INNER JOIN zte_cm."GsmCell" t3 
+    ON t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'adjacentCell' = CONCAT('"SubNetwork=', t3.data->>'SubNetwork_id', ',SubNetwork=',t3.data->>'SubNetwork_2_id', ',MeContext=', t3.data->>'meContext_id', ',ManagedElement=', t3.data->>'ManagedElement_id', ',BssFunction=', t3.data->>'BssFunction_id', ',BtsSiteManager=', t3.data->>'BtsSiteManager_id', ',GsmCell=', t3.data->>'GsmCell_id','"')
 `;
 
 exports.up = (pgm) => {
