@@ -658,6 +658,40 @@ inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncI
 inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 `;
 
+const NETWORK_3G2G_RELATIONS = `
+--Huawei (CGFMML) 3G2G RELATIONS
+SELECT
+'HUAWEI' as "SRV VENDOR",
+hex_to_int(REPLACE(t2.data->>'LAC','H''','')) AS "SRV LAC",
+t1.data->>'CELLID' AS "SRV CELLID",
+hex_to_int(REPLACE(t3.data->>'LAC','H''','')) AS "NBR LAC",
+hex_to_int(REPLACE(t3.data->>'CID','H''','')) AS "NBR CI"
+from huawei_cm."U2GNCELL" t1
+INNER JOIN huawei_cm."UCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BSCID'=t2.data->>'BSCID' and t1.data->>'CELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."UEXT2GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t3.data->>'BSCID'=t3.data->>'BSCID' and t1.data->>'GSMCELLINDEX'=t3.data->>'GSMCELLINDEX' 
+UNION
+--Huawei (NBI) 3G2G RELATIONS
+SELECT
+'HUAWEI' as "SRV VENDOR",
+(t2.data->>'LAC')::INTEGER/1 AS "SRV LAC",
+t1.data->>'CELLID' AS "SRV CELLID",
+(t3.data->>'LAC')::INTEGER/1 AS "NBR LAC",
+(t3.data->>'CID')::INTEGER/1 AS "NBR CI"
+from huawei_cm."U2GNCELL" t1
+INNER JOIN huawei_cm."UCELL" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'neid'=t2.data->>'neid' and t1.data->>'CELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."UEXT2GCELL" t3 on t1.data->>'FileName'=t3.data->>'FileName' and t3.data->>'neid'=t3.data->>'neid' and t1.data->>'GSMCELLINDEX'=t3.data->>'GSMCELLINDEX' 
+UNION
+--ZTE (XLS) 3G2G RELATIONS
+SELECT
+'ZTE' as "SRV VENDOR",
+(t2.data->>'refULocationArea')::INTEGER/1  AS "SRV LAC",
+t1.data->>'cid' AS "SRV CELLID",
+(t1.data->>'lac')::INTEGER/1 AS "NBR LAC",
+(t1.data->>'cellIdentity')::INTEGER/1 AS "NBR CI"
+from zte_cm."GsmRelation" t1
+INNER JOIN zte_cm."UtranCellFDD" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid'
+`;
+
 const NETWORK_2G2G_RELATIONS = `
 --Motorola 2G2G Relations
 SELECT
@@ -690,7 +724,7 @@ FROM huawei_cm."G2GNCELL" t1
 INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
 UNION
---ZTE 2G-2G RELATIONS (BULK_CM)
+--ZTE 2G-2G RELATIONS (xls)
 SELECT 
 'ZTE' as "SRV VENDOR",
 REGEXP_REPLACE(t2.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1') AS "SRV LAC",
@@ -699,7 +733,24 @@ REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1') AS "NBR LA
 REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1') AS "NBR CI"
 FROM zte_cm."GsmRelation" t1
 INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
+UNION
+--ZTE 2G-2G RELATIONS (Bulk_CM) Own Neighbours
+SELECT
+'ZTE' AS "SRV VENDOR",
+t2.data->>'lac' AS "SRV LAC",
+t2.data->>'cellIdentity' as "SRV CELL ID",
+t3.data->>'lac' AS "NBR LAC",
+t3.data->>'cellIdentity' as "NBR CELL ID"
+from zte_cm."GsmRelation" t1
+-- Serving Cell
+INNER JOIN zte_cm."GsmCell" t2 
+    on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BssFunction_id'=t2.data->>'BssFunction_id' and t1.data->>'BtsSiteManager_id'=t2.data->>'BtsSiteManager_id' 
+    and t1.data->>'GsmCell_id'=t2.data->>'GsmCell_id'
+-- Nbr Cell
+INNER JOIN zte_cm."GsmCell" t3 
+    ON t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'adjacentCell' = CONCAT('"SubNetwork=', t3.data->>'SubNetwork_id', ',SubNetwork=',t3.data->>'SubNetwork_2_id', ',MeContext=', t3.data->>'meContext_id', ',ManagedElement=', t3.data->>'ManagedElement_id', ',BssFunction=', t3.data->>'BssFunction_id', ',BtsSiteManager=', t3.data->>'BtsSiteManager_id', ',GsmCell=', t3.data->>'GsmCell_id','"')
 `;
+
 
 exports.up = (pgm) => {
 	pgm.sql(`
@@ -731,6 +782,7 @@ VALUES
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
 	('Network 3G3G RELATIONS','Network 3G3G RELATIONS', $$${NETWORK_3G3G_RELATIONS}$$, '{}', 'table',2, true),
+	('Network 3G2G RELATIONS','Network 3G2G RELATIONS', $$${NETWORK_3G2G_RELATIONS}$$, '{}', 'table',2, true),
 	('Network 2G2G RELATIONS','Network 2G2G RELATIONS', $$${NETWORK_2G2G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
 		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
@@ -749,6 +801,7 @@ VALUES
 		NETWORK_SITES : NETWORK_SITES,
 		NETWORK_NODES : NETWORK_NODES,
 		NETWORK_3G3G_RELATIONS : NETWORK_3G3G_RELATIONS,
+		NETWORK_3G2G_RELATIONS : NETWORK_3G2G_RELATIONS,
 		NETWORK_2G2G_RELATIONS : NETWORK_2G2G_RELATIONS
 	})
 };
