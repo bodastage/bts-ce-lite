@@ -905,7 +905,7 @@ VALUES
 	('Nokia 2G parameters','Nokia 2G parameters', $$${NOKIA_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Nokia 3G parameters','Nokia 3G parameters', $$${NOKIA_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Nokia 4G parameters','Nokia 4G parameters', $$${NOKIA_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
-	('COMBINED KEY PARAMAETERS','COMBINED KEY PARAMAETERS', $$${COMBINED_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('Combined Key Parameters','Combined Key Parameters', $$${COMBINED_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
