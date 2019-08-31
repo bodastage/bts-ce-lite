@@ -344,6 +344,133 @@ SELECT
 FROM nokia_cm."LNCEL" t1
 `
 
+const COMBINED_KEY_PARAMAETERS = `
+--KEY PARAMETERS (3G Huawei CFGMML)
+select
+t1.data->>'DATETIME' as "VARDATE",
+'null' as "STATE",
+'null' as "REGIONAL",
+'HUAWEI' as"VENDOR",
+'3G' as "TECH",
+t2.data->>'SYSOBJECTID' as "NENAME",
+t1.data->>'BSCID' as "NEID",
+'null' as "SITEPROP",
+t3.data->>'NODEBID' as "SITE  ID",
+t1.data->>'NODEBNAME' as "SITENAME",
+t1.data->>'CELLID' as "CELLID",
+t1.data->>'CELLNAME' as "CELLNAME",
+t1.data->>'LOCELL' as "CI",
+'null' as "ACTSTATUS",
+'null' as "BLKSTATUS",
+'null' as "DLBANDWIDTH",
+t1.data->>'BANDIND' as "BAND",
+'null' as "CARR",
+t1.data->>'UARFCNDOWNLINK' as "DLF",
+t1.data->>'UARFCNUPLINK' as "ULF",
+t5.data->>'MCC' as "MCC",
+t5.data->>'MNC' as "MNC",
+hex_to_int(REPLACE(t1.data->>'LAC','H''','')) as "LAC",
+hex_to_int(REPLACE(t1.data->>'RAC','H''','')) as "RAC",
+CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', hex_to_int(REPLACE(t1.data->>'LAC','H''','')), '-', t1.data->>'LOCELL') AS "CGI" ,
+'null' as "2G_BCCHNO",
+'null' as "2G_BSIC",
+'null' as "2G_TRX",
+t1.data->>'PSCRAMBCODE' AS "3G_PSC",
+'null' as "3G_DLCE",
+'null' as "3G_ULCE",
+'null' as "4G_PCI",
+'null' as "4G_TAC",
+'null' as "4G_ROOTIDX"
+FROM 
+huawei_cm."UCELL" t1 --where t1.data->>'FILENAME' LIKE 'CFGMML%'
+INNER JOIN huawei_cm."SYS" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BSCID'=t2.data->>'BSCID'
+INNER JOIN huawei_cm."UNODEB" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
+INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FILENAME' = t1.data->>'FILENAME'
+UNION
+--KEY PARAMETERS 3G Huawei NBI
+select
+t1.data->>'varDateTime' as "VARDATE",
+'null' as "STATE",
+'null' as "REGIONAL",
+'HUAWEI' as"VENDOR",
+'3G' as "TECH",
+t2.data->>'SYSOBJECTID' as "NENAME",
+t1.data->>'neid' as "NEID",
+'null' as "SITEPROP",
+t3.data->>'NODEBID' as "SITE  ID",
+t1.data->>'NODEBNAME' as "SITENAME",
+t1.data->>'CELLID' as "CELLID",
+t1.data->>'CELLNAME' as "CELLNAME",
+t1.data->>'LOCELL' as "CI",
+t1.data->>'ACTSTATUS' as "ACTSTATUS",
+t1.data->>'BLKSTATUS' as "BLKSTATUS",
+'null' as "DLBANDWIDTH",
+t1.data->>'BANDIND' as "BAND",
+'null' as "CARR",
+t1.data->>'UARFCNDOWNLINK' as "DLF",
+t1.data->>'UARFCNUPLINK' as "ULF",
+t5.data->>'MCC' as "MCC",
+t5.data->>'MNC' as "MNC",
+(t1.data->>'LAC')::INTEGER as "LAC",
+(t1.data->>'RAC')::INTEGER as "RAC",
+CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'LOCELL') AS "CGI" ,
+'null' as "2G_BCCHNO",
+'null' as "2G_BSIC",
+'null' as "2G_TRX",
+t1.data->>'PSCRAMBCODE' AS "3G_PSC",
+'null' as "3G_DLCE",
+'null' as "3G_ULCE",
+'null' as "4G_PCI",
+'null' as "4G_TAC",
+'null' as "4G_ROOTIDX"
+FROM 
+huawei_cm."UCELL" t1 --where t1.data->>'FILENAME' LIKE 'UNBI%'
+INNER JOIN huawei_cm."SYS" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'neid'=t2.data->>'neid'
+INNER JOIN huawei_cm."UNODEB" t3 on t1.data->>'FileName'=t3.data->>'FileName' and t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
+INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FileName' = t1.data->>'FileName'
+UNION
+--KEY PARAMETERS (2G Huawei CFGMML)
+select
+t1.data->>'DATETIME' as "VARDATE",
+'null' as "STATE",
+'null' as "REGIONAL",
+'HUAWEI' as"VENDOR",
+'2G' as "TECH",
+t2.data->>'SYSOBJECTID' as "NENAME",
+t1.data->>'BSCID' as "NEID",
+'null' as "SITEPROP",
+'null' as "SITE  ID",
+'null' as "SITENAME",
+t1.data->>'CELLID' as "CELLID",
+t1.data->>'CELLNAME' as "CELLNAME",
+t1.data->>'CI' as "CI",
+'null' as "ACTSTATUS",
+'null' as "BLKSTATUS",
+'null' as "DLBANDWIDTH",
+t1.data->>'BANDIND' as "BAND",
+'null' as "CARR",
+'null' as "DLF",
+'null' as "ULF",
+t1.data->>'MCC' as "MCC",
+t1.data->>'MNC' as "MNC",
+(t1.data->>'LAC')::INTEGER as "LAC",
+'0' as "RAC",
+CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI" ,
+t4.data->>'FREQ' as "2G_BCCHNO",
+CONCAT(t1.data->>'NCC', t1.data->>'BCC') as "2G_BSIC",
+'null' as "2G_TRX",
+'null' AS "3G_PSC",
+'null' as "3G_DLCE",
+'null' as "3G_ULCE",
+'null' as "4G_PCI",
+'null' as "4G_TAC",
+'null' as "4G_ROOTIDX"
+FROM 
+huawei_cm."GCELL" t1 
+INNER JOIN huawei_cm."SYS" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BSCID'=t2.data->>'BSCID'
+INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' and t1.data->>'BSCID' = t4.data->>'BSCID' 
+`
+
 const NETWORK_CELLS = `
 -- Ericsson 2G
 SELECT 
@@ -673,10 +800,10 @@ UNION
 --Huawei (NBI) 3G2G RELATIONS
 SELECT
 'HUAWEI' as "SRV VENDOR",
-(t2.data->>'LAC')::INTEGER/1 AS "SRV LAC",
+(t2.data->>'LAC')::INTEGER AS "SRV LAC",
 t1.data->>'CELLID' AS "SRV CELLID",
-(t3.data->>'LAC')::INTEGER/1 AS "NBR LAC",
-(t3.data->>'CID')::INTEGER/1 AS "NBR CI"
+(t3.data->>'LAC')::INTEGER AS "NBR LAC",
+(t3.data->>'CID')::INTEGER AS "NBR CI"
 from huawei_cm."U2GNCELL" t1
 INNER JOIN huawei_cm."UCELL" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'neid'=t2.data->>'neid' and t1.data->>'CELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."UEXT2GCELL" t3 on t1.data->>'FileName'=t3.data->>'FileName' and t3.data->>'neid'=t3.data->>'neid' and t1.data->>'GSMCELLINDEX'=t3.data->>'GSMCELLINDEX' 
@@ -684,10 +811,10 @@ UNION
 --ZTE (XLS) 3G2G RELATIONS
 SELECT
 'ZTE' as "SRV VENDOR",
-(t2.data->>'refULocationArea')::INTEGER/1  AS "SRV LAC",
+(t2.data->>'refULocationArea')::INTEGER  AS "SRV LAC",
 t1.data->>'cid' AS "SRV CELLID",
-(t1.data->>'lac')::INTEGER/1 AS "NBR LAC",
-(t1.data->>'cellIdentity')::INTEGER/1 AS "NBR CI"
+(t1.data->>'lac')::INTEGER AS "NBR LAC",
+(t1.data->>'cellIdentity')::INTEGER AS "NBR CI"
 from zte_cm."GsmRelation" t1
 INNER JOIN zte_cm."UtranCellFDD" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid'
 `;
@@ -778,6 +905,7 @@ VALUES
 	('Nokia 2G parameters','Nokia 2G parameters', $$${NOKIA_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Nokia 3G parameters','Nokia 3G parameters', $$${NOKIA_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Nokia 4G parameters','Nokia 4G parameters', $$${NOKIA_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('Combined Key Parameters','Combined Key Parameters', $$${COMBINED_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
@@ -797,6 +925,7 @@ VALUES
 		NOKIA_2G_KEY_PARAMAETERS : NOKIA_2G_KEY_PARAMAETERS,
 		NOKIA_3G_KEY_PARAMAETERS : NOKIA_3G_KEY_PARAMAETERS,
 		NOKIA_4G_KEY_PARAMAETERS : NOKIA_4G_KEY_PARAMAETERS,
+		COMBINED_KEY_PARAMAETERS : COMBINED_KEY_PARAMAETERS,
 		NETWORK_CELLS : NETWORK_CELLS,
 		NETWORK_SITES : NETWORK_SITES,
 		NETWORK_NODES : NETWORK_NODES,
