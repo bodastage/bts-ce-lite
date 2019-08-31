@@ -411,8 +411,8 @@ t1.data->>'UARFCNDOWNLINK' as "DLF",
 t1.data->>'UARFCNUPLINK' as "ULF",
 t5.data->>'MCC' as "MCC",
 t5.data->>'MNC' as "MNC",
-(t1.data->>'LAC')::INTEGER/1 as "LAC",
-(t1.data->>'RAC')::INTEGER/1 as "RAC",
+(t1.data->>'LAC')::INTEGER as "LAC",
+(t1.data->>'RAC')::INTEGER as "RAC",
 CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'LOCELL') AS "CGI" ,
 'null' as "2G_BCCHNO",
 'null' as "2G_BSIC",
@@ -453,7 +453,7 @@ t1.data->>'BANDIND' as "BAND",
 'null' as "ULF",
 t1.data->>'MCC' as "MCC",
 t1.data->>'MNC' as "MNC",
-(t1.data->>'LAC')::INTEGER/1 as "LAC",
+(t1.data->>'LAC')::INTEGER as "LAC",
 '0' as "RAC",
 CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI" ,
 t4.data->>'FREQ' as "2G_BCCHNO",
@@ -800,10 +800,10 @@ UNION
 --Huawei (NBI) 3G2G RELATIONS
 SELECT
 'HUAWEI' as "SRV VENDOR",
-(t2.data->>'LAC')::INTEGER/1 AS "SRV LAC",
+(t2.data->>'LAC')::INTEGER AS "SRV LAC",
 t1.data->>'CELLID' AS "SRV CELLID",
-(t3.data->>'LAC')::INTEGER/1 AS "NBR LAC",
-(t3.data->>'CID')::INTEGER/1 AS "NBR CI"
+(t3.data->>'LAC')::INTEGER AS "NBR LAC",
+(t3.data->>'CID')::INTEGER AS "NBR CI"
 from huawei_cm."U2GNCELL" t1
 INNER JOIN huawei_cm."UCELL" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'neid'=t2.data->>'neid' and t1.data->>'CELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."UEXT2GCELL" t3 on t1.data->>'FileName'=t3.data->>'FileName' and t3.data->>'neid'=t3.data->>'neid' and t1.data->>'GSMCELLINDEX'=t3.data->>'GSMCELLINDEX' 
@@ -811,10 +811,10 @@ UNION
 --ZTE (XLS) 3G2G RELATIONS
 SELECT
 'ZTE' as "SRV VENDOR",
-(t2.data->>'refULocationArea')::INTEGER/1  AS "SRV LAC",
+(t2.data->>'refULocationArea')::INTEGER  AS "SRV LAC",
 t1.data->>'cid' AS "SRV CELLID",
-(t1.data->>'lac')::INTEGER/1 AS "NBR LAC",
-(t1.data->>'cellIdentity')::INTEGER/1 AS "NBR CI"
+(t1.data->>'lac')::INTEGER AS "NBR LAC",
+(t1.data->>'cellIdentity')::INTEGER AS "NBR CI"
 from zte_cm."GsmRelation" t1
 INNER JOIN zte_cm."UtranCellFDD" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid'
 `;
