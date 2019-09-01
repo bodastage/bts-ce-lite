@@ -1,6 +1,8 @@
- 
-# Reports
-
+---
+id: reports
+title: Reports
+sidebar_label: Reports
+---
 This module creates tabular, graphical reports, and composite/dashboard like reports. 
 
 To access the reports module, click the **Reports** icon on the home tab.

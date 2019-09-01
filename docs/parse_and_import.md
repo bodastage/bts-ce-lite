@@ -1,5 +1,8 @@
-# Parse and Import
-
+---
+id: parse_and_import
+title: Parse and Import
+sidebar_label: Parse and Import
+---
 The **Parse and Import** module parses network dumps and optionally loads them into the database.  Below is a 
 screenshot of the module.
 

@@ -1,4 +1,8 @@
-# GIS
+---
+id: gis
+title: GIS
+sidebar_label: GIS
+---
 
 This GIS module displays network entities and their properties on map. It allows filtering based on technology, name, and environment. 
 

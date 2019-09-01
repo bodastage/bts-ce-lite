@@ -1,0 +1,15 @@
+{
+  "docs": {
+    "Contents": [
+		"index",
+		"introduction",
+		"installation",
+		"parse_and_import",
+		"reports",
+		"gis",
+		"key_files_and_folders",
+		"contributing",
+		"development"
+	]
+  }
+}

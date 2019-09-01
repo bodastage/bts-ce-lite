@@ -1,4 +1,8 @@
-# Key Files and Folders
+---
+id: key_files_and_folders
+title: Key Files and Folders
+sidebar_label: Key Files and Folders
+---
 There are some key files and folders such as the log file, libraries folder, and migrations files.
 
 Below is a list of key files and folder
