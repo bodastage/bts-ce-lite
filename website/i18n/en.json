@@ -44,7 +44,9 @@
     },
     "links": {
       "Docs": "Docs",
-      "Blog": "Blog"
+      "Blog": "Blog",
+      "Users": "Users",
+      "GitHub": "GitHub"
     },
     "categories": {
       "Contents": "Contents"

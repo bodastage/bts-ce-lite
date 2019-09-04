@@ -95,7 +95,7 @@ class Index extends React.Component {
       <div
         className="productShowcaseSection paddingBottom"
         style={{textAlign: 'center'}}>
-        <h2>v0.3.0-alpha.4 is available for testing</h2>
+        <h2><a href="https://github.com/bodastage/bts-ce-lite/releases">v0.3.0-alpha.5 is available for testing</a></h2>
         <MarkdownBlock>This is a pre-release version.</MarkdownBlock>
       </div>
     );
@@ -149,20 +149,24 @@ class Index extends React.Component {
           {
             content: 'Support for the leading vendors i.e. Ericsson, Huawei, ZTE, Nokia, and Motorola. And support for 2G, 3G, 4G, and 5G',
             imageAlign: 'top',
+			image: `${baseUrl}img/undraw_good_team_m7uu.svg`,
             title: 'Multi-vendor/technology',
           },
           {
             content: 'Parsing and loading multi network configuration and performance management dump formats',
+			image: `${baseUrl}img/undraw_blooming_jtv6.svg`,
             imageAlign: 'top',
             title: 'Network dump processing',
           },
           {
             content: 'Supports the creation of tabular, graphical and composite/dashboard-like reports',
+			image: `${baseUrl}img/undraw_visual_data_b1wx.svg`,
             imageAlign: 'top',
             title: 'Reporting',
           },
           {
             content: 'The GIS module displays and searches network entities with ease',
+			image: `${baseUrl}img/undraw_map_1r69.svg`,
             imageAlign: 'top',
             title: 'GIS',
           },
