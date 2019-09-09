@@ -951,13 +951,13 @@ JOIN
 --ZTE 2G3G Relations (xls)
 SELECT
 'ZTE' AS "SRV VENDOR",
-REGEXP_REPLACE(t2.data->>'refGLocationArea','\d+,\d+,(\d+),\d+','\1') AS "SRV LAC",
+REGEXP_REPLACE(t2.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1') AS "SRV LAC",
 t2.data->>'cellIdentity' as "SRV CELL ID",
 t3.data->>'lac' AS "NBR LAC",
-REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,\d+,(\d+)','\1') AS "NBR CI"
+REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1') AS "NBR CI"
 FROM zte_cm."UtranRelation" t1
 INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'MEID'=t2.data->>'MEID'	and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId'	and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId'
-INNER JOIN zte_cm."ExternalUtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->'DataType'=t3.data->'DataType'and t1.data->>'MEID'=t1.data->>'MEID' and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,(\d+),\d+','\1')=t3.data->>'rnc_id'and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\d+,\d+,\d+,(\d+)','\1')=t3.data->>'ci'
+INNER JOIN zte_cm."ExternalUtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->'DataType'=t3.data->'DataType'and t1.data->>'MEID'=t3.data->>'MEID' and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1')=t3.data->>'rnc_id'and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1')=t3.data->>'ci'
 `;
 
 exports.up = (pgm) => {
