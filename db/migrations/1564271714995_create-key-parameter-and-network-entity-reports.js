@@ -794,61 +794,61 @@ const NETWORK_RELATIONS = `
 select 
 'Huawei' as "SRV  VENDOR",
 '3G' as "SRV TECH",
-(t1.data->>'RNCID')::INTEGER as "SRV  RNCID/LAC",
+hex_to_int(REPLACE(t3.data->>'LAC','H''','')) as "SRV LAC",
 t1.data->>'CELLID' as "SRV  CELLID",
-t6.data->>'CELLNAME' as "SRV  CELLNAME",
+t3.data->>'CELLNAME' as "SRV  CELLNAME",
 '3G' as "NBR TECH",
-(t1.data->>'NCELLRNCID')::INTEGER as "NBR CELL RNCID/LAC", 
+hex_to_int(REPLACE(t2.data->>'LAC','H''','')) as "NBR LAC", 
 (t1.data->>'NCELLID')::INTEGER as "NBR CELLID",
 t2.data->>'CELLNAME' as "NBR CELLNAME"
 from huawei_cm."UINTRAFREQNCELL" t1
-inner join huawei_cm."UCELL" t2 on t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'RNCID' = t1.data->>'NCELLRNCID'
-inner join huawei_cm."UCELL" t6 on t1.data->>'CELLID'= t6.data->>'CELLID'
+inner join huawei_cm."UCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'RNCID' = t1.data->>'NCELLRNCID'
+inner join huawei_cm."UCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'CELLID'= t3.data->>'CELLID'
 union
 --HUAWEI 3G3G EXT RELATIONS
 select
 'Huawei' as "SRV  VENDOR",
 '3G' as "SRV TECH",
-(t3.data->>'RNCID')::INTEGER as "SRV  RNCID",
+hex_to_int(REPLACE(t5.data->>'LAC','H''','')) as "SRV LAC",
 t3.data->>'CELLID'as "SRV  CELLID",
 t5.data->>'CELLNAME' as "SRV  Cell Name",
 '3G' as "NBR TECH",
-(t3.data->>'NCELLRNCID')::INTEGER as "NBR CELL RNCID",
+hex_to_int(REPLACE(t4.data->>'LAC','H''','')) as "NBR LAC",
 (t3.data->>'NCELLID')::INTEGER as "NBR CELLID" ,
 t4.data->>'CELLNAME' as "NBR Cellname"
 from huawei_cm."UINTRAFREQNCELL" t3
-inner join huawei_cm."UEXT3GCELL" t4 on  t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
-inner join huawei_cm."UCELL" t5 on t3.data->>'CELLID'= t5.data->>'CELLID'
+inner join huawei_cm."UEXT3GCELL" t4 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t4.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
+inner join huawei_cm."UCELL" t5 on t1.data->>'FILENAME'=t5.data->>'FILENAME' and t3.data->>'CELLID'= t5.data->>'CELLID'
 union
 --ZTE 3G3G RELATIONS
 select
 'ZTE' as "SRV  Vendor",
 '3G' as "SRV TECH",
-(t1.data->>'rncid')::INTEGER as "SRV  RNCID",
+(t3.data->>'refULocationArea')::INTEGER as "SRV LAC",
 t1.data->>'cid' as "SRV  CELLID",
 t3.data->>'userLabel' as "SRV  Cell Name",
 '3G' as "NBR TECH",
-(t1.data->>'nrncid')::INTEGER as "NBR CELL RNCID",
+(t2.data->>'refULocationArea')::INTEGER as "NBR LAC",
 (t1.data->>'ncid')::INTEGER as "NBR CELLID" ,
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
-inner join zte_cm."UtranCellFDD" t2 on t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
-inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
+inner join zte_cm."UtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t3.data->>'cid' = t1.data->>'cid'
 union
 --ZTE 3G3G EXT RELATIONS
 select
 'ZTE' as "SRV  Vendor",
 '3G' as "SRV TECH",
-(t1.data->>'rncid')::INTEGER as "SRV  RNCID",
+(t3.data->>'refULocationArea')::INTEGER as "SRV  LAC",
 t1.data->>'cid' as "SRV  CELLID",
 t3.data->>'userLabel' as "SRV  Cell Name",
 '3G' as "NBR TECH",
-(t1.data->>'nrncid')::INTEGER as "NBR CELL RNCID",
+(t2.data->>'lac')::INTEGER as "NBR LAC",
 (t1.data->>'ncid')::INTEGER as "NBR CELLID",
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
-inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
-inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
+inner join zte_cm."ExternalUtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t3.data->>'cid' = t1.data->>'cid'
 UNION
 --Huawei (CGFMML) 3G2G RELATIONS
 SELECT
