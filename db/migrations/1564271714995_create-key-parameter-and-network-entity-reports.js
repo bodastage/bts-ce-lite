@@ -919,8 +919,8 @@ t2.data->>'CELLNAME' as "SRV CELLNAME",
 (t3.data->>'CI')::INTEGER as "NBR CELL ID",
 t3.data->>'CELLNAME' as "NBR CELLNAME"
 FROM huawei_cm."G2GNCELL" t1
-INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
-INNER JOIN huawei_cm."GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'CELLID'  
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'NBR2GNCELLID'=t3.data->>'CELLID'  
 UNION
 --Huawei 2G2G Ext Relations
 SELECT
@@ -934,8 +934,8 @@ t2.data->>'CELLNAME' as "SRV CELLNAME",
 (t3.data->>'CI')::INTEGER as "NBR CELL ID",
 t3.data->>'EXT2GCELLNAME' as "NBR CELLNAME"
 FROM huawei_cm."G2GNCELL" t1
-INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
-INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
 UNION
 --ZTE 2G-2G RELATIONS (xls)
 SELECT 
@@ -949,7 +949,7 @@ t2.data->>'userLabel' as "SRV CELLNAME",
 (REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1'))::INTEGER AS "NBR CI",
 t1.data->>'userLabel' as "NBR CELLNAME"
 FROM zte_cm."GsmRelation" t1
-INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
+INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
 UNION
 --ZTE 2G-2G RELATIONS (Bulk_CM) Own Neighbours
 SELECT
@@ -965,11 +965,11 @@ t3.data->>'userLabel' as "NBR CELLNAME"
 from zte_cm."GsmRelation" t1
 -- Serving Cell
 INNER JOIN zte_cm."GsmCell" t2 
-    on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BssFunction_id'=t2.data->>'BssFunction_id' and t1.data->>'BtsSiteManager_id'=t2.data->>'BtsSiteManager_id' 
+    on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'BssFunction_id'=t2.data->>'BssFunction_id' and t1.data->>'BtsSiteManager_id'=t2.data->>'BtsSiteManager_id' 
     and t1.data->>'GsmCell_id'=t2.data->>'GsmCell_id'
 -- Nbr Cell
 INNER JOIN zte_cm."GsmCell" t3 
-    ON t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'adjacentCell' = CONCAT('"SubNetwork=', t3.data->>'SubNetwork_id', ',SubNetwork=',t3.data->>'SubNetwork_2_id', ',MeContext=', t3.data->>'meContext_id', ',ManagedElement=', t3.data->>'ManagedElement_id', ',BssFunction=', t3.data->>'BssFunction_id', ',BtsSiteManager=', t3.data->>'BtsSiteManager_id', ',GsmCell=', t3.data->>'GsmCell_id','"')
+    ON t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t1.data->>'adjacentCell' = CONCAT('"SubNetwork=', t3.data->>'SubNetwork_id', ',SubNetwork=',t3.data->>'SubNetwork_2_id', ',MeContext=', t3.data->>'meContext_id', ',ManagedElement=', t3.data->>'ManagedElement_id', ',BssFunction=', t3.data->>'BssFunction_id', ',BtsSiteManager=', t3.data->>'BtsSiteManager_id', ',GsmCell=', t3.data->>'GsmCell_id','"')
 UNION
 --Huawei 2G3G Relations (CFGMML)
 SELECT 
