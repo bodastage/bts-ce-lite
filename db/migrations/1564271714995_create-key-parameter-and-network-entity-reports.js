@@ -789,13 +789,225 @@ FROM motorola_cm."cell_x_export" t1
 
 `;
 
+const NETWORK_RELATIONS = `
+--HUAWEI 3G3G RELATIONS 
+select 
+'Huawei' as "SRV  VENDOR",
+'3G' as "SRV TECH",
+(t1.data->>'RNCID')::INTEGER as "SRV  RNCID/LAC",
+t1.data->>'CELLID' as "SRV  CELLID",
+t6.data->>'CELLNAME' as "SRV  CELLNAME",
+'3G' as "NBR TECH",
+(t1.data->>'NCELLRNCID')::INTEGER as "NBR CELL RNCID/LAC", 
+(t1.data->>'NCELLID')::INTEGER as "NBR CELLID",
+t2.data->>'CELLNAME' as "NBR CELLNAME"
+from huawei_cm."UINTRAFREQNCELL" t1
+inner join huawei_cm."UCELL" t2 on t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'RNCID' = t1.data->>'NCELLRNCID'
+inner join huawei_cm."UCELL" t6 on t1.data->>'CELLID'= t6.data->>'CELLID'
+union
+--HUAWEI 3G3G EXT RELATIONS
+select
+'Huawei' as "SRV  VENDOR",
+'3G' as "SRV TECH",
+(t3.data->>'RNCID')::INTEGER as "SRV  RNCID",
+t3.data->>'CELLID'as "SRV  CELLID",
+t5.data->>'CELLNAME' as "SRV  Cell Name",
+'3G' as "NBR TECH",
+(t3.data->>'NCELLRNCID')::INTEGER as "NBR CELL RNCID",
+(t3.data->>'NCELLID')::INTEGER as "NBR CELLID" ,
+t4.data->>'CELLNAME' as "NBR Cellname"
+from huawei_cm."UINTRAFREQNCELL" t3
+inner join huawei_cm."UEXT3GCELL" t4 on  t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
+inner join huawei_cm."UCELL" t5 on t3.data->>'CELLID'= t5.data->>'CELLID'
+union
+--ZTE 3G3G RELATIONS
+select
+'ZTE' as "SRV  Vendor",
+'3G' as "SRV TECH",
+(t1.data->>'rncid')::INTEGER as "SRV  RNCID",
+t1.data->>'cid' as "SRV  CELLID",
+t3.data->>'userLabel' as "SRV  Cell Name",
+'3G' as "NBR TECH",
+(t1.data->>'nrncid')::INTEGER as "NBR CELL RNCID",
+(t1.data->>'ncid')::INTEGER as "NBR CELLID" ,
+t2.data->>'userLabel' as "NBR Cellname"
+from zte_cm."UtranRelation" t1
+inner join zte_cm."UtranCellFDD" t2 on t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
+union
+--ZTE 3G3G EXT RELATIONS
+select
+'ZTE' as "SRV  Vendor",
+'3G' as "SRV TECH",
+(t1.data->>'rncid')::INTEGER as "SRV  RNCID",
+t1.data->>'cid' as "SRV  CELLID",
+t3.data->>'userLabel' as "SRV  Cell Name",
+'3G' as "NBR TECH",
+(t1.data->>'nrncid')::INTEGER as "NBR CELL RNCID",
+(t1.data->>'ncid')::INTEGER as "NBR CELLID",
+t2.data->>'userLabel' as "NBR Cellname"
+from zte_cm."UtranRelation" t1
+inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
+UNION
+--Huawei (CGFMML) 3G2G RELATIONS
+SELECT
+'HUAWEI' as "SRV VENDOR",
+'3G' as "SRV TECH",
+hex_to_int(REPLACE(t2.data->>'LAC','H''','')) AS "SRV LAC",
+t1.data->>'CELLID' AS "SRV CELLID",
+t2.data->>'CELLNAME' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+hex_to_int(REPLACE(t3.data->>'LAC','H''','')) AS "NBR LAC",
+hex_to_int(REPLACE(t3.data->>'CID','H''','')) AS "NBR CI",
+t3.data->>'GSMCELLNAME' as "NBR Cellname"
+from huawei_cm."U2GNCELL" t1
+INNER JOIN huawei_cm."UCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BSCID'=t2.data->>'BSCID' and t1.data->>'CELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."UEXT2GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t3.data->>'BSCID'=t3.data->>'BSCID' and t1.data->>'GSMCELLINDEX'=t3.data->>'GSMCELLINDEX' 
+UNION
+--Huawei (NBI) 3G2G RELATIONS
+SELECT
+'HUAWEI' as "SRV VENDOR",
+'3G' as "SRV TECH",
+(t2.data->>'LAC')::INTEGER AS "SRV LAC",
+t1.data->>'CELLID' AS "SRV CELLID",
+t2.data->>'CELLNAME' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+(t3.data->>'LAC')::INTEGER AS "NBR LAC",
+(t3.data->>'CID')::INTEGER AS "NBR CI",
+t3.data->>'GSMCELLNAME' as "NBR Cellname"
+from huawei_cm."U2GNCELL" t1
+INNER JOIN huawei_cm."UCELL" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'neid'=t2.data->>'neid' and t1.data->>'CELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."UEXT2GCELL" t3 on t1.data->>'FileName'=t3.data->>'FileName' and t3.data->>'neid'=t3.data->>'neid' and t1.data->>'GSMCELLINDEX'=t3.data->>'GSMCELLINDEX' 
+UNION
+--ZTE (XLS) 3G2G RELATIONS
+SELECT
+'ZTE' as "SRV VENDOR",
+'3G' as "SRV TECH",
+(t2.data->>'refULocationArea')::INTEGER  AS "SRV LAC",
+t1.data->>'cid' AS "SRV CELLID",
+t2.data->>'userLabel' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+(t1.data->>'lac')::INTEGER AS "NBR LAC",
+(t1.data->>'cellIdentity')::INTEGER AS "NBR CI",
+t1.data->>'userLabel' as "NBR Cellname"
+from zte_cm."GsmRelation" t1
+INNER JOIN zte_cm."UtranCellFDD" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid'
+UNION
+--Motorola 2G2G Relations
+SELECT
+'MOTOROLA' AS "SRV VENDOR",
+'2G' as "SRV TECH",
+(t1.data->>'source_lac')::INTEGER AS "SRV LAC",
+t1.data->>'source_ci' AS "SRV CELL ID",
+null as "SRV CELLNAME",
+'2G' as "SRV TECH",
+(t1.data->>'dest_lac')::INTEGER AS "NBR LAC",
+(t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
+null as "NBR CELLNAME"
+FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_bsic' is not null
+UNION
+--Huawei 2G2G Relations 
+SELECT
+'Huawei' as "SRV VENDOR",
+'2G' as "SRV TECH",
+(t2.data->>'LAC')::INTEGER as "SRV LAC",
+t2.data->>'CI' as "SRV CELL ID",
+t2.data->>'CELLNAME' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+(t3.data->>'LAC')::INTEGER as "NBR LAC",
+(t3.data->>'CI')::INTEGER as "NBR CELL ID",
+t3.data->>'CELLNAME' as "NBR CELLNAME"
+FROM huawei_cm."G2GNCELL" t1
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'CELLID'  
+UNION
+--Huawei 2G2G Ext Relations
+SELECT
+'Huawei' as "SRV VENDOR",
+'2G' as "SRV TECH",
+(t2.data->>'LAC')::INTEGER as "SRV LAC",
+t2.data->>'CI' as "SRV CELL ID",
+t2.data->>'CELLNAME' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+(t3.data->>'LAC')::INTEGER as "NBR LAC",
+(t3.data->>'CI')::INTEGER as "NBR CELL ID",
+t3.data->>'EXT2GCELLNAME' as "NBR CELLNAME"
+FROM huawei_cm."G2GNCELL" t1
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'SRC2GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GEXT2GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'EXT2GCELLID'
+UNION
+--ZTE 2G-2G RELATIONS (xls)
+SELECT 
+'ZTE' as "SRV VENDOR",
+'2G' as "SRV TECH",
+(REGEXP_REPLACE(t2.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1'))::INTEGER AS "SRV LAC",
+t2.data->>'cellIdentity' as "SRV CELL ID",
+t2.data->>'userLabel' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+(REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1'))::INTEGER AS "NBR LAC",
+(REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1'))::INTEGER AS "NBR CI",
+t1.data->>'userLabel' as "NBR CELLNAME"
+FROM zte_cm."GsmRelation" t1
+INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'MEID'=t2.data->>'MEID' and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId' and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId' and t1.data->>'DataType'= t2.data->>'DataType'
+UNION
+--ZTE 2G-2G RELATIONS (Bulk_CM) Own Neighbours
+SELECT
+'ZTE' AS "SRV VENDOR",
+'2G' AS "SRV TECH",
+(t2.data->>'lac')::INTEGER AS "SRV LAC",
+t2.data->>'cellIdentity' as "SRV CELL ID",
+t2.data->>'userLabel' as "SRV CELLNAME",
+'2G' as "NBR TECH",
+(t3.data->>'lac')::INTEGER AS "NBR LAC",
+(t3.data->>'cellIdentity')::INTEGER as "NBR CELL ID",
+t3.data->>'userLabel' as "NBR CELLNAME"
+from zte_cm."GsmRelation" t1
+-- Serving Cell
+INNER JOIN zte_cm."GsmCell" t2 
+    on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BssFunction_id'=t2.data->>'BssFunction_id' and t1.data->>'BtsSiteManager_id'=t2.data->>'BtsSiteManager_id' 
+    and t1.data->>'GsmCell_id'=t2.data->>'GsmCell_id'
+-- Nbr Cell
+INNER JOIN zte_cm."GsmCell" t3 
+    ON t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'adjacentCell' = CONCAT('"SubNetwork=', t3.data->>'SubNetwork_id', ',SubNetwork=',t3.data->>'SubNetwork_2_id', ',MeContext=', t3.data->>'meContext_id', ',ManagedElement=', t3.data->>'ManagedElement_id', ',BssFunction=', t3.data->>'BssFunction_id', ',BtsSiteManager=', t3.data->>'BtsSiteManager_id', ',GsmCell=', t3.data->>'GsmCell_id','"')
+UNION
+--Huawei 2G3G Relations (CFGMML)
+SELECT 
+'HUAWEI' AS "SRV VENDOR",
+'2G' AS "SRV TECH",
+(t2.data->>'LAC')::INTEGER AS "SRV LAC",
+t2.data->>'CI' AS "SRV CI",
+t2.data->>'CELLNAME' AS "SRV CELLNAME",
+'3G' AS "NBR TECH",
+(t3.data->>'LAC')::INTEGER AS "NBR LAC",
+(t3.data->>'CI')::INTEGER AS "NBR CI",
+t3.data->>'EXT3GCELLNAME' AS "NBR CELLNAME"
+FROM huawei_cm."G3GNCELL" t1
+INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'SRC3GNCELLID'=t2.data->>'CELLID'
+INNER JOIN huawei_cm."GEXT3GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'NBR3GNCELLID'=t3.data->>'EXT3GCELLID'
+UNION
+--ZTE 2G3G Relations (xls)
+SELECT
+'ZTE' AS "SRV VENDOR",
+'2G' AS "SRV TECH",
+(REGEXP_REPLACE(t2.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1'))::INTEGER AS "SRV LAC",
+t2.data->>'cellIdentity' as "SRV CELL ID",
+t2.data->>'userLabel' AS "SRV CELLNAME",
+'3G' AS "NBR TECH",
+(t3.data->>'lac')::INTEGER AS "NBR LAC",
+(REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1'))::INTEGER AS "NBR CI",
+t3.data->>'userLabel' AS "NBR CELLNAME"
+FROM zte_cm."UtranRelation" t1
+INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'MEID'=t2.data->>'MEID'	and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId'	and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId'
+INNER JOIN zte_cm."ExternalUtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->'DataType'=t3.data->'DataType'and t1.data->>'MEID'=t3.data->>'MEID' and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1')=t3.data->>'rnc_id'and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1')=t3.data->>'ci'
+`;
 const NETWORK_3G3G_RELATIONS = `
 --HUAWEI 3G3G RELATIONS 
 select 
-'Huawei' as "SVR Vendor",
-t1.data->>'RNCID' as "SVR RNCID",
-t1.data->>'CELLID' as "SVR CELLID",
-t6.data->>'CELLNAME' as "SVR Cell Name",
+'Huawei' as "SRV  Vendor",
+t1.data->>'RNCID' as "SRV  RNCID",
+t1.data->>'CELLID' as "SRV  CELLID",
+t6.data->>'CELLNAME' as "SRV  Cell Name",
 t1.data->>'NCELLRNCID' as "NBR CELL RNCID", 
 t1.data->>'NCELLID' as "NBR CELLID",
 t2.data->>'CELLNAME' as "NBR cell name"
@@ -805,10 +1017,10 @@ inner join huawei_cm."UCELL" t6 on t1.data->>'CELLID'= t6.data->>'CELLID'
 union
 --HUAWEI 3G3G EXT RELATIONS
 select
-'Huawei' as "SVR Vendor",
-t3.data->>'RNCID' as "SVR RNCID",
-t3.data->>'CELLID'as "SVR CELLID",
-t5.data->>'CELLNAME' as "SVR Cell Name",
+'Huawei' as "SRV  Vendor",
+t3.data->>'RNCID' as "SRV  RNCID",
+t3.data->>'CELLID'as "SRV  CELLID",
+t5.data->>'CELLNAME' as "SRV  Cell Name",
 t3.data->>'NCELLRNCID' as "NBR CELL RNCID",
 t3.data->>'NCELLID' as "NBR CELLID" ,
 t4.data->>'CELLNAME' as "NBR Cellname"
@@ -818,10 +1030,10 @@ inner join huawei_cm."UCELL" t5 on t3.data->>'CELLID'= t5.data->>'CELLID'
 union
 --ZTE 3G3G RELATIONS
 select
-'ZTE' as "SVR Vendor",
-t1.data->>'rncid' as "SVR RNCID",
-t1.data->>'cid' as "SVR CELLID",
-t3.data->>'userLabel' as "SVR Cell Name",
+'ZTE' as "SRV  Vendor",
+t1.data->>'rncid' as "SRV  RNCID",
+t1.data->>'cid' as "SRV  CELLID",
+t3.data->>'userLabel' as "SRV  Cell Name",
 t1.data->>'nrncid' as "NBR CELL RNCID",
 t1.data->>'ncid' as "NBR CELLID" ,
 t2.data->>'userLabel' as "NBR Cellname"
@@ -831,10 +1043,10 @@ inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
 union
 --ZTE 3G3G EXT RELATIONS
 select
-'ZTE' as "SVR Vendor",
-t1.data->>'rncid' as "SVR RNCID",
-t1.data->>'cid' as "SVR CELLID",
-t3.data->>'userLabel' as "SVR Cell Name",
+'ZTE' as "SRV  Vendor",
+t1.data->>'rncid' as "SRV  RNCID",
+t1.data->>'cid' as "SRV  CELLID",
+t3.data->>'userLabel' as "SRV  Cell Name",
 t1.data->>'nrncid' as "NBR CELL RNCID",
 t1.data->>'ncid' as "NBR CELLID" ,
 t2.data->>'userLabel' as "NBR Cellname"
@@ -947,7 +1159,7 @@ t3.data->>'CI' AS "NBR CI"
 FROM huawei_cm."G3GNCELL" t1
 INNER JOIN huawei_cm."GCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'SRC3GNCELLID'=t2.data->>'CELLID'
 INNER JOIN huawei_cm."GEXT3GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'NBR3GNCELLID'=t3.data->>'EXT3GCELLID'
-JOIN
+UNION
 --ZTE 2G3G Relations (xls)
 SELECT
 'ZTE' AS "SRV VENDOR",
@@ -990,6 +1202,7 @@ VALUES
 	('Network Cells','Network Cells', $$${NETWORK_CELLS}$$, '{}', 'table',2, true),
 	('Network Sites','Network Sites', $$${NETWORK_SITES}$$, '{}', 'table',2, true),
 	('Network Nodes','Network Nodes', $$${NETWORK_NODES}$$, '{}', 'table',2, true),
+	('Network Relations','Network Relations', $$${NETWORK_RELATIONS}$$, '{}', 'table',2, true),
 	('Network 3G3G Relations','Network 3G3G RELATIONS', $$${NETWORK_3G3G_RELATIONS}$$, '{}', 'table',2, true),
 	('Network 3G2G Relations','Network 3G2G RELATIONS', $$${NETWORK_3G2G_RELATIONS}$$, '{}', 'table',2, true),
 	('Network 2G2G Relations','Network 2G2G RELATIONS', $$${NETWORK_2G2G_RELATIONS}$$, '{}', 'table',2, true),
@@ -1011,6 +1224,7 @@ VALUES
 		NETWORK_CELLS : NETWORK_CELLS,
 		NETWORK_SITES : NETWORK_SITES,
 		NETWORK_NODES : NETWORK_NODES,
+		NETWORK_RELATIONS : NETWORK_RELATIONS,
 		NETWORK_3G3G_RELATIONS : NETWORK_3G3G_RELATIONS,
 		NETWORK_3G2G_RELATIONS : NETWORK_3G2G_RELATIONS,
 		NETWORK_2G2G_RELATIONS : NETWORK_2G2G_RELATIONS,
