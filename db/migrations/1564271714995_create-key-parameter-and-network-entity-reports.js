@@ -901,7 +901,7 @@ SELECT
 (t1.data->>'source_lac')::INTEGER AS "SRV LAC",
 t1.data->>'source_ci' AS "SRV CELL ID",
 null as "SRV CELLNAME",
-'2G' as "SRV TECH",
+'2G' as "NBR TECH",
 (t1.data->>'dest_lac')::INTEGER AS "NBR LAC",
 (t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
 null as "NBR CELLNAME"
@@ -1000,6 +1000,19 @@ t3.data->>'userLabel' AS "NBR CELLNAME"
 FROM zte_cm."UtranRelation" t1
 INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'MEID'=t2.data->>'MEID'	and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId'	and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId'
 INNER JOIN zte_cm."ExternalUtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->'DataType'=t3.data->'DataType'and t1.data->>'MEID'=t3.data->>'MEID' and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1')=t3.data->>'rnc_id'and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1')=t3.data->>'ci'
+--Motorola 2G3G Relations
+SELECT
+'MOTOROLA' AS "SRV VENDOR",
+'2G' as "SRV TECH",
+(t1.data->>'source_lac')::INTEGER AS "SRV LAC",
+t1.data->>'source_ci' AS "SRV CELL ID",
+null as "SRV CELLNAME",
+'3G' as "NBR TECH",
+(t1.data->>'dest_lac')::INTEGER AS "NBR LAC",
+(t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
+null as "NBR CELLNAME"
+FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_rnc_id' is not null
+
 `;
 const NETWORK_3G3G_RELATIONS = `
 --HUAWEI 3G3G RELATIONS 
