@@ -817,8 +817,8 @@ hex_to_int(REPLACE(t4.data->>'LAC','H''','')) as "NBR LAC",
 (t3.data->>'NCELLID')::INTEGER as "NBR CELLID" ,
 t4.data->>'CELLNAME' as "NBR Cellname"
 from huawei_cm."UINTRAFREQNCELL" t3
-inner join huawei_cm."UEXT3GCELL" t4 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t4.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
-inner join huawei_cm."UCELL" t5 on t1.data->>'FILENAME'=t5.data->>'FILENAME' and t3.data->>'CELLID'= t5.data->>'CELLID'
+inner join huawei_cm."UEXT3GCELL" t4 on t3.data->>'FILENAME'=t4.data->>'FILENAME' and t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
+inner join huawei_cm."UCELL" t5 on t3.data->>'FILENAME'=t5.data->>'FILENAME' and t3.data->>'CELLID'= t5.data->>'CELLID'
 union
 --ZTE 3G3G RELATIONS
 select
@@ -832,7 +832,7 @@ t3.data->>'userLabel' as "SRV  Cell Name",
 (t1.data->>'ncid')::INTEGER as "NBR CELLID" ,
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
-inner join zte_cm."UtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'cid' = t1.data->>'ncid' and t1.data->>'rncid' = t1.data->>'rncid'
 inner join zte_cm."UtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t3.data->>'cid' = t1.data->>'cid'
 union
 --ZTE 3G3G EXT RELATIONS
@@ -847,7 +847,7 @@ t3.data->>'userLabel' as "SRV  Cell Name",
 (t1.data->>'ncid')::INTEGER as "NBR CELLID",
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
-inner join zte_cm."ExternalUtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
+inner join zte_cm."ExternalUtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
 inner join zte_cm."UtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t3.data->>'cid' = t1.data->>'cid'
 UNION
 --Huawei (CGFMML) 3G2G RELATIONS
@@ -1000,6 +1000,7 @@ t3.data->>'userLabel' AS "NBR CELLNAME"
 FROM zte_cm."UtranRelation" t1
 INNER JOIN zte_cm."GsmCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'MEID'=t2.data->>'MEID'	and t1.data->>'GBtsSiteManagerId'=t2.data->>'GBtsSiteManagerId'	and t1.data->>'GGsmCellId'=t2.data->>'GGsmCellId'
 INNER JOIN zte_cm."ExternalUtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->'DataType'=t3.data->'DataType'and t1.data->>'MEID'=t3.data->>'MEID' and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,(\\d+),\\d+','\\1')=t3.data->>'rnc_id'and REGEXP_REPLACE(t1.data->>'RELATIONCGI','\\d+,\\d+,\\d+,(\\d+)','\\1')=t3.data->>'ci'
+UNION
 --Motorola 2G3G Relations
 SELECT
 'MOTOROLA' AS "SRV VENDOR",
@@ -1012,7 +1013,6 @@ null as "SRV CELLNAME",
 (t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
 null as "NBR CELLNAME"
 FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_rnc_id' is not null
-
 `;
 const NETWORK_3G3G_RELATIONS = `
 --HUAWEI 3G3G RELATIONS 
