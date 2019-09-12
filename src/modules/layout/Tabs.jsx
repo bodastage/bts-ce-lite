@@ -14,6 +14,8 @@ import ReportContainer from '../reports/ReportContainer';
 import CreateReport from '../reports/CreateReport';
 import CreateCompositeReport from '../reports/CreateCompositeReport';
 import GISMap from '../gis/GISMap';
+import Baseline from '../baseline/Baseline';
+import ParameterLibrary from '../telecomlib/ParameterLibrary';
 
 const Components = {
     "Help": Help,
@@ -25,7 +27,9 @@ const Components = {
 	"ReportContainer": ReportContainer,
 	"CreateReport": CreateReport,
 	"CreateCompositeReport": CreateCompositeReport,
-	"GISMap": GISMap
+	"GISMap": GISMap,
+	"Baseline": Baseline,
+	"ParameterLibrary": ParameterLibrary
     };
 
 class Tabs extends React.Component {

@@ -12,6 +12,8 @@ var Excel = window.require('exceljs');
 const fixPath = window.require('fix-path');
 const fs = window.require('fs');
 const bcf = window.require('./boda-cell-file');
+const queryHelper = window.require('./query-helpers');
+const baseline = window.require('./baseline');
 const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
 
@@ -38,38 +40,6 @@ if (!isDev) {
 
 const SQLITE3_DB_PATH = path.join(basepath,'db',SQLITE3_DB_NAME);
 
-
-/**
-* Get database connection details
-*/
-async function getSQLiteDBConnectionDetails(dbName='boda'){
-		
-		let details = await
-		new Promise((resolve, reject) => {
-			
-			let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			db.all("SELECT * FROM databases WHERE name = ?", [dbName] , (err, row) => {
-				if(err !== null){
-					log.error(row);
-					//@TODO: Show table data log error
-					return reject(err);
-					
-				}
-				
-				return resolve({
-					hostname : row[0].hostname,
-					port : row[0].port,
-					username : row[0].username,
-					password : row[0].password
-				});
-			});
-			
-		});
-
-		return details;
-}
-
-
 async function getSQLiteReportInfo(reportId){
 		let reportInfo = await
 		new Promise((resolve, reject) => {
@@ -90,51 +60,6 @@ async function getSQLiteReportInfo(reportId){
 
 		return reportInfo;
 }
-
-
-/**
-* Run report query
-*
-* @param string query
-*/
-async function runQuery(query){
-	
-	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
-
-	const hostname = dbConDetails.hostname;
-	const port = dbConDetails.port;
-	const username = dbConDetails.username;
-	const password = dbConDetails.password;
-	
-	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
-	const client = new Client({
-		connectionString: connectionString,
-	});
-		
-	client.connect((err) => {
-		if(err){
-			return err;
-		}
-	});
-		
-	let results = await
-	new Promise((resolve, reject) => {
-		client.query(query)
-		.then( result => {
-			resolve(result);
-		} )
-		.catch(e => {
-			//@TODO: Error notice
-			reject(e);
-			
-		})
-		.then(() => client.end());
-	});	
-	
-	return results;
-	
-}
-
 
 function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGGridFilterModel, AGGridColumns){
 	let newQuery = `SELECT * FROM (${query}) qt`;
@@ -266,7 +191,7 @@ function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGGridFilt
 async function generateCSVFromQuery(csvFileName, outputFolder, query){
 	const fileName = csvFileName + '.csv'
 	try{
-		let results = await runQuery(query);
+		let results = await queryHelper.runQuery(query);
 		
 		let header = []
 		results.fields.forEach((v,i) => {
@@ -310,7 +235,7 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query){
 		workbook.creator = 'Bodastage Solutions';
 		const worksheet = workbook.addWorksheet(excelFileName);
 		
-		let results = await runQuery(query);
+		let results = await queryHelper.runQuery(query);
 		
 		let headers = []
 		results.fields.forEach((v,i) => {
@@ -355,7 +280,7 @@ async function generateExcelOrCSV(fileName, outputFolder, query, format){
 async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
 	
 	
-	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+	const dbConDetails  = await queryHelper.getSQLiteDBConnectionDetails('boda');
 
 	const hostname = dbConDetails.hostname;
 	const port = dbConDetails.port;
@@ -553,7 +478,7 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			
 		});
 
-		//Wait for loading to complete. The csvToJson can complete before 
+		//Wait for loading to complete. The csvToJson can complete before the streamWriter is done
 		await new Promise(async (rs, rj) => {
 			while(fileIsLoading === true ){
 				log.info(`Waiting for ${waitTime} seconds for loading of ${fileName} to complete...`);
@@ -653,7 +578,7 @@ async function runMigrations(hostname, port, username, password){
 	if (!isDev) basePath = process.resourcesPath;	
 	
 	//Create boda database 
-	const dbCon  = await getSQLiteDBConnectionDetails('boda');
+	const dbCon  = await queryHelper.getSQLiteDBConnectionDetails('boda');
 	const bodaConnStr = `postgresql://${dbCon.username}:${dbCon.password}@${dbCon.hostname}:${dbCon.port}/boda`;
 	const migrationDir = path.join(basePath,'db','migrations');
 	const options = {
@@ -839,7 +764,7 @@ async function loadBodaCellFile(inputFolder, truncateTables, beforeFileLoad, aft
 	//2.add nbrs
 
 			
-	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+	const dbConDetails  = await queryHelper.getSQLiteDBConnectionDetails('boda');
 
 	const hostname = dbConDetails.hostname;
 	const port = dbConDetails.port;
@@ -945,7 +870,7 @@ async function loadBodaCellFile(inputFolder, truncateTables, beforeFileLoad, aft
 
 async function loadEricssonMeasCollectXML(inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
 
-	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+	const dbConDetails  = await queryHelper.getSQLiteDBConnectionDetails('boda');
 
 	const hostname = dbConDetails.hostname;
 	const port = dbConDetails.port;
@@ -1146,7 +1071,7 @@ async function loadEricssonMeasCollectXML(inputFolder, truncateTables, beforeFil
 
 async function loadCSVFiles(table, tableFields, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
 
-	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
+	const dbConDetails  = await queryHelper.getSQLiteDBConnectionDetails('boda');
 
 	const hostname = dbConDetails.hostname;
 	const port = dbConDetails.port;
@@ -1373,10 +1298,73 @@ async function loadData(dataType, vendor, format, inputFolder, truncateTables, b
 }
 
 
+/*
+* Run network baseline 
+*
+* @param string clustering Clustering algorithm used 
+* @param string scoring Scoring algorithm used to choose baseline
+*/
+async function runBaseline(clustering, scoring){
+	
+	await baseline.computeBaseline(clustering, scoring);
+	
+	return {status: 'success', message: 'Baseline successfully run.'}
+}
+
+
+/*
+* Upload/Update user baseline 
+* 
+* The baseline file is uploaded to baseline.configuration 
+*
+* @param string baselineFile The baseline file to upload
+* @param boolean replace Replace previous reference
+*/
+async function uploadUserBaseline(baselineFile, replace){
+	try{ 
+		await baseline.uploadUserBaseline(baselineFile, replace);
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while uploading baseline file. Check logs.'};
+	}
+	return {status: 'success', message: 'Baseline file successfully imported.'}
+}
+
+
+/*
+* Import parameter reference
+*
+* @param string parameterReferenceFile The baseline file to upload
+* @param boolean replace Replace previous reference
+*/
+async function uploadParameterReference(parameterReferenceFile, replace){
+	try{ 
+		await baseline.uploadParameterReference(parameterReferenceFile, replace);
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while uploading file. Check logs.'};
+	}
+	return {status: 'success', message: 'Parameter reference successfully imported.'}
+}
+
+
+/**
+* Clear table fore loading
+*
+*/
+async function autoGenerateParameterRef(clearTableBefore){
+	try{ 
+		await baseline.autoGenerateParameterRef(clearTableBefore);
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while generating parameter reference. Check logs.'};
+	}
+	return {status: 'success', message: 'Parameter reference successfully generated.'}
+}
+
+exports.runBaseline = runBaseline;
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
-exports.getSQLiteDBConnectionDetails = getSQLiteDBConnectionDetails;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
-exports.runQuery = runQuery;
 exports.generateCSVFromQuery = generateCSVFromQuery;
 exports.loadCMDataViaStream = loadCMDataViaStream;
 exports.generateExcelOrCSV = generateExcelOrCSV;
@@ -1384,3 +1372,6 @@ exports.getPathToPsqlOnMacOSX = getPathToPsqlOnMacOSX;
 exports.runMigrations = runMigrations;
 exports.loadData = loadData;
 exports.parseData = parseData;
+exports.uploadUserBaseline = uploadUserBaseline;
+exports.uploadParameterReference = uploadParameterReference;
+exports.autoGenerateParameterRef = autoGenerateParameterRef;

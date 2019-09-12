@@ -1,0 +1,3 @@
+vendor,technology,mo,parameter_id,parameter_name,is_key,granulity,description
+HUAWEI,2G,GCELLDUMMY,DUMMYPARAM1,DUMMYPARAM,NO,GCELL,Dummy parameter
+HUAWEI,2G,GCELLDUMMY,DUMMYPARAM2,DUMMYPARAM,NO,UCELL,Dummy parameter

@@ -50,6 +50,25 @@ class Dashboard extends React.Component {
 		}
 		shell.openItem(logPath)
 	}
+	
+	/**
+	* Load baseline module
+	*/
+	showBaseLineModule= (options) => (e) => { 
+		e.preventDefault();
+		let tabId = options.component;
+        this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
+	}
+	
+	
+	/**
+	* Load baseline module
+	*/
+	showParameterLibrary= (options) => (e) => { 
+		e.preventDefault();
+		let tabId = options.component;
+        this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
+	}
     
 	showGISModule= (options) => (e) => { 
         e.preventDefault();
@@ -97,9 +116,23 @@ class Dashboard extends React.Component {
                             </div>
 
                             <div className="col-md-2">
+								<div className="icon-display"><a title="GIS" href="#/baseline" 
+									onClick={this.showBaseLineModule({
+                                component: 'Baseline',
+                                title: 'Baseline Audit'
+                                })}> 
+									<FontAwesomeIcon icon="pencil-ruler"/></a></div>
+                                <div className="icon-label">Baseline Audit</div>
                             </div>
 
                             <div className="col-md-2">
+								<div className="icon-display"><a title="GIS" href="#/parameterlibrary" 
+									onClick={this.showParameterLibrary({
+                                component: 'ParameterLibrary',
+                                title: 'Parameter Reference'
+                                })}> 
+									<FontAwesomeIcon icon="book"/></a></div>
+                                <div className="icon-label">Parameter Reference</div>
                             </div>
                             
                             <div className="col-md-2">

@@ -35,6 +35,13 @@ class UILayout extends React.Component {
 		});
 	}
     
+	/*
+	*
+	*/
+	resetUI = () => {
+		window.localStorage.clear();
+		window.location.reload();
+	}
 	setSidePanel = (sidePanel) => (e) => { 
 		e.preventDefault();
 		
@@ -67,6 +74,7 @@ class UILayout extends React.Component {
                 <MenuItem icon="user" text="Profile" onClick={this.addTab({
                         component: 'UserProfile', 
                         title:'Profile'})}/>
+				<MenuItem icon="eraser" text="Reset UI" onClick={this.resetUI.bind(this)} />		
                 <MenuItem icon="power" text="Logout" className={classNames(Classes.MINIMAL, Classes.INTENT_DANGER)} onClick={this.logout} />
             </Menu>
             );

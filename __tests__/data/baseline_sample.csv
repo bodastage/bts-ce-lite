@@ -1,0 +1,4 @@
+vendor,technology,mo,parameter,baseline
+HUAWEI,3G,UCELL,MAXTXPOWER,120
+HUAWEI,2G,GCELL,CSDSP,3
+HUAWEI,2G,GCELL,EXTTP,3

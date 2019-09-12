@@ -20,7 +20,6 @@ const fstream = window.require("fstream");
 const csv=window.require('csvtojson');
 const utils = window.require('./background-utils');
 const fixPath = window.require('fix-path');
-
 const vendorFormats = window.require('./vendor-formats');
 const VENDOR_CM_PARSERS = vendorFormats.VENDOR_CM_PARSERS;
 
@@ -754,6 +753,50 @@ async function  executeTask(task, options){
 	}catch(err){
 		sendLogToUI('setup_database','error', err);
 	}
+	
+	//Run baseline 
+	try{
+		if(task === 'run_baseline'){
+			const result = await utils.runBaseline(options.clustering, options.scoring);
+			sendLogToUI('run_baseline',result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI('run_baseline','error', "Error while running baseline.  Check logs for details.");
+	}	
+	
+	//Upload baseline file
+	try{
+		if(task === 'upload_baseline'){
+			const result = await utils.uploadUserBaseline(options.baselineFile);
+			sendLogToUI('upload_baseline',result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI('upload_baseline','error', "Error while running baseline.  Check logs for details.");
+	}	
+	
+	//Upload parameter reference
+	try{
+		if(task === 'upload_parameter_reference'){
+			const result = await utils.uploadParameterReference(options.referenceFile, options.clearTableBefore);
+			sendLogToUI('upload_parameter_reference',result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI('upload_parameter_reference','error', "Error while uploading parameter reference.  Check logs for details.");
+	}	
+	
+	//Auto generate parameter reference 
+	try{
+		if(task === 'auto_generate_param_ref'){
+			const result = await utils.autoGenerateParameterRef(options.clearTableBefore);
+			sendLogToUI('auto_generate_param_ref',result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI('auto_generate_param_ref','error', "Error while auto generating parameter reference.  Check logs for details.");
+	}	
 }
 
 ipcRenderer.on('parse-cm-job', (event, task, args) => {
