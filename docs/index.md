@@ -1,3 +1,9 @@
+---
+id: index
+title: Contents
+sidebar_label: Table of contents
+---
+
 # Boda-Lite Documentation
 Boda-Lite is a multi-vendor network management desktop application. It is a minimal feature version of [BTS-CE](https://github.com/bodastage/bts-ce).
 

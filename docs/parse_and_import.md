@@ -1,9 +1,12 @@
-# Parse and Import
-
+---
+id: parse_and_import
+title: Parse and Import
+sidebar_label: Parse and Import
+---
 The **Parse and Import** module parses network dumps and optionally loads them into the database.  Below is a 
 screenshot of the module.
 
-![Parse and Import](./images/parse_and_import.png)
+![Parse and Import](/bts-ce-lite/img/parse_and_import.png)
 
 The **Data type** field has three options: CM, FM, and PM. CM for configuration management files, PM for performance management files, and FM for fault management network dumps. 
 

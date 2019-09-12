@@ -381,6 +381,7 @@ class ReportsTree extends React.Component{
 		this.catDialogTitle = "Add report category";
 		this.setState({ isOpen: true, notesValue: "" }) 
 	};
+	
     closeCreateCategoryDialog = () => this.setState({ isOpen: false });
     
     handleSave = () => {

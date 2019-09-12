@@ -1,4 +1,8 @@
-# Contributing
+---
+id: contributing
+title: Contributing
+sidebar_label: Contributing
+---
 
 Contributions to the project can be in form of issue submissions, feature requests, writing code , and documentation
 

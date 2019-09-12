@@ -2,6 +2,7 @@ exports.up = (pgm) => {
 	pgm.noTransaction();
 	
 	//ACT,BLK,MOD tables
+	pgm.createTable({schema: "huawei_cm", name: "UCELL_BLK"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "AE1T1_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "BRD_MOD"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "BTS_ACT"}, {id: "id", load_datetime: "load_datetime", data: "data"});
@@ -2885,6 +2886,7 @@ exports.down = (pgm) => {
     pgm.dropTable({schema: "huawei_cm", name: "USCCPCH_ACT"});
     pgm.dropTable({schema: "huawei_cm", name: "UTYPRAB_ACT"});
     pgm.dropTable({schema: "huawei_cm", name: "UTYPSRB_ACT"});
+	pgm.dropTable({schema: "huawei_cm", name: "UCELL_BLK"});
 	
 	//
     pgm.dropTable({schema: "huawei_cm", name: 'ABISCP'});

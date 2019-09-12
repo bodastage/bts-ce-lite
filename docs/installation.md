@@ -1,5 +1,8 @@
-# Installation
-
+---
+id: installation
+title: Installation
+sidebar_label: Installation
+---
 - [System Requirements](#system-requirements)
 - [Installing Boda-Lite](#installing-laravel)
 

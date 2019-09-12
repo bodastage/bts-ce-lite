@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getReportFields } from './reports-actions';
+import { getReportFields, getReportInfo } from './reports-actions';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
@@ -119,6 +119,7 @@ class TableReport extends React.Component{
     
     refreshData = () => {
         this.props.dispatch(getReportFields(this.props.options.reportId));
+		this.props.dispatch(getReportInfo(this.props.options.reportId));
         
         this.toaster.show({
                 icon: "info-sign",
