@@ -564,7 +564,7 @@ async function runMigrations(hostname, port, username, password){
 			res  = await client.query("DROP ROLE IF EXISTS bodastage");
 			res  = await client.query("CREATE USER bodastage WITH PASSWORD 'password'");
 			res  = await client.query("CREATE DATABASE boda owner bodastage");
-			
+
 			client.end();
 			if(typeof res.err !== 'undefined') reject("Error occured"); else resolve("Database and role created successfully.");
 			
@@ -572,6 +572,31 @@ async function runMigrations(hostname, port, username, password){
 	}catch(e){
 		return {status: 'error', message: 'Error occurred while running migrations. See log for details'}	
 	}
+	
+	//add tablefunc extension 
+	const connStr2 = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+	const client2 = new Client({connectionString: connStr2});
+	client2.connect((err) => {
+		if(err){
+			log.error(err)
+			return {status: 'error', message: 'Error occurred while creating tablefunc extension. See log for details'}	
+		}
+	});
+	
+	try{
+		let results = await
+		new Promise( async (resolve, reject) => {
+			console.log("Running here");
+			console.log("client2:",client2);
+			const res  = await client2.query("CREATE EXTENSION IF NOT EXISTS  tablefunc");
+			client2.end();
+			console.log("client2 closed with res:", res);
+			if(typeof res.err !== 'undefined') reject("Error occured while creating tablefunc extension"); else resolve("tablefunc extension created successfully.");
+		});	
+	}catch(e){
+		return {status: 'error', message: 'Error occurred while creating tablefunc extension. See log for details'}	
+	}
+	
 	
 	//Get app base path
 	let basePath = app.getAppPath();

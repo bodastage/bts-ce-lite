@@ -117,6 +117,78 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	const result = await queryHelper.runQuery(sql);
 }
 
+
+
+
+async function computeEricssonBaselineScore(tech, mo, parameter){
+	let sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score)
+SELECT 
+	'ERICSSON' as vendor,
+	'${tech}' as technology,
+    t1.data->>'BSC_NAME' AS "cluster",
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter",
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score"
+FROM 
+ericsson_cm."${mo}" t1
+GROUP BY 
+    t1.data->>'BSC_NAME',
+    t1.data->>'${parameter}'
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
+  score=EXCLUDED.score + scores.score
+	`
+	
+	if(tech === '3G'){
+		sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score)
+SELECT 
+	'ERICSSON' as vendor,
+	'${tech}' as technology,
+    t1.data->>'SubNetwork_2_id' AS "cluster",
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter",
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score"
+FROM 
+ericsson_cm."${mo}" t1
+GROUP BY 
+    t3.data->>'SubNetwork_2_id',
+    t1.data->>'${parameter}'
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
+  score=EXCLUDED.score + scores.score
+		`;
+	}
+	
+	
+	if(tech === '4G'){
+		sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score)
+SELECT 
+	'ERICSSON' as vendor,
+	'${tech}' as technology,
+    t1.data->>'meContext_id' AS "cluster",
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter",
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score"
+FROM 
+ericsson_cm."${mo}" t1
+GROUP BY 
+    t3.data->>'meContext_id',
+    t1.data->>'${parameter}'
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
+  score=EXCLUDED.score + scores.score
+		`;
+	}
+	const result = await queryHelper.runQuery(sql);
+}
+
+
 /*
 * Update the baseline comparison report query
 */
@@ -201,9 +273,14 @@ async function computeScores(scoreAlgo){
 		for(let v of rows) {
 			log.info(`Processing vendor:${v.vendor} tech:${v.technology} mo:${v.mo} parameter:${v.parameter}`)
 
-			//HUAWEI - technology = 2G or 3G
+			//HUAWEI
 			if(v.vendor === 'HUAWEI'){
 				await computeHuaweiBaselineScore(v.technology, v.mo, v.parameter);
+			}
+			
+			//ERICSSON
+			if(v.vendor === 'HUAWEI'){
+				await computeEricssonBaselineScore(v.technology, v.mo, v.parameter);
 			}
 		}
 	}
@@ -260,8 +337,6 @@ async function uploadUserBaseline(baselineFile, truncate){
 	if(truncate === true ){
 		queryHelper.runQuery('TRUNCATE TABLE baseline.configuration RESTART IDENTITY');
 	}
-	
-	console.log(`baselineFile: ${baselineFile}`);
 	
 	await new Promise((resolve, reject) => {
 		csv({output: "csv", noheader:true, trim:true})
@@ -341,9 +416,8 @@ async function autoGenerateParameterRef(clearTableBefore){
 		FROM information_schema.tables 
 		WHERE  table_schema  = '${v.cm_schema}' 
 		AND table_type = 'BASE TABLE'`;
-		console.log(colSql);
+
 		const colSqlRes = await queryHelper.runQuery(colSql);
-		console.log("colSqlRes:", colSqlRes)
 		
 		for( let t of colSqlRes.rows){
 			const sql = `
@@ -370,8 +444,6 @@ async function autoGenerateParameterRef(clearTableBefore){
 			ON CONFLICT ON CONSTRAINT unq_parameter_reference DO NOTHING
 			`;
 			
-			
-		console.log(sql);
 		await queryHelper.runQuery(sql);
 		}
 		
@@ -396,8 +468,6 @@ async function uploadParameterReference(fileName, truncate){
 	if(truncate === true ){
 		queryHelper.runQuery('TRUNCATE TABLE telecomlib.parameter_reference RESTART IDENTITY');
 	}
-	
-	console.log(`Parameter reference file: ${fileName}`);
 	
 	await new Promise((resolve, reject) => {
 		csv({output: "csv", noheader:true, trim:true})

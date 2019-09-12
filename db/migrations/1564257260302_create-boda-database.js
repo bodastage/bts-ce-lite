@@ -36,15 +36,11 @@ exports.up = (pgm) => {
 //	
 //	pgm.sql( "CREATE DATABASE boda owner bodastage");
 	
-	
-	pgm.sql("CREATE EXTENSION IF NOT EXISTS  tablefunc");
 };
 
 exports.down = (pgm) => {
 //	pgm.noTransaction();
 //	pgm.sql("DROP DATABASE IF EXISTS boda");
 // 	pgm.dropRole("bodastage");
-
-	pgm.sql("DROP EXTENSION IF EXISTS tablefunc");
 
 };
