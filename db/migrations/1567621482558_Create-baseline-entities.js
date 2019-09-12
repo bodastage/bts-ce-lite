@@ -164,6 +164,45 @@ FROM
 	`);
 	
 	
+	pgm.sql(`
+WITH baseline_cat AS ( SELECT id as cat_id FROM reports.categories WHERE name = 'Baseline Audit' )
+INSERT INTO
+	reports.reports (name, notes, query, options, type, category_id, in_built)
+SELECT
+	'Parameter Reference','Parameter Reference', '
+SELECT 
+vendor as "VENDOR", 
+technology AS "TECHNOLOGY", 
+mo as "MO", 
+parameter_id as "PARAMETER ID", 
+parameter_name as "PARAMETER NAME", 
+granulity as "GRANULITY", 
+is_key as "IS_KEY", 
+description as "DESCRIPTION" 
+FROM telecomlib.parameter_reference 
+	', '{}', 'table', cat_id, true
+FROM 
+	baseline_cat
+	`);
+	
+	pgm.sql(`
+WITH baseline_cat AS ( SELECT id as cat_id FROM reports.categories WHERE name = 'Baseline Audit' )
+INSERT INTO
+	reports.reports (name, notes, query, options, type, category_id, in_built)
+SELECT
+	'Baseline Reference','Baseline Reference', '
+		SELECT 
+	vendor as "VENDOR", 
+	technology AS "technology", 
+	mo as "MO", 
+	parameter as "PARAMETER", 
+	baseline as "BASELINE_VALUE" 
+	FROM baseline.vw_configuration 
+	', '{}', 'table', cat_id, true 
+FROM 
+	baseline_cat
+	`);
+	
 	//Create configuration view 
 	pgm.createView( { schema: "baseline", name: "vw_configuration"}, 
 	{replace: true}, 
@@ -174,11 +213,10 @@ SELECT
 	t1.technology, 
 	t1.mo, 
 	t1.parameter, 
-	t2.granulity,
 	t1.baseline
 FROM 
 baseline.configuration t1 
-INNER JOIN telecomlib.parameter_reference t2  
+LEFT JOIN telecomlib.parameter_reference t2  
 	ON t1.vendor  = t2.vendor 
 	AND t1.technology = t2.technology 
 	AND t1.mo = t2.mo 
@@ -194,6 +232,8 @@ exports.down = (pgm) => {
 	pgm.sql(`DELETE FROM reports.reports WHERE name = 'Baseline Values'`)
 	pgm.sql(`DELETE FROM reports.reports WHERE name = 'Baseline Discrepancies'`)
 	pgm.sql(`DELETE FROM reports.reports WHERE name = 'Baseline Comparison'`)
+	pgm.sql(`DELETE FROM reports.reports WHERE name = 'Baseline Reference'`)
+	pgm.sql(`DELETE FROM reports.reports WHERE name = 'Parameter Reference'`)
 	
 	//Remove baseline categories
 	pgm.sql(`DELETE FROM reports.categories WHERE name = 'Baseline Audit'`)
