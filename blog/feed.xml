@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Boda-Lite Blog</title>
+        <link>https://bodastage.org/bts-ce-lite/blog</link>
+        <description>The best place to stay up-to-date with the latest Boda-Lite news and events.</description>
+        <lastBuildDate>Tue, 20 Aug 2019 06:00:00 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>Feed for Node.js</generator>
+        <image>
+            <title>Boda-Lite Blog</title>
+            <url>https://bodastage.org/bts-ce-lite/img/favicon.ico</url>
+            <link>https://bodastage.org/bts-ce-lite/blog</link>
+        </image>
+        <copyright>Copyright © 2019 Bodastage Solutions</copyright>
+        <item>
+            <title><![CDATA[Version 0.3.0-alpha.4]]></title>
+            <link>https://bodastage.org/bts-ce-lite/blog/2019/08/20/new-version-0.3.0-alpha.4.html</link>
+            <guid>https://bodastage.org/bts-ce-lite/blog/2019/08/20/new-version-0.3.0-alpha.4.html</guid>
+            <pubDate>Tue, 20 Aug 2019 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>This is a pre-release. It has the following changes:</p> <ul> <li>Preserve column ordering when reports are exported</li> <li>Update documentation with boda cell file structure</li> <li>Added relations reports</li> <li>Tracking documetation with releases</li> </ul> ]]></description>
+        </item>
+    </channel>
+</rss>
