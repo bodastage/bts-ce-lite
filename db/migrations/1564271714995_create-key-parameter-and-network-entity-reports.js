@@ -346,187 +346,196 @@ FROM nokia_cm."LNCEL" t1
 
 const COMBINED_KEY_PARAMAETERS = `
 --KEY PARAMETERS (3G Huawei CFGMML)
-select
-t1.data->>'DATETIME' as "VARDATE",
-null as "STATE",
-null as "REGIONAL",
-'HUAWEI' as"VENDOR",
-'3G' as "TECH",
-t2.data->>'SYSOBJECTID' as "NENAME",
-t1.data->>'BSCID' as "NEID",
-null as "SITEPROP LAT",
-null as "SITEPROP LON",
-t3.data->>'NODEBID' as "SITE  ID",
-t1.data->>'NODEBNAME' as "SITENAME",
-t1.data->>'CELLID' as "CELLID",
-t1.data->>'CELLNAME' as "CELLNAME",
-t1.data->>'LOCELL' as "CI",
-case 
-when t1.data->>'CELLID'=t6.data->>'CELLID' 
-then 'Activated'
-else 'Not ACTIVATED' 
-end as "ACT_STATUS",
-case 
-when t1.data->>'CELLID'=t7.data->>'CELLID' 
-then 'Blocked'
-else 'Not Blocked' 
-end as "BLKSTATUS",
-null as "DLBANDWIDTH",
-t1.data->>'BANDIND' as "BAND",
-null as "CARR",
-t1.data->>'UARFCNDOWNLINK' as "DLF",
-t1.data->>'UARFCNUPLINK' as "ULF",
-t5.data->>'MCC' as "MCC",
-t5.data->>'MNC' as "MNC",
-hex_to_int(REPLACE(t1.data->>'LAC','H''','')) as "LAC",
-hex_to_int(REPLACE(t1.data->>'RAC','H''','')) as "RAC",
-CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', hex_to_int(REPLACE(t1.data->>'LAC','H''','')), '-', t1.data->>'LOCELL') AS "CGI" ,
-null as "2G_BCCHNO",
-null as "2G_BSIC",
-null as "2G_TRX",
-t1.data->>'PSCRAMBCODE' AS "3G_PSC",
-null as "3G_DLCE",
-null as "3G_ULCE",
-null as "4G_PCI",
-null as "4G_TAC",
-null as "4G_ROOTIDX"
+SELECT
+    t1.data->>'DATETIME' AS "VARDATE",
+    NULL AS "STATE",
+    NULL AS "REGIONAL",
+    'HUAWEI' AS "VENDOR",
+    '3G' AS "TECH",
+    t2.data->>'SYSOBJECTID' AS "NENAME",
+    t1.data->>'BSCID' AS "NEID",
+    NULL AS "SITEPROP LAT",
+    NULL AS "SITEPROP LON",
+    t3.data->>'NODEBID' AS "SITE  ID",
+    t1.data->>'NODEBNAME' AS "SITENAME",
+    t1.data->>'CELLID' AS "CELLID",
+    t1.data->>'CELLNAME' AS "CELLNAME",
+    t1.data->>'LOCELL' AS "CI",
+    CASE 
+    	WHEN t1.data->>'CELLID' = t6.data->>'CELLID' THEN 'Activated'
+	ELSE 'Not ACTIVATED' 
+    END AS "ACT_STATUS",
+    CASE 
+        WHEN t1.data->>'CELLID' = t7.data->>'CELLID' THEN 'Blocked'
+        ELSE 'Not Blocked' 
+    END AS "BLKSTATUS",
+    NULL AS "DLBANDWIDTH",
+    t1.data->>'BANDIND' AS "BAND",
+   NULL AS "CARR",
+   t1.data->>'UARFCNDOWNLINK' AS "DLF",
+   t1.data->>'UARFCNUPLINK' AS "ULF",
+   t5.data->>'MCC' AS "MCC",
+   t5.data->>'MNC' AS "MNC",
+   hex_to_int(REPLACE(t1.data->>'LAC','H''','')) AS "LAC",
+   hex_to_int(REPLACE(t1.data->>'RAC','H''','')) AS "RAC",
+   CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', hex_to_int(REPLACE(t1.data->>'LAC','H''','')), '-', t1.data->>'LOCELL') AS "CGI" ,
+   NULL AS "2G_BCCHNO",
+   NULL AS "2G_BSIC",
+   NULL AS "2G_TRX",
+   t1.data->>'PSCRAMBCODE' AS "3G_PSC",
+   NULL AS "3G_DLCE",
+   NULL AS "3G_ULCE",
+   NULL AS "4G_PCI",
+   NULL AS "4G_TAC",
+   NULL AS "4G_ROOTIDX"
 FROM 
 huawei_cm."UCELL" t1 --where t1.data->>'FILENAME' LIKE 'CFGMML%'
-INNER JOIN huawei_cm."SYS" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BSCID'=t2.data->>'BSCID'
-INNER JOIN huawei_cm."UNODEB" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
+INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FILENAME' = t2.data->>'FILENAME' 
+    AND t1.data->>'BSCID'=t2.data->>'BSCID'
+INNER JOIN huawei_cm."UNODEB" t3 ON t1.data->>'FILENAME' = t3.data->>'FILENAME' 
+    AND t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
 INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FILENAME' = t1.data->>'FILENAME'
-LEFT JOIN huawei_cm."UCELL_ACT" t6 on t1.data->>'FILENAME'=t6.data->>'FILENAME' and t1.data->>'CELLID'=t6.data->>'CELLID'
-LEFT JOIN huawei_cm."UCELL_BLK" t7 on t1.data->>'FILENAME'=t7.data->>'FILENAME' and t1.data->>'CELLID'=t7.data->>'CELLID'
+LEFT JOIN huawei_cm."UCELL_ACT" t6 ON t1.data->>'FILENAME' = t6.data->>'FILENAME' 
+    AND t1.data->>'CELLID' = t6.data->>'CELLID'
+LEFT JOIN huawei_cm."UCELL_BLK" t7 ON t1.data->>'FILENAME' = t7.data->>'FILENAME' 
+    AND t1.data->>'CELLID' = t7.data->>'CELLID'
 UNION
 --KEY PARAMETERS 3G Huawei NBI
-select
-t1.data->>'varDateTime' as "VARDATE",
-null as "STATE",
-null as "REGIONAL",
-'HUAWEI' as"VENDOR",
-'3G' as "TECH",
-t2.data->>'SYSOBJECTID' as "NENAME",
-t1.data->>'neid' as "NEID",
-null as "SITEPROP LAT",
-null as "SITEPROP LON",
-t3.data->>'NODEBID' as "SITE  ID",
-t1.data->>'NODEBNAME' as "SITENAME",
-t1.data->>'CELLID' as "CELLID",
-t1.data->>'CELLNAME' as "CELLNAME",
-t1.data->>'LOCELL' as "CI",
-CASE 
-		WHEN t1.data->>'ACTSTATUS'='1' THEN 'Activated'
+SELECT
+    t1.data->>'varDateTime' AS "VARDATE",
+    NULL AS "STATE",
+    NULL AS "REGIONAL",
+    'HUAWEI' AS "VENDOR",
+    '3G' AS "TECH",
+    t2.data->>'SYSOBJECTID' AS "NENAME",
+    t1.data->>'neid' AS "NEID",
+    NULL AS "SITEPROP LAT",
+    NULL AS "SITEPROP LON",
+    t3.data->>'NODEBID' AS "SITE  ID",
+    t1.data->>'NODEBNAME' AS "SITENAME",
+    t1.data->>'CELLID' AS "CELLID",
+    t1.data->>'CELLNAME' AS "CELLNAME",
+    t1.data->>'LOCELL' AS "CI",
+    CASE 
+        WHEN t1.data->>'ACTSTATUS'='1' THEN 'Activated'
 	ELSE 'Not  Activated'
-	END AS "ACTSTATUS",
-CASE 
-		WHEN t1.data->>'BLKSTATUS'='1' THEN 'Blocked'
+    END AS "ACTSTATUS",
+    CASE 
+	WHEN t1.data->>'BLKSTATUS'='1' THEN 'Blocked'
 	ELSE 'Not Blocked'
-	END AS "BLKSTATUS",
-null as "DLBANDWIDTH",
-t1.data->>'BANDIND' as "BAND",
-null as "CARR",
-t1.data->>'UARFCNDOWNLINK' as "DLF",
-t1.data->>'UARFCNUPLINK' as "ULF",
-t5.data->>'MCC' as "MCC",
-t5.data->>'MNC' as "MNC",
-(t1.data->>'LAC')::INTEGER as "LAC",
-(t1.data->>'RAC')::INTEGER as "RAC",
-CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'LOCELL') AS "CGI" ,
-null as "2G_BCCHNO",
-null as "2G_BSIC",
-null as "2G_TRX",
-t1.data->>'PSCRAMBCODE' AS "3G_PSC",
-null as "3G_DLCE",
-null as "3G_ULCE",
-null as "4G_PCI",
-null as "4G_TAC",
-null as "4G_ROOTIDX"
+    END AS "BLKSTATUS",
+    NULL AS "DLBANDWIDTH",
+    t1.data->>'BANDIND' AS "BAND",
+    NULL AS "CARR",
+    t1.data->>'UARFCNDOWNLINK' AS "DLF",
+    t1.data->>'UARFCNUPLINK' AS "ULF",
+    t5.data->>'MCC' AS "MCC",
+    t5.data->>'MNC' AS "MNC",
+    (t1.data->>'LAC')::INTEGER AS "LAC",
+    (t1.data->>'RAC')::INTEGER AS "RAC",
+    CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'LOCELL') AS "CGI" ,
+    NULL AS "2G_BCCHNO",
+    NULL AS "2G_BSIC",
+    NULL AS "2G_TRX",
+    t1.data->>'PSCRAMBCODE' AS "3G_PSC",
+    NULL AS "3G_DLCE",
+    NULL AS "3G_ULCE",
+    NULL AS "4G_PCI",
+    NULL AS "4G_TAC",
+    NULL AS "4G_ROOTIDX"
 FROM 
 huawei_cm."UCELL" t1 --where t1.data->>'FILENAME' LIKE 'UNBI%'
-INNER JOIN huawei_cm."SYS" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'neid'=t2.data->>'neid'
-INNER JOIN huawei_cm."UNODEB" t3 on t1.data->>'FileName'=t3.data->>'FileName' and t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
+INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FileName' = t2.data->>'FileName' 
+    AND t1.data->>'neid' = t2.data->>'neid'
+INNER JOIN huawei_cm."UNODEB" t3 ON  t1.data->>'FileName' = t3.data->>'FileName' 
+    AND t1.data->>'NODEBNAME' = t3.data->>'NODEBNAME'
 INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FileName' = t1.data->>'FileName'
 UNION
 --KEY PARAMETERS (2G Huawei CFGMML)
-select
-t1.data->>'DATETIME' as "VARDATE",
-null as "STATE",
-null as "REGIONAL",
-'HUAWEI' as"VENDOR",
-'2G' as "TECH",
-t2.data->>'SYSOBJECTID' as "NENAME",
-t1.data->>'BSCID' as "NEID",
-null as "SITEPROP LAT",
-null as "SITEPROP LON",
-null as "SITENAME",
-t1.data->>'CELLID' as "CELLID",
-t1.data->>'CELLNAME' as "CELLNAME",
-t1.data->>'CI' as "CI",
-null as "ACTSTATUS",
-null as "BLKSTATUS",
-null as "DLBANDWIDTH",
-t1.data->>'BANDIND' as "BAND",
-null as "CARR",
-null as "DLF",
-null as "ULF",
-t1.data->>'MCC' as "MCC",
-t1.data->>'MNC' as "MNC",
-(t1.data->>'LAC')::INTEGER as "LAC",
-'0' as "RAC",
-CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI" ,
-t4.data->>'FREQ' as "2G_BCCHNO",
-CONCAT(t1.data->>'NCC', t1.data->>'BCC') as "2G_BSIC",
-null as "2G_TRX",
-null AS "3G_PSC",
-null as "3G_DLCE",
-null as "3G_ULCE",
-null as "4G_PCI",
-null as "4G_TAC",
-null as "4G_ROOTIDX"
+SELECT
+    t1.data->>'DATETIME' AS "VARDATE",
+    NULL AS "STATE",
+    NULL AS "REGIONAL",
+    'HUAWEI' AS "VENDOR",
+    '2G' AS "TECH",
+    t2.data->>'SYSOBJECTID' AS "NENAME",
+    t1.data->>'BSCID' AS "NEID",
+    NULL AS "SITEPROP LAT",
+    NULL AS "SITEPROP LON",
+    t1.data->>'BTSID' AS "SITE  ID",
+    NULL AS "SITENAME",
+    t1.data->>'CELLID' AS "CELLID",
+    t1.data->>'CELLNAME' AS "CELLNAME",
+    t1.data->>'CI' as "CI",
+    NULL AS "ACTSTATUS",
+    NULL AS "BLKSTATUS",
+    NULL AS "DLBANDWIDTH",
+    t1.data->>'BANDIND' AS "BAND",
+    NULL AS "CARR",
+    NULL AS "DLF",
+    NULL AS "ULF",
+    t1.data->>'MCC' AS "MCC",
+    t1.data->>'MNC' AS "MNC",
+    (t1.data->>'LAC')::INTEGER AS "LAC",
+    '0' AS "RAC",
+    CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI" ,
+    t4.data->>'FREQ' AS "2G_BCCHNO",
+    CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "2G_BSIC",
+    NULL AS "2G_TRX",
+    NULL AS "3G_PSC",
+    NULL AS "3G_DLCE",
+    NULL AS "3G_ULCE",
+    NULL AS "4G_PCI",
+    NULL AS "4G_TAC",
+    NULL AS "4G_ROOTIDX"
 FROM 
 huawei_cm."GCELL" t1 
-INNER JOIN huawei_cm."SYS" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'BSCID'=t2.data->>'BSCID'
-INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' and t1.data->>'BSCID' = t4.data->>'BSCID' 
+INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FILENAME' = t2.data->>'FILENAME' 
+    AND t1.data->>'BSCID' = t2.data->>'BSCID'
+INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' 
+    AND t1.data->>'BSCID' = t4.data->>'BSCID' 
 UNION
 --KEY PARAMETERS (4G Bulk_CM)
-select
-t1.data->>'DATETIME' as "VARDATE",
-null as "STATE",
-null as "REGIONAL",
-'ZTE' as"VENDOR",
-'4G' as "TECH",
-t1.data->>'SubNetwork_id' as "NENAME",
-t1.data->>'SubNetwork_2_id' as "NEID",
-t1.data->>'latitude' as "SITEPROP LAT",
-t1.data->>'longitude' as "SITEPROP LON",
-t1.data->>'ENBFunction_id' as "SITE  ID",
-t2.data->>'enbName' as "SITENAME",
-CONCAT(t1.data->>'ENBFunction_id',t1.data->>'EUtranCellFDD_id') as "CELLID",
-t1.data->>'userLabel' as "CELLNAME",
-t1.data->>'EUtranCellFDD_id' as "CI",
-nulL as "ACTSTATUS",
-null as "BLKSTATUS",
-t1.data->>'bandWidthDl' as "DLBANDWIDTH",
-t1.data->>'freqBandInd' as "BAND",
-NULL as "CARR",
-t1.data->>'earfcnDl' as "DLF",
-t1.data->>'earfcnUl' as "ULF",
-'0' as "MCC",
-'0' as "MNC",
-'0' as "LAC",
-'0' as "RAC",
-'0'  AS "CGI" ,
-null as "2G_BCCHNO",
-null as "2G_BSIC",
-null as "2G_TRX",
-null AS "3G_PSC",
-null as "3G_DLCE",
-null as "3G_ULCE",
-t1.data->>'pci' as "4G_PCI",
-t1.data->>'tac' as "4G_TAC",
-null as "4G_ROOTIDX"
-from zte_cm."EUtranCellFDD" t1
-inner join zte_cm."ENBFunction" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'SubNetwork_id'=t2.data->>'SubNetwork_id' and t1.data->>'ENBFunction_id'=t2.data->>'ENBFunction_id'
+SELECT
+    t1.data->>'DATETIME' AS "VARDATE",
+    NULL AS "STATE",
+    NULL AS "REGIONAL",
+    'ZTE' AS "VENDOR",
+    '4G' AS "TECH",
+    t1.data->>'SubNetwork_id' AS "NENAME",
+    t1.data->>'SubNetwork_2_id' AS "NEID",
+    t1.data->>'latitude' AS "SITEPROP LAT",
+    t1.data->>'longitude' AS "SITEPROP LON",
+    t1.data->>'ENBFunction_id' AS "SITE  ID",
+    t2.data->>'enbName' AS "SITENAME",
+    CONCAT(t1.data->>'ENBFunction_id',t1.data->>'EUtranCellFDD_id') AS "CELLID",
+    t1.data->>'userLabel' AS "CELLNAME",
+    t1.data->>'EUtranCellFDD_id' AS "CI",
+    NULL AS "ACTSTATUS",
+    NULL AS "BLKSTATUS",
+    t1.data->>'bandWidthDl' AS "DLBANDWIDTH",
+    t1.data->>'freqBandInd' AS "BAND",
+    NULL AS "CARR",
+    t1.data->>'earfcnDl' AS "DLF",
+    t1.data->>'earfcnUl' AS "ULF",
+    '0' AS "MCC",
+    '0' AS "MNC",
+    '0' AS "LAC",
+    '0' AS "RAC",
+    '0' AS "CGI" ,
+    NULL AS "2G_BCCHNO",
+    NULL AS "2G_BSIC",
+    NULL AS "2G_TRX",
+    NULL AS "3G_PSC",
+    NULL AS "3G_DLCE",
+    NULL AS "3G_ULCE",
+    t1.data->>'pci' AS "4G_PCI",
+    t1.data->>'tac' AS "4G_TAC",
+    NULL AS "4G_ROOTIDX"
+FROM zte_cm."EUtranCellFDD" t1
+inner join zte_cm."ENBFunction" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME' 
+    AND t1.data->>'SubNetwork_id' = t2.data->>'SubNetwork_id' 
+    AND t1.data->>'ENBFunction_id' = t2.data->>'ENBFunction_id'
 `
 
 const NETWORK_CELLS = `
