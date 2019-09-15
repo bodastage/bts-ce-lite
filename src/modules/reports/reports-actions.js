@@ -574,9 +574,9 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
 					query = $$${qry}$$, 
 					options = $$${JSON.stringify(options)}$$, 
 					type = '${reportType}' 
-					WHERE " + 
+					WHERE
 					id = ${reportId}`;
-					
+
 				const results = await runQuery(query);
 
 				if(typeof results.error !== 'undefined'){

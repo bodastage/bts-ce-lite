@@ -10,6 +10,9 @@ import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
 		 Menu, MenuItem, Position, HTMLSelect } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
+import { COMP_OPERATORS, COMP_VALUE_TYPES, COMP_PROPERTIES,
+		 generateStyleClass, numberParser, getTableStyleExpression } from './reports-utils';
+		 
 const { ipcRenderer} = window.require("electron")
 const { app, shell } = window.require('electron').remote;
 
@@ -264,14 +267,44 @@ class TableReport extends React.Component{
         this.columnDef = [];
         if( typeof this.props.fields === 'undefined'  ) return;
         
+		const tableStyles = this.props.reportInfo.options.tableStyles;
+		const reportId = this.props.reportInfo.id;
+		
         for(var key in this.props.fields){
             let columnName = this.props.fields[key]
+
+			
+			//Cell Styles 
+			let cellClassRules = {};
+
+			
+			if(typeof tableStyles[columnName] !== 'undefined'){
+				const conditions = tableStyles[columnName].conditions;
+				
+				for(var idx in conditions){
+					const cond = conditions[idx];
+					const op = cond.op;
+					const rValType = cond.rValType;
+					const rValue = cond.rValue;
+					const propt = cond.property;
+					const propVal = cond.propertyValue;
+					
+					const className = generateStyleClass(reportId, columnName, idx);
+					const condExpr = getTableStyleExpression(cond);
+					
+					cellClassRules[className] = condExpr
+				}
+				
+			}
+			
             this.columnDef.push({
 				headerName: columnName, 
 				field: columnName,  
                 filter: "agTextColumnFilter",
-				filterParams:{caseSensitive: true}
+				filterParams:{caseSensitive: true},
+				cellClassRules: cellClassRules
 			});
+			
         }
     }
 
@@ -366,8 +399,38 @@ class TableReport extends React.Component{
 				<MenuItem icon={<span><FontAwesomeIcon icon="file-excel"/></span>} text="EXCEL" onClick={this.onDownloadClick('excel')}/>
 			</Menu>);
 		
+		//Create table styles 
+		let tableStylesCSS = "";
+		if(typeof this.props.reportInfo.options !== 'undefined'){
+			const tableStyles = this.props.reportInfo.options.tableStyles;
+			const reportId = this.props.reportInfo.id;
+								
+			for(var field in tableStyles){
+				const conditions = tableStyles[field].conditions;
+				for(var i in conditions){
+					const cond = conditions[i];
+					const propt = cond.property;
+					const propVal = cond.propertyValue;
+					
+					const className = generateStyleClass(reportId, field, i);
+					tableStylesCSS += `
+					.${className} \{ ${propt}: ${propVal};\}
+					`;
+				}
+					
+			}
+
+		}
+		
         return (
             <div>
+			
+				<style dangerouslySetInnerHTML={{__html: `
+					 .test-test{}
+ 					 ${tableStylesCSS}
+					`}} />
+			
+			
 						{notice}
 						
 						{this.state.processing === false? "" : <ProgressBar intent={Intent.PRIMARY}/>}
