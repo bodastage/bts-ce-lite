@@ -550,7 +550,7 @@ export function clearPreviewReportError(){
 
 
 export function confirmReportCreation(reportId, reportInfo){
-    return { type: CONFIRM_REPORT_CREATED,
+    return { type: CONFIRM_REPORT_CREATED,	
         reportId: reportId,
         reportInfo: reportInfo
     };

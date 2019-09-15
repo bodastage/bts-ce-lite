@@ -15,7 +15,7 @@ import './create-report-styles.css'
 import { GraphOptionsContainer } from './GraphOptions'
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 import { COMP_OPERATORS, COMP_VALUE_TYPES, COMP_PROPERTIES,
-		 generateStyleClass, numberParser } from './reports-utils';
+		 generateStyleClass, numberParser, getTableStyleExpression } from './reports-utils';
 
 //Empty container
 function EmptyContain(props){
@@ -565,7 +565,7 @@ class CreateReport extends React.Component{
 					const propVal = cond.propertyValue;
 					
 					const className = generateStyleClass(reportId, columnName, idx);
-					const condExpr = this.getTableStyleExpression(cond);
+					const condExpr = getTableStyleExpression(cond);
 					
 					cellClassRules[className] = condExpr
 				}

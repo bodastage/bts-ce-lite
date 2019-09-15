@@ -277,25 +277,27 @@ class TableReport extends React.Component{
 			//Cell Styles 
 			let cellClassRules = {};
 
-			
-			if(typeof tableStyles[columnName] !== 'undefined'){
-				const conditions = tableStyles[columnName].conditions;
-				
-				for(var idx in conditions){
-					const cond = conditions[idx];
-					const op = cond.op;
-					const rValType = cond.rValType;
-					const rValue = cond.rValue;
-					const propt = cond.property;
-					const propVal = cond.propertyValue;
+			if(tableStyles !== undefined){
+				if(typeof tableStyles[columnName] !== 'undefined'){
+					const conditions = tableStyles[columnName].conditions;
 					
-					const className = generateStyleClass(reportId, columnName, idx);
-					const condExpr = getTableStyleExpression(cond);
+					for(var idx in conditions){
+						const cond = conditions[idx];
+						const op = cond.op;
+						const rValType = cond.rValType;
+						const rValue = cond.rValue;
+						const propt = cond.property;
+						const propVal = cond.propertyValue;
+						
+						const className = generateStyleClass(reportId, columnName, idx);
+						const condExpr = getTableStyleExpression(cond);
+						
+						cellClassRules[className] = condExpr
+					}
 					
-					cellClassRules[className] = condExpr
 				}
-				
 			}
+
 			
             this.columnDef.push({
 				headerName: columnName, 

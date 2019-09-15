@@ -199,9 +199,58 @@ async function updateBaselineComparisonQuery(){
 	const clusterColStr = "\"" + res.rows.map(v => v.cluster).join('","') + "\""
 	const clusterCtStr = "\"" + res.rows.map(v => v.cluster).join('" character varying,"') + "\" character varying"
 	
+	
+	//Update table cell options 
+	//color user baseline green 
+	//color differences red 
+	let rptStyles = {}
+	rptStyles['BASELINE_VALUE'] = {
+		conditions:[
+			{
+				op: "EQUAL TO",
+				rValType: "COLUMN",
+				rValue: "BASELINE_VALUE",
+				property: "background-color",
+				propertyValue: "green"
+			},
+			{
+				op: "EQUAL TO",
+				rValType: "COLUMN",
+				rValue: "BASELINE_VALUE",
+				property: "color",
+				propertyValue: "white"
+			}
+		]
+	}
+	
+	for(var i in res.rows){
+		const field = res.rows[i].cluster
+		rptStyles[field] = {
+			conditions:[
+				{
+					op: "NOT EQUAL TO",
+					rValType: "COLUMN",
+					rValue: "BASELINE_VALUE",
+					property: "background-color",
+					propertyValue: "red"
+				},
+				{
+					op: "NOT EQUAL TO",
+					rValType: "COLUMN",
+					rValue: "BASELINE_VALUE",
+					property: "color",
+					propertyValue: "white"
+				}
+			]
+		}
+	}
+	
+	const rptOptions = JSON.stringify({type: "Table", tableStyles: rptStyles})
+	
 	const sql = ` 
 UPDATE reports.reports  
 SET 
+    options = \$\$${rptOptions}\$\$,
 	query = \$\$
 SELECT 
     vendor as "VENDOR", 
@@ -279,7 +328,7 @@ async function computeScores(scoreAlgo){
 			}
 			
 			//ERICSSON
-			if(v.vendor === 'HUAWEI'){
+			if(v.vendor === 'ERICSSON'){
 				await computeEricssonBaselineScore(v.technology, v.mo, v.parameter);
 			}
 		}

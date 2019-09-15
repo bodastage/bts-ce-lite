@@ -1,4 +1,4 @@
-export const COMP_OPERATORS = ["EQUAL TO","GREATER THAN","LESS THAN","GREATER OR EQUAL TO","LESS OR EQUAL TO","IN", "NOT IN", "ENDS WITH", "STARTS WITH", "MATCHES REGEXP","CONTAINS"]
+export const COMP_OPERATORS = ["EQUAL TO", "NOT EQUAL TO", "GREATER THAN","LESS THAN","GREATER OR EQUAL TO","LESS OR EQUAL TO","IN", "NOT IN", "ENDS WITH", "STARTS WITH", "MATCHES REGEXP","CONTAINS"]
 export const COMP_VALUE_TYPES = ["COLUMN", "INPUT"];
 export const COMP_PROPERTIES = ['background-color', 'color'];
 
@@ -33,6 +33,11 @@ export function  getTableStyleExpression(condition){
 		if(condition.op === 'EQUAL TO'){
 			value = numberParser(value)
 			return `x == ${value}`;
+		}
+
+		if(condition.op === 'NOT EQUAL TO'){
+			value = numberParser(value)
+			return `x != ${value}`;
 		}
 		
 		if(condition.op === 'GREATER THAN'){
