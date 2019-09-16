@@ -733,10 +733,12 @@ async function  executeTask(task, options){
 	}
 	
 	
-	//Generate Reports
+	//Download report
 	try{
 		if(task === 'download_report'){
-			const reportFile = await utils.generateExcelOrCSV(options.filename, options.outputFolder, options.query, options.format);
+			const reportFile = await utils.generateExcelOrCSV(options.filename, options.outputFolder, options.query, options.format,{
+				reportId: options.reportId
+			});
 			sendLogToUI('download_report','success', reportFile);
 		}
 	}catch(err){

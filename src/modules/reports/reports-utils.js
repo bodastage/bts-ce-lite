@@ -82,7 +82,7 @@ export function  getTableStyleExpression(condition){
 			return `new RegExp(".*${value}.*").test(x)`;
 		}
 		
-		if(condition.op === 'CONTAINS'){
+		if(condition.op === 'MATCHES REGEXP'){
 			return `new RegExp(${value}).test(x)`;
 		}
 	}

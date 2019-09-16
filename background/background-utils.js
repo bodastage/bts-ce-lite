@@ -14,6 +14,7 @@ const fs = window.require('fs');
 const bcf = window.require('./boda-cell-file');
 const queryHelper = window.require('./query-helpers');
 const baseline = window.require('./baseline');
+const bgUtils = window.require('./bg-utils');
 const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
 
@@ -187,8 +188,9 @@ function getSortAndFilteredQuery(query, columnNames, AGGridSortModel, AGGridFilt
 * @param string csvFileName
 * @param string outputFolder
 * @param string query SQL query text
+* @param string options CSV options like separator
 */
-async function generateCSVFromQuery(csvFileName, outputFolder, query){
+async function generateCSVFromQuery(csvFileName, outputFolder, query, options){
 	const fileName = csvFileName + '.csv'
 	try{
 		let results = await queryHelper.runQuery(query);
@@ -214,41 +216,151 @@ async function generateCSVFromQuery(csvFileName, outputFolder, query){
 	
 }
 
+//reference: https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-eg-127-into-an-excel-column-eg-aa
+function getCharFromNumber(columnNumber){
+    var dividend = columnNumber;
+    var columnName = "";
+    var modulo;
+
+    while (dividend > 0)
+    {
+        modulo = (dividend - 1) % 26;
+        columnName = String.fromCharCode(65 + modulo).toString() + columnName;
+        dividend = parseInt((dividend - modulo) / 26);
+    } 
+    return  columnName;
+}
+
 /**
 * Generae Excel file from SQL query
 *
 * @param string csvFileName
 * @param string outputFolder
 * @param string query SQL query text
+* @param options options Options like styles to apply to results for excel
 */
-async function generateExcelFromQuery(excelFileName, outputFolder, query){
+async function generateExcelFromQuery(excelFileName, outputFolder, query, options){
 	
 	try{
 		const fileName = excelFileName + '.xlsx'
-		var options = {
+		var excelOptions = {
 		  filename: path.join(outputFolder, fileName),
 		  useStyles: true
 		};
 		
 
 		const workbook = new Excel.Workbook();
+		
 		workbook.creator = 'Bodastage Solutions';
 		const worksheet = workbook.addWorksheet(excelFileName);
 		
 		let results = await queryHelper.runQuery(query);
 		
 		let headers = []
+		let tableFields = []
 		results.fields.forEach((v,i) => {
 			headers.push({key: v.name, header: v.name})
+			tableFields.push(v.name)
 		});
 		
 		worksheet.columns = headers;
 		
+		//Report table styles 
+		let tableStyles = {};
+		if(typeof options.reportId !== 'undefined'){
+			const reportId = options.reportId;
+
+			const res = await queryHelper.runQuery(`SELECT options FROM reports.reports WHERE id  = ${reportId}`);
+			console.log("res:", res);
+			const rptOptions = res.rows[0].options;
+			if(rptOptions.tableStyles !== 'undefined'){
+				tableStyles = rptOptions.tableStyles;
+			}
+		}
+		
+		console.log("tableStyles:", tableStyles);
+		
 		results.rows.forEach((row,i) => {
+			const rowNumber = i + 2;
 			worksheet.addRow(row).commit();
+			
+			worksheet.getRow(rowNumber).eachCell({ includeEmpty: true }, function (cell, colNumber) {
+				//columns 
+				const colField = tableFields[colNumber-1]
+				if(typeof tableStyles[colField] !== 'undefined'){
+					const cellValue = row[colField];
+					const conditions = tableStyles[colField].conditions
+					
+					styles = {}
+					for(var cIdx in conditions){
+						const cond = conditions[cIdx]
+						const op = cond.op;
+						const rValType = cond.rValType;
+						const rValue = cond.rValue;
+						const property = cond.property;
+						const propertyValue = cond.propertyValue;
+						
+						const rVal = rValType === 'COLUMN'? row[tableFields.indexOf(rValue)] : rValue;
+						
+						if(bgUtils.checkStyleCondition(cellValue, op, rVal)){
+							const styles = bgUtils.getExcelJsCellStyle(property, propertyValue)
+							
+							if(Object.keys(styles.fill).length > 0 ){
+								cell.fill = styles.fill;
+							}
+							
+							if(Object.keys(styles.font).length > 0 ){
+								cell.font = styles.font;
+							}
+							
+						}
+					}
+				}
+			})
 		});
+		
+		
+			
+
+			
+		//styling test
+		//results.rows.forEach((row,i) => {
+		//	//style cells 
+		//	const cl = getCharFromNumber(1);
+		//	const rw = i;
+		//	const cell = `${cl}${rw}`
+		//	console.log("col-row:",`${cl}${rw}`);
+		//	
+		//	worksheet.getCell(cell).font = {
+		//		color: { argb: 'FF00FF00' },
+		//		italic: true
+		//	};
+		//	//worksheet.getCell(cell).fill={
+		//	//	type: 'pattern',
+		//	//	pattern: 'solid',
+		//	//	bgColor: {argb:'FFFF0000'} 
+		//	//};
+		//	
+		//
+		//})
+		
+		//attempt 2 
+		//worksheet.eachRow(function (row, _rowNumber) {
+		//	row.eachCell({ includeEmpty: true }, function (cell, _colNumber) {
+		//		if(_rowNumber === 1){
+		//			cell.fill = {
+		//				type: 'pattern',
+		//				pattern: 'solid',
+		//				fgColor: { argb: 'FFA9A9A9' }
+		//			};
+		//
+		//		}
+		//	})
+		//});
+		
 
 		await workbook.xlsx.writeFile(path.join(outputFolder, fileName));
+		
 		
 		return path.join(outputFolder, fileName);
 	}catch(err){
@@ -259,12 +371,12 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query){
 
 }
 
-async function generateExcelOrCSV(fileName, outputFolder, query, format){
+async function generateExcelOrCSV(fileName, outputFolder, query, format, options){
 	if(format === 'excel'){
-		return await generateExcelFromQuery(fileName, outputFolder, query);
+		return await generateExcelFromQuery(fileName, outputFolder, query, options);
 	}
 	
-	return await generateCSVFromQuery(fileName, outputFolder, query);
+	return await generateCSVFromQuery(fileName, outputFolder, query, options);
 }
 
 

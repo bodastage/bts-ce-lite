@@ -4,7 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { connect } from 'react-redux';
 import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import { Intent, Button, FileInput, HTMLSelect, Position,
-		 ProgressBar, Classes, Switch, Icon, Tooltip  } from "@blueprintjs/core";
+		 ProgressBar, Classes, Switch, Icon, Tooltip, FormGroup, MenuItem,
+		 Collapse
+		 } from "@blueprintjs/core";
+import { Select } from "@blueprintjs/select";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
@@ -62,7 +65,8 @@ export default class Baseline extends React.Component {
 			scoring: 'MAX_OCCURENCE',
 			
 			//Baseline configuration csv
-			baselineFile: ""
+			baselineFile: "",
+			showConfigOptions: false
         };
 		
 		this.onInputFileChange = this.onInputFileChange.bind(this)
@@ -75,6 +79,8 @@ export default class Baseline extends React.Component {
 		
 		this.agTblReload += 1;
 		this.baselineListener = null;
+		
+		this.category = [];
 		
 	}
 	
@@ -270,6 +276,10 @@ export default class Baseline extends React.Component {
 		shell.showItemInFolder(this.state.baselineFile);
 	}
 	
+	handleConfigureChange = (e) => {
+		this.setState({showConfigOptions: !this.state.showConfigOptions});
+	}
+	
 	
     render(){   
 		let inputFileEllipsis = "file-text-dir-rtl";
@@ -294,51 +304,18 @@ export default class Baseline extends React.Component {
 					{ this.state.processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
 
 					{notice}
-					
-<h5>Compute baseline</h5>										
+												
 					<div className="">     
 
 						<form>
-						  
-						  
-						  <div className="form-group row">
-							<label htmlFor="input_folder" className="col-sm-2 col-form-label">Clustering</label>
-							<div className="col-sm-8">
-							  <HTMLSelect options={this.clusteringOptions} id="clustering_algo" 
-							  className="mr-2" 
-							  onChange={this.onClusteringChange.bind(this)}	
-							  value={this.state.clustering}/> 
-							  
-								<Tooltip content="Algorithm for clustering cells for baseline computation" position={Position.RIGHT}>
-								<Icon icon="info-sign" />
-								</Tooltip>
-							</div>
-							<div className="col-sm-2">
-								
-							</div>
-						  </div>
-						  
-						  
-						  <div className="form-group row">
-							<label htmlFor="input_folder" className="col-sm-2 col-form-label">Score</label>
-							<div className="col-sm-8">
-							  <HTMLSelect options={this.scoringOptions} id="scoring_algo" className="mr-2"
-								onChange={this.onScoringChange.bind(this)}							  
-								value={this.state.scoring}/> 
-							  
-								<Tooltip content="Algorithm for determining the baseline value" position={Position.RIGHT}>
-								<Icon icon="info-sign" />
-								</Tooltip>
-							</div>
-							<div className="col-sm-2">
-								
-							</div>
-						  </div>
-						  <Button icon="play" onClick={this.runBaseline}  text="Run baseline" className={Classes.INTENT_PRIMARY} disabled={this.state.processing}/> &nbsp;
+						  <Button icon="play" onClick={this.runBaseline}  text="Run baseline audit" className={Classes.INTENT_PRIMARY} disabled={this.state.processing}/> &nbsp;
 						</form>
 					</div>
 					
 					<hr />
+					<div><Switch  checked={this.state.showConfigOptions} label="Custom configuration" onChange={this.handleConfigureChange}/></div>
+					<Collapse isOpen={this.state.showConfigOptions}>
+					
 					<h5>List of parameters for baseline audit</h5>
 					
 					  <div className="form-group row">
@@ -356,10 +333,19 @@ export default class Baseline extends React.Component {
 						</div>
 					
 					  </div>
-					
-					
-					<div className="mb-2">
-						<Button icon="refresh" onClick={this.refreshData} minimal={true}></Button>
+
+					<div>
+						<FormGroup>
+								<Button icon="refresh" onClick={this.refreshData} minimal={true}></Button>
+								<Button icon="download" onClick={this.refreshData} minimal={true}></Button>
+								| &nbsp;
+								<Icon icon="add" className="mr-2" />
+								<HTMLSelect options={["HUAWEI"]} className="mr-2"/>
+								<HTMLSelect options={["2G", "3G", "4G", "5G"]} className="mr-2"/>
+								<HTMLSelect options={["GCELL"]} className="mr-2"/>
+								<HTMLSelect options={["--All Parameters--","BCCHNO", "etc..."]} className="mr-2"/>
+								<input value="" />
+						</FormGroup>
 					</div>
 					<div className="ag-theme-balham" style={{width: '100%', height: "100%", boxSizing: "border-box"}}>
 						<AgGridReact
@@ -382,6 +368,8 @@ export default class Baseline extends React.Component {
 						</AgGridReact>
 
 					</div>
+					
+					</Collapse>
 
 					
 				</fieldset>

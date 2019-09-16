@@ -188,11 +188,11 @@ class TableReport extends React.Component{
 		let downloadQuery = `SELECT "${columnOrder.join('","')}" FROM ( ${this.filteredSortedQuery} ) dq`
 
 		let payload = {
-			reportId: this.props.options.reportId, //deprecate
+			reportId: this.props.options.reportId,
 			query: downloadQuery,
 			filename: fileName, //Name of the file to be downloaded  without extension
 			outputFolder: app.getPath('downloads'),
-			format: format
+			format: format,
 		}
 		
 		ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
