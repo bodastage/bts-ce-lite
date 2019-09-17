@@ -347,7 +347,7 @@ FROM nokia_cm."LNCEL" t1
 const COMBINED_KEY_PARAMAETERS = `
 --KEY PARAMETERS (3G Huawei CFGMML)
 SELECT
-    t1.data->>'DATETIME' AS "VARDATE",
+    t1.data->>'DATETIME' AS "DATETIME",
     NULL AS "STATE",
     NULL AS "REGIONAL",
     'HUAWEI' AS "VENDOR",
@@ -402,7 +402,7 @@ LEFT JOIN huawei_cm."UCELL_BLK" t7 ON t1.data->>'FILENAME' = t7.data->>'FILENAME
 UNION
 --KEY PARAMETERS 3G Huawei NBI
 SELECT
-    t1.data->>'varDateTime' AS "VARDATE",
+    t1.data->>'varDateTime' AS "DATETIME",
     NULL AS "STATE",
     NULL AS "REGIONAL",
     'HUAWEI' AS "VENDOR",
@@ -453,7 +453,7 @@ INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FileName' = t1.data->>'FileN
 UNION
 --KEY PARAMETERS (2G Huawei CFGMML)
 SELECT
-    t1.data->>'DATETIME' AS "VARDATE",
+    t1.data->>'DATETIME' AS "DATETIME",
     NULL AS "STATE",
     NULL AS "REGIONAL",
     'HUAWEI' AS "VENDOR",
@@ -497,7 +497,7 @@ INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID'
 UNION
 --KEY PARAMETERS (4G Bulk_CM)
 SELECT
-    t1.data->>'DATETIME' AS "VARDATE",
+    t1.data->>'DATETIME' AS "DATETIME",
     NULL AS "STATE",
     NULL AS "REGIONAL",
     'ZTE' AS "VENDOR",
@@ -856,7 +856,7 @@ t3.data->>'userLabel' as "SRV  Cell Name",
 (t1.data->>'ncid')::INTEGER as "NBR CELLID",
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
-inner join zte_cm."ExternalUtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
+inner join zte_cm."ExternalUtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'rncid' = t1.data->>'rncid' and t2.data->>'nrncId' = t1.data->>'nrncid' and t2.data->>'ncId' = t1.data->>'ncid' and t1.data->>'rncid' <> t1.data->>'nrncid'
 inner join zte_cm."UtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t3.data->>'cid' = t1.data->>'cid'
 UNION
 --Huawei (CGFMML) 3G2G RELATIONS
@@ -1073,8 +1073,8 @@ t1.data->>'nrncid' as "NBR CELL RNCID",
 t1.data->>'ncid' as "NBR CELLID" ,
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
-inner join zte_cm."ExternalUtranCellFDD" t2 on t2.data->>'ncid' = t1.data->>'ncId' and t1.data->>'rncid' <> t1.data->>'rncid'
-inner join zte_cm."UtranCellFDD" t3 on t3.data->>'cid' = t1.data->>'cid'
+inner join zte_cm."ExternalUtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'rncid' = t1.data->>'rncid' and t2.data->>'nrncId' = t1.data->>'nrncid' and t2.data->>'ncId' = t1.data->>'ncid' and t1.data->>'rncid' <> t1.data->>'nrncid' 
+inner join zte_cm."UtranCellFDD" t3 on t2.data->>'FILENAME' = t1.data->>'FILENAME' and t3.data->>'cid' = t1.data->>'cid'
 `;
 
 const NETWORK_3G2G_RELATIONS = `
