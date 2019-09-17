@@ -271,14 +271,14 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 			const reportId = options.reportId;
 
 			const res = await queryHelper.runQuery(`SELECT options FROM reports.reports WHERE id  = ${reportId}`);
-			console.log("res:", res);
+
 			const rptOptions = res.rows[0].options;
 			if(rptOptions.tableStyles !== 'undefined'){
 				tableStyles = rptOptions.tableStyles;
 			}
 		}
 		
-		console.log("tableStyles:", tableStyles);
+		//console.log("tableStyles:", tableStyles);
 		
 		results.rows.forEach((row,i) => {
 			const rowNumber = i + 2;
@@ -300,11 +300,11 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 						const property = cond.property;
 						const propertyValue = cond.propertyValue;
 						
-						const rVal = rValType === 'COLUMN'? row[tableFields.indexOf(rValue)] : rValue;
+						const rVal = rValType === 'COLUMN'? row[rValue] : rValue;
 						
 						if(bgUtils.checkStyleCondition(cellValue, op, rVal)){
 							const styles = bgUtils.getExcelJsCellStyle(property, propertyValue)
-							
+
 							if(Object.keys(styles.fill).length > 0 ){
 								cell.fill = styles.fill;
 							}
@@ -319,46 +319,6 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 			})
 		});
 		
-		
-			
-
-			
-		//styling test
-		//results.rows.forEach((row,i) => {
-		//	//style cells 
-		//	const cl = getCharFromNumber(1);
-		//	const rw = i;
-		//	const cell = `${cl}${rw}`
-		//	console.log("col-row:",`${cl}${rw}`);
-		//	
-		//	worksheet.getCell(cell).font = {
-		//		color: { argb: 'FF00FF00' },
-		//		italic: true
-		//	};
-		//	//worksheet.getCell(cell).fill={
-		//	//	type: 'pattern',
-		//	//	pattern: 'solid',
-		//	//	bgColor: {argb:'FFFF0000'} 
-		//	//};
-		//	
-		//
-		//})
-		
-		//attempt 2 
-		//worksheet.eachRow(function (row, _rowNumber) {
-		//	row.eachCell({ includeEmpty: true }, function (cell, _colNumber) {
-		//		if(_rowNumber === 1){
-		//			cell.fill = {
-		//				type: 'pattern',
-		//				pattern: 'solid',
-		//				fgColor: { argb: 'FFA9A9A9' }
-		//			};
-		//
-		//		}
-		//	})
-		//});
-		
-
 		await workbook.xlsx.writeFile(path.join(outputFolder, fileName));
 		
 		
@@ -698,11 +658,8 @@ async function runMigrations(hostname, port, username, password){
 	try{
 		let results = await
 		new Promise( async (resolve, reject) => {
-			console.log("Running here");
-			console.log("client2:",client2);
 			const res  = await client2.query("CREATE EXTENSION IF NOT EXISTS  tablefunc");
 			client2.end();
-			console.log("client2 closed with res:", res);
 			if(typeof res.err !== 'undefined') reject("Error occured while creating tablefunc extension"); else resolve("tablefunc extension created successfully.");
 		});	
 	}catch(e){

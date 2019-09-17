@@ -183,7 +183,6 @@ function numberParser(str) {
 }
 
 function  checkStyleCondition(lValue, op, rValue){
-	
 	if(op === 'EQUAL TO'){
 		return lValue == rValue;
 	}
@@ -252,12 +251,13 @@ function cssColorToRGBA(cssColor){
 	if(typeof COLOR_NAME_TO_HEX[cssColor] !== 'undefined'){
 		hexValue = "#" + COLOR_NAME_TO_HEX[cssColor];
 	}
+
 	return rgbaToHex(hexToRgba(hexValue)).replace('#','').toUpperCase();
 }
 
 function RGBAToARGB(hexRGBAVal){
-	const a = hexRGBAVal.slice(7)
-	const rgb = hexRGBAVal.slice(0,7)
+	const a = hexRGBAVal.slice(6);
+	const rgb = hexRGBAVal.slice(0,6);
 	return `${a}${rgb}`
 }
 

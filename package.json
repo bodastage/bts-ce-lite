@@ -76,7 +76,7 @@
     "electron-is-dev": "^1.1.0",
     "electron-log": "^3.0.5",
     "electron-unrar-js": "https://github.com/erssebaggala/node-unrar.js.git",
-    "exceljs": "^1.13.0",
+    "exceljs": "^1.14.0",
     "file-loader": "2.0.0",
     "file-type": "^11.0.0",
     "fix-path": "^2.1.0",
