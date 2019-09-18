@@ -71,18 +71,18 @@ export function  getTableStyleExpression(condition){
 		}
 		
 		if(condition.op === 'ENDS WITH'){
-			return `new RegExp("${value}$").test(x)`;
+			return `new RegExp(/${value}$/).test(x)`;
 		}
 		
 		if(condition.op === 'STARTS WITH'){
-			return `new RegExp("^${value}").test(x)`;
+			return `new RegExp(/^${value}/).test(x)`;
 		}
 		
 		if(condition.op === 'CONTAINS'){
-			return `new RegExp(".*${value}.*").test(x)`;
+			return `new RegExp(/.*${value}.*/).test(x)`;
 		}
 		
 		if(condition.op === 'MATCHES REGEXP'){
-			return `new RegExp(${value}).test(x)`;
+			return `new RegExp(/${value}/).test(x)`;
 		}
 	}

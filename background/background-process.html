@@ -759,7 +759,8 @@ async function  executeTask(task, options){
 	//Run baseline 
 	try{
 		if(task === 'run_baseline'){
-			const result = await utils.runBaseline(options.clustering, options.scoring);
+			const result = await utils.runBaseline(options.clustering, options.scoring, 
+					(message) => sendLogToUI('run_baseline', 'info', message) );
 			sendLogToUI('run_baseline',result.status, result.message);
 		}
 	}catch(err){

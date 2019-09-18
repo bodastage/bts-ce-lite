@@ -1397,12 +1397,52 @@ async function loadData(dataType, vendor, format, inputFolder, truncateTables, b
 *
 * @param string clustering Clustering algorithm used 
 * @param string scoring Scoring algorithm used to choose baseline
+* @param function infoStatusCallBack callback function sending back updates
 */
-async function runBaseline(clustering, scoring){
+async function runBaseline(clustering, scoring, infoStatusCallBack){
 	
+	//Auto-generate parameter reference if it is missing 
+	//Check if the parameter refence is empty
+	const result = await queryHelper.runQuery("SELECT (count(1))::INTEGER AS ref_count FROM telecomlib.parameter_reference t");
+	const refCount = result.rows[0].ref_count;
+	infoStatusCallBack("Checking if there is a parameter reference...");
+	if(refCount === 0){
+		infoStatusCallBack("Parameter reference is empty. Auto-generating a parameter reference from the network dumps...");
+		await baseline.autoGenerateParameterRef(false);
+		infoStatusCallBack("Parameter reference was successfully generated.");
+	}else{
+		infoStatusCallBack("Parameter reference is available.");
+	}
+	
+	//Check if there a baseline configuration. If there is none, use reference 
+	infoStatusCallBack("Checking if there is a baseline configuration...");
+	const result2 = await queryHelper.runQuery("SELECT (count(1))::INTEGER AS cnt FROM baseline.configuration t");
+	const baselineConfCount = result2.rows[0].cnt;
+	if(baselineConfCount === 0){
+		infoStatusCallBack("No baseline configuration provided. Auto-creating configuration from the parameter reference...");
+		
+		await baseline.autoGenerateParameterRef(false);
+		await queryHelper.runQuery(`
+			INSERT INTO baseline.configuration 
+			(vendor, technology, mo, parameter, baseline) 
+			SELECT 
+				t1.vendor AS vendor, 
+				t1.technology AS technology,  
+				t1.mo AS mo,  
+				t1.parameter_id AS parameter,  
+				'' AS baseline 
+			FROM 
+				telecomlib.parameter_reference t1
+		`);
+		infoStatusCallBack("Baseline configuration successfully generated.");
+	}else{
+		infoStatusCallBack("Baseline configuration is available.");
+	}
+	
+	infoStatusCallBack("Running baseline audit...");
 	await baseline.computeBaseline(clustering, scoring);
 	
-	return {status: 'success', message: 'Baseline successfully run.'}
+	return {status: 'success', message: 'Baseline audit successfully run.'}
 }
 
 

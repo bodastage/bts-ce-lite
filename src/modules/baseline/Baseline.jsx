@@ -313,7 +313,7 @@ export default class Baseline extends React.Component {
 					</div>
 					
 					<hr />
-					<div><Switch  checked={this.state.showConfigOptions} label="Custom configuration" onChange={this.handleConfigureChange}/></div>
+					<div><Switch  disabled={this.state.processing} checked={this.state.showConfigOptions} label="Custom configuration" onChange={this.handleConfigureChange}/></div>
 					<Collapse isOpen={this.state.showConfigOptions}>
 					
 					<h5>List of parameters for baseline audit</h5>
