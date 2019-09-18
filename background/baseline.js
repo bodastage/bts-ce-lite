@@ -106,9 +106,9 @@ SELECT
 FROM 
 huawei_cm."${mo}" t1
 INNER JOIN huawei_cm."CNOPERATORTA" t2 
-	AND t2.data->>'FILENAME' = t1.data->>'FILENAME'
+	ON t2.data->>'FILENAME' = t1.data->>'FILENAME'
 GROUP BY 
-    t3.data->>'TAC',
+    t2.data->>'TAC',
     t1.data->>'${parameter}'
 ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
   score=EXCLUDED.score + scores.score
@@ -116,8 +116,6 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	}
 	const result = await queryHelper.runQuery(sql);
 }
-
-
 
 
 async function computeEricssonBaselineScore(tech, mo, parameter){
@@ -134,6 +132,8 @@ SELECT
     COUNT(1) AS "score"
 FROM 
 ericsson_cm."${mo}" t1
+WHERE 
+	t1.data->>'BSC_NAME' IS NOT NULL 
 GROUP BY 
     t1.data->>'BSC_NAME',
     t1.data->>'${parameter}'
@@ -154,9 +154,11 @@ SELECT
     t1.data->>'${parameter}' as "value",
     COUNT(1) AS "score"
 FROM 
-ericsson_cm."${mo}" t1
+ericsson_cm."${mo}" t1 
+WHERE 
+	t1.data->>'SubNetwork_2_id' IS NOT NULL 
 GROUP BY 
-    t3.data->>'SubNetwork_2_id',
+    t1.data->>'SubNetwork_2_id',
     t1.data->>'${parameter}'
 ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
   score=EXCLUDED.score + scores.score
@@ -167,22 +169,25 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	if(tech === '4G'){
 		sql = `
 INSERT INTO baseline.scores 
-(vendor, technology, cluster, mo, parameter, value, score)
+(vendor, technology, cluster, mo, parameter, value, score) 
 SELECT 
-	'ERICSSON' as vendor,
-	'${tech}' as technology,
-    t1.data->>'meContext_id' AS "cluster",
-    '${mo}' AS "mo",
-    '${parameter}' AS "parameter",
-    t1.data->>'${parameter}' as "value",
-    COUNT(1) AS "score"
+	'ERICSSON' as vendor, 
+	'${tech}' as technology, 
+    t1.data->>'meContext_id' AS "cluster", 
+    '${mo}' AS "mo", 
+    '${parameter}' AS "parameter", 
+    t1.data->>'${parameter}' as "value", 
+    COUNT(1) AS "score" 
 FROM 
-ericsson_cm."${mo}" t1
+ericsson_cm."${mo}" t1 
+WHERE 
+	TRIM(t1.data->>'meContext_id') IS NOT NULL 
+	AND TRIM(t1.data->>'meContext_id') != '' 
 GROUP BY 
-    t3.data->>'meContext_id',
-    t1.data->>'${parameter}'
-ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
-  score=EXCLUDED.score + scores.score
+    t1.data->>'meContext_id', 
+    t1.data->>'${parameter}' 
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET  
+  score=EXCLUDED.score + scores.score 
 		`;
 	}
 	const result = await queryHelper.runQuery(sql);
@@ -199,9 +204,58 @@ async function updateBaselineComparisonQuery(){
 	const clusterColStr = "\"" + res.rows.map(v => v.cluster).join('","') + "\""
 	const clusterCtStr = "\"" + res.rows.map(v => v.cluster).join('" character varying,"') + "\" character varying"
 	
+	
+	//Update table cell options 
+	//color user baseline green 
+	//color differences red 
+	let rptStyles = {}
+	rptStyles['BASELINE_VALUE'] = {
+		conditions:[
+			{
+				op: "EQUAL TO",
+				rValType: "COLUMN",
+				rValue: "BASELINE_VALUE",
+				property: "background-color",
+				propertyValue: "green"
+			},
+			{
+				op: "EQUAL TO",
+				rValType: "COLUMN",
+				rValue: "BASELINE_VALUE",
+				property: "color",
+				propertyValue: "white"
+			}
+		]
+	}
+	
+	for(var i in res.rows){
+		const field = res.rows[i].cluster
+		rptStyles[field] = {
+			conditions:[
+				{
+					op: "NOT EQUAL TO",
+					rValType: "COLUMN",
+					rValue: "BASELINE_VALUE",
+					property: "background-color",
+					propertyValue: "red"
+				},
+				{
+					op: "NOT EQUAL TO",
+					rValType: "COLUMN",
+					rValue: "BASELINE_VALUE",
+					property: "color",
+					propertyValue: "white"
+				}
+			]
+		}
+	}
+	
+	const rptOptions = JSON.stringify({type: "Table", tableStyles: rptStyles})
+	
 	const sql = ` 
 UPDATE reports.reports  
 SET 
+    options = \$\$${rptOptions}\$\$,
 	query = \$\$
 SELECT 
     vendor as "VENDOR", 
@@ -279,13 +333,12 @@ async function computeScores(scoreAlgo){
 			}
 			
 			//ERICSSON
-			if(v.vendor === 'HUAWEI'){
+			if(v.vendor === 'ERICSSON'){
 				await computeEricssonBaselineScore(v.technology, v.mo, v.parameter);
 			}
 		}
 	}
 }
-
 
 
 /*
@@ -512,6 +565,8 @@ async function uploadParameterReference(fileName, truncate){
 	});//eof: promise
 }
 
+
+
 /*
 * Compute baseline
 * 
@@ -526,7 +581,7 @@ async function computeBaseline(clustering, scoring){
 	//Cluster network
 	await clusterNetwork(clustering);
 	
-	//Compute scores 
+	//Compute scores. Get the counts 
 	await computeScores(scoring);
 	
 	//Compute baseline values from scores 

@@ -733,10 +733,12 @@ async function  executeTask(task, options){
 	}
 	
 	
-	//Generate Reports
+	//Download report
 	try{
 		if(task === 'download_report'){
-			const reportFile = await utils.generateExcelOrCSV(options.filename, options.outputFolder, options.query, options.format);
+			const reportFile = await utils.generateExcelOrCSV(options.filename, options.outputFolder, options.query, options.format,{
+				reportId: options.reportId
+			});
 			sendLogToUI('download_report','success', reportFile);
 		}
 	}catch(err){
@@ -757,7 +759,8 @@ async function  executeTask(task, options){
 	//Run baseline 
 	try{
 		if(task === 'run_baseline'){
-			const result = await utils.runBaseline(options.clustering, options.scoring);
+			const result = await utils.runBaseline(options.clustering, options.scoring, 
+					(message) => sendLogToUI('run_baseline', 'info', message) );
 			sendLogToUI('run_baseline',result.status, result.message);
 		}
 	}catch(err){

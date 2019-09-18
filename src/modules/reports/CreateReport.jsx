@@ -5,7 +5,7 @@ import 'brace/mode/sql';
 import 'brace/theme/github';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FormGroup, InputGroup, Button, TextArea, Intent, Spinner,
-         Callout, Menu, MenuItem, ProgressBar, HTMLSelect , Popover, Position } from "@blueprintjs/core";
+         Callout, Menu, MenuItem, ProgressBar, HTMLSelect , Popover, Position, Icon } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { AgGridReact } from 'ag-grid-react';
 import { requestCreateReportFields, clearPreviewReportError,  
@@ -14,6 +14,100 @@ import Plot from 'react-plotly.js';
 import './create-report-styles.css'
 import { GraphOptionsContainer } from './GraphOptions'
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
+import { COMP_OPERATORS, COMP_VALUE_TYPES, COMP_PROPERTIES,
+		 generateStyleClass, numberParser, getTableStyleExpression } from './reports-utils';
+
+//Empty container
+function EmptyContain(props){
+	return <div>{props.children}</div>
+}
+
+class TableStyleCondition extends React.Component{
+	
+	constructor(props){
+		super(props);
+		
+		this.handleOpChange = this.handleOpChange.bind(this);
+		this.updateTableStyles = this.updateTableStyles.bind(this);
+		this.handleValueTypeChange = this.handleValueTypeChange.bind(this);
+		this.handleRValueChange = this.handleRValueChange.bind(this);
+		this.handlePropertyValueChange = this.handlePropertyValueChange.bind(this)
+		
+		this.state = {
+			//comparison operator type
+			op: COMP_OPERATORS[0],
+			
+			//Comparison value type
+			rValType: COMP_VALUE_TYPES[0],
+			
+			//The right hand side of the comparison. It's eith an input 
+			rValue: null,
+			
+			//the propert to update 
+			property: COMP_PROPERTIES[0],
+			
+			propertyValue: ""
+			
+		}
+		
+		
+	}
+	
+	handleRValueChange = (e) => {
+		this.setState({rValue: e.target.value});
+	}
+	
+	handlePropertyValueChange = (e) => {
+		this.setState({propertyValue: e.target.value});
+	}
+	
+	handlePropertyChange = (e) => {
+		this.setState({property: e.target.value});
+	}
+	
+	handleValueTypeChange = (e) => {
+		this.setState({rValType: e.target.value});
+	}
+
+	handleOpChange = (e) => {
+		this.setState({op: e.target.value});
+	}
+	
+	updateTableStyles = () => {
+			this.props.updateTableStyles({
+				op: this.state.op,
+				rValue: this.state.rValue,
+				rValType: this.state.rValType,
+				property: this.state.property,
+				propertyValue: this.state.propertyValue,
+			});
+	}
+	
+	render(){
+		
+		
+		//rvalue 
+		let RValue = <input className="bp3-input" style={{width:"100px", display: "inline-block"}} onChange={this.handleRValueChange}/>
+		if(this.state.rValType === 'COLUMN'){
+			RValue = <HTMLSelect options={this.props.fields} onChange={this.handleRValueChange}></HTMLSelect> 
+		}
+		
+		return(
+			<div>
+				<span>IF</span>&nbsp;  
+				<span>[{this.props.field}]</span>&nbsp;  
+				<HTMLSelect options={COMP_OPERATORS} onChange={this.handleOpChange}></HTMLSelect>&nbsp;  
+				<HTMLSelect options={COMP_VALUE_TYPES} onChange={this.handleValueTypeChange}></HTMLSelect>&nbsp; 
+				{RValue}&nbsp;
+				<span>THEN SET</span>&nbsp;
+				<HTMLSelect options={COMP_PROPERTIES} onChange={this.handlePropertyChange}></HTMLSelect>&nbsp; 
+				<span>TO</span>&nbsp; 
+				<input onChange={this.handlePropertyValueChange} className="bp3-input" style={{width:"100px", display: "inline-block"}}/>&nbsp;
+				<span><Icon icon="floppy-disk" onClick={this.updateTableStyles}/> </span>&nbsp;
+			</div>
+		);
+	}
+}
 
 
 class CreateReport extends React.Component{
@@ -63,7 +157,16 @@ class CreateReport extends React.Component{
             plotWidth: null,
             
             //@TODO: Looking in replacing ploltly's revision property
-            plotReloadCount: 0
+            plotReloadCount: 0,
+			
+			//Field current being configured under configure table properties
+			currentConfigField: this.props.fields !== undefined ? this.props.fields[0] : null ,
+			
+			
+			configureTableRefresh: 0,
+			
+			//Incremenet to change UI state
+			changeUIState: 1
             
         }
         
@@ -110,7 +213,8 @@ class CreateReport extends React.Component{
         this.addPlotTrace = this.addPlotTrace.bind(this);
         this.getGraphOptions = this.getGraphOptions.bind(this);
         this.updatePlotData = this.updatePlotData.bind(this);
-        
+		this.updateTableStyles = this.updateTableStyles.bind(this);
+		
         //Plotly data parameter values
         this.plotData = [];
         
@@ -142,8 +246,67 @@ class CreateReport extends React.Component{
         //This is used to indicate that the report type has changed as result 
         //of selecting the type selection combo
         this.reportTypeChange = false;
+		
+		//Holds table styles for coloring the table cells and changing fonts 
+		this.tableStyles ={}
+		this.configureTableRefresh = 0;
+		//Add field to this.tableStyles
+		this.configField = this.configField.bind(this)
+		this.removeConfigField = this.removeConfigField.bind(this)
+		this.handleConfigureFieldsChange = this.handleConfigureFieldsChange.bind(this)
+		this.removeFieldCondition = this.removeFieldCondition.bind(this)
     }
  
+	removeConfigField = (fieldName) => {
+		console.log("fieldName:", fieldName);
+		delete this.tableStyles[fieldName];
+		
+		//Update the currently selected fields in the table configurations
+		const remainingFields = this.props.fields.filter( v => typeof this.tableStyles[v] === 'undefined' );
+		this.setState(
+			{configureTableRefresh: this.state.configureTableRefresh+1,
+			currentConfigField: remainingFields[0]}
+		)
+	}
+	
+	/**
+	* Remove field styling condition
+	*
+	* @param string field Field name 
+	* @param integer index the index of the condition in the conditions arrays
+	*/
+	removeFieldCondition = (field, index) => {
+		console.log("field, index:", field, index);
+		this.tableStyles[field].conditions.splice(index, 1)
+		this.setState({changeUIState: this.state.changeUIState + 1});
+	}
+	
+    configField = () => {
+		this.tableStyles[this.state.currentConfigField] = {conditions:[]}
+		
+		//Update the currently selected fields in the table configurations
+		const remainingFields = this.props.fields.filter( v => typeof this.tableStyles[v] === 'undefined' );
+		this.setState(
+			{configureTableRefresh: this.state.configureTableRefresh+1,
+			currentConfigField: remainingFields[0]}
+		)
+	}
+	
+	/*
+	* Update the table styles 
+	*
+	* @param string field Field name 
+	* @param object newCondition The style and condition for applying it.
+	*/
+	updateTableStyles = (field, newCondition) => {
+		this.tableStyles[field].conditions.push(newCondition);
+		this.setState({changeUIState: this.state.changeUIState + 1});
+	}
+	
+	handleConfigureFieldsChange = (event) => {
+       this.setState({currentConfigField: event.currentTarget.value});
+	}
+	
     handleResize(resizeEntries){
         this.setState({plotWidth: resizeEntries[0].contentRect.width + "px"})
     }
@@ -177,9 +340,11 @@ class CreateReport extends React.Component{
             options = {
                 type: this.state.reportType,
                 data: this.getGraphOptions(),
-                layout: this.plotLayout //Plotly layout options
+                layout: this.plotLayout, //Plotly layout options,
             }
-        }
+        }else{
+			options['tableStyles'] = this.tableStyles;
+		}
         
         this.props.dispatch(createOrUpdateReport({
             name: this.reportName,
@@ -316,15 +481,105 @@ class CreateReport extends React.Component{
 //        }
     }
     
-    
-        updateColumnDefs(){
+	/**
+	*/
+    getTableStyleExpression(condition){
+		let value = condition.rValue
+		if(condition.rValType === 'COLUMN'){
+			value = `data["${value}"]`
+		}
+		
+		if(condition.op === 'EQUAL TO'){
+			value = numberParser(value)
+			return `x == ${value}`;
+		}
+		
+		if(condition.op === 'GREATER THAN'){
+			value = numberParser(value)
+			return `x > ${value}`;
+		}		
+		
+		if(condition.op === 'LESS THAN'){
+			value = numberParser(value)
+			return `x < ${value}`;
+		}
+		
+		if(condition.op === 'GREATER OR EQUAL TO'){
+			value = numberParser(value)
+			return `x >= ${value}`;
+		}
+		
+		if(condition.op === 'LESS OR EQUAL TO'){
+			value = numberParser(value)
+			return `x <= ${value}`;
+		}
+		
+		//Comma separated range
+		if(condition.op === 'IN'){
+			return `"${value}".split(',').indexOf(x) >= 0`;
+		}
+		
+		//Comma separated range
+		if(condition.op === 'NOT IN'){
+			return `"${value}".split(',').indexOf(x) == -1`;
+		}
+		
+		if(condition.op === 'ENDS WITH'){
+			return `new RegExp("${value}$").test(x)`;
+		}
+		
+		if(condition.op === 'STARTS WITH'){
+			return `new RegExp("^${value}").test(x)`;
+		}
+		
+		if(condition.op === 'CONTAINS'){
+			return `new RegExp(".*${value}.*").test(x)`;
+		}
+		
+		if(condition.op === 'CONTAINS'){
+			return `new RegExp(${value}).test(x)`;
+		}
+	}
+	
+	updateColumnDefs(){
         this.columnDef = [];
         if( typeof this.props.fields === 'undefined'  ) return;
         for(var key in this.props.fields){
             let columnName = this.props.fields[key]
+			
+			//Cell Styles 
+			let cellClassRules = {
+				//'test-cell-style-1': 'x > 0 && x < 10',
+				//'test-cell-style-2': 'x > 0 && x < 10'
+			};
+			
+			if(typeof this.tableStyles[columnName] !== 'undefined'){
+				const conditions = this.tableStyles[columnName].conditions;
+				const reportId = this.props.reportInfo !== null ? this.props.reportInfo.id : 'undefined';
+				for(var idx in conditions){
+					const cond = conditions[idx];
+					const op = cond.op;
+					const rValType = cond.rValType;
+					const rValue = cond.rValue;
+					const propt = cond.property;
+					const propVal = cond.propertyValue;
+					
+					const className = generateStyleClass(reportId, columnName, idx);
+					const condExpr = getTableStyleExpression(cond);
+					
+					cellClassRules[className] = condExpr
+				}
+			}
+			
+			
             this.columnDef.push(
-                {headerName: columnName, field: columnName,  
-                 filter: "agTextColumnFilter"},);
+                {
+					headerName: columnName, 
+					field: columnName,  
+					filter: "agTextColumnFilter",
+					cellClassRules: cellClassRules,
+					//valueParser: numberParser
+				 });
         }
     }
     
@@ -516,7 +771,15 @@ class CreateReport extends React.Component{
             
             this.aceEditorValue = this.props.reportInfo.query;
             this.reportName = this.props.reportInfo.name;
-
+			
+			if(this.props.reportInfo.type === 'Table'){
+				if(typeof this.props.reportInfo.options.tableStyles	!== 'undefined'){
+					this.tableStyles = this.props.reportInfo.options.tableStyles;
+				}
+				
+			}
+			
+			
             //This is changed to force re-rendering of the inputGroup and textarea
             this.nameRedraw +=  1;
             
@@ -548,8 +811,6 @@ class CreateReport extends React.Component{
                 this.fetchingReportInfo = true;
             }
         }
-        
-        //console.log("this.props:", this.props)
         
         //Update preview area
         let previewTable;
@@ -639,9 +900,76 @@ class CreateReport extends React.Component{
             }
         }
         
+		
+		//Configure table 
+		
+		let configureTable = null;
+		console.log("this.props.fields:", this.props.fields);
+		console.log("this.reportType:", this.reportType);
+		let testTableStyles = "";
+		if(this.props.fields !== undefined && this.state.reportType === 'Table'){
+			configureTable = [<b>Configure table</b>];
+			
+			let conditionCount = 0
+			for(var field in this.tableStyles){
+				const f = field;
+				const conditions = this.tableStyles[field].conditions;
+				
+				configureTable.push(
+				<div>
+					<Icon icon="delete" onClick = {(ev) => {ev.preventDefault();this.removeConfigField(f)}}/> <span>{f}</span>
+				</div>
+				);
+				
+				for(var i in conditions){
+					const cond = conditions[i];
+					const op = cond.op;
+					const rValType = cond.rValType;
+					const rValue = cond.rValue;
+					const propt = cond.property;
+					const propVal = cond.propertyValue;
+
+					const reportId = this.props.reportInfo !== null ? this.props.reportInfo.id : 'undefined';
+					const className = generateStyleClass(reportId, field, i);
+					
+					testTableStyles += `
+					.${className} \{ ${propt}: ${propVal};\}
+					`;
+					
+					configureTable.push(
+					<div>
+						<Icon icon="cross" onClick={() => { this.removeFieldCondition(field, i)}}/> IF {f} {op} {rValue}({rValType}) THEN SET {propt} TO {propVal}
+					</div>
+					)	
+				}
+				
+				
+				configureTable.push(
+				<div>
+						{<TableStyleCondition fields={this.props.fields} field={f} updateTableStyles={(newCondition) => {this.updateTableStyles(f, newCondition)}}/>}
+					<hr />
+				</div>);	
+			}
+			
+			const remainingFields = this.props.fields.filter( v => typeof this.tableStyles[v] === 'undefined' );
+			if(remainingFields.length > 0){
+				configureTable.push(<div><HTMLSelect options={remainingFields} onChange={this.handleConfigureFieldsChange}></HTMLSelect> <Icon icon="add" onClick={this.configField}/></div>);	
+			}
+			
+		}
+		
+		//Table cell styles 
+		//const tableCellStyles = tableStyles.map(v => 
+		//<style dangerouslySetInnerHTML={{__html: `
+		//  .styled { color: blue }
+		//`}} />
+		//)
+		//
         return (
         <div >
-			
+				<style dangerouslySetInnerHTML={{__html: `
+					  ${testTableStyles}
+					`}} />
                 <fieldset className="col-md-12 fieldset">    	
                     <legend className="legend"><FontAwesomeIcon icon="table"/> {tabTitle}</legend>
                     
@@ -721,6 +1049,8 @@ class CreateReport extends React.Component{
                         {previewTable}
                 </div>
             </div>
+			
+			<EmptyContain key={this.configureTableRefresh}>{configureTable}</EmptyContain>
             
             {this.state.reportType === 'Graph'?
             <div className="row">
