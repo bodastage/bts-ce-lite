@@ -1,51 +1,87 @@
-const ERICSSON_2G_KEY_PARAMAETERS = `
-WITH QRY_CHANNEL_GROUP_TRX AS (
-	SELECT 
-		t1.data->>'BSC_NAME' AS "NENAME", 
-		t1.data->>'CELL_NAME' AS "CELLNAME", 
-		COUNT(t1.data->>'CHGR_NAME') AS NumberOfTRX
-	FROM ericsson_cm."CHANNEL_GROUP" t1
-	GROUP BY t1.data->>'BSC_NAME', t1.data->>'CELL_NAME'
-)
+const 2G_KEY_PARAMAETERS = `
+--2G Parameters 
+--2G Parameters / ZTE(xls)
+SELECT 
+	t1.data->>'DATETIME' AS "DATETIME",
+	'ZTE' AS "VENDOR",
+    '2G' AS "TECH",
+    t1.data->>'cellIdentity' AS "CELLID",
+	t1.data->>'userLabel' AS "CELLNAME",
+	(REGEXP_REPLACE(t1.data->>'refGLocationArea','(\\d+),\\d+,\\d+,\\d+','\\1')) AS "MCC",
+	(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,(\\d+),\\d+,\\d+','\\1')) AS "MNC",
+	(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1')) AS "LAC",
+	t1.data->>'refGRoutingArea' AS "RAC",
+	CONCAT((REGEXP_REPLACE(t1.data->>'refGLocationArea','(\\d+),\\d+,\\d+,\\d+','\\1')),'-',(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,(\\d+),\\d+,\\d+','\\1')),'-',(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1')),'-',TRIM(t1.data->>'cellIdentity')) AS "CGI",
+	t1.data->>'bcchFrequency' AS "2G_BCCHNO",
+	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS "2G_BSIC"
+	FROM zte_cm."GsmCell" t1 where t1.data->>'MEID' is not null
+UNION
+--2G Parameters / ZTE(bulk_CM)
+SELECT 
+	t1.data->>'DATETIME' AS "DATETIME",
+	'ZTE' AS "VENDOR",
+    '2G' AS "TECH",
+	t1.data->>'cellIdentity' AS ci,
+	t1.data->>'userLabel' AS name,
+	t1.data->>'mcc' as mcc,
+	t1.data->>'mnc' as mnc,
+	t1.data->>'lac' AS lac,
+	t1.data->>'rac' as rac,
+	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'cellIdentity')) AS cgi,
+	t1.data->>'bcchFrequency' AS bcch,
+	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS bsic
+FROM zte_cm."GsmCell" t1 where t1.data->>'SubNetwork_id' is not null
+UNION
+--2G Parameters / Huawei(CFGMML&NBI)
+SELECT 
+	t1.data->>'DATETIME' AS "DATETIME", 
+	'HUAWEI' AS "VENDOR", 
+	'2G' AS "TECHNOLOGY", 
+    t1.data->>'CI' AS "CI",
+	t1.data->>'CELLNAME' AS "CELLNAME", 
+	t1.data->>'MCC' AS "MCC", 
+	t1.data->>'MNC' AS "MNC", 
+	t1.data->>'LAC' AS "LAC", 
+	null as rac,
+	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'CI') AS "CGI",
+	t4.data->>'FREQ' AS "BCCHNO", 
+	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC"
+	FROM huawei_cm."GCELL" t1 
+INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' and t1.data->>'BSCID' = t4.data->>'BSCID' where t4.data->>'ISMAINBCCH' = 'YES'
+UNION 
+--2G Parameters / Ericsson(Bulk_CM)
 SELECT
-   t1.data->>'DATETIME' AS "DATETIME",
-   'ERICSSON' AS "VENDOR",
-   '2G' AS "TECHNOLOGY",
-   'BSC' AS "NETYPE",
-   t1.data->>'BSC_NAME' AS "NENAME",
-   '' AS "MGW",
---    REPLACE("MODE", " - ACTIVE", "") AS MGC,
-   '' AS "MGC_NUM",
-   '' AS "CARR",
-   SUBSTRING(t1.data->>'CELL_NAME', 2, 3) AS "SITEPROP",
-   SUBSTRING(LPAD(t1.data->>'CI', 5, '0'),0, 4) AS "SITEID",
-   SUBSTRING(t1.data->>'CELL_NAME', 0, 5) AS "SITENAME",
-   t1.data->>'CI' AS "CELLID",
-   t1.data->>'CELL_NAME' AS "CELLNAME",
-   REPLACE(t1.data->>'CELL_STATE', '"', '') AS "ACTSTATUS",
-   '' AS BLKSTATUS,
-   REPLACE(t1.data->>'C_SYS_TYPE', 'GSM', '') AS "DLF",
-   REPLACE(t1.data->>'C_SYS_TYPE', 'GSM', '') AS "ULF",
-   '' AS "DLBANDWIDTH",
-   REPLACE(t1.data->>'C_SYS_TYPE', 'GSM', '') AS "BAND",
-   t1.data->>'MCC' AS "MCC",
-   t1.data->>'MNC' AS "MNC",
-   t1.data->>'LAC' AS "LAC",
-   '' AS "RAC",		
-   t1.data->>'BCCHNO',
-   t1.data->>'BCC',
-   t1.data->>'NCC',
-   t1.data->>'CI',
-   CONCAT(t1.data->>'BCC', t1.data->>'NCC') AS "BSIC",
-   CONCAT(t1.data->>'MCC', ' - ', LPAD(t1.data->>'MNC', 2, '0'), ' - ', LPAD(t1.data->>'LAC',5 ,'0'), ' - ', LPAD(t1.data->>'CI', 5,'0')) AS "CGI",
-   CONCAT(t1.data->>'MCC', ' - ', t1.data->>'MNC', ' - ', t1.data->>'LAC', ' - ', t1.data->>'CI') AS CGI_Raw,
-   '' AS "CGI_HEX",
-   t3.NumberOfTRX AS TRX_NUM 
-FROM ericsson_cm."INTERNAL_CELL" t1 
-INNER JOIN ericsson_cm."BSC" t2 ON t1.data->>'BSC_NAME' = t2.data->>'BSC_NAME'
-  LEFT JOIN QRY_CHANNEL_GROUP_TRX t3
-  ON t1.data->>'CELL_NAME' = t3."CELLNAME"
-  AND t1.data->>'BSC_NAME' = t3."NENAME"
+    t1.data->>'DATETIME' AS "DATETIME",
+    'ERICSSON' AS "VENDOR",
+    '2G' AS "TECHNOLOGY",
+    t1.data->>'CI' AS "CELLID",
+    t1.data->>'CELL_NAME' AS "CELLNAME",
+    t1.data->>'MCC' AS "MCC",
+    t1.data->>'MNC' AS "MNC",
+    t1.data->>'LAC' AS "LAC",
+    '' AS "RAC",	
+    CONCAT(t1.data->>'MCC', ' - ', LPAD(t1.data->>'MNC', 2, '0'), ' - ', LPAD(t1.data->>'LAC',5 ,'0'), ' - ', LPAD(t1.data->>'CI', 5,'0')) AS "CGI",
+    t1.data->>'BCCHNO',
+    CONCAT(t1.data->>'BCC', t1.data->>'NCC') AS "BSIC"
+    FROM ericsson_cm."INTERNAL_CELL" t1
+UNION
+--2G Parameters / Nokia(RAML)
+SELECT 
+	t1.data->>'DATETIME' AS "DATETIME",
+	'NOKIA' AS "VENDOR",
+    '2G' AS "TECH",
+    t1.data->>'cellId' AS ci,
+    t1.data->>'name' as Cellname,
+    t1.data->>'locationAreaIdMCC' as MCC,
+    t1.data->>'locationAreaIdMNC' as MNC,
+    t1.data->>'locationAreaIdLAC' as LAC,
+    null,
+    CONCAT( TRIM(t1.data->>'locationAreaIdMCC'),'-', TRIM(t1.data->>'locationAreaIdMNC'),'-',TRIM(t1.data->>'locationAreaIdLAC'),'-',TRIM(t1.data->>'cellId')) AS cgi,
+    t2.data->>'initialFrequency' AS bcch,
+    CONCAT(TRIM(t1.data->>'bsIdentityCodeNCC'), TRIM(t1.data->>'bsIdentityCodeBCC')) AS bsic
+FROM nokia_cm."BTS" t1
+INNER JOIN nokia_cm."TRX" t2 ON
+    t1.data->>'DISTNAME' = SUBSTRING(t2.data->>'DISTNAME', '.*BTS-\\d+')
 `
 
 
@@ -1210,7 +1246,7 @@ VALUES
 INSERT INTO
 	reports.reports (name, notes, query, options, type, category_id, in_built)
 VALUES
-	('Ericsson 2G parameters','Ericsson 2G parameters', $$${ERICSSON_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('2G parameters','2G parameters', $$${2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Ericsson 3G parameters','Ericsson 3G parameters', $$${ERICSSON_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Ericsson 4G parameters','Ericsson 4G parameters', $$${ERICSSON_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 2G parameters','Huawei 2G parameters', $$${HUAWEI_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
@@ -1232,7 +1268,7 @@ VALUES
 	('Network 2G2G Relations','Network 2G2G RELATIONS', $$${NETWORK_2G2G_RELATIONS}$$, '{}', 'table',2, true),
 	('Network 2G3G Relations','Network 2G3G RELATIONS', $$${NETWORK_2G3G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
-		ERICSSON_2G_KEY_PARAMAETERS: ERICSSON_2G_KEY_PARAMAETERS,
+		2G_KEY_PARAMAETERS: 2G_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
 		ERICSSON_4G_KEY_PARAMAETERS: ERICSSON_4G_KEY_PARAMAETERS,
 		HUAWEI_2G_KEY_PARAMAETERS: HUAWEI_2G_KEY_PARAMAETERS,
