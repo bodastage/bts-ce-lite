@@ -878,7 +878,7 @@ t3.data->>'userLabel' as "SRV  Cell Name",
 t2.data->>'userLabel' as "NBR Cellname"
 from zte_cm."UtranRelation" t1
 --neighbour cell name
-inner join zte_cm."UtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'cid' = t1.data->>'ncid' and t2.data->>'nrncid' = t1.data->>'rncid'
+inner join zte_cm."UtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t2.data->>'cid' = t1.data->>'ncid' and t2.data->>'rncid' = t1.data->>'nrncid'
 --serving cell name
 inner join zte_cm."UtranCellFDD" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'DataType'=t3.data->>'DataType' and t3.data->>'cid' = t1.data->>'cid'
 union
