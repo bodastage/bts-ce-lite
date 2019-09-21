@@ -117,6 +117,98 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	const result = await queryHelper.runQuery(sql);
 }
 
+/*
+* Compute Nokia baseline scores for Nokia 
+* 
+*/
+async function computeNokiaBaselineScore(tech, mo, parameter){
+	
+	//2G
+	let sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score)
+SELECT 
+	'NOKIA' as vendor,
+	'${tech}' as technology,
+    t2.data->>'name' AS "cluster",
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter",
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score"
+FROM 
+nokia_cm."${mo}" t1
+INNER JOIN nokia_cm."BSC" t2 
+	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*BSC-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*BSC-\\d+')
+WHERE 
+	t2.data->>'name' IS NOT NULL 
+	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
+GROUP BY 
+    t2.data->>'name',
+    t1.data->>'${parameter}'
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
+  score=EXCLUDED.score + scores.score
+	`
+	
+	if(tech === '3G'){
+	sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score)
+SELECT 
+	'NOKIA' as vendor,
+	'${tech}' as technology,
+    t2.data->>'name' AS "cluster",
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter",
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score"
+FROM 
+nokia_cm."${mo}" t1
+INNER JOIN nokia_cm."RNC" t2 
+	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*RNC-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*RNC-\\d+')  
+WHERE 
+	t2.data->>'name' IS NOT NULL 
+	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
+GROUP BY 
+    t2.data->>'name',
+    t1.data->>'${parameter}'
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
+  score=EXCLUDED.score + scores.score
+	`
+
+	}
+	
+	//@TODO: Change this grouping to TAC
+	if(tech === '4G'){
+	sql = ` 
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score) 
+SELECT 
+	'NOKIA' as vendor, 
+	'${tech}' as technology, 
+    t2.data->>'name' AS "cluster", 
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter", 
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score" 
+FROM 
+nokia_cm."${mo}" t1 
+INNER JOIN nokia_cm."MRBTS" t2  
+	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*MRBTS-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*MRBTS-\\d+')   
+WHERE  
+	t2.data->>'name' IS NOT NULL 
+	AND t1.data->>'FILENAME' = t2.data->>'FILENAME' 
+GROUP BY 
+    t2.data->>'name', 
+    t1.data->>'${parameter}' 
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET  
+  score=EXCLUDED.score + scores.score 
+	`
+	}
+	
+	console.log(sql);
+	const result = await queryHelper.runQuery(sql);
+}
+
 
 async function computeEricssonBaselineScore(tech, mo, parameter){
 	let sql = `
@@ -142,6 +234,60 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	`
 	
 	if(tech === '3G'){
+		sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score)
+SELECT 
+	'ERICSSON' as vendor,
+	'${tech}' as technology,
+    t1.data->>'SubNetwork_2_id' AS "cluster",
+    '${mo}' AS "mo",
+    '${parameter}' AS "parameter",
+    t1.data->>'${parameter}' as "value",
+    COUNT(1) AS "score"
+FROM 
+ericsson_cm."${mo}" t1 
+WHERE 
+	t1.data->>'SubNetwork_2_id' IS NOT NULL 
+GROUP BY 
+    t1.data->>'SubNetwork_2_id',
+    t1.data->>'${parameter}'
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
+  score=EXCLUDED.score + scores.score
+		`;
+	}
+	
+	
+	if(tech === '4G'){
+		sql = `
+INSERT INTO baseline.scores 
+(vendor, technology, cluster, mo, parameter, value, score) 
+SELECT 
+	'ERICSSON' as vendor, 
+	'${tech}' as technology, 
+    t1.data->>'meContext_id' AS "cluster", 
+    '${mo}' AS "mo", 
+    '${parameter}' AS "parameter", 
+    t1.data->>'${parameter}' as "value", 
+    COUNT(1) AS "score" 
+FROM 
+ericsson_cm."${mo}" t1 
+WHERE 
+	TRIM(t1.data->>'meContext_id') IS NOT NULL 
+	AND TRIM(t1.data->>'meContext_id') != '' 
+GROUP BY 
+    t1.data->>'meContext_id', 
+    t1.data->>'${parameter}' 
+ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET  
+  score=EXCLUDED.score + scores.score 
+		`;
+	}
+	const result = await queryHelper.runQuery(sql);
+}
+
+async function computeZTEBaselineScore(tech, mo, parameter){
+	
+	if(tech === '2G' || tech === '3G'){
 		sql = `
 INSERT INTO baseline.scores 
 (vendor, technology, cluster, mo, parameter, value, score)
@@ -327,14 +473,24 @@ async function computeScores(scoreAlgo){
 		for(let v of rows) {
 			log.info(`Processing vendor:${v.vendor} tech:${v.technology} mo:${v.mo} parameter:${v.parameter}`)
 
-			//HUAWEI
 			if(v.vendor === 'HUAWEI'){
 				await computeHuaweiBaselineScore(v.technology, v.mo, v.parameter);
 			}
 			
-			//ERICSSON
 			if(v.vendor === 'ERICSSON'){
 				await computeEricssonBaselineScore(v.technology, v.mo, v.parameter);
+			}
+			
+			if(v.vendor === 'NOKIA'){
+				await computeNokiaBaselineScore(v.technology, v.mo, v.parameter);
+			}
+			
+			if(v.vendor === 'ZTE'){
+				await computeZTEBaselineScore(v.technology, v.mo, v.parameter);
+			}
+			
+			if(v.vendor === 'MOTOROLA'){
+				//@TODO: Implement ZTE baseline scoring 
 			}
 		}
 	}
@@ -497,6 +653,7 @@ async function autoGenerateParameterRef(clearTableBefore){
 			ON CONFLICT ON CONSTRAINT unq_parameter_reference DO NOTHING
 			`;
 			
+		console.log(sql)
 		await queryHelper.runQuery(sql);
 		}
 		
