@@ -12,7 +12,7 @@ exports.up = async (pgm) => {
 			vendor: {type: "varchar(100)", notNull: true},
 			technology: {type: "varchar(20)", notNull: true},
 			mo: {type: "varchar(100)", notNull: true},
-			parameter: {type: "varchar(200)", notNull: true},
+			parameter: {type: "varchar(300)", notNull: true},
 			baseline: {type: "varchar(200)"}, //manually provided baseline value
 			extra_fields: {type: "JSON"},
 			created_at: "createdAt", 
@@ -70,7 +70,6 @@ exports.up = async (pgm) => {
 		}
 	);
 	
-	
 	//Baseline score.  A score value for each posible baseline value 
 	//The baseline will be selected from the value with the highest 
 	//score 
@@ -82,8 +81,8 @@ exports.up = async (pgm) => {
 			technology: {type: "varchar(100)", notNull: true},
 			cluster: {type: "varchar(100)", notNull: true},
 			mo: {type: "varchar(100)", notNull: true},
-			parameter: {type: "varchar(200)", notNull: true},
-			value: {type: "varchar(200)", notNull: true},
+			parameter: {type: "varchar(300)", notNull: true},
+			value: {type: "text", notNull: true},
 			score: {type: "integer", notNull: true, default: 0},
 			created_at: "createdAt", 
 			modified_at: "createdAt", 
@@ -99,7 +98,7 @@ exports.up = async (pgm) => {
 	pgm.addConstraint(
 		{schema: "baseline", name: 'scores'}, 
 		"unq_scores", 
-		{unique: ["vendor", "technology", "mo", "parameter", "value"]}
+		{unique: ["vendor", "technology", "cluster", "mo", "parameter", "value"]}
 	);
  
  
@@ -112,8 +111,8 @@ exports.up = async (pgm) => {
 			technology: {type: "varchar(100)", notNull: true},
 			cluster: {type: "varchar(100)", notNull: true},
 			mo: {type: "varchar(100)", notNull: true},
-			parameter: {type: "varchar(200)", notNull: true},
-			value: {type: "varchar(200)", notNull: true},
+			parameter: {type: "varchar(300)", notNull: true},
+			value: {type: "text", notNull: true},
 			created_at: "createdAt", 
 			modified_at: "createdAt", 
 			created_by: "createdBy",

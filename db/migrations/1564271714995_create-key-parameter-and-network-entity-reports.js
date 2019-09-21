@@ -1,4 +1,4 @@
-const 2G_KEY_PARAMAETERS = `
+const GSM_KEY_PARAMAETERS = `
 --2G Parameters 
 --2G Parameters / ZTE(xls)
 SELECT 
@@ -1246,7 +1246,7 @@ VALUES
 INSERT INTO
 	reports.reports (name, notes, query, options, type, category_id, in_built)
 VALUES
-	('2G parameters','2G parameters', $$${2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('2G Parameters','2G parameters', $$${GSM_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Ericsson 3G parameters','Ericsson 3G parameters', $$${ERICSSON_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Ericsson 4G parameters','Ericsson 4G parameters', $$${ERICSSON_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 2G parameters','Huawei 2G parameters', $$${HUAWEI_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
@@ -1268,7 +1268,7 @@ VALUES
 	('Network 2G2G Relations','Network 2G2G RELATIONS', $$${NETWORK_2G2G_RELATIONS}$$, '{}', 'table',2, true),
 	('Network 2G3G Relations','Network 2G3G RELATIONS', $$${NETWORK_2G3G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
-		2G_KEY_PARAMAETERS: 2G_KEY_PARAMAETERS,
+		GSM_KEY_PARAMAETERS: GSM_KEY_PARAMAETERS,
 		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
 		ERICSSON_4G_KEY_PARAMAETERS: ERICSSON_4G_KEY_PARAMAETERS,
 		HUAWEI_2G_KEY_PARAMAETERS: HUAWEI_2G_KEY_PARAMAETERS,

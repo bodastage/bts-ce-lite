@@ -10,10 +10,10 @@ exports.up = (pgm) => {
 			vendor: {type: "varchar(100)", notNull: true},
 			technology: {type: "varchar(100)", notNull: true},
 			mo: {type: "varchar(100)", notNull: true},
-			parameter_id: {type: "varchar(250)", notNull: true},
-			parameter_name: {type: "varchar(250)", notNull: true},
+			parameter_id: {type: "varchar(300)", notNull: true},
+			parameter_name: {type: "varchar(300)", notNull: true},
 			description: {type: "text"},
-			is_key: {type: "varchar(250)", default: "NO"}, //YES or NO
+			is_key: {type: "varchar(50)", default: "NO"}, //YES or NO
 			granulity: {type: "varchar(100)"}, //CELL,SITE,RNC,BSC,CELLR,CARRIER
 			created_at: "createdAt", 
 			modified_at: "createdAt", 
