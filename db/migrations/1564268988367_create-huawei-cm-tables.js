@@ -1673,8 +1673,7 @@ exports.up = (pgm) => {
     pgm.createTable({schema: "huawei_cm", name: "X2AUTOSETUPOPERATOR"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "XW"}, {id: "id", load_datetime: "load_datetime", data: "data"});
 	pgm.createTable({schema: "huawei_cm", name: "USERPRIORITY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-	pgm.createTable({schema: "huawei_cm", name: "UUSERPRIORITY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
-	
+		
 };
 
 exports.down = (pgm) => {
@@ -2665,7 +2664,6 @@ exports.down = (pgm) => {
     pgm.dropTable({schema: "huawei_cm", name: 'UUSERHAPPYBR'});
     pgm.dropTable({schema: "huawei_cm", name: 'UUSERMBR'});
     pgm.dropTable({schema: "huawei_cm", name: 'UUSERPLNSHAREPARA'});
-    pgm.dropTable({schema: "huawei_cm", name: 'UUSERPRIORITY'});
     pgm.dropTable({schema: "huawei_cm", name: 'UVIPIMSI'});
     pgm.dropTable({schema: "huawei_cm", name: 'UVIRTUALGRID'});
     pgm.dropTable({schema: "huawei_cm", name: 'UWPSALGO'});

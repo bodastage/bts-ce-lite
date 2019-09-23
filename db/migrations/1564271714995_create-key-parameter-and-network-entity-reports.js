@@ -85,39 +85,62 @@ INNER JOIN nokia_cm."TRX" t2 ON
 `
 
 
-const ERICSSON_3G_KEY_PARAMAETERS = `
-SELECT t1.data->>'DATETIME' AS "DATETIME",
-	   'ERICSSON' AS "VENDOR",
-	   '3G' AS "TECHNOLOGY",
-	   t1.data->>'SubNetwork_2_id' AS "NENAME",
-	   t2.data->>'cId' AS "CELLID",
-	   t2.data->>'userLabel' AS "CELLNAME",
---        t3."CELLNAME_SC",
-	   SUBSTRING(t2.data->>'userLabel', 2, 3) AS "SITEPROP",
-	   SUBSTRING(LPAD(t2.data->>'cId', 5, '0'),0, 4) AS "SITEID",
-	   t3.data->>'MeContext_id' as "SITENAME",
-	   t1.data->>'plmnIdentity_mcc' AS "MCC",
-	   t1.data->>'plmnIdentity_mnc' AS "MNC",
-	   t2.data->>'lac' AS "LAC",
-	   t2.data->>'rac' AS "RAC",
-	   t2.data->>'uarfcnDl' AS "DLF",
-	   t2.data->>'uarfcnUl' AS "ULF",
-	   CASE WHEN t2.data->>'administrativeState' = '1' THEN 'UNLOCKED'
-			WHEN t2.data->>'administrativeState' = '0' THEN 'LOCKED'
-			ELSE 'SHUTTING_DOWN'
-	   END
-	   AS "ACTSTATUS",
-	   '' AS "BLKSTATUS",
-	   t2.data->>'primaryScramblingCode' AS "PSC",
-	   t2.data->>'cId' AS "CID",
-	   t2.data->>'cId' AS "CI",
-	   CONCAT(t1.data->>'plmnIdentity_mcc', '-', LPAD(t1.data->>'plmnIdentity_mnc', 2, '0'), '-',LPAD(t2.data->>'lac',5, '0'), '-', LPAD(t2.data->>'cId',5, '0')) AS CGI,
-	   CONCAT(t1.data->>'plmnIdentity_mcc', '-', t1.data->>'plmnIdentity_mnc', '-', t2.data->>'lac', '-', t2.data->>'cId') AS "CGI_RAW",
-	   '' AS "CGI_HEX"
-FROM ericsson_cm."UtranNetwork" t1
-	INNER JOIN ericsson_cm."UtranCell"  t2 ON t2.data->>'SubNetwork_2_id'  = t1.data->>'SubNetwork_2_id'
-	LEFT JOIN ericsson_cm."RbsLocalCell" t3 ON t1.data->>'SubNetwork_2_id' = t1.data->>'SubNetwork_2_id'
-		AND t2.data->>'cId' = t3.data->>'localCellId'
+const UMTS_KEY_PARAMAETERS = `
+--UMTS_KEY_PARAMETERS
+--HUAWEI (NBIXML)
+SELECT
+    t1.data->>'FileName' AS "CM File",
+    t1.data->>'neid' AS "RNC_ID",
+    t1.data->>'CELLID' AS "CELL_ID",
+    t1.data->>'CELLNAME' AS "CELL_NAME",
+    (t1.data->>'PSCRAMBCODE') AS "PSC",
+    (t1.data->>'LAC')::INTEGER AS "LAC",
+    (t1.data->>'RAC')::INTEGER AS "RAC"
+FROM huawei_cm."UCELL" t1 where t1.data->>'neid' is not null
+UNION
+--HUAWEI (CFGMML)
+SELECT
+    (t1.data->>'FILENAME') AS "I/P Dump",
+    (t1.data->>'BSCID') AS "RNC ID",
+    (t1.data->>'CELLID') AS "CELL_ID",
+    (t1.data->>'CELLNAME') AS "CELL_NAME",
+    (t1.data->>'PSCRAMBCODE') AS "PSC",
+    hex_to_int(REPLACE(t1.data->>'LAC','H''','')) AS "LAC",
+    hex_to_int(REPLACE(t1.data->>'RAC','H''','')) AS "RAC"
+FROM huawei_cm."UCELL" t1 where t1.data->>'BSCID' is not null
+UNION
+--ZTE (BULK_CM)
+SELECT
+    t1.data->>'FILENAME' AS "I/P Dump",
+    t1.data->>'RncFunction_id' AS "RNC ID",
+    t1.data->>'localCellId' AS "CELL ID",
+    t1.data->>'userLabel' AS "CELL NAME",
+    t1.data->>'primaryScramblingCode' AS "PSC",
+    (t1.data->>'lac')::INTEGER AS "LAC",
+    (t1.data->>'rac')::INTEGER AS "RAC"
+FROM zte_cm."UtranCellFDD" t1 WHERE t1.data->>'SubNetwork_id' IS NOT NULL
+UNION
+--ZTE (XLS)
+SELECT
+    t1.data->>'FILENAME' AS "I/P Dump",
+    t1.data->>'rncid' AS "RNC ID",
+    t1.data->>'cid' AS "CELL ID",
+    t1.data->>'userLabel' AS "CELL NAME",
+    t1.data->>'primaryScramblingCode' AS "PSC",
+    (t1.data->>'refULocationArea')::INTEGER AS "LAC",
+    (t1.data->>'refURoutingArea')::INTEGER AS "RAC"
+FROM zte_cm."UtranCellFDD" t1 WHERE t1.data->>'MEID' IS NOT NULL
+UNION
+--NOKIA (RAML)
+SELECT 
+    t1.data->>'FILENAME' AS "I/P Dump",
+    null AS "RNC ID",
+    t1.data->>'CId' AS "CELL ID",
+    t1.data->>'name' AS "CELL NAME",
+    t1.data->>'PriScrCode' AS "PSC",
+    (t1.data->>'LAC')::INTEGER AS "LAC",
+    (t1.data->>'RAC')::INTEGER AS "RAC"
+FROM nokia_cm."WCEL" t1
 
 `
 
@@ -1247,7 +1270,7 @@ INSERT INTO
 	reports.reports (name, notes, query, options, type, category_id, in_built)
 VALUES
 	('2G Parameters','2G parameters', $$${GSM_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
-	('Ericsson 3G parameters','Ericsson 3G parameters', $$${ERICSSON_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('3G parameters','3G parameters', $$${UMTS_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Ericsson 4G parameters','Ericsson 4G parameters', $$${ERICSSON_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 2G parameters','Huawei 2G parameters', $$${HUAWEI_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 3G parameters','Huawei 3G parameters', $$${HUAWEI_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
@@ -1269,7 +1292,7 @@ VALUES
 	('Network 2G3G Relations','Network 2G3G RELATIONS', $$${NETWORK_2G3G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
 		GSM_KEY_PARAMAETERS: GSM_KEY_PARAMAETERS,
-		ERICSSON_3G_KEY_PARAMAETERS: ERICSSON_3G_KEY_PARAMAETERS,
+		UMTS_KEY_PARAMAETERS: UMTS_3G_KEY_PARAMAETERS,
 		ERICSSON_4G_KEY_PARAMAETERS: ERICSSON_4G_KEY_PARAMAETERS,
 		HUAWEI_2G_KEY_PARAMAETERS: HUAWEI_2G_KEY_PARAMAETERS,
 		HUAWEI_3G_KEY_PARAMAETERS: HUAWEI_3G_KEY_PARAMAETERS,
