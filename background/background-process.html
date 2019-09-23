@@ -478,7 +478,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			sendLogToUI('parse_data','info',`Cleanup of GExport XML files completed.`);
 			
 		}catch(error){
-			log.error('[parse_cm_job] Error occurred:', error);
+			log.error('Error occurred:', error);
 			if(typeof error === 'undefined'){
 				sendLogToUI('parse_data','error', 'Error occured.');
 				return;
@@ -494,14 +494,18 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 	//else if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
 	else{
 		sendLogToUI('parse_data','info',`Uncompressing files...` );
-		log.info(`[parse_cm_job] Uncompressing files...`)
+		log.info(`Uncompressing files...`)
 		uncompressFolder(inputFolder);
 	}
 	
 	sendLogToUI('parse_data','info', `Parsing files...`);
-	log.info("[parse_cm_job] Parsing files...")
+	log.info("Parsing files...")
+	
+
 	
 	let commandArgs  = ['-jar', parserPath, '-i',inputFolder,'-o',outputFolder];
+	
+	if( vendor.toLowerCase() === 'ericsson' && format === 'BSM') commandArgs[5] = path.join(outputFolder, "inv_bsm.csv")
 	
 	//Set the java heap to 1G if processing ZTE Plan template excel workbook
 	if( vendor.toLowerCase() === 'zte' && format === 'XLS') commandArgs.unshift('-Xms1G');
