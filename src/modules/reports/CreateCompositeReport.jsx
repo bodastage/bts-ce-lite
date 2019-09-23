@@ -1,15 +1,30 @@
 import React from 'react'
 import { connect } from 'react-redux';
-import { Button, ResizeSensor, Spinner, Icon, Intent,
-		 MenuItem, Menu, FormGroup, InputGroup } from "@blueprintjs/core";
+import { 
+	Button, 
+	ResizeSensor, 
+	Spinner, 
+	Icon, 
+	Intent,
+	MenuItem, 
+	Menu, 
+	FormGroup, 
+	InputGroup 
+	} from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import '../../../node_modules/react-grid-layout/css/styles.css'
 import '../../../node_modules/react-resizable/css/styles.css'
 import GridLayout from 'react-grid-layout';
 import './composite-report-stats.css'
-import { getReportInfo, getCompReportInfoForEdit, addToCompositeReport, updateCompositeLayout,
-		saveCompositeReport, loadCompReportInfoForEdit, clearCreateCompReportState } 
-		from './reports-actions';
+import { 
+	getReportInfo, 
+	getCompReportInfoForEdit, 
+	addToCompositeReport, 
+	updateCompositeLayout,
+	saveCompositeReport, 
+	loadCompReportInfoForEdit, 
+	clearCreateCompReportState 
+	} from './reports-actions';
 import CompositeReportContainer from './CompositeReportContainer';
 
 class CreateCompositeReport extends React.Component {

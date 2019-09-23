@@ -1672,13 +1672,17 @@ exports.up = (pgm) => {
     pgm.createTable({schema: "huawei_cm", name: "WTCPPROXYALGO"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "X2AUTOSETUPOPERATOR"}, {id: "id", load_datetime: "load_datetime", data: "data"});
     pgm.createTable({schema: "huawei_cm", name: "XW"}, {id: "id", load_datetime: "load_datetime", data: "data"});
+	pgm.createTable({schema: "huawei_cm", name: "USERPRIORITY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
+	pgm.createTable({schema: "huawei_cm", name: "UUSERPRIORITY"}, {id: "id", load_datetime: "load_datetime", data: "data"});
 	
 };
 
 exports.down = (pgm) => {
 	pgm.noTransaction();
 	
-    pgm.dropTable({schema: "huawei_cm", name: '2GHASHKEY'});
+    pgm.dropTable({schema: "huawei_cm", name: 'USERPRIORITY'});
+	pgm.dropTable({schema: "huawei_cm", name: 'UUSERPRIORITY'});
+	pgm.dropTable({schema: "huawei_cm", name: '2GHASHKEY'});
     pgm.dropTable({schema: "huawei_cm", name: '2GUSERIDANONSWITCH'});
     pgm.dropTable({schema: "huawei_cm", name: '3GHASHKEY'});
     pgm.dropTable({schema: "huawei_cm", name: '3GUSERIDANONSWITCH'});
