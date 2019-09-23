@@ -271,12 +271,15 @@ exports.down = (pgm) => {
 	pgm.dropConstraint({schema: "live_network", name: '2g_cells'}, "unq_ci_node_2g_cells");
 	pgm.dropConstraint({schema: "live_network", name: '3g_cells'}, "unq_ci_node_3g_cells");
 	pgm.dropConstraint({schema: "live_network", name: '4g_cells'}, "unq_ci_node_4g_cells");
+	pgm.dropConstraint({schema: "live_network", name: 'sites'}, "unq_sites");
+	pgm.dropConstraint({schema: "live_network", name: 'nodes'}, "unq_nodes");
 	pgm.dropView({schema: "live_network", name: 'vw_cells'});
 	pgm.dropTable({schema: "live_network", name: 'relations'});
 	pgm.dropTable({schema: "live_network", name: '2g_cells'});
 	pgm.dropTable({schema: "live_network", name: '3g_cells'});
 	pgm.dropTable({schema: "live_network", name: '4g_cells'});
-	pgm.dropConstraint({schema: "live_network", name: 'sites'}, "unq_sites");
-	pgm.dropConstraint({schema: "live_network", name: 'nodes'}, "unq_nodes");
+	pgm.dropTable({schema: "live_network", name: 'nodes'});
+	pgm.dropTable({schema: "live_network", name: 'sites'});
+
 	pgm.dropSchema("live_network", {ifExists : true} );
 };
