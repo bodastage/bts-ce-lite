@@ -98,6 +98,23 @@ SELECT
 FROM nokia_cm."BTS" t1
 INNER JOIN nokia_cm."TRX" t2 ON
     t1.data->>'DISTNAME' = SUBSTRING(t2.data->>'DISTNAME', '.*BTS-\\d+')
+UNION
+--2G_Key_Parameters/Motorola Cell_X_Export
+SELECT
+    t1.data->>'datetime' AS "DATETIME",
+    'MOTOROLA' AS "VENDOR",
+    '2G' AS "TECH",
+	t1.data->>'ci' AS ci,
+	t1.data->>'site_name' AS name,
+	t1.data->>'mcc' as mcc,
+	t1.data->>'mnc' as mnc,
+	t1.data->>'lac' AS lac,
+	t1.data->>'rac' as rac,
+	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'ci')) AS cgi,
+	t1.data->>'bcch_arfcn' AS bcch,
+	null,
+	null 
+FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
 
 
