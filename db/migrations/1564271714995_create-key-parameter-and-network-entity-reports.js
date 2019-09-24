@@ -1,6 +1,16 @@
 const GSM_KEY_PARAMAETERS = `
---2G Parameters 
---2G Parameters / ZTE(xls)
+--2G Key Parameters 
+--2G Key Parameters / ZTE(xls)
+WITH QRY_CHANNEL_GROUP_TRX AS (
+	SELECT 
+	t1.data->>'FILENAME' AS "FILENAME",
+	t1.data->>'MEID' AS "MEID",
+	t1.data->>'GBtsSiteManagerId' AS "GBtsSiteManagerId", 
+	t1.data->>'GGsmCellId' AS "GGsmCellId",
+	COUNT(t1.data->>'GTrxId') AS NumberOfTRX
+	FROM zte_cm."Trx" t1
+	GROUP BY t1.data->>'FILENAME',t1.data->>'MEID',t1.data->>'GBtsSiteManagerId', t1.data->>'GGsmCellId'
+)
 SELECT 
 	t1.data->>'DATETIME' AS "DATETIME",
 	'ZTE' AS "VENDOR",
@@ -13,8 +23,10 @@ SELECT
 	t1.data->>'refGRoutingArea' AS "RAC",
 	CONCAT((REGEXP_REPLACE(t1.data->>'refGLocationArea','(\\d+),\\d+,\\d+,\\d+','\\1')),'-',(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,(\\d+),\\d+,\\d+','\\1')),'-',(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1')),'-',TRIM(t1.data->>'cellIdentity')) AS "CGI",
 	t1.data->>'bcchFrequency' AS "2G_BCCHNO",
-	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS "2G_BSIC"
-	FROM zte_cm."GsmCell" t1 where t1.data->>'MEID' is not null
+	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS "2G_BSIC",
+	t3.NumberOfTRX AS "2G_TRX"
+	FROM zte_cm."GsmCell" t1 
+LEFT JOIN QRY_CHANNEL_GROUP_TRX t3 on t1.data->>'FILENAME'=t3."FILENAME" and t1.data->>'MEID'=t3."MEID" and t1.data->>'GBtsSiteManagerId'=t3."GBtsSiteManagerId" and t1.data->>'GGsmCellId'=t3."GGsmCellId"
 UNION
 --2G Parameters / ZTE(bulk_CM)
 SELECT 
@@ -29,7 +41,8 @@ SELECT
 	t1.data->>'rac' as rac,
 	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'cellIdentity')) AS cgi,
 	t1.data->>'bcchFrequency' AS bcch,
-	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS bsic
+	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS bsic,
+	null 
 FROM zte_cm."GsmCell" t1 where t1.data->>'SubNetwork_id' is not null
 UNION
 --2G Parameters / Huawei(CFGMML&NBI)
@@ -45,7 +58,8 @@ SELECT
 	null as rac,
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'CI') AS "CGI",
 	t4.data->>'FREQ' AS "BCCHNO", 
-	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC"
+	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC",
+	null
 	FROM huawei_cm."GCELL" t1 
 INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' and t1.data->>'BSCID' = t4.data->>'BSCID' where t4.data->>'ISMAINBCCH' = 'YES'
 UNION 
@@ -62,7 +76,8 @@ SELECT
     '' AS "RAC",	
     CONCAT(t1.data->>'MCC', ' - ', LPAD(t1.data->>'MNC', 2, '0'), ' - ', LPAD(t1.data->>'LAC',5 ,'0'), ' - ', LPAD(t1.data->>'CI', 5,'0')) AS "CGI",
     t1.data->>'BCCHNO',
-    CONCAT(t1.data->>'BCC', t1.data->>'NCC') AS "BSIC"
+    CONCAT(t1.data->>'BCC', t1.data->>'NCC') AS "BSIC",
+	null
     FROM ericsson_cm."INTERNAL_CELL" t1
 UNION
 --2G Parameters / Nokia(RAML)
@@ -78,7 +93,8 @@ SELECT
     null,
     CONCAT( TRIM(t1.data->>'locationAreaIdMCC'),'-', TRIM(t1.data->>'locationAreaIdMNC'),'-',TRIM(t1.data->>'locationAreaIdLAC'),'-',TRIM(t1.data->>'cellId')) AS cgi,
     t2.data->>'initialFrequency' AS bcch,
-    CONCAT(TRIM(t1.data->>'bsIdentityCodeNCC'), TRIM(t1.data->>'bsIdentityCodeBCC')) AS bsic
+    CONCAT(TRIM(t1.data->>'bsIdentityCodeNCC'), TRIM(t1.data->>'bsIdentityCodeBCC')) AS bsic,
+	null
 FROM nokia_cm."BTS" t1
 INNER JOIN nokia_cm."TRX" t2 ON
     t1.data->>'DISTNAME' = SUBSTRING(t2.data->>'DISTNAME', '.*BTS-\\d+')
@@ -1292,7 +1308,7 @@ VALUES
 	('Network 2G3G Relations','Network 2G3G RELATIONS', $$${NETWORK_2G3G_RELATIONS}$$, '{}', 'table',2, true)
 	`,{
 		GSM_KEY_PARAMAETERS: GSM_KEY_PARAMAETERS,
-//		UMTS_KEY_PARAMAETERS: UMTS_3G_KEY_PARAMAETERS,
+		UMTS_KEY_PARAMAETERS: UMTS_KEY_PARAMAETERS,
 		ERICSSON_4G_KEY_PARAMAETERS: ERICSSON_4G_KEY_PARAMAETERS,
 		HUAWEI_2G_KEY_PARAMAETERS: HUAWEI_2G_KEY_PARAMAETERS,
 		HUAWEI_3G_KEY_PARAMAETERS: HUAWEI_3G_KEY_PARAMAETERS,
