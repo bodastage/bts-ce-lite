@@ -82,6 +82,13 @@ export default class Baseline extends React.Component {
 		
 		this.category = [];
 		
+		this.VENDOR_LIST = [
+			"HUAWEI",
+			"ERICSSON",
+			"ZTE",
+			"NOKIA"
+		]
+		
 	}
 	
 	dismissNotice = () => {
@@ -339,12 +346,14 @@ export default class Baseline extends React.Component {
 								<Button icon="refresh" onClick={this.refreshData} minimal={true}></Button>
 								<Button icon="download" onClick={this.refreshData} minimal={true}></Button>
 								| &nbsp;
-								<Icon icon="add" className="mr-2" />
-								<HTMLSelect options={["HUAWEI"]} className="mr-2"/>
+								
+								<HTMLSelect options={this.VENDOR_LIST} className="mr-2"/>
 								<HTMLSelect options={["2G", "3G", "4G", "5G"]} className="mr-2"/>
 								<HTMLSelect options={["GCELL"]} className="mr-2"/>
 								<HTMLSelect options={["--All Parameters--","BCCHNO", "etc..."]} className="mr-2"/>
-								<input value="" />
+								<input value="" className="bp3-input" />
+								 &nbsp;
+								<Icon icon="add" className="mr-2" />
 						</FormGroup>
 					</div>
 					<div className="ag-theme-balham" style={{width: '100%', height: "100%", boxSizing: "border-box"}}>
