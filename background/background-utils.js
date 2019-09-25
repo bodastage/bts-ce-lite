@@ -273,12 +273,14 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 			const res = await queryHelper.runQuery(`SELECT options FROM reports.reports WHERE id  = ${reportId}`);
 
 			const rptOptions = res.rows[0].options;
-			if(rptOptions.tableStyles !== 'undefined'){
+			console.log(rptOptions);
+			console.log("tableStyles", rptOptions.tableStyles);
+			if(typeof rptOptions.tableStyles !== 'undefined'){
 				tableStyles = rptOptions.tableStyles;
 			}
 		}
 		
-		//console.log("tableStyles:", tableStyles);
+		console.log("tableStyles:", tableStyles);
 		
 		results.rows.forEach((row,i) => {
 			const rowNumber = i + 2;
