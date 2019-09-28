@@ -723,6 +723,19 @@ async function uploadParameterReference(fileName, truncate){
 }
 
 
+async function updateBaselineParameter(vendor, tech, mo, parameter, baseline){
+	
+	const sql = `INSERT INTO baseline."configuration"
+		(vendor, technology, mo, parameter, baseline)
+	VALUES
+		('${vendor}', '${tech}', '${mo}', '${parameter}', '${baseline}')
+	 ON CONFLICT ON CONSTRAINT unq_configuration DO UPDATE
+	 SET 
+		baseline = EXCLUDED.baseline
+	`;
+	const result  = await queryHelper.runQuery(sql);
+}
+
 
 /*
 * Compute baseline
@@ -749,6 +762,7 @@ async function computeBaseline(clustering, scoring){
 
 }
 
+exports.updateBaselineParameter = updateBaselineParameter;
 exports.computeBaseline = computeBaseline;
 exports.clusterNetwork  = clusterNetwork ;
 exports.uploadUserBaseline  = uploadUserBaseline ;

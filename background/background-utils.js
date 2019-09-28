@@ -1495,6 +1495,29 @@ async function autoGenerateParameterRef(clearTableBefore){
 	return {status: 'success', message: 'Parameter reference successfully generated.'}
 }
 
+async function downloadBaselineReference(fileName, outputFolder, format){
+	try{ 
+		const f = typeof format === 'undefined' ? 'csv' : format;
+		const q = "SELECT * FROM baseline.vw_configuration"
+		const dlFileName = await generateExcelOrCSV(fileName, outputFolder, q, f, {});
+		return {status: 'success', message: dlFileName };
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while generating baseline reference. Check logs.'};
+	}
+}
+
+async function addParamToBaselineRef(vendor, tech, mo, parameter, baselineValue){
+	try{
+			await baseline.updateBaselineParameter(vendor, tech, mo, parameter, baselineValue);
+			return {status: 'success', message:  `Parameter ${parameter} added to baselined` };
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while updating baseline reference. Check logs for details.'};		
+	}
+}
+
+exports.addParamToBaselineRef = addParamToBaselineRef;
 exports.runBaseline = runBaseline;
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
@@ -1508,3 +1531,4 @@ exports.parseData = parseData;
 exports.uploadUserBaseline = uploadUserBaseline;
 exports.uploadParameterReference = uploadParameterReference;
 exports.autoGenerateParameterRef = autoGenerateParameterRef;
+exports.downloadBaselineReference = downloadBaselineReference;
