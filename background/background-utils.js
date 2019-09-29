@@ -1517,6 +1517,22 @@ async function addParamToBaselineRef(vendor, tech, mo, parameter, baselineValue)
 	}
 }
 
+/*
+* Delete parameter from baseline configuration
+*
+*/
+async function deleteBaselineParameter(vendor, tech, mo, parameter){
+	try{	
+			const sql = `DELETE FROM baseline.configuration WHERE vendor = '${vendor}' AND technology = '${tech}' AND mo = '${mo}' AND parameter = '${parameter}'`;
+			console.log(sql);
+			await queryHelper.runQuery(sql);
+			return {status: 'success', message:  `Parameter ${parameter} added to baselined` };
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error while deleting ${parameter}. Check logs for details.`};		
+	}
+}
+
 exports.addParamToBaselineRef = addParamToBaselineRef;
 exports.runBaseline = runBaseline;
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
@@ -1532,3 +1548,4 @@ exports.uploadUserBaseline = uploadUserBaseline;
 exports.uploadParameterReference = uploadParameterReference;
 exports.autoGenerateParameterRef = autoGenerateParameterRef;
 exports.downloadBaselineReference = downloadBaselineReference;
+exports.deleteBaselineParameter = deleteBaselineParameter;

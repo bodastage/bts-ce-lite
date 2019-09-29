@@ -12,7 +12,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
-
+import { renderToString } from 'react-dom/server';
 
 //styles
 import  './baseline.css';
@@ -60,7 +60,17 @@ export default class Baseline extends React.Component {
 				{headerName: "PARAMETER", field: "parameter", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
 				{headerName: "GRANULITY", field: "granulity", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
 				{headerName: "BASELINE", field: "baseline", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
-				{headerName: " ", field: "manage", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}
+				{headerName: " ", 
+					field: "manage", 
+					filter: "agTextColumnFilter", 
+					filterParams:{caseSensitive: true},
+					valueGetter: function(params){
+						return  '4';
+					},
+					cellRendererFramework: (params) => {
+						return <Icon icon="cross" onClick={() => this.deleteParameter(params.node.data.vendor, params.node.data.technology, params.node.data.mo, params.node.data.parameter)}/>;
+					}
+				}
 			],
             rowData: [
             ],
@@ -106,6 +116,7 @@ export default class Baseline extends React.Component {
 		
 		this.baselineRefDownloadListener = null;
 		this.addToBaselineRefListener = null;
+		this.deleteBaselineListener = null;
 		
 	}
 	
@@ -122,7 +133,7 @@ export default class Baseline extends React.Component {
         this.agTblReload += 1;
 		this.gridApi.refreshInfiniteCache();
     }
-	
+
     onGridReady(params) {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
@@ -207,6 +218,59 @@ export default class Baseline extends React.Component {
 		}
 		ipcRenderer.on('parse-cm-request', this.baselineListener);
 	}
+	
+	/**
+	* Delete parameter
+	*/
+	deleteParameter = (vendor, technology, mo, parameter) => {
+		let payload = {
+			vendor: vendor,
+			technology: technology,
+			mo: mo,
+			parameter: parameter
+		};
+		
+		//Set processing to true 
+		this.setState({processing: true });
+		
+		ipcRenderer.send('parse-cm-request', 'delete_baseline_parameter', JSON.stringify(payload));
+		
+		this.deleteBaselineListener = (event, task, args) => {
+			const obj = JSON.parse(args)
+			if(task !== 'delete_baseline_parameter') return;
+			
+			//error
+			if(obj.status === 'error' && task === 'delete_baseline_parameter' ){
+				this.setState({
+						notice: {type: 'danger', message: obj.message},
+						processing: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
+			}
+			
+			//info
+			if(obj.status === 'info' && task === 'delete_baseline_parameter' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'delete_baseline_parameter' ){
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: obj.message
+							},
+						processing: false
+						});
+
+				ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
+				this.refreshData();
+			}
+			
+		}
+		ipcRenderer.on('parse-cm-request', this.deleteBaselineListener);
+		
+	}
+	
 	
 	/*
 	* Update the cluster state variable
