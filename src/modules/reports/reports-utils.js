@@ -22,9 +22,11 @@ export function numberParser(str) {
     return (isNaN(valueAsNumber) || valueAsNumber === null) ? str : valueAsNumber;
 }
 
+export function getTableStyleExpression(conditions){
+	return conditions.map(cond => buildExpresion(cond)).join(" && ");
+}
 
-
-export function  getTableStyleExpression(condition){
+export function  buildExpresion(condition){
 		let value = condition.rValue
 		if(condition.rValType === 'COLUMN'){
 			value = `data["${value}"]`

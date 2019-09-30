@@ -293,15 +293,23 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 					styles = {}
 					for(var cIdx in conditions){
 						const cond = conditions[cIdx]
-						const op = cond.op;
-						const rValType = cond.rValType;
-						const rValue = cond.rValue;
+						
+						const styleConditions = cond.styleConditions;
 						const property = cond.property;
 						const propertyValue = cond.propertyValue;
 						
-						const rVal = rValType === 'COLUMN'? row[rValue] : rValue;
-						
-						if(bgUtils.checkStyleCondition(cellValue, op, rVal)){
+
+						//Array with resultfrom evaluating each style condition
+						let stArray = styleConditions.map( cdn => { 
+							const op = cdn.op;
+							const rValType = cdn.rValType;
+							const rValue = cdn.rValue;
+							const rVal = rValType === 'COLUMN'? row[rValue] : rValue;
+							return bgUtils.checkStyleCondition(cellValue, op, rVal);
+						});
+
+						const styleResult = eval(stArray.join(" && "));
+						if(styleResult){
 							const styles = bgUtils.getExcelJsCellStyle(property, propertyValue)
 
 							if(Object.keys(styles.fill).length > 0 ){
