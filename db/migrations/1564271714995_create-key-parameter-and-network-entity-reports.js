@@ -112,7 +112,7 @@ SELECT
 	t1.data->>'rac' as rac,
 	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'ci')) AS cgi,
 	t1.data->>'bcch_arfcn' AS bcch,
-	null,
+	CONCAT(div((t1.data->>'bsic')::INTEGER,8), mod((t1.data->>'bsic')::INTEGER,8)) as BSIC,
 	null 
 FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
@@ -122,7 +122,9 @@ const UMTS_KEY_PARAMAETERS = `
 --UMTS_KEY_PARAMETERS
 --HUAWEI (NBIXML)
 SELECT
-    t1.data->>'FileName' AS "CM File",
+    t1.data->>'varDateTime' AS "DATETIME",
+	'HUAWEI' AS "VENDOR",
+	'3G' AS "TECH",
     t1.data->>'neid' AS "RNC_ID",
     t1.data->>'CELLID' AS "CELL_ID",
     t1.data->>'CELLNAME' AS "CELL_NAME",
@@ -133,7 +135,9 @@ FROM huawei_cm."UCELL" t1 where t1.data->>'neid' is not null
 UNION
 --HUAWEI (CFGMML)
 SELECT
-    (t1.data->>'FILENAME') AS "I/P Dump",
+    t1.data->>'DATETIME' AS "DATETIME",
+	'HUAWEI' AS "VENDOR",
+	'3G' AS "TECH",
     (t1.data->>'BSCID') AS "RNC ID",
     (t1.data->>'CELLID') AS "CELL_ID",
     (t1.data->>'CELLNAME') AS "CELL_NAME",
@@ -144,7 +148,9 @@ FROM huawei_cm."UCELL" t1 where t1.data->>'BSCID' is not null
 UNION
 --ZTE (BULK_CM)
 SELECT
-    t1.data->>'FILENAME' AS "I/P Dump",
+    t1.data->>'DATETIME' AS "DATETIME",
+	'ZTE' AS "VENDOR",
+	'3G' AS "TECH",
     t1.data->>'RncFunction_id' AS "RNC ID",
     t1.data->>'localCellId' AS "CELL ID",
     t1.data->>'userLabel' AS "CELL NAME",
@@ -155,7 +161,9 @@ FROM zte_cm."UtranCellFDD" t1 WHERE t1.data->>'SubNetwork_id' IS NOT NULL
 UNION
 --ZTE (XLS)
 SELECT
-    t1.data->>'FILENAME' AS "I/P Dump",
+    t1.data->>'DATETIME' AS "DATETIME",
+	'ZTE' AS "VENDOR",
+	'3G' AS "TECH",
     t1.data->>'rncid' AS "RNC ID",
     t1.data->>'cid' AS "CELL ID",
     t1.data->>'userLabel' AS "CELL NAME",
@@ -166,7 +174,9 @@ FROM zte_cm."UtranCellFDD" t1 WHERE t1.data->>'MEID' IS NOT NULL
 UNION
 --NOKIA (RAML)
 SELECT 
-    t1.data->>'FILENAME' AS "I/P Dump",
+    t1.data->>'DATETIME' AS "DATETIME",
+	'NOKIA' AS "VENDOR",
+	'3G' AS "TECH",
     null AS "RNC ID",
     t1.data->>'CId' AS "CELL ID",
     t1.data->>'name' AS "CELL NAME",
@@ -174,10 +184,24 @@ SELECT
     (t1.data->>'LAC')::INTEGER AS "LAC",
     (t1.data->>'RAC')::INTEGER AS "RAC"
 FROM nokia_cm."WCEL" t1
+UNION
+--ERICSSON (Bulk_CM)
+SELECT 
+    t2.data->>'DATETIME' AS "DATETIME",
+	'ERICSSON' AS "VENDOR",
+	'3G' AS "TECHNOLOGY",
+	t2.data->>'SubNetwork_2_id' AS "NENAME",
+	t2.data->>'cId' AS "CELLID",
+	t2.data->>'userLabel' AS "CELLNAME",
+	t2.data->>'primaryScramblingCode' AS "PSC",
+	(t2.data->>'lac')::INTEGER AS "LAC",
+	(t2.data->>'rac')::INTEGER AS "RAC"
+	FROM ericsson_cm."UtranCell"  t2
+
 
 `
 
-const ERICSSON_4G_KEY_PARAMAETERS = `
+const LTE_KEY_PARAMAETERS = `
 SELECT 
 	t1.data->>'DATETIME' AS "DATETIME",
 	'ERICSSON' AS "VENDOR",
@@ -749,6 +773,14 @@ SELECT
 		t1.data->>'name' AS "CELLNAME"
 
 FROM nokia_cm."LNBTS" t1
+UNION
+SELECT
+    t1.data->>'datetime' AS "DATETIME",
+	'MOTOROLA' AS "VENDOR",
+    '2G' AS "TECH",
+    t1.data->>'ci' AS "CELLID",
+    concat(t1.data->>'site_name', '_',Right(t1.data->>'ci',1)) AS "CELLNAME"
+FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
 
 const NETWORK_SITES = `
@@ -891,24 +923,24 @@ FROM motorola_cm."cell_x_export" t1
 `;
 
 const NETWORK_RELATIONS = `
---HUAWEI 3G3G RELATIONS 
+--HUAWEI(CFGMML) 3G3G RELATIONS 
 select 
-'Huawei' as "SRV  VENDOR",
-'3G' as "SRV TECH",
-hex_to_int(REPLACE(t3.data->>'LAC','H''','')) as "SRV LAC",
-t1.data->>'CELLID' as "SRV  CELLID",
-t3.data->>'CELLNAME' as "SRV  CELLNAME",
-'3G' as "NBR TECH",
-hex_to_int(REPLACE(t2.data->>'LAC','H''','')) as "NBR LAC", 
-(t1.data->>'NCELLID')::INTEGER as "NBR CELLID",
-t2.data->>'CELLNAME' as "NBR CELLNAME"
+	'HUAWEI' as "SRV  VENDOR",
+	'3G' as "SRV TECH",
+	hex_to_int(REPLACE(t3.data->>'LAC','H''','')) as "SRV LAC",
+	t1.data->>'CELLID' as "SRV  CELLID",
+	t3.data->>'CELLNAME' as "SRV  CELLNAME",
+	'3G' as "NBR TECH",
+	hex_to_int(REPLACE(t2.data->>'LAC','H''','')) as "NBR LAC", 
+	(t1.data->>'NCELLID')::INTEGER as "NBR CELLID",
+	t2.data->>'CELLNAME' as "NBR CELLNAME"
 from huawei_cm."UINTRAFREQNCELL" t1
-inner join huawei_cm."UCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'RNCID' = t1.data->>'NCELLRNCID'
+inner join huawei_cm."UCELL" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'NCELLID'= t2.data->>'CELLID' and t1.data->>'NCELLRNCID'=t2.data->>'BSCID'
 inner join huawei_cm."UCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and t1.data->>'CELLID'= t3.data->>'CELLID'
 union
---HUAWEI 3G3G EXT RELATIONS
+--HUAWEI(CFGMML) 3G3G EXT RELATIONS
 select
-'Huawei' as "SRV  VENDOR",
+'HUAWEI' as "SRV  VENDOR",
 '3G' as "SRV TECH",
 hex_to_int(REPLACE(t5.data->>'LAC','H''','')) as "SRV LAC",
 t3.data->>'CELLID'as "SRV  CELLID",
@@ -918,7 +950,7 @@ hex_to_int(REPLACE(t4.data->>'LAC','H''','')) as "NBR LAC",
 (t3.data->>'NCELLID')::INTEGER as "NBR CELLID" ,
 t4.data->>'CELLNAME' as "NBR Cellname"
 from huawei_cm."UINTRAFREQNCELL" t3
-inner join huawei_cm."UEXT3GCELL" t4 on t3.data->>'FILENAME'=t4.data->>'FILENAME' and t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'RNCID' <> t4.data->>'NRNCID'
+inner join huawei_cm."UEXT3GCELL" t4 on t3.data->>'FILENAME'=t4.data->>'FILENAME' and t3.data->>'NCELLID' = t4.data->>'CELLID' and t3.data->>'NCELLRNCID'=t4.data->>'NRNCID'
 inner join huawei_cm."UCELL" t5 on t3.data->>'FILENAME'=t5.data->>'FILENAME' and t3.data->>'CELLID'= t5.data->>'CELLID'
 union
 --ZTE 3G3G RELATIONS
@@ -1003,16 +1035,17 @@ SELECT
 '2G' as "SRV TECH",
 (t1.data->>'source_lac')::INTEGER AS "SRV LAC",
 t1.data->>'source_ci' AS "SRV CELL ID",
-null as "SRV CELLNAME",
+concat(t1.data->>'site_name','_',right(t1.data->>'source_ci',1)) as "SRV CELLNAME",
 '2G' as "NBR TECH",
 (t1.data->>'dest_lac')::INTEGER AS "NBR LAC",
 (t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
-null as "NBR CELLNAME"
-FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_bsic' is not null
+concat(t2.data->>'site_name','_',right(t2.data->>'ci',1)) as "NBR CELLNAME"
+FROM motorola_cm."cell_x_export" t1 
+LEFT JOIN motorola_cm."cell_x_export" t2 on t1.data->>'dest_ci'=t2.data->>'ci' and t1.data->>'dest_lac'=t2.data->>'lac' where t1.data->>'dest_bsic' is not null
 UNION
 --Huawei 2G2G Relations 
 SELECT
-'Huawei' as "SRV VENDOR",
+'HUAWEI' as "SRV VENDOR",
 '2G' as "SRV TECH",
 (t2.data->>'LAC')::INTEGER as "SRV LAC",
 t2.data->>'CI' as "SRV CELL ID",
@@ -1027,7 +1060,7 @@ INNER JOIN huawei_cm."GCELL" t3 on t1.data->>'FILENAME'=t3.data->>'FILENAME' and
 UNION
 --Huawei 2G2G Ext Relations
 SELECT
-'Huawei' as "SRV VENDOR",
+'HUAWEI' as "SRV VENDOR",
 '2G' as "SRV TECH",
 (t2.data->>'LAC')::INTEGER as "SRV LAC",
 t2.data->>'CI' as "SRV CELL ID",
@@ -1110,7 +1143,7 @@ SELECT
 '2G' as "SRV TECH",
 (t1.data->>'source_lac')::INTEGER AS "SRV LAC",
 t1.data->>'source_ci' AS "SRV CELL ID",
-null as "SRV CELLNAME",
+concat(t1.data->>'site_name','_',right(t1.data->>'source_ci',1)) as "SRV CELLNAME",
 '3G' as "NBR TECH",
 (t1.data->>'dest_lac')::INTEGER AS "NBR LAC",
 (t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
@@ -1120,7 +1153,7 @@ FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_rnc_id' is not null
 const NETWORK_3G3G_RELATIONS = `
 --HUAWEI 3G3G RELATIONS 
 select 
-'Huawei' as "SRV  Vendor",
+'HUAWEI' as "SRV  Vendor",
 t1.data->>'RNCID' as "SRV  RNCID",
 t1.data->>'CELLID' as "SRV  CELLID",
 t6.data->>'CELLNAME' as "SRV  Cell Name",
@@ -1133,7 +1166,7 @@ inner join huawei_cm."UCELL" t6 on t1.data->>'CELLID'= t6.data->>'CELLID'
 union
 --HUAWEI 3G3G EXT RELATIONS
 select
-'Huawei' as "SRV  Vendor",
+'HUAWEI' as "SRV  Vendor",
 t3.data->>'RNCID' as "SRV  RNCID",
 t3.data->>'CELLID'as "SRV  CELLID",
 t5.data->>'CELLNAME' as "SRV  Cell Name",
@@ -1217,7 +1250,7 @@ FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_bsic' is not null
 UNION
 --Huawei 2G2G Relations 
 SELECT
-'Huawei' as "SRV VENDOR",
+'HUAWEI' as "SRV VENDOR",
 t2.data->>'LAC' as "SRV LAC",
 t2.data->>'CI' as "SRV CELL ID",
 t3.data->>'LAC' as "NBR LAC",
@@ -1228,7 +1261,7 @@ INNER JOIN huawei_cm."GCELL" t3 on t1.data->>'NBR2GNCELLID'=t3.data->>'CELLID'
 UNION
 --Huawei 2G2G Ext Relations
 SELECT
-'Huawei' as "SRV VENDOR",
+'HUAWEI' as "SRV VENDOR",
 t2.data->>'LAC' as "SRV LAC",
 t2.data->>'CI' as "SRV CELL ID",
 t3.data->>'LAC' as "NBR LAC",
@@ -1302,9 +1335,9 @@ VALUES
 INSERT INTO
 	reports.reports (name, notes, query, options, type, category_id, in_built)
 VALUES
-	('2G Parameters','2G parameters', $$${GSM_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
-	('3G parameters','3G parameters', $$${UMTS_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
-	('Ericsson 4G parameters','Ericsson 4G parameters', $$${ERICSSON_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('2G Key Parameters','2G Key Parameters', $$${GSM_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('3G Key Parameters','3G Key Parameters', $$${UMTS_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
+	('4G Key Parameters','4G Key Parameters', $$${LTE_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 2G parameters','Huawei 2G parameters', $$${HUAWEI_2G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 3G parameters','Huawei 3G parameters', $$${HUAWEI_3G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
 	('Huawei 4G parameters','Huawei 4G parameters', $$${HUAWEI_4G_KEY_PARAMAETERS}$$, '{}', 'table',1, true),
@@ -1326,7 +1359,7 @@ VALUES
 	`,{
 		GSM_KEY_PARAMAETERS: GSM_KEY_PARAMAETERS,
 		UMTS_KEY_PARAMAETERS: UMTS_KEY_PARAMAETERS,
-		ERICSSON_4G_KEY_PARAMAETERS: ERICSSON_4G_KEY_PARAMAETERS,
+		LTE_KEY_PARAMAETERS: LTE_KEY_PARAMAETERS,
 		HUAWEI_2G_KEY_PARAMAETERS: HUAWEI_2G_KEY_PARAMAETERS,
 		HUAWEI_3G_KEY_PARAMAETERS: HUAWEI_3G_KEY_PARAMAETERS,
 		HUAWEI_4G_KEY_PARAMAETERS: HUAWEI_4G_KEY_PARAMAETERS,
