@@ -1,4 +1,20 @@
-export const COMP_OPERATORS = ["EQUAL TO", "NOT EQUAL TO", "GREATER THAN","LESS THAN","GREATER OR EQUAL TO","LESS OR EQUAL TO","IN", "NOT IN", "ENDS WITH", "STARTS WITH", "MATCHES REGEXP","CONTAINS"]
+export const COMP_OPERATORS = [
+	"EQUAL TO", 
+	"NOT EQUAL TO", 
+	"GREATER THAN",
+	"LESS THAN",
+	"GREATER OR EQUAL TO",
+	"LESS OR EQUAL TO",
+	"IN", 
+	"NOT IN", 
+	"ENDS WITH", 
+	"STARTS WITH", 
+	"MATCHES REGEXP",
+	"CONTAINS",
+	"LENGTH EQUAL TO",
+	"LENGTH LESS THAN",
+	"LENGTH GREATER THAN"
+];
 export const COMP_VALUE_TYPES = ["COLUMN", "INPUT"];
 export const COMP_PROPERTIES = ['background-color', 'color'];
 
@@ -86,5 +102,17 @@ export function  buildExpresion(condition){
 		
 		if(condition.op === 'MATCHES REGEXP'){
 			return `new RegExp(/${value}/).test(x)`;
+		}
+		
+		if(condition.op === 'LENGTH EQUAL TO'){
+			return `x.length === ${value}`;
+		}
+		
+		if(condition.op === 'LENGTH LESS THAN'){
+			return `x.length < ${value}`;
+		}
+		
+		if(condition.op === 'LENGTH GREATER THAN'){
+			return `x.length > ${value}`;
 		}
 	}

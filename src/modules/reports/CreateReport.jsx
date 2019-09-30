@@ -125,7 +125,6 @@ class TableStyleCondition extends React.Component{
 			RValue = <HTMLSelect options={this.props.fields} onChange={this.handleRValueChange}></HTMLSelect> 
 		}
 		
-		console.log("this.state.styleConditions:" , this.state.styleConditions);
 		return(
 			<div>
 				<div className="row">
@@ -1019,7 +1018,7 @@ class CreateReport extends React.Component{
 				
 				
 				configureTable.push(
-				<div>
+				<div key={i}>
 						{<TableStyleCondition fields={this.props.fields} field={f} onChange={(newCondition) => {this.updateTableStyles(f, newCondition)}}/>}
 					<hr />
 				</div>);	
