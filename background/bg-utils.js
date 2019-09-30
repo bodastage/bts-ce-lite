@@ -258,16 +258,17 @@ function  checkStyleCondition(lValue, op, rValue){
 		return new RegExp(rValue).test(lValue);
 	}
 			
-	if(condition.op === 'LENGTH EQUAL TO'){
-		return lValue.length === rValue;
+	if(op === 'LENGTH EQUAL TO'){
+		
+		return lValue === null ? false : lValue.length === rValue;
 	}
 	
-	if(condition.op === 'LENGTH LESS THAN'){
-		return lValue.length < rValue;
+	if(op === 'LENGTH LESS THAN'){
+		return lValue === null ? false : lValue.length < rValue;
 	}
 	
-	if(condition.op === 'LENGTH GREATER THAN'){
-		return lValue.length > rValue;
+	if(op === 'LENGTH GREATER THAN'){
+		return lValue === null ? false : lValue.length > rValue;
 	}
 	
 	return false;

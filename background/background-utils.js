@@ -298,7 +298,6 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 						const property = cond.property;
 						const propertyValue = cond.propertyValue;
 						
-
 						//Array with resultfrom evaluating each style condition
 						let stArray = styleConditions.map( cdn => { 
 							const op = cdn.op;
