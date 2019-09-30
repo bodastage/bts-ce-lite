@@ -1,7 +1,24 @@
 //const hexToRgba = window.require('hex-to-rgba');
 const rgbaToHex   = require('hex-and-rgba').rgbaToHex;
 const hexToRgba   = window.require('hex-and-rgba').hexToRgba;
-const COMP_OPERATORS = ["EQUAL TO", "NOT EQUAL TO", "GREATER THAN","LESS THAN","GREATER OR EQUAL TO","LESS OR EQUAL TO","IN", "NOT IN", "ENDS WITH", "STARTS WITH", "MATCHES REGEXP", "CONTAINS"];
+const COMP_OPERATORS = [
+	"EQUAL TO", 
+	"NOT EQUAL TO", 
+	"GREATER THAN",
+	"LESS THAN",
+	"GREATER OR EQUAL TO",
+	"LESS OR EQUAL TO",
+	"IN", 
+	"NOT IN", 
+	"ENDS WITH", 
+	"STARTS WITH", 
+	"MATCHES REGEXP",
+	"CONTAINS",
+	"LENGTH EQUAL TO",
+	"LENGTH LESS THAN",
+	"LENGTH GREATER THAN"
+];
+
 const COMP_VALUE_TYPES = ["COLUMN", "INPUT"];
 const COMP_PROPERTIES = ['background-color', 'color'];
 const CSS_EXCELJS_PROP_MAP = {
@@ -239,6 +256,19 @@ function  checkStyleCondition(lValue, op, rValue){
 	
 	if(op === 'MATCHES REGEXP'){
 		return new RegExp(rValue).test(lValue);
+	}
+			
+	if(op === 'LENGTH EQUAL TO'){
+		
+		return lValue === null ? false : lValue.length === rValue;
+	}
+	
+	if(op === 'LENGTH LESS THAN'){
+		return lValue === null ? false : lValue.length < rValue;
+	}
+	
+	if(op === 'LENGTH GREATER THAN'){
+		return lValue === null ? false : lValue.length > rValue;
 	}
 	
 	return false;

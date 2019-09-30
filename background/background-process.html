@@ -806,6 +806,40 @@ async function  executeTask(task, options){
 		log.error(err)
 		sendLogToUI('auto_generate_param_ref','error', "Error while auto generating parameter reference.  Check logs for details.");
 	}	
+	
+	//Download baseline reference
+	try{
+		if(task === 'download_baseline_reference'){
+			const result = await utils.downloadBaselineReference(options.fileName, options.outputFolder, options.format);
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error while auto generating parameter reference.  Check logs for details.");
+	}	
+	
+	//Add parameter to baseline reference 
+	try{
+		if(task === 'add_param_to_baseline'){
+			const result = await utils.addParamToBaselineRef(options.vendor, options.tech, options.mo, options.parameter, options.baseline);
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error while auto generating parameter reference.  Check logs for details.");
+	}		
+	
+	//
+	//Add parameter to baseline reference 
+	try{
+		if(task === 'delete_baseline_parameter'){
+			const result = await utils.deleteBaselineParameter(options.vendor, options.technology, options.mo, options.parameter);
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error while deleting parameter from baseline computation.  Check logs for details.");
+	}		
 }
 
 ipcRenderer.on('parse-cm-job', (event, task, args) => {

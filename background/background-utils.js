@@ -293,15 +293,22 @@ async function generateExcelFromQuery(excelFileName, outputFolder, query, option
 					styles = {}
 					for(var cIdx in conditions){
 						const cond = conditions[cIdx]
-						const op = cond.op;
-						const rValType = cond.rValType;
-						const rValue = cond.rValue;
+						
+						const styleConditions = cond.styleConditions;
 						const property = cond.property;
 						const propertyValue = cond.propertyValue;
 						
-						const rVal = rValType === 'COLUMN'? row[rValue] : rValue;
-						
-						if(bgUtils.checkStyleCondition(cellValue, op, rVal)){
+						//Array with resultfrom evaluating each style condition
+						let stArray = styleConditions.map( cdn => { 
+							const op = cdn.op;
+							const rValType = cdn.rValType;
+							const rValue = cdn.rValue;
+							const rVal = rValType === 'COLUMN'? row[rValue] : rValue;
+							return bgUtils.checkStyleCondition(cellValue, op, rVal);
+						});
+
+						const styleResult = eval(stArray.join(" && "));
+						if(styleResult){
 							const styles = bgUtils.getExcelJsCellStyle(property, propertyValue)
 
 							if(Object.keys(styles.fill).length > 0 ){
@@ -1495,6 +1502,45 @@ async function autoGenerateParameterRef(clearTableBefore){
 	return {status: 'success', message: 'Parameter reference successfully generated.'}
 }
 
+async function downloadBaselineReference(fileName, outputFolder, format){
+	try{ 
+		const f = typeof format === 'undefined' ? 'csv' : format;
+		const q = "SELECT * FROM baseline.vw_configuration"
+		const dlFileName = await generateExcelOrCSV(fileName, outputFolder, q, f, {});
+		return {status: 'success', message: dlFileName };
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while generating baseline reference. Check logs.'};
+	}
+}
+
+async function addParamToBaselineRef(vendor, tech, mo, parameter, baselineValue){
+	try{
+			await baseline.updateBaselineParameter(vendor, tech, mo, parameter, baselineValue);
+			return {status: 'success', message:  `Parameter ${parameter} added to baselined` };
+	}catch(e){
+		log.error(e)
+		return {status: 'error', message: 'Error while updating baseline reference. Check logs for details.'};		
+	}
+}
+
+/*
+* Delete parameter from baseline configuration
+*
+*/
+async function deleteBaselineParameter(vendor, tech, mo, parameter){
+	try{	
+			const sql = `DELETE FROM baseline.configuration WHERE vendor = '${vendor}' AND technology = '${tech}' AND mo = '${mo}' AND parameter = '${parameter}'`;
+			console.log(sql);
+			await queryHelper.runQuery(sql);
+			return {status: 'success', message:  `Parameter ${parameter} added to baselined` };
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error while deleting ${parameter}. Check logs for details.`};		
+	}
+}
+
+exports.addParamToBaselineRef = addParamToBaselineRef;
 exports.runBaseline = runBaseline;
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;
 exports.getSQLiteReportInfo = getSQLiteReportInfo;
@@ -1508,3 +1554,5 @@ exports.parseData = parseData;
 exports.uploadUserBaseline = uploadUserBaseline;
 exports.uploadParameterReference = uploadParameterReference;
 exports.autoGenerateParameterRef = autoGenerateParameterRef;
+exports.downloadBaselineReference = downloadBaselineReference;
+exports.deleteBaselineParameter = deleteBaselineParameter;

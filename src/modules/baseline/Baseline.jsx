@@ -12,7 +12,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
-
+import { renderToString } from 'react-dom/server';
 
 //styles
 import  './baseline.css';
@@ -26,6 +26,32 @@ export default class Baseline extends React.Component {
 	
    constructor(props){
         super(props);
+		
+		this.onInputFileChange = this.onInputFileChange.bind(this)
+		this.showBaselineFile = this.showBaselineFile.bind(this)
+		this.uploadUserBaseline = this.uploadUserBaseline.bind(this)
+		this.refreshData = this.refreshData.bind(this)
+		
+		this.clusteringOptions = ['NODE_AND_TAC'];
+		this.scoringOptions = ['MAX_OCCURENCE'];
+		
+		this.agTblReload += 1;
+		this.baselineListener = null;
+		
+		this.category = [];
+		
+		this.VENDOR_LIST = [
+			"HUAWEI",
+			"ERICSSON",
+			"ZTE",
+			"NOKIA"
+		]
+		
+		this.TECH_LIST = ["2G", "3G", "4G", "5G"];
+		this.MO_LIST = ["--All MOs--"];
+		this.PARAM_LIST = ["--All Parameters--"];
+		
+		
         this.state = {
             columnDefs: [
 				{headerName: "VENDOR", field: "vendor", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
@@ -34,7 +60,17 @@ export default class Baseline extends React.Component {
 				{headerName: "PARAMETER", field: "parameter", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
 				{headerName: "GRANULITY", field: "granulity", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
 				{headerName: "BASELINE", field: "baseline", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
-				{headerName: " ", field: "manage", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}
+				{headerName: " ", 
+					field: "manage", 
+					filter: "agTextColumnFilter", 
+					filterParams:{caseSensitive: true},
+					valueGetter: function(params){
+						return  '4';
+					},
+					cellRendererFramework: (params) => {
+						return <Icon icon="cross" onClick={() => this.deleteParameter(params.node.data.vendor, params.node.data.technology, params.node.data.mo, params.node.data.parameter)}/>;
+					}
+				}
 			],
             rowData: [
             ],
@@ -66,28 +102,21 @@ export default class Baseline extends React.Component {
 			
 			//Baseline configuration csv
 			baselineFile: "",
-			showConfigOptions: false
+			showConfigOptions: false,
+			
+			//baseline reference manual update 
+			vendor: this.VENDOR_LIST[0],
+			tech: this.TECH_LIST[0],
+			mo: this.MO_LIST[0],
+			baselineValue: "",
+			
+			reloadUI: 0
+			
         };
 		
-		this.onInputFileChange = this.onInputFileChange.bind(this)
-		this.showBaselineFile = this.showBaselineFile.bind(this)
-		this.uploadUserBaseline = this.uploadUserBaseline.bind(this)
-		this.refreshData = this.refreshData.bind(this)
-		
-		this.clusteringOptions = ['NODE_AND_TAC'];
-		this.scoringOptions = ['MAX_OCCURENCE'];
-		
-		this.agTblReload += 1;
-		this.baselineListener = null;
-		
-		this.category = [];
-		
-		this.VENDOR_LIST = [
-			"HUAWEI",
-			"ERICSSON",
-			"ZTE",
-			"NOKIA"
-		]
+		this.baselineRefDownloadListener = null;
+		this.addToBaselineRefListener = null;
+		this.deleteBaselineListener = null;
 		
 	}
 	
@@ -104,7 +133,7 @@ export default class Baseline extends React.Component {
         this.agTblReload += 1;
 		this.gridApi.refreshInfiniteCache();
     }
-	
+
     onGridReady(params) {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
@@ -190,6 +219,59 @@ export default class Baseline extends React.Component {
 		ipcRenderer.on('parse-cm-request', this.baselineListener);
 	}
 	
+	/**
+	* Delete parameter
+	*/
+	deleteParameter = (vendor, technology, mo, parameter) => {
+		let payload = {
+			vendor: vendor,
+			technology: technology,
+			mo: mo,
+			parameter: parameter
+		};
+		
+		//Set processing to true 
+		this.setState({processing: true });
+		
+		ipcRenderer.send('parse-cm-request', 'delete_baseline_parameter', JSON.stringify(payload));
+		
+		this.deleteBaselineListener = (event, task, args) => {
+			const obj = JSON.parse(args)
+			if(task !== 'delete_baseline_parameter') return;
+			
+			//error
+			if(obj.status === 'error' && task === 'delete_baseline_parameter' ){
+				this.setState({
+						notice: {type: 'danger', message: obj.message},
+						processing: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
+			}
+			
+			//info
+			if(obj.status === 'info' && task === 'delete_baseline_parameter' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'delete_baseline_parameter' ){
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: obj.message
+							},
+						processing: false
+						});
+
+				ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
+				this.refreshData();
+			}
+			
+		}
+		ipcRenderer.on('parse-cm-request', this.deleteBaselineListener);
+		
+	}
+	
+	
 	/*
 	* Update the cluster state variable
 	*/
@@ -220,7 +302,6 @@ export default class Baseline extends React.Component {
 			});
 			return;
 		}
-		this.setState({processing: true});
 		
 		let payload = {
 			baselineFile: this.state.baselineFile,
@@ -264,6 +345,156 @@ export default class Baseline extends React.Component {
 			
 		}
 		ipcRenderer.on('parse-cm-request', this.uploadBaselineListener);
+	}
+	
+	
+	/*
+	* Download baseline reference
+	*
+	*/
+	downloadBaselineReference = () => {
+
+		let payload = {
+			"fileName": "baseline_reference",
+			"format": "excel",
+			"outputFolder": app.getPath('downloads'),
+		}
+		
+		//Set processing to true 
+		this.setState({processing: true });
+		
+		ipcRenderer.send('parse-cm-request', 'download_baseline_reference', JSON.stringify(payload));
+		
+		this.baselineRefDownloadListener = (event, task, args) => {
+			const obj = JSON.parse(args)
+			if(task !== 'download_baseline_reference') return;
+			
+			//error
+			if(obj.status === 'error' && task === 'download_baseline_reference' ){
+				this.setState({
+						notice: {type: 'danger', message: obj.message},
+						processing: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.baselineRefDownloadListener);
+			}
+			
+			//info
+			if(obj.status === 'info' && task === 'download_baseline_reference' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'download_baseline_reference' ){
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: obj.message
+							},
+						processing: false
+						});
+				const excelFile = obj.message;
+				shell.showItemInFolder(excelFile);
+				ipcRenderer.removeListener("parse-cm-request", this.baselineRefDownloadListener);
+			}
+			
+		}
+
+		ipcRenderer.on('parse-cm-request', this.baselineRefDownloadListener);
+	}
+	
+	addToBaselineReference = () => {
+		let payload = {
+			"vendor": this.state.vendor,
+			"tech": this.state.tech,
+			"mo": this.state.mo,
+			"parameter": this.state.parameter,
+			"baseline": this.state.baselineValue
+		}
+		
+		//Set processing to true 
+		this.setState({processing: true });
+		
+		ipcRenderer.send('parse-cm-request', 'add_param_to_baseline', JSON.stringify(payload));
+		
+		this.addToBaselineRefListener = (event, task, args) => {
+			const obj = JSON.parse(args)
+			if(task !== 'add_param_to_baseline') return;
+			
+			//error
+			if(obj.status === 'error' && task === 'add_param_to_baseline' ){
+				this.setState({
+						notice: {type: 'danger', message: obj.message},
+						processing: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.addToBaselineRefListener);
+			}
+			
+			//info
+			if(obj.status === 'info' && task === 'add_param_to_baseline' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'add_param_to_baseline' ){
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: obj.message
+							},
+						processing: false
+						});
+				const excelFile = obj.message;
+				ipcRenderer.removeListener("parse-cm-request", this.addToBaselineRefListener);
+				this.agTblReload += 1;
+				this.gridApi.refreshInfiniteCache();
+			}
+			
+		}
+
+		ipcRenderer.on('parse-cm-request', this.addToBaselineRefListener);	
+	}
+	
+	/**
+	* Update hte MO_LIST used in the baseline reference update 
+	* @param string vendor Vendor name  
+	* @param string tech 
+	*/
+	updateMOList = async (vendor ,tech) => {
+		const result = await runQuery(`SELECT DISTINCT mo FROM telecomlib.parameter_reference WHERE vendor = '${vendor}' AND technology = '${tech}'`);
+		this.MO_LIST = [ '--All MOs--' ,...result.rows.map( v => v.mo)];
+	}
+	
+	updateParameterList = async (vendor, tech, mo) => {
+		const result = await runQuery(`SELECT DISTINCT parameter_id as parameter FROM telecomlib.parameter_reference WHERE vendor = '${vendor}' AND technology = '${tech}' AND mo = '${mo}'`);
+		this.PARAM_LIST = [ '--All Parameters--' ,...result.rows.map( v => v.parameter)];	
+		this.setState({parameter: this.PARAM_LIST[0]});
+	}
+	handleVendorSelect = async (event) => {
+		const vendor = event.target.value;
+		await this.updateMOList(vendor, this.state.tech);
+		this.setState({vendor: vendor});
+		await this.updateParameterList(this.state.vendor, this.state.tech, this.state.mo);
+	}
+	
+	handleMOSelect = async (event) => {
+		const mo = event.target.value;
+		await this.updateParameterList(this.state.vendor, this.state.tech, mo);
+		this.setState({mo: mo});
+		
+	}
+	
+	handleTechSelect = async (event) => {
+		const tech = event.target.value;
+		await this.updateMOList(this.state.vendor, tech);
+		this.setState({tech: tech});
+		await this.updateParameterList(this.state.vendor, this.state.tech, this.state.mo);
+		
+	}
+	
+	handleParameterSelect = (event) => {
+		this.setState({parameter: event.target.value});
+	}
+	
+	handleValueChange = (event) => {
+		this.setState({baselineValue: event.target.value});
 	}
 	
 	/*
@@ -340,20 +571,20 @@ export default class Baseline extends React.Component {
 						</div>
 					
 					  </div>
-
+	
 					<div>
 						<FormGroup>
 								<Button icon="refresh" onClick={this.refreshData} minimal={true}></Button>
-								<Button icon="download" onClick={this.refreshData} minimal={true}></Button>
+								<Button icon="download" onClick={this.downloadBaselineReference} minimal={true}></Button>
 								| &nbsp;
 								
-								<HTMLSelect options={this.VENDOR_LIST} className="mr-2"/>
-								<HTMLSelect options={["2G", "3G", "4G", "5G"]} className="mr-2"/>
-								<HTMLSelect options={["GCELL"]} className="mr-2"/>
-								<HTMLSelect options={["--All Parameters--","BCCHNO", "etc..."]} className="mr-2"/>
-								<input value="" className="bp3-input" />
+								<HTMLSelect options={this.VENDOR_LIST} className="mr-2" onChange={this.handleVendorSelect} name="vendor"/>
+								<HTMLSelect options={this.TECH_LIST} className="mr-2" onChange={this.handleTechSelect} name="tech"/>
+								<HTMLSelect options={this.MO_LIST} className="mr-2" onChange={this.handleMOSelect} name="mo"/>
+								<HTMLSelect options={this.PARAM_LIST} className="mr-2" onChange={this.handleParameterSelect} name="parameter"/>
+								<input className="bp3-input" placeholder="Baseline value" name="baseline_value" defaultValue={this.state.baselineValue} onChange={this.handleValueChange}/>
 								 &nbsp;
-								<Icon icon="add" className="mr-2" />
+								<Icon icon="add" className="mr-2" onClick={this.addToBaselineReference}/>
 						</FormGroup>
 					</div>
 					<div className="ag-theme-balham" style={{width: '100%', height: "100%", boxSizing: "border-box"}}>

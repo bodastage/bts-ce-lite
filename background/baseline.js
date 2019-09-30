@@ -358,18 +358,26 @@ async function updateBaselineComparisonQuery(){
 	rptStyles['BASELINE_VALUE'] = {
 		conditions:[
 			{
-				op: "EQUAL TO",
-				rValType: "COLUMN",
-				rValue: "BASELINE_VALUE",
 				property: "background-color",
-				propertyValue: "green"
+				propertyValue: "green",
+				styleConditions: [
+					{
+						op: "EQUAL TO",
+						rValType: "COLUMN",
+						rValue: "BASELINE_VALUE",
+					}
+				]
 			},
 			{
-				op: "EQUAL TO",
-				rValType: "COLUMN",
-				rValue: "BASELINE_VALUE",
 				property: "color",
-				propertyValue: "white"
+				propertyValue: "white",
+				styleConditions: [
+					{
+						op: "EQUAL TO",
+						rValType: "COLUMN",
+						rValue: "BASELINE_VALUE"
+					}
+				]
 			}
 		]
 	}
@@ -379,18 +387,36 @@ async function updateBaselineComparisonQuery(){
 		rptStyles[field] = {
 			conditions:[
 				{
-					op: "NOT EQUAL TO",
-					rValType: "COLUMN",
-					rValue: "BASELINE_VALUE",
 					property: "background-color",
-					propertyValue: "red"
+					propertyValue: "red",
+					styleConditions: [
+						{
+							op: "NOT EQUAL TO",
+							rValType: "COLUMN",
+							rValue: "BASELINE_VALUE",
+						},
+						{
+							op: "LENGTH GREATER THAN",
+							rValType: "INPUT",
+							rValue: "0",
+						}
+					]
 				},
 				{
-					op: "NOT EQUAL TO",
-					rValType: "COLUMN",
-					rValue: "BASELINE_VALUE",
 					property: "color",
-					propertyValue: "white"
+					propertyValue: "white",
+					styleConditions: [
+						{
+							op: "NOT EQUAL TO",
+							rValType: "COLUMN",
+							rValue: "BASELINE_VALUE"
+						},
+						{
+							op: "LENGTH GREATER THAN",
+							rValType: "INPUT",
+							rValue: "0",
+						}
+					]
 				}
 			]
 		}
@@ -723,6 +749,19 @@ async function uploadParameterReference(fileName, truncate){
 }
 
 
+async function updateBaselineParameter(vendor, tech, mo, parameter, baseline){
+	
+	const sql = `INSERT INTO baseline."configuration"
+		(vendor, technology, mo, parameter, baseline)
+	VALUES
+		('${vendor}', '${tech}', '${mo}', '${parameter}', '${baseline}')
+	 ON CONFLICT ON CONSTRAINT unq_configuration DO UPDATE
+	 SET 
+		baseline = EXCLUDED.baseline
+	`;
+	const result  = await queryHelper.runQuery(sql);
+}
+
 
 /*
 * Compute baseline
@@ -749,6 +788,7 @@ async function computeBaseline(clustering, scoring){
 
 }
 
+exports.updateBaselineParameter = updateBaselineParameter;
 exports.computeBaseline = computeBaseline;
 exports.clusterNetwork  = clusterNetwork ;
 exports.uploadUserBaseline  = uploadUserBaseline ;

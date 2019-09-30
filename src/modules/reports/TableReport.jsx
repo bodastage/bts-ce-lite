@@ -289,8 +289,10 @@ class TableReport extends React.Component{
 						const propt = cond.property;
 						const propVal = cond.propertyValue;
 						
+						if(typeof cond.styleConditions === 'undefined') continue;
+						
 						const className = generateStyleClass(reportId, columnName, idx);
-						const condExpr = getTableStyleExpression(cond);
+						const condExpr = getTableStyleExpression(cond.styleConditions);
 						
 						cellClassRules[className] = condExpr
 					}

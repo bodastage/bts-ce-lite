@@ -33,20 +33,35 @@ class TableStyleCondition extends React.Component{
 		this.handleRValueChange = this.handleRValueChange.bind(this);
 		this.handlePropertyValueChange = this.handlePropertyValueChange.bind(this)
 		
-		this.state = {
+		this.initialCondition = {
 			//comparison operator type
 			op: COMP_OPERATORS[0],
 			
 			//Comparison value type
 			rValType: COMP_VALUE_TYPES[0],
 			
-			//The right hand side of the comparison. It's eith an input 
-			rValue: null,
+			//The right hand side of the comparison. It's either a column or an input 
+			rValue: null
+		};
+		
+		this.state = {
+			//comparison operator type
+			op: COMP_OPERATORS[0],
+			
+			//Comparison value type
+			rValType: COMP_VALUE_TYPES[0], //0 - COLUMN, 1 - INPUT
+			
+			//The right hand side of the comparison. It's either a column or an input 
+			rValue: this.props.fields[0],
 			
 			//the propert to update 
 			property: COMP_PROPERTIES[0],
 			
-			propertyValue: ""
+			propertyValue: "",
+			
+			//Conditions for setting property to propertyValue
+			//Array of {op, rValTypem rValue}
+			styleConditions: []
 			
 		}
 		
@@ -74,18 +89,36 @@ class TableStyleCondition extends React.Component{
 	}
 	
 	updateTableStyles = () => {
-			this.props.updateTableStyles({
+		this.props.onChange({
+			property: this.state.property,
+			propertyValue: this.state.propertyValue,
+			styleConditions: this.state.styleConditions
+		});
+	}
+	
+	addCondition = () => {
+		const styleConditions = [ 
+			...this.state.styleConditions,
+			{
 				op: this.state.op,
 				rValue: this.state.rValue,
-				rValType: this.state.rValType,
-				property: this.state.property,
-				propertyValue: this.state.propertyValue,
-			});
+				rValType: this.state.rValType
+			}
+		];
+		
+		this.setState({styleConditions: styleConditions});
+	}
+	
+	/**
+	* Remove condition
+	*/
+	removeCondition = (index) => {
+		const styleConditions  = this.state.styleConditions.filter((v, i) => i !== index );
+		this.setState({styleConditions: styleConditions});
 	}
 	
 	render(){
-		
-		
+
 		//rvalue 
 		let RValue = <input className="bp3-input" style={{width:"100px", display: "inline-block"}} onChange={this.handleRValueChange}/>
 		if(this.state.rValType === 'COLUMN'){
@@ -94,17 +127,41 @@ class TableStyleCondition extends React.Component{
 		
 		return(
 			<div>
-				<span>IF</span>&nbsp;  
-				<span>[{this.props.field}]</span>&nbsp;  
-				<HTMLSelect options={COMP_OPERATORS} onChange={this.handleOpChange}></HTMLSelect>&nbsp;  
-				<HTMLSelect options={COMP_VALUE_TYPES} onChange={this.handleValueTypeChange}></HTMLSelect>&nbsp; 
-				{RValue}&nbsp;
-				<span>THEN SET</span>&nbsp;
-				<HTMLSelect options={COMP_PROPERTIES} onChange={this.handlePropertyChange}></HTMLSelect>&nbsp; 
-				<span>TO</span>&nbsp; 
-				<input onChange={this.handlePropertyValueChange} className="bp3-input" style={{width:"100px", display: "inline-block"}}/>&nbsp;
-				<span><Icon icon="floppy-disk" onClick={this.updateTableStyles}/> </span>&nbsp;
+				<div className="row">
+				<div className="col-1">
+					<span>IF</span>&nbsp;  
+					<span>[{this.props.field}]</span>&nbsp;  
+				</div>
+				<div 
+					className="col-6" 
+					style={{borderLeft: "1px solid #eeee", borderRight: "1px solid #eeee"}}>
+					<div style={{display: "inline"}}>
+						{/*Display conditions*/}
+						{this.state.styleConditions.map( (cond, cIdx) => (
+						<div key={cIdx}>
+							<Icon icon="small-minus" onClick={() => this.removeCondition(cIdx)}/> {`${cond.op} <${cond.rValType}:${cond.rValue}>`} 
+						</div>
+						))}
+					
+						<div style={{display: "inline"}}>
+							<HTMLSelect options={COMP_OPERATORS} onChange={this.handleOpChange}></HTMLSelect>&nbsp;  
+							<HTMLSelect options={COMP_VALUE_TYPES} onChange={this.handleValueTypeChange}></HTMLSelect>&nbsp; 
+							{RValue}&nbsp;
+						</div>
+						<Icon icon="small-plus" onClick={this.addCondition}/>
+						<br />
+					</div>
+				</div>
+				<div className="col-4">
+					<span>THEN SET</span>&nbsp;
+					<HTMLSelect options={COMP_PROPERTIES} onChange={this.handlePropertyChange}></HTMLSelect>&nbsp; 
+					<span>TO</span>&nbsp; 
+					<input onChange={this.handlePropertyValueChange} className="bp3-input" style={{width:"100px", display: "inline-block"}}/>&nbsp;
+					<span><Icon icon="floppy-disk" onClick={this.updateTableStyles}/> </span>&nbsp;
+				</div>
 			</div>
+			</div>
+			
 		);
 	}
 }
@@ -237,7 +294,6 @@ class CreateReport extends React.Component{
         };
         
         
-        
         //Preview data
         //Holds the aggrid data
         this.previewData = [];
@@ -287,8 +343,10 @@ class CreateReport extends React.Component{
 		//Update the currently selected fields in the table configurations
 		const remainingFields = this.props.fields.filter( v => typeof this.tableStyles[v] === 'undefined' );
 		this.setState(
-			{configureTableRefresh: this.state.configureTableRefresh+1,
-			currentConfigField: remainingFields[0]}
+			{
+				configureTableRefresh: this.state.configureTableRefresh+1,
+				currentConfigField: remainingFields[0]
+			}
 		)
 	}
 	
@@ -565,8 +623,8 @@ class CreateReport extends React.Component{
 					const propVal = cond.propertyValue;
 					
 					const className = generateStyleClass(reportId, columnName, idx);
-					const condExpr = getTableStyleExpression(cond);
-					
+					const condExpr = getTableStyleExpression(cond.styleConditions);
+					console.log("condExpr:", condExpr);
 					cellClassRules[className] = condExpr
 				}
 			}
@@ -901,59 +959,74 @@ class CreateReport extends React.Component{
         }
         
 		
-		//Configure table 
-		
+		//Configure table styles i.e cell colors etc
 		let configureTable = null;
-		console.log("this.props.fields:", this.props.fields);
-		console.log("this.reportType:", this.reportType);
 		let testTableStyles = "";
 		if(this.props.fields !== undefined && this.state.reportType === 'Table'){
-			configureTable = [<b>Configure table</b>];
+			
+			let ky=0;
+			configureTable = [<b key={ky+"ab"}>Configure table</b>];
 			
 			let conditionCount = 0
 			for(var field in this.tableStyles){
 				const f = field;
 				const conditions = this.tableStyles[field].conditions;
+				ky += 1;
 				
 				configureTable.push(
-				<div>
+				<div key={ky+"ab"}>
 					<Icon icon="delete" onClick = {(ev) => {ev.preventDefault();this.removeConfigField(f)}}/> <span>{f}</span>
 				</div>
 				);
 				
+				
 				for(var i in conditions){
 					const cond = conditions[i];
-					const op = cond.op;
-					const rValType = cond.rValType;
-					const rValue = cond.rValue;
+					const styleConditions = conditions[i].styleConditions || [];
+					
+					
+					//const op = cond.op;
+					//const rValType = cond.rValType;
+					//const rValue = cond.rValue;
 					const propt = cond.property;
 					const propVal = cond.propertyValue;
 
 					const reportId = this.props.reportInfo !== null ? this.props.reportInfo.id : 'undefined';
 					const className = generateStyleClass(reportId, field, i);
 					
+					const condLen = styleConditions.length;
+					
 					testTableStyles += `
 					.${className} \{ ${propt}: ${propVal};\}
 					`;
 					
 					configureTable.push(
-					<div>
-						<Icon icon="cross" onClick={() => { this.removeFieldCondition(field, i)}}/> IF {f} {op} {rValue}({rValType}) THEN SET {propt} TO {propVal}
-					</div>
+						<div>
+							<Icon 
+								icon="cross" 
+								onClick={() => { this.removeFieldCondition(field, i)}}
+							/> 
+							IF {f} 
+								{styleConditions.map((m,ii) => {
+									return <span>&nbsp;{m.op} ({m.rValType}:{m.rValue})&nbsp;{ii < condLen-1 ? " AND": ""}</span>; 
+								})}
+							THEN 
+							SET {propt} TO {propVal}
+						</div>
 					)	
 				}
 				
 				
 				configureTable.push(
-				<div>
-						{<TableStyleCondition fields={this.props.fields} field={f} updateTableStyles={(newCondition) => {this.updateTableStyles(f, newCondition)}}/>}
+				<div key={i}>
+						{<TableStyleCondition fields={this.props.fields} field={f} onChange={(newCondition) => {this.updateTableStyles(f, newCondition)}}/>}
 					<hr />
 				</div>);	
 			}
 			
 			const remainingFields = this.props.fields.filter( v => typeof this.tableStyles[v] === 'undefined' );
 			if(remainingFields.length > 0){
-				configureTable.push(<div><HTMLSelect options={remainingFields} onChange={this.handleConfigureFieldsChange}></HTMLSelect> <Icon icon="add" onClick={this.configField}/></div>);	
+				configureTable.push(<div key={ky+"hs"}><HTMLSelect options={remainingFields} onChange={this.handleConfigureFieldsChange}></HTMLSelect> <Icon icon="add" onClick={this.configField}/></div>);	
 			}
 			
 		}
