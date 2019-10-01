@@ -58,7 +58,7 @@ export default class Baseline extends React.Component {
 				{headerName: "TECH", field: "technology", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
 				{headerName: "MO", field: "mo", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
 				{headerName: "PARAMETER", field: "parameter", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
-				{headerName: "GRANULITY", field: "granulity", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
+				{headerName: "GRANURALITY", field: "granurality", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
 				{headerName: "BASELINE", field: "baseline", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
 				{headerName: " ", 
 					field: "manage", 

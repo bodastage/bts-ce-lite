@@ -352,8 +352,9 @@ async function updateBaselineComparisonQuery(){
 	
 	
 	//Update table cell options 
-	//color user baseline green 
-	//color differences red 
+	//color for baseline values is green 
+	//color differences red
+	//empty values are not colored
 	let rptStyles = {}
 	rptStyles['BASELINE_VALUE'] = {
 		conditions:[
@@ -657,14 +658,14 @@ async function autoGenerateParameterRef(clearTableBefore){
 		for( let t of colSqlRes.rows){
 			const sql = `
 			INSERT INTO telecomlib.parameter_reference 
-			(vendor, technology, mo, parameter_id, parameter_name, granulity)
+			(vendor, technology, mo, parameter_id, parameter_name, granurality)
 			SELECT 
 				'${v.vendor}' as vendor, 
 				 COALESCE(t2.technology,'UNKNOWN') AS technology,
 				'${t.table_name}' as mo,
 				key as parameter_id,
 				key as parameter_name,
-				COALESCE(t2.granulity, 'UNKNOWN') as granulity
+				COALESCE(t2.granurality, 'UNKNOWN') as granurality
 				
 			FROM (
 				SELECT DISTINCT jsonb_object_keys(data)  AS key
@@ -695,7 +696,7 @@ async function autoGenerateParameterRef(clearTableBefore){
 */
 async function uploadParameterReference(fileName, truncate){
 	
-	let parameterList = ['vendor', 'technology', 'mo', 'parameter_id', 'parameter_name', 'is_key', 'granulity', 'description'];
+	let parameterList = ['vendor', 'technology', 'mo', 'parameter_id', 'parameter_name', 'is_key', 'granurality', 'description'];
 	let paramIndices = []
 	
 	//Add exclude logic

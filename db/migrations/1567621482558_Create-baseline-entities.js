@@ -175,7 +175,7 @@ technology AS "TECHNOLOGY",
 mo as "MO", 
 parameter_id as "PARAMETER ID", 
 parameter_name as "PARAMETER NAME", 
-granulity as "GRANULITY", 
+granurality as "GRANURALITY", 
 is_key as "IS_KEY", 
 description as "DESCRIPTION" 
 FROM telecomlib.parameter_reference 
