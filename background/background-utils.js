@@ -853,6 +853,7 @@ async function parseData(dataType, vendor, format, inputFolder, outputFolder, be
 *
 * @param string input folder
 * @param boolean truncateTables
+* @deprecated
 *
 * @since 0.3.0
 */
@@ -1505,7 +1506,7 @@ async function autoGenerateParameterRef(clearTableBefore){
 async function downloadBaselineReference(fileName, outputFolder, format){
 	try{ 
 		const f = typeof format === 'undefined' ? 'csv' : format;
-		const q = "SELECT * FROM baseline.vw_configuration"
+		const q = "SELECT vendor, technology, mo, parameter, baseline as baseline_value FROM baseline.vw_configuration"
 		const dlFileName = await generateExcelOrCSV(fileName, outputFolder, q, f, {});
 		return {status: 'success', message: dlFileName };
 	}catch(e){
@@ -1539,6 +1540,22 @@ async function deleteBaselineParameter(vendor, tech, mo, parameter){
 	}
 }
 
+async function importGISFile(fileName, format){
+	try{
+		if( format === 'BCF'){
+			await bcf.loadBodaCellFile(fileName);
+			return {status: 'success', message:  `Successfully imported ${fileName}` };
+		}
+		
+		return {status: 'error', message:  ` Import failed. Unsupported file format ${format}.` };
+
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error occured while importing ${format} file. Check logs for details.`};		
+	}
+}
+
+exports.importGISFile = importGISFile;
 exports.addParamToBaselineRef = addParamToBaselineRef;
 exports.runBaseline = runBaseline;
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;

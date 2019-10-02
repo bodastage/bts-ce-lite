@@ -1,3 +1,7 @@
+const { Client, Pool } = window.require('pg');
+const queryHelper = window.require('./query-helpers');
+const fs = require("fs");
+
 const BCF_2G_PARAMS = {
 	technology: {required: true},
 	ci: {required: true},
@@ -257,8 +261,129 @@ function generateNbrInsertQuery(fields, values){
 	
 }
 
+
+async function loadBodaCellFile(inputFile, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
+	//1.Load cells 
+	// -get columns from first row
+	// -validate that the key parameter columns exist 
+	// -
+	//2.add nbrs
+
+			
+	const dbConDetails  = await queryHelper.getSQLiteDBConnectionDetails('boda');
+
+	const hostname = dbConDetails.hostname;
+	const port = dbConDetails.port;
+	const username = dbConDetails.username;
+	const password = dbConDetails.password;
+	
+	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+	
+	const pool = new Pool({
+	  connectionString: connectionString,
+	})
+	
+	pool.on('error', (err, client) => {
+		log.error(err.toString());
+		client.release();
+	})
+
+	
+	if(typeof beforeLoad === 'function'){
+		beforeLoad();
+	}
+	
+	if(truncateTables === true) {
+		log.info("Truncate tables before loading is set to true.")
+		
+		client = await pool.connect();
+		if(client.processID === null){
+			log.error('Failed to connect to database');
+			return {status: "error", message: 'Failed to connect to database during boda cell file loading'};
+		}
+		
+		await client.query(`TRUNCATE plan_network."2g_cells" RESTART IDENTITY CASCADE`);
+		await client.query(`TRUNCATE plan_network."3g_cells" RESTART IDENTITY CASCADE`);
+		await client.query(`TRUNCATE plan_network."4g_cells" RESTART IDENTITY CASCADE`);
+		
+		client.release();
+	}
+	
+	var fileList = [];
+	var fileIsDir = false;
+	
+	if(fs.lstatSync(inputFile).isDirectory()){
+		fileIsDir = true;
+		fileList = fs.readdirSync(inputFile,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+	}else{
+		fileList = [inputFile]
+	}
+	
+
+	for (let i=0; i< fileList.length; i++) {
+		let fileName = fileList[i];
+		
+		let filePath = fileIsDir ? path.join(inputFile, fileList[i]) : fileName;
+		
+		
+		client = await pool.connect();
+		if(client.processID === null){
+			log.error('Failed to connect to database');
+			return {status: "error", message: 'Failed to connect to database during boda cell file loading'};
+		}
+		
+		
+		let parameterList = [];
+		//This is used to capture load error in onError Event
+		let loadError = null;
+		console.log("filePath:", filePath);
+		await new Promise((resolve, reject) => {
+			csv({output: "csv", noheader:true, trim:true})
+			.fromFile(filePath)
+			.subscribe(async (csvRow, index)=>{
+				
+				//Header column 
+				if(index === 0){
+					parameterList = csvRow;
+					return;
+				}
+				
+				//Insert cell parameters 
+				const sql = generateParameterInsertQuery(parameterList, csvRow);
+				await client.query(sql);
+				
+				//Insert relations
+				const nbrSQL = generateNbrInsertQuery(parameterList, csvRow);
+				if (nbrSQL !== null) await client.query(nbrSQL);
+				
+			},(err) => {//onError
+				log.error(`csvJoJson.onError: ${err.toString()}`);
+				client.release();
+				loadError = `Error while loading ${fileName}`;
+				resolve();
+			},
+			()=>{//onComplete
+				log.info(`End of csvToJson for ${fileName}.`)
+				client.release();
+				resolve();
+			});
+		});//eof: promise
+		
+		//Return error status if loadError is not null
+		if(loadError !== null) throw new Error(loadError, 'boda-cell-file.js');
+		
+		
+	}
+
+	if(typeof afterLoad === 'function'){
+		afterLoad();
+	}
+}
+
+
 exports.BCF_2G_PARAMS = BCF_2G_PARAMS;
 exports.BCF_3G_PARAMS = BCF_3G_PARAMS;
 exports.BCF_4G_PARAMS = BCF_4G_PARAMS;
 exports.generateParameterInsertQuery = generateParameterInsertQuery;
 exports.generateNbrInsertQuery = generateNbrInsertQuery;
+exports.loadBodaCellFile = loadBodaCellFile;
