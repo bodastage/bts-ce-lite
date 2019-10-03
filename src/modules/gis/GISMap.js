@@ -47,7 +47,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 
-const IMPORT_FILE_FORMAT = ['BCF', 'TEMS', 'XEUS'];
+const IMPORT_FILE_FORMAT = ['BCF', 'TEMS'];
 
 class GISMap extends React.Component{
     static icon = "globe-africa";

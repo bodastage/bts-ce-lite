@@ -387,3 +387,4 @@ exports.BCF_4G_PARAMS = BCF_4G_PARAMS;
 exports.generateParameterInsertQuery = generateParameterInsertQuery;
 exports.generateNbrInsertQuery = generateNbrInsertQuery;
 exports.loadBodaCellFile = loadBodaCellFile;
+exports.getTechParameterList  = getTechParameterList ;

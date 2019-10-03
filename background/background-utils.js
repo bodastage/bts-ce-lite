@@ -17,6 +17,7 @@ const baseline = window.require('./baseline');
 const bgUtils = window.require('./bg-utils');
 const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
+const tems = window.require('./tems');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -1547,6 +1548,10 @@ async function importGISFile(fileName, format){
 			return {status: 'success', message:  `Successfully imported ${fileName}` };
 		}
 		
+		if(format === 'TEMS'){
+			await tems.loadTEMSFile(fileName);
+			return {status: 'success', message:  `Successfully imported ${fileName}` };
+		}
 		return {status: 'error', message:  ` Import failed. Unsupported file format ${format}.` };
 
 	}catch(e){
