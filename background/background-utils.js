@@ -412,6 +412,11 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
 		}
 		
+		if(vendor.toLowerCase() === 'ericsson' && typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
+			 moName = moTransform.ERICSSON_MO_MAP[moName];
+			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
+		}
+		
 		//Transform ZTE to import ZTE Plan Template data in correct tables
 		if(vendor.toLowerCase() === 'zte' && typeof moTransform.ZTE_MO_MAP[moName] !== 'undefined'){
 			 moName = moTransform.ZTE_MO_MAP[moName];

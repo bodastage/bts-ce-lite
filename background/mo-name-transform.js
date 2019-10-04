@@ -250,5 +250,12 @@ const ZTE_MO_MAP = {
 
 }
 
+
+const ERICSSON_MO_MAP = {
+	'EutranFreqRelation_UtranCell' : 'EutranFreqRelation'
+};
+
+
+
 exports.HUAWEI_MO_MAP = HUAWEI_MO_MAP;
 exports.ZTE_MO_MAP = ZTE_MO_MAP;
