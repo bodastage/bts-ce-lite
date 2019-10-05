@@ -22,9 +22,9 @@ SELECT
 	(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1')) AS "LAC",
 	t1.data->>'refGRoutingArea' AS "RAC",
 	CONCAT((REGEXP_REPLACE(t1.data->>'refGLocationArea','(\\d+),\\d+,\\d+,\\d+','\\1')),'-',(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,(\\d+),\\d+,\\d+','\\1')),'-',(REGEXP_REPLACE(t1.data->>'refGLocationArea','\\d+,\\d+,(\\d+),\\d+','\\1')),'-',TRIM(t1.data->>'cellIdentity')) AS "CGI",
-	t1.data->>'bcchFrequency' AS "2G_BCCHNO",
-	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS "2G_BSIC",
-	t3.NumberOfTRX AS "2G_TRX"
+	t1.data->>'bcchFrequency' AS "BCCHNO",
+	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS "BSIC",
+	t3.NumberOfTRX AS "TRX"
 	FROM zte_cm."GsmCell" t1 
 LEFT JOIN QRY_CHANNEL_GROUP_TRX t3 on t1.data->>'FILENAME'=t3."FILENAME" and t1.data->>'MEID'=t3."MEID" and t1.data->>'GBtsSiteManagerId'=t3."GBtsSiteManagerId" and t1.data->>'GGsmCellId'=t3."GGsmCellId"
 UNION
@@ -56,7 +56,7 @@ SELECT
 	t1.data->>'MNC' AS "MNC", 
 	t1.data->>'LAC' AS "LAC", 
 	null as rac,
-	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', LPAD(t1.data->>'LAC',5,'0'), '-', t1.data->>'CI') AS "CGI",
+	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI",
 	t4.data->>'FREQ' AS "BCCHNO", 
 	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC",
 	null
@@ -119,86 +119,52 @@ FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 
 
 const UMTS_KEY_PARAMAETERS = `
---UMTS_KEY_PARAMETERS
---HUAWEI (NBIXML)
-SELECT
-    t1.data->>'varDateTime' AS "DATETIME",
-	'HUAWEI' AS "VENDOR",
-	'3G' AS "TECH",
-    t1.data->>'neid' AS "RNC_ID",
-    t1.data->>'CELLID' AS "CELL_ID",
-    t1.data->>'CELLNAME' AS "CELL_NAME",
-    (t1.data->>'PSCRAMBCODE') AS "PSC",
-    (t1.data->>'LAC')::INTEGER AS "LAC",
-    (t1.data->>'RAC')::INTEGER AS "RAC"
-FROM huawei_cm."UCELL" t1 where t1.data->>'neid' is not null
-UNION
---HUAWEI (CFGMML)
+--UMTS KEY PARAMETERS (3G Huawei CFGMML)
 SELECT
     t1.data->>'DATETIME' AS "DATETIME",
-	'HUAWEI' AS "VENDOR",
-	'3G' AS "TECH",
-    (t1.data->>'BSCID') AS "RNC ID",
-    (t1.data->>'CELLID') AS "CELL_ID",
-    (t1.data->>'CELLNAME') AS "CELL_NAME",
-    (t1.data->>'PSCRAMBCODE') AS "PSC",
-    hex_to_int(REPLACE(t1.data->>'LAC','H''','')) AS "LAC",
-    hex_to_int(REPLACE(t1.data->>'RAC','H''','')) AS "RAC"
-FROM huawei_cm."UCELL" t1 where t1.data->>'BSCID' is not null
-UNION
---ZTE (BULK_CM)
-SELECT
-    t1.data->>'DATETIME' AS "DATETIME",
-	'ZTE' AS "VENDOR",
-	'3G' AS "TECH",
-    t1.data->>'RncFunction_id' AS "RNC ID",
-    t1.data->>'localCellId' AS "CELL ID",
-    t1.data->>'userLabel' AS "CELL NAME",
-    t1.data->>'primaryScramblingCode' AS "PSC",
-    (t1.data->>'lac')::INTEGER AS "LAC",
-    (t1.data->>'rac')::INTEGER AS "RAC"
-FROM zte_cm."UtranCellFDD" t1 WHERE t1.data->>'SubNetwork_id' IS NOT NULL
-UNION
---ZTE (XLS)
-SELECT
-    t1.data->>'DATETIME' AS "DATETIME",
-	'ZTE' AS "VENDOR",
-	'3G' AS "TECH",
-    t1.data->>'rncid' AS "RNC ID",
-    t1.data->>'cid' AS "CELL ID",
-    t1.data->>'userLabel' AS "CELL NAME",
-    t1.data->>'primaryScramblingCode' AS "PSC",
-    (t1.data->>'refULocationArea')::INTEGER AS "LAC",
-    (t1.data->>'refURoutingArea')::INTEGER AS "RAC"
-FROM zte_cm."UtranCellFDD" t1 WHERE t1.data->>'MEID' IS NOT NULL
-UNION
---NOKIA (RAML)
-SELECT 
-    t1.data->>'DATETIME' AS "DATETIME",
-	'NOKIA' AS "VENDOR",
-	'3G' AS "TECH",
-    null AS "RNC ID",
-    t1.data->>'CId' AS "CELL ID",
-    t1.data->>'name' AS "CELL NAME",
-    t1.data->>'PriScrCode' AS "PSC",
-    (t1.data->>'LAC')::INTEGER AS "LAC",
-    (t1.data->>'RAC')::INTEGER AS "RAC"
-FROM nokia_cm."WCEL" t1
-UNION
---ERICSSON (Bulk_CM)
-SELECT 
-    t2.data->>'DATETIME' AS "DATETIME",
-	'ERICSSON' AS "VENDOR",
-	'3G' AS "TECHNOLOGY",
-	t2.data->>'SubNetwork_2_id' AS "NENAME",
-	t2.data->>'cId' AS "CELLID",
-	t2.data->>'userLabel' AS "CELLNAME",
-	t2.data->>'primaryScramblingCode' AS "PSC",
-	(t2.data->>'lac')::INTEGER AS "LAC",
-	(t2.data->>'rac')::INTEGER AS "RAC"
-	FROM ericsson_cm."UtranCell"  t2
-
-
+    'HUAWEI' AS "VENDOR",
+    '3G' AS "TECH",
+    t2.data->>'SYSOBJECTID' AS "NENAME",
+    t1.data->>'BSCID' AS "NEID",
+    NULL AS "SITEPROP LAT",
+    NULL AS "SITEPROP LON",
+    t3.data->>'NODEBID' AS "SITE  ID",
+    t1.data->>'NODEBNAME' AS "SITENAME",
+    t1.data->>'CELLID' AS "CELLID",
+    t1.data->>'CELLNAME' AS "CELLNAME",
+    t1.data->>'LOCELL' AS "CI",
+    CASE 
+    	WHEN t1.data->>'CELLID' = t6.data->>'CELLID' THEN 'Activated'
+	ELSE 'Not ACTIVATED' 
+    END AS "ACT_STATUS",
+    CASE 
+        WHEN t1.data->>'CELLID' = t7.data->>'CELLID' THEN 'Blocked'
+        ELSE 'Not Blocked' 
+    END AS "BLKSTATUS",
+    NULL AS "DLBANDWIDTH",
+    t1.data->>'BANDIND' AS "BAND",
+   NULL AS "CARR",
+   t1.data->>'UARFCNDOWNLINK' AS "DLF",
+   t1.data->>'UARFCNUPLINK' AS "ULF",
+   t5.data->>'MCC' AS "MCC",
+   t5.data->>'MNC' AS "MNC",
+   hex_to_int(REPLACE(t1.data->>'LAC','H''','')) AS "LAC",
+   hex_to_int(REPLACE(t1.data->>'RAC','H''','')) AS "RAC",
+   CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', hex_to_int(REPLACE(t1.data->>'LAC','H''','')), '-', t1.data->>'LOCELL') AS "CGI" ,
+   t1.data->>'PSCRAMBCODE' AS "3G_PSC",
+   NULL AS "3G_DLCE",
+   NULL AS "3G_ULCE"
+FROM 
+huawei_cm."UCELL" t1 
+INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FILENAME' = t2.data->>'FILENAME' 
+    AND t1.data->>'BSCID'=t2.data->>'BSCID'
+INNER JOIN huawei_cm."UNODEB" t3 ON t1.data->>'FILENAME' = t3.data->>'FILENAME' 
+    AND t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
+INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t5.data->>'FILENAME' = t1.data->>'FILENAME'
+LEFT JOIN huawei_cm."UCELL_ACT" t6 ON t1.data->>'FILENAME' = t6.data->>'FILENAME' 
+    AND t1.data->>'CELLID' = t6.data->>'CELLID'
+LEFT JOIN huawei_cm."UCELL_BLK" t7 ON t1.data->>'FILENAME' = t7.data->>'FILENAME' 
+    AND t1.data->>'CELLID' = t7.data->>'CELLID'
 `
 
 const LTE_KEY_PARAMAETERS = `
@@ -1027,7 +993,7 @@ t2.data->>'userLabel' as "SRV CELLNAME",
 (t1.data->>'cellIdentity')::INTEGER AS "NBR CI",
 t1.data->>'userLabel' as "NBR Cellname"
 from zte_cm."GsmRelation" t1
-INNER JOIN zte_cm."UtranCellFDD" t2 on t1.data->>'FileName'=t2.data->>'FileName' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid'
+INNER JOIN zte_cm."UtranCellFDD" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'DataType'=t2.data->>'DataType' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid'
 UNION
 --Motorola 2G2G Relations
 SELECT
