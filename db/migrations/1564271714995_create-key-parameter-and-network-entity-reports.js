@@ -165,6 +165,38 @@ LEFT JOIN huawei_cm."UCELL_ACT" t6 ON t1.data->>'FILENAME' = t6.data->>'FILENAME
     AND t1.data->>'CELLID' = t6.data->>'CELLID'
 LEFT JOIN huawei_cm."UCELL_BLK" t7 ON t1.data->>'FILENAME' = t7.data->>'FILENAME' 
     AND t1.data->>'CELLID' = t7.data->>'CELLID'
+UNION
+--ZTE (XLS)
+SELECT
+    t1.data->>'DATETIME' AS "DATETIME",
+	'ZTE' AS "VENDOR",
+	'3G' AS "TECH",
+	null as "NENAME",
+	t1.data->>'MEID' AS "NEID",
+    t1.data->>'latitude' as "SITEPROP LAT",
+	t1.data->>'longitude' as "SITEPROP LON",
+    t1.data->>'nodebBNo' as "SITE ID",
+    null as SITENAME,
+    t1.data->>'cid' AS "CELL ID",
+    t1.data->>'userLabel' AS "CELL NAME",
+    t1.data->>'localCellId' AS "CI",
+    null as ACTSTATUS,
+    null as BLKSTATUS,
+    null as BW,
+    t1.data->>'freqBandInd' AS "BAND",
+    null as CARR,
+    t1.data->>'uarfcnDl' as "DLF",
+    t1.data->>'uarfcnUl' as "ULF",
+    t2.data->>'MCC' as MCC,
+    t2.data->>'MNC' as MNC,
+    (t1.data->>'refULocationArea')::INTEGER AS "LAC",
+    (t1.data->>'refURoutingArea')::INTEGER AS "RAC",
+    concat(t2.data->>'MCC','-',t2.data->>'MNC','-',t1.data->>'refULocationArea','-',t1.data->>'cid'),
+    t1.data->>'primaryScramblingCode' AS "PSC",
+    null as "3G_DLCE",
+    null as "3G_ULCE"
+FROM zte_cm."UtranCellFDD" t1 
+INNER JOIN zte_cm."LogicalCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid' where t1.data->>'MEID' is not null
 `
 
 const LTE_KEY_PARAMAETERS = `
