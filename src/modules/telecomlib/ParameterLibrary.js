@@ -28,7 +28,7 @@ export default class ParameterLibrary extends React.Component {
 				{headerName: "PARAMETER ID", field: "parameter_id", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
 				{headerName: "PARAMETER NAME", field: "parameter_name", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}, 
 				{headerName: "IS KEY", field: "is_key", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
-				{headerName: "GRANULITY", field: "granulity", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
+				{headerName: "GRANURALITY", field: "granurality", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
 				{headerName: "DESCRIPTION", field: "descripton", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}},
 				{headerName: " ", field: "manage", filter: "agTextColumnFilter", filterParams:{caseSensitive: true}}
 			],

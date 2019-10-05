@@ -17,6 +17,7 @@ const baseline = window.require('./baseline');
 const bgUtils = window.require('./bg-utils');
 const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
+const tems = window.require('./tems');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -408,6 +409,11 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 		//Remap MO name e.g UCELLSETUP to UCELL inorder to load to appropriate table 
 		if(vendor.toLowerCase() === 'huawei' && typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
 			 moName = moTransform.HUAWEI_MO_MAP[moName];
+			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
+		}
+		
+		if(vendor.toLowerCase() === 'ericsson' && typeof moTransform.HUAWEI_MO_MAP[moName] !== 'undefined'){
+			 moName = moTransform.ERICSSON_MO_MAP[moName];
 			log.info(`${fileName.replace(".csv","")} transformed to ${moName}}`);
 		}
 		
@@ -853,6 +859,7 @@ async function parseData(dataType, vendor, format, inputFolder, outputFolder, be
 *
 * @param string input folder
 * @param boolean truncateTables
+* @deprecated
 *
 * @since 0.3.0
 */
@@ -1505,7 +1512,7 @@ async function autoGenerateParameterRef(clearTableBefore){
 async function downloadBaselineReference(fileName, outputFolder, format){
 	try{ 
 		const f = typeof format === 'undefined' ? 'csv' : format;
-		const q = "SELECT * FROM baseline.vw_configuration"
+		const q = "SELECT vendor, technology, mo, parameter, baseline as baseline_value FROM baseline.vw_configuration"
 		const dlFileName = await generateExcelOrCSV(fileName, outputFolder, q, f, {});
 		return {status: 'success', message: dlFileName };
 	}catch(e){
@@ -1530,16 +1537,35 @@ async function addParamToBaselineRef(vendor, tech, mo, parameter, baselineValue)
 */
 async function deleteBaselineParameter(vendor, tech, mo, parameter){
 	try{	
-			const sql = `DELETE FROM baseline.configuration WHERE vendor = '${vendor}' AND technology = '${tech}' AND mo = '${mo}' AND parameter = '${parameter}'`;
-			console.log(sql);
-			await queryHelper.runQuery(sql);
-			return {status: 'success', message:  `Parameter ${parameter} added to baselined` };
+		const sql = `DELETE FROM baseline.configuration WHERE vendor = '${vendor}' AND technology = '${tech}' AND mo = '${mo}' AND parameter = '${parameter}'`;
+		await queryHelper.runQuery(sql);
+		return {status: 'success', message:  `Parameter ${parameter} added to baselined` };
 	}catch(e){
 		log.error(e);
 		return {status: 'error', message: `Error while deleting ${parameter}. Check logs for details.`};		
 	}
 }
 
+async function importGISFile(fileName, format, truncateTable){
+	try{
+		if( format === 'BCF'){
+			await bcf.loadBodaCellFile(fileName, truncateTable);
+			return {status: 'success', message:  `Successfully imported ${fileName}` };
+		}
+		
+		if(format === 'TEMS'){
+			await tems.loadTEMSFile(fileName, truncateTable);
+			return {status: 'success', message:  `Successfully imported ${fileName}` };
+		}
+		return {status: 'error', message:  ` Import failed. Unsupported file format ${format}.` };
+
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error occured while importing ${format} file. Check logs for details.`};		
+	}
+}
+
+exports.importGISFile = importGISFile;
 exports.addParamToBaselineRef = addParamToBaselineRef;
 exports.runBaseline = runBaseline;
 exports.SQLITE3_DB_PATH = SQLITE3_DB_PATH;

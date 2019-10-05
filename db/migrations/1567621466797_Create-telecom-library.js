@@ -14,7 +14,7 @@ exports.up = (pgm) => {
 			parameter_name: {type: "varchar(300)", notNull: true},
 			description: {type: "text"},
 			is_key: {type: "varchar(50)", default: "NO"}, //YES or NO
-			granulity: {type: "varchar(100)"}, //CELL,SITE,RNC,BSC,CELLR,CARRIER
+			granurality: {type: "varchar(100)"}, //CELL,SITE,RNC,BSC,CELLR,CARRIER
 			created_at: "createdAt", 
 			modified_at: "createdAt", 
 			created_by: "createdBy",
@@ -36,7 +36,7 @@ exports.up = (pgm) => {
 			vendor: {type: "varchar(100)", notNull: true},
 			technology: {type: "varchar(100)", notNull: true},
 			mo: {type: "varchar(100)", notNull: true},
-			granulity: {type: "varchar(50)", notNull: true},
+			granurality: {type: "varchar(50)", notNull: true},
 			created_at: "createdAt", 
 			modified_at: "createdAt", 
 			created_by: "createdBy",
@@ -54,7 +54,7 @@ exports.up = (pgm) => {
 //Huawei
 	pgm.sql(`
 INSERT INTO telecomlib.managed_objects
-(vendor, technology, granulity, mo)
+(vendor, technology, granurality, mo)
 VALUES
 ('ERICSSON','2G','BSC','BSC'),
 ('ERICSSON','2G','CELL','CHANNEL_GROUP'),

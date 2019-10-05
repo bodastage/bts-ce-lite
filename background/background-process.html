@@ -839,6 +839,18 @@ async function  executeTask(task, options){
 	}catch(err){
 		log.error(err)
 		sendLogToUI(task,'error', "Error while deleting parameter from baseline computation.  Check logs for details.");
+	}	
+
+	//
+	//Import GIS File 
+	try{
+		if(task === 'upload_gis_file'){
+			const result = await utils.importGISFile(options.importFile, options.format, options.truncateTable);
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error occured while importing file.  Check logs for details.");
 	}		
 }
 

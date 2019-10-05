@@ -1,23 +1,52 @@
 import React from 'react'
 import { connect } from 'react-redux';
-import { Map, TileLayer, Popup, Polyline, Marker, Tooltip } from 'react-leaflet';
+import { 
+	Map, 
+	TileLayer, 
+	Popup, 
+	Polyline, 
+	Marker, 
+	Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'leaflet/dist/leaflet.css';
 import './gis.css';
-import { ResizeSensor, Popover, Button, Intent, PopoverInteractionKind, Icon,
-		 FormGroup, InputGroup, Checkbox } from "@blueprintjs/core";
+import { 
+	ResizeSensor, 
+	Popover, 
+	Button, 
+	Intent, 
+	PopoverInteractionKind, 
+	Icon,
+	FormGroup, 
+	InputGroup, 
+	Checkbox, 
+	FileInput, 
+	HTMLSelect,
+	ProgressBar,
+	Switch
+	} from "@blueprintjs/core";
 import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation, gisClear } from './gis-actions';
 import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
 import Control from 'react-leaflet-control';
 import { Sidebar, Tab } from 'react-leaflet-sidetabs';
-import { FiHome, FiChevronRight, FiSearch, FiSettings, FiRadio, FiArrowRight, FiShare2 } from "react-icons/fi";
+import { FiHome, 
+	FiChevronRight, 
+	FiSearch, 
+	FiSettings, 
+	FiList,
+	FiRadio, 
+	FiArrowRight, 
+	FiShare2, 
+	FiDatabase } from "react-icons/fi";
 import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
 import { renderToString } from 'react-dom/server'
+
+const { ipcRenderer} = window.require("electron");
 
 //Fix icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -27,11 +56,30 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 
+const IMPORT_FILE_FORMAT = ['BCF', 'TEMS'];
+
 class GISMap extends React.Component{
     static icon = "globe-africa";
     static label = "GIS";
     constructor(props){
         super(props);
+		
+		//Raduis of sectors per technology
+		this.techRadii = {
+			'gsm': 700,
+			'umts': 500,
+			'lte': 250,
+			'5g': 200
+		};
+		
+		//Sector angle offset to handle overlapping sectors 
+		this.angularOffset = {
+			'gsm': 0,
+			'umts': 5,
+			'lte': 10,
+			'5g': 15
+		}
+		
         this.state = {
             lat: 51.505,
             lng: -0.09,
@@ -45,17 +93,37 @@ class GISMap extends React.Component{
 			//Technology filter
 			showGSMCells: true,
 			showUMTSCells: true,
-			showLTECells: true
+			showLTECells: true,
+			
+			//Importing data
+			importFile: "",
+			importFileFormat: IMPORT_FILE_FORMAT[0],
+			processingImport: false,
+			importStatusNotice: null,
+			
+			//Clear data in tables before loading
+			clearBeforeLoading: false,
+			
+			gsmRadius: this.techRadii['gsm'],
+			umtsRadius: this.techRadii['umts'],
+			lteRadius: this.techRadii['lte'],
+			
+			//
+			updateKey : 0
         }
         
         this.handleResize = this.handleResize.bind(this);
-        this.click = this.click.bind(this);
 		this.refreshMap = this.refreshMap.bind(this);
 		this.showHideNbrsForCell = this.showHideNbrsForCell.bind(this);
 		this.showHideRelation = this.showHideRelation.bind(this);
 		this.handleFilterTextChangeEvent = this.handleFilterTextChangeEvent.bind(this)
 		this.handleEnabledChange = this.handleEnabledChange.bind(this)
 		this.handleTechFilterCheckBox = this.handleTechFilterCheckBox.bind(this)
+		
+		
+		this.importFileBGJobListener = null;
+		
+
     }
     
   onSideBarClose() {
@@ -119,13 +187,14 @@ class GISMap extends React.Component{
 	  
   }
   
-    click(e){
-        console.log(e)
-    }
+	updateRadii = () => {
+		this.setState({updateKey: this.state.updateKey+1});
+	}
     
 	componentWillUnmount(){
 		this.props.dispatch(gisClear());
 	}
+	
     componentDidMount () {
 		this.map = this.refs.map.leafletElement;
         const map = this.refs.map.leafletElement;
@@ -179,6 +248,86 @@ class GISMap extends React.Component{
 		this.props.dispatch(gisGetCells());
 	}
     
+	dismissImportStatusNotice = () => {
+		this.setState({importStatusNotice: null});
+	}
+	
+	
+	onImportFileChange = (e) => {
+		if( e.target.files.length === 0) return;
+		this.setState({importFile: e.target.files[0].path})
+	}
+	
+		
+	onImportFileFormatChange = (e) => {
+		this.setState({
+			importFileFormat: e.target.value
+		});
+	}
+	
+	
+	importMapData = () => {
+		//Show error notice if user tries to upload empty file.
+		if(this.state.importFile.length === 0 ){
+			this.setState({
+				importStatusNotice: {
+					type: 'danger', 
+					message: "No file selected!"
+					}
+			});
+			return;
+		}
+		
+		this.setState({processingImport: true });
+		
+		let payload = {
+			importFile: this.state.importFile,
+			format: this.state.importFileFormat,
+			truncateTable: this.state.clearBeforeLoading
+		}
+
+		//Set processing to true 
+		this.setState({processing: true });
+		
+		ipcRenderer.send('parse-cm-request', 'upload_gis_file', JSON.stringify(payload));
+		
+		this.importFileBGJobListener = (event, task, args) => {
+			const obj = JSON.parse(args)
+			if(task !== 'upload_gis_file') return;
+			
+			//error
+			if(obj.status === 'error' && task === 'upload_gis_file' ){
+				this.setState({
+						importStatusNotice: {type: 'danger', message: obj.message},
+						processingImport: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
+			}
+			
+			//info
+			if(obj.status === 'info' && task === 'upload_gis_file' ){
+				this.setImportStatusNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'upload_gis_file' ){
+				this.setState({
+						importStatusNotice: {
+							type: 'success', 
+							message: obj.message
+							},
+						processingImport: false
+						});
+
+				ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
+				this.refreshMap();
+			}
+			
+		}
+		ipcRenderer.on('parse-cm-request', this.importFileBGJobListener);
+	}
+	
+	setImportStatusNotice = (type,message) => {this.setState({importStatusNotice: {type: type, message: message}})}
+	
     handleResize(resizeEntries){
 
         //this.setState({height: resizeEntries[0].contentRect.height})
@@ -188,7 +337,31 @@ class GISMap extends React.Component{
         },1);
     }
     
+	handleClearSwitch = () => {
+		this.setState({clearBeforeLoading: !this.state.clearBeforeLoading});
+	}
+	
+	handleGSMRadiusChange = (e) => {
+		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
+		this.techRadii['gsm'] = e.target.value;
+		this.setState({gsmRadius: e.target.value});
+	}
+	
+	handleUMTSRadiusChange = (e) => {
+		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
+		this.techRadii['umts'] = e.target.value;
+		this.setState({umtsRadius: e.target.value});
+	}
+	
+	handleLTERadiusChange = (e) => {
+		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
+		this.techRadii['lte'] = e.target.value;
+		this.setState({lteRadius: e.target.value});
+	}
+	
+	
     render(){
+		
         const position = [this.state.lat, this.state.lng]
         const height = this.state.height;
 		let center = [this.state.lat, this.state.lng]
@@ -229,13 +402,15 @@ class GISMap extends React.Component{
 		.map((cellid, i) => {
 			const cell = this.props.cells[cellid];
 			const beamWidth = parseInt(cell.antenna_beam) > 0 && parseInt(cell.antenna_beam) !== NaN ?  cell.antenna_beam : 30;
+			const lcTech = cell.technology.toLowerCase(); 
+			const radius = this.techRadii[lcTech] || 500;
 			return (
 				<React.Fragment key={cell.ci}>
 					<SemiCircle 
 						position={[cell.latitude, cell.longitude]}
-						radius={500}
-						startAngle={cell.azimuth}
-						stopAngle={cell.azimuth + beamWidth}
+						radius={radius}
+						startAngle={cell.azimuth + this.angularOffset[lcTech]}
+						stopAngle={cell.azimuth + beamWidth + this.angularOffset[lcTech]}
 						weight={2}
 						key={cell.ci + "-cell"}
 						
@@ -331,7 +506,18 @@ class GISMap extends React.Component{
 		
 		const displayCellCount = cellMarkers.length;
 		
-		console.log("this.state.showGSMCells", this.state.showGSMCells);
+		let importFileEllipsis = this.state.importFile === '' ? "" : "file-text-dir-rtl"
+		
+		//Import status notices 
+		let importStatusNotice = null;
+		if(this.state.importStatusNotice !== null ){ 
+			importStatusNotice = (<div className={`alert alert-${this.state.importStatusNotice.type} p-2`} role="alert">{this.state.importStatusNotice.message}
+					<button type="button" className="close"  aria-label="Close" onClick={this.dismissImportStatusNotice}>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>)
+		}
+
 		
         return (
 			<fieldset className="col-md-12 fieldset">    	
@@ -342,11 +528,10 @@ class GISMap extends React.Component{
 
                     <div className="map-container" >
 
-		
-				
                     <ResizeSensor onResize={this.handleResize}>
 				
-						<Map ref='map' 
+						<Map 
+							ref='map' 
 							attributionControl={false}
 							center={center} 
 							zoom={this.state.zoom} 
@@ -413,17 +598,104 @@ class GISMap extends React.Component{
 											<h6 className="horizontal-line">
 												<span className="horizontal-line-text">Environment</span>
 											</h6>
-											<Checkbox inline={true} checked={this.state.showPlanEnv} name="showPlanEnv" label="Plan" onChange={this.handleTechFilterCheckBox} />
-											<Checkbox inline={true} checked={this.state.showLiveEnv} name="showLiveEnv" label="Live" onChange={this.handleTechFilterCheckBox} />
+											<Checkbox inline={true} checked={this.state.showPlanEnv} 
+												name="showPlanEnv" 
+												label="Plan" 
+												onChange={this.handleTechFilterCheckBox} 
+												disabled={true}
+											/>
+											<Checkbox 
+												inline={true} 
+												checked={this.state.showLiveEnv} 
+												name="showLiveEnv" 
+												label="Live" 
+												onChange={this.handleTechFilterCheckBox} 
+												disabled={true}
+											/>
 										</div>
 										
 									</div>
 							   </Tab>
-							   <Tab id="gis_settings" header="Settings" anchor="bottom" icon={<FiSettings />}>
+							   
+							   <Tab id="gis_data" header="Data" icon={<FiDatabase />}>
 									<div className="mt-2">
+										<div>
+											<h6 className="horizontal-line">
+												<span className="horizontal-line-text">Upload file</span>
+											</h6>
+											{ this.state.processingImport ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
+											{importStatusNotice}
 									
+											<FileInput disabled={this.state.processingImport} className={"mr-2 " + importFileEllipsis} text={this.state.importFile} onChange={this.onImportFileChange} />
+											<HTMLSelect 
+												disabled={this.state.processingImport} 
+												options={IMPORT_FILE_FORMAT} 
+												className="mt-2 mr-2" 
+												onChange={this.onImportFileFormatChange}
+											/>
+											<Switch  disabled={this.state.processingImport} checked={this.state.clearBeforeLoading} label="Delete before loading" onChange={this.handleClearSwitch}/>
+											<Button text="Upload" disabled={this.state.processingImport}  icon="upload" className="mt-2" onClick={this.importMapData}/>
+										</div>
 									</div>
-							   </Tab>           
+							   </Tab> 
+							   
+							   <Tab id="gis_properties" header="Properties" icon={<FiList />}>
+									<div className="mt-2">
+										<div>
+											<h6 className="horizontal-line">
+												<span className="horizontal-line-text">Radius</span>
+											</h6>
+												<div className="row">
+													<label htmlFor="gsm_radius" className="col-sm-2 col-form-label">GSM</label>
+													<div className="col-10">
+														<FormGroup
+															labelFor="gsm_radius"
+															inline={true}
+															className="mb-1"
+														>
+															<InputGroup 
+																id="gsm_radius" 
+																defaultValue={this.techRadii['gsm']}
+																onChange={this.handleGSMRadiusChange}
+															/>
+														</FormGroup>
+													</div>
+												</div>
+												
+												<div className="row">
+													<label htmlFor="umts_radius" className="col-sm-2 col-form-label">UMTS</label>
+													<div className="col-10">
+														<FormGroup
+															labelFor="umts_radius"
+															inline={true}
+															className="mb-1"
+														>
+															<InputGroup 
+																id="umts_radius" 
+																defaultValue={this.techRadii['umts']}
+																onChange={this.handleUMTSRadiusChange}
+															/>
+														</FormGroup>
+													</div>
+												</div>
+												
+												<div className="row">
+													<label htmlFor="lte_radius" className="col-sm-2 col-form-label">LTE</label>
+													<div className="col-10">
+														<FormGroup
+															labelFor="lte_radius"
+															inline={true}
+															className="mb-1"
+														>
+															<InputGroup id="lte_radius" defaultValue={this.techRadii['lte']} onChange={this.handleLTERadiusChange}/>
+														</FormGroup>
+													</div>
+												</div>
+
+										</div>
+										
+									</div>
+							   </Tab>          
 							</Sidebar>
 							
 						</Map>
