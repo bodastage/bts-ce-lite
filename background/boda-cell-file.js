@@ -293,7 +293,7 @@ async function loadBodaCellFile(inputFile, truncateTables, beforeFileLoad, after
 		beforeLoad();
 	}
 	
-	if(truncateTables === true) {
+	if(truncateTables) {
 		log.info("Truncate tables before loading is set to true.")
 		
 		client = await pool.connect();

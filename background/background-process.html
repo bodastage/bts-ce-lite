@@ -845,7 +845,7 @@ async function  executeTask(task, options){
 	//Import GIS File 
 	try{
 		if(task === 'upload_gis_file'){
-			const result = await utils.importGISFile(options.importFile, options.format);
+			const result = await utils.importGISFile(options.importFile, options.format, options.truncateTable);
 			sendLogToUI(task, result.status, result.message);
 		}
 	}catch(err){

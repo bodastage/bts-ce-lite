@@ -3,7 +3,9 @@ const lineReader = window.require('line-reader');
 const queryHelper = window.require('./query-helpers');
 const { Client, Pool } = window.require('pg');
 const bcf = window.require('./boda-cell-file');
-
+const xpath = window.require('xpath');
+const dom = window.require('xmldom').DOMParser;
+  
 const TEMS_BCF_MAP = {
 	"Cell":  "cellid",
 	"Cell":  "cellname",
@@ -37,7 +39,7 @@ const TEMS_BCF_MAP = {
 	"BSIC": "bsic"
 };
 
-const TEMS_BCG_MAP_2G = {
+const TEMS_BCF_MAP_2G = {
 	"Network_CellID":  "siteid",
 	"Cell":  "cellname",
 	"Lat" : "latitude",
@@ -61,6 +63,38 @@ const TEMS_BCG_MAP_2G = {
 	"BSIC": "bsic"
 }
 
+const TEMS_BCF_MAP_3G = {
+	"Network_CellID":  null,
+	"Cell":  "cellname",
+	"Lat" : "latitude",
+	"Latitude" : "latitude",
+	"Lon" : "longitude",
+	"Longitude" : "longitude",
+	"MCC" : "mcc",
+	"MNC" : "mnc",
+	"LAC" : "lac",
+	"RA" : "rac",
+	"CI" : "ci",
+	"ANT_DIRECTION" : "azimuth",
+	"ANT DIR" : "azimuth",
+	"ANT ORIENTATION": "azimuth",
+	"ANT_BEAM_WIDTH" : "antenna_beam",
+	"ANT_TYPE": "antenna_type",
+	"ANT_HEIGHT": "height",
+	"ANT_TILT": "mechanical_tilt",
+	"CELL_TYPE": "cell_type",
+	"UARFCN": "uarfcn",
+	"RNC-ID": "rncid",
+	"SC": "psc",
+	"C-ID": "ci",
+	"URA": "ura",
+	"TIME_OFFSET": null,
+	"CPICH_POWER": "cpich_power",
+	"MAX_TX_POWER": "max_tx_power",
+	"NODE_B": "siteid",
+	"NODE_B_STATUS": null,
+}
+
 /**
 * Determine TEMS file format
 * 
@@ -68,7 +102,6 @@ const TEMS_BCG_MAP_2G = {
 */
 async function getFileFormat(fileName){
 	const fl = await firstLine(fileName);
-	console.log("fl:",fl);
 	
 	if('<?xml version="1.0" encoding="UTF-8"?>' == fl.trim()) return 'XML';
 	
@@ -95,13 +128,13 @@ function getDataCellTable(technology){
 		case 'umts':
 		case 'wcdma':
 		case 'cdma2000':
-			return "3g_cell"
+			return "3g_cells"
 		case '4g':
 		case 'lte':
-			return "4g_cell";
+			return "4g_cells";
 		case '5g':
 		case 'nr':
-			return "5g_cell";
+			return "5g_cells";
 		default:
 			throw new Error("Un-recognised technology. Expected gsm, umts, wcdma, lte, nr, 2g, 3g, 4g, or 5g")
 			
@@ -165,7 +198,7 @@ function generateParameterInsertQuery(fields, values){
 		${updatePhrase.join(",")}
 	`;
 	
-	console.log(sql)
+	//console.log(sql)
 	return sql;
 
 }
@@ -246,61 +279,454 @@ async function loadCELFile(fileName, truncateTables){
 	let valueIndex = [];
 	
 	let lineCnt = 0;
+	let line2 = "";
 	lineReader.eachLine(fileName, async function(line) {
 		//console.log(line);
 		lineCnt += 1;
 		if(lineCnt === 1) return;
 		if(lineCnt === 2) {
 			parameterList = line.split("\t");
-			bcfFields = parameterList.map( p => { 
-				return typeof TEMS_BCG_MAP_2G[p] === 'undefined' ? null : TEMS_BCG_MAP_2G[p];
-			}).filter(v => v != null)
-			valueIndex = parameterList.map( (p, i) => { 
-				return TEMS_BCG_MAP_2G[p] === undefined ? -1 : i;
-			}).filter(v => v > -1);
-			
-			if(bcfFields.indexOf("bsic") > -1){
-				bcfFields.push("technology");
-				bcfFields.push("cgi");
-				bcfFields.push("node");
-			}
-			
 		}
 		
 		values = line.split("\t");
-		bcfValues = valueIndex.map(v => values[v]);
-		
-		if(bcfFields.indexOf("bsic") > -1){			
+	
+		if(parameterList.indexOf("ARFCN") > -1 && values[parameterList.indexOf("ARFCN")].length > 0){
+			bcfFields = parameterList.map( p => { 
+				return typeof TEMS_BCF_MAP_2G[p] === 'undefined' ? null : TEMS_BCF_MAP_2G[p];
+			}).filter(v => v != null)
+			valueIndex = parameterList.map( (p, i) => { 
+				return TEMS_BCF_MAP_2G[p] === undefined ? -1 : i;
+			}).filter(v => v > -1);
+			
+			//Add extra fields
+			bcfFields.push("technology");
+			bcfFields.push("cgi");
+			bcfFields.push("node");
+			
+			//Add extra field values
+			bcfValues = valueIndex.map(v => values[v]);
+				
 			bcfValues.push("gsm");
+			//construct cgi
+			bcfValues[bcfFields.indexOf("cgi")] = `${bcfValues[bcfFields.indexOf("mcc")]}-${bcfValues[bcfFields.indexOf("mnc")]}-${bcfValues[bcfFields.indexOf("lac")]}-${bcfValues[bcfFields.indexOf("ci")]}`
+			bcfValues.push("BSC");
+			
+		}
+
+		if(parameterList.indexOf("UARFCN") > -1 && values[parameterList.indexOf("UARFCN")].length > 0){
+			bcfFields = parameterList.map( p => { 
+				return typeof TEMS_BCF_MAP_3G[p] === 'undefined' ? null : TEMS_BCF_MAP_3G[p];
+			}).filter(v => v != null)
+			valueIndex = parameterList.map( (p, i) => { 
+				return TEMS_BCF_MAP_3G[p] === undefined ? -1 : i;
+			}).filter(v => v > -1);
+			
+			//Add extra fields
+			bcfFields.push("technology");
+			bcfFields.push("cgi");
+			bcfFields.push("node");
+			
+			bcfValues = valueIndex.map(v => values[v]);
+			
+			//Add extra field values
+			bcfValues.push("umts");
 			
 			//cgi
 			bcfValues[bcfFields.indexOf("cgi")] = `${bcfValues[bcfFields.indexOf("mcc")]}-${bcfValues[bcfFields.indexOf("mnc")]}-${bcfValues[bcfFields.indexOf("lac")]}-${bcfValues[bcfFields.indexOf("ci")]}`
-			bcfValues.push("BSC");
+			bcfValues.push("RNC");
+			
 		}
 		
-		console.log("bcfFields:", bcfFields);
-		console.log("bcfValues:", bcfValues);
 		const InsertQry = generateParameterInsertQuery(bcfFields, bcfValues);
 		await queryHelper.runQuery(InsertQry);
 		
 	});
 }
 
-function loadXMLFile(fileName){
+/*
+* Load XML file
+* 
+* @param string fileName
+*/
+async function loadXMLFile(fileName){	//@TODO: Confirm file is XML
 	
+	var xml = fs.readFileSync(fileName).toString();
+	var doc = new dom().parseFromString(xml)
+	//var nodes = xpath.select("//GSM/CELL_LIST", doc);
+	var nodes = xpath.evaluate("//GSM/CELL_LIST/GSM_CELL", doc, null, xpath.XPathResult.ANY_TYPE, null);
+	//console.log(nodes[0]);
+	
+	const gsmBcfFields = [
+		'technology',
+		'node',
+		'cellname',
+		'cell_type',
+		'ncc',
+		'bcc',
+		'bsic',
+		'bcch',
+		'carrier_layer',
+		'mcc',
+		'mnc',
+		'lac',
+		'ci',
+		'cgi',
+		'latitude',
+		'longitude',
+		'azimuth',
+		'antenna_beam',
+		'height'
+	];
+	
+	
+	const wcdmaBcfFields = [
+		'technology',
+		'ci',
+		'cellname',
+		'siteid',
+		'carrier_layer',
+		'azimuth',
+		'electrical_tilt',
+		'mechanical_tilt',
+		'lac',
+		'rac',
+		'sac',
+		'node',
+		'psc',
+		'uarfcn',
+		'antenna_beam',
+		'latitude',
+		'longitude',
+		'azimuth',
+		'antenna_beam',
+		'height',
+		'vendor',
+		'cell_type',
+		'mnc',
+		'mcc',
+		'rncid'
+	];
+	
+	const lteBcfFields = [
+		"technology",
+		"cellname",
+		"siteid",
+		"enodeb_id",
+		"carrier_layer",
+		"azimuth",
+		"electrical_tilt",
+		"mechanical_tilt",
+		"tac",
+		"node",
+		"pci",
+		"euarfcn",
+		"bandwidth",
+		"ecgi",
+		"mnc",
+		"mcc",
+		"antenna_beam",
+		"latitude",
+		"longitude",
+		"height",
+		"vendor",
+		"cell_type"
+	]
+	
+	//GSM_CELL
+	node = nodes.iterateNext()
+	while(node){
+//		console.log(node);
+		const children = node.childNodes;
+
+		let paramValues = {};
+		
+		for(var i = 0 ; i < children.length; i++){
+			if( children[i].localName == undefined) continue;
+			const child = children[i];
+			
+			if(child.nodeName === 'CELLNAME') paramValues['cellname'] = child.firstChild.data;
+			
+			if(child.nodeName === 'CELL_TYPE') paramValues['cell_type'] = child.firstChild.data;
+			
+			//BSIC
+			if(child.nodeName === 'BSIC'){
+				const children2 = child.childNodes;
+				for(var j = 0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+
+					if(child2.nodeName === 'BCC') paramValues['bcc'] = child2.firstChild.data;
+					if(child2.nodeName === 'NCC') paramValues['ncc'] = child2.firstChild.data;
+				}
+				
+				paramValues['bsic'] = `${paramValues["ncc"]}${paramValues["bcc"]}`
+			}
+			
+			
+			//CHANNEL_INFO
+			if(child.nodeName === 'CHANNEL_INFO'){
+				const children2 = child.childNodes[1].childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'ARFCN') paramValues['bcch'] = child2.firstChild.data;
+					if(child2.nodeName === 'BAND') paramValues['carrier_layer'] = child2.firstChild.data;
+				}
+			}
+			
+			//CGI
+			if(child.nodeName === 'CGI'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'MCC') paramValues['mcc'] = child2.firstChild.data;
+					if(child2.nodeName === 'MNC') paramValues['mnc'] = child2.firstChild.data;
+					if(child2.nodeName === 'LAC') paramValues['lac'] = child2.firstChild.data;
+					if(child2.nodeName === 'CI') paramValues['ci'] = child2.firstChild.data;
+				}
+				
+				paramValues['cgi'] = `${paramValues["mcc"]}-${paramValues["mnc"]}-${paramValues["lac"]}-${paramValues["ci"]}`
+			}
+			
+			//POSITION
+			if(child.nodeName === 'POSITION'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'LATITUDE') paramValues['latitude'] = child2.firstChild.data;
+					if(child2.nodeName === 'LONGITUDE') paramValues['longitude'] = child2.firstChild.data;
+				}
+			}
+			
+			//ANTENNA
+			if(child.nodeName === 'ANTENNA'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'DIRECTION') paramValues['azimuth'] = child2.firstChild.data;
+					if(child2.nodeName === 'BEAM_WIDTH') paramValues['antenna_beam'] = child2.firstChild.data;
+					if(child2.nodeName === 'HEIGHT') paramValues['height'] = child2.firstChild.data;
+				}
+			}
+		}
+		
+		
+		paramValues['technology'] = 'gsm';
+		paramValues['node'] = 'BSC';
+		
+		const bcfGSMValues  = gsmBcfFields.map(v => paramValues[v]);
+			
+		const InsertQry = generateParameterInsertQuery(gsmBcfFields, bcfGSMValues);
+		await queryHelper.runQuery(InsertQry);
+
+		node = nodes.iterateNext()
+	}
+	
+	
+	//WCDMA 
+	var nodes = xpath.evaluate("//WCDMA/CELL_LIST/WCDMA_CELL", doc, null, xpath.XPathResult.ANY_TYPE, null);
+	node = nodes.iterateNext()
+	while(node){
+//		console.log(node);
+		const children = node.childNodes;
+
+		let paramValues = {};
+		
+		for(var i = 0 ; i < children.length; i++){
+			if( children[i].localName == undefined) continue;
+			const child = children[i];
+			
+			if(child.nodeName === 'CELLNAME') paramValues['cellname'] = child.firstChild.data;
+			
+			if(child.nodeName === 'CELL_TYPE') paramValues['cell_type'] = child.firstChild.data;
+			
+			if(child.nodeName === 'LOCALCELLID') paramValues['localcellid'] = child.firstChild.data;
+			
+			if(child.nodeName === 'UARFCN_DL') paramValues['uarfcn'] = child.firstChild.data;
+			
+			if(child.nodeName === 'RNC_ID') paramValues['rncid'] = child.firstChild.data;
+			
+			if(child.nodeName === 'SC') paramValues['psc'] = child.firstChild.data;
+			
+			if(child.nodeName === 'CPICH_POWER') paramValues['cpich_power'] = child.firstChild.data;
+
+			if(child.nodeName === 'NODE_B') { 
+				paramValues['siteid'] = child.firstChild.data;
+				paramValues['sitename'] = child.firstChild.data;
+			}
+			
+			if(child.nodeName === 'NODE_B_STATUS') paramValues['status'] = child.firstChild.data;
+
+			if(child.nodeName === 'URA') paramValues['ura'] = child.firstChild.data;
+			//
+			
+			//CGI
+			if(child.nodeName === 'CGI'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'MCC') paramValues['mcc'] = child2.firstChild.data;
+					if(child2.nodeName === 'MNC') paramValues['mnc'] = child2.firstChild.data;
+					if(child2.nodeName === 'LAC') paramValues['lac'] = child2.firstChild.data;
+					if(child2.nodeName === 'CI') paramValues['ci'] = child2.firstChild.data;
+				}
+				
+				paramValues['cgi'] = `${paramValues["mcc"]}-${paramValues["mnc"]}-${paramValues["lac"]}-${paramValues["ci"]}`
+			}
+			
+			//POSITION
+			if(child.nodeName === 'POSITION'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'LATITUDE') paramValues['latitude'] = child2.firstChild.data;
+					if(child2.nodeName === 'LONGITUDE') paramValues['longitude'] = child2.firstChild.data;
+				}
+			}
+			
+			//ANTENNA
+			if(child.nodeName === 'ANTENNA'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'DIRECTION') paramValues['azimuth'] = child2.firstChild.data;
+					if(child2.nodeName === 'BEAM_WIDTH') paramValues['antenna_beam'] = child2.firstChild.data;
+					if(child2.nodeName === 'HEIGHT') paramValues['height'] = child2.firstChild.data;
+				}
+			}
+		}
+		
+		paramValues['technology'] = 'umts';
+		paramValues['node'] = paramValues['rncid'] || "RNC";
+		
+		const bcfWCDMAValues  = wcdmaBcfFields.map(v => paramValues[v] || '');
+
+		const InsertQry = generateParameterInsertQuery(wcdmaBcfFields, bcfWCDMAValues);
+		await queryHelper.runQuery(InsertQry);
+
+		node = nodes.iterateNext()
+	}
+	
+	//LTE
+	var nodes = xpath.evaluate("//LTE/CELL_LIST/LTE_CELL", doc, null, xpath.XPathResult.ANY_TYPE, null);
+	node = nodes.iterateNext()
+	while(node){
+//		console.log(node);
+		const children = node.childNodes;
+
+		let paramValues = {};
+		
+		for(var i = 0 ; i < children.length; i++){
+			if( children[i].localName == undefined) continue;
+			const child = children[i];
+			
+			if(child.nodeName === 'CELLNAME') paramValues['cellname'] = child.firstChild.data;
+			
+			if(child.nodeName === 'CELL_TYPE') paramValues['cell_type'] = child.firstChild.data;
+			
+			if(child.nodeName === 'LOCALCELLID') paramValues['localcellid'] = child.firstChild.data;
+			
+			if(child.nodeName === 'PCI') paramValues['pci'] = child.firstChild.data;
+			
+			if(child.nodeName === 'EARFCN_DL') paramValues['euarfcn'] = child.firstChild.data;
+			
+			if(child.nodeName === 'TA') paramValues['tac'] = child.firstChild.data;
+			
+			if(child.nodeName === 'TIME_OFFSET') paramValues['time_offset'] = child.firstChild.data;
+			
+			if(child.nodeName === 'RS_POWER') paramValues['rs_power'] = child.firstChild.data;
+			
+			if(child.nodeName === 'MAX_TX_POWER') paramValues['max_tx_power'] = child.firstChild.data;
+
+
+			if(child.nodeName === 'ENODE_B') { 
+				paramValues['siteid'] = child.firstChild.data;
+				paramValues['enodeb_id'] = child.firstChild.data;
+				paramValues['sitename'] = child.firstChild.data;
+			}
+			
+			if(child.nodeName === 'ENODE_B_STATUS') paramValues['status'] = child.firstChild.data;
+
+			//POSITION
+			if(child.nodeName === 'POSITION'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'LATITUDE') paramValues['latitude'] = child2.firstChild.data;
+					if(child2.nodeName === 'LONGITUDE') paramValues['longitude'] = child2.firstChild.data;
+				}
+			}
+			
+			//ANTENNA
+			if(child.nodeName === 'ANTENNA'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'DIRECTION') paramValues['azimuth'] = child2.firstChild.data;
+					if(child2.nodeName === 'BEAM_WIDTH') paramValues['antenna_beam'] = child2.firstChild.data;
+					if(child2.nodeName === 'HEIGHT') paramValues['height'] = child2.firstChild.data;
+				}
+			}
+		}
+		
+		paramValues['technology'] = 'lte';
+		paramValues['node'] = paramValues['siteid'] || "ENODEB";
+		
+		const bcfLTEValues  = lteBcfFields.map(v => paramValues[v] || '');
+		
+		const InsertQry = generateParameterInsertQuery(lteBcfFields, bcfLTEValues);
+		await queryHelper.runQuery(InsertQry);
+
+		node = nodes.iterateNext()
+	}
 }
 
-async function loadTEMSFile(fileName){
+async function loadTEMSFile(fileName, clearTables){
 	const fileFormat = await getFileFormat(fileName);
 	
 	if(fileFormat === null) throw new Error("Unknow TEMS file format.");
+	
+	if(clearTables){
+		
+		await queryHelper.runQuery(`TRUNCATE plan_network."2g_cells" RESTART IDENTITY CASCADE`);
+		await queryHelper.runQuery(`TRUNCATE plan_network."3g_cells" RESTART IDENTITY CASCADE`);
+		await queryHelper.runQuery(`TRUNCATE plan_network."4g_cells" RESTART IDENTITY CASCADE`);
+		await queryHelper.runQuery(`TRUNCATE plan_network."relations" RESTART IDENTITY CASCADE`);
+	}
 	
 	if(fileFormat === 'CEL'){
 		await loadCELFile(fileName);
 	}
 	
 	if(fileFormat === 'XML'){
-		loadXMLFile(fileName);
+		await loadXMLFile(fileName);
 	}
 }
 

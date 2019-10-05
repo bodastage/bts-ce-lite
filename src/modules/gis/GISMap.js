@@ -23,7 +23,8 @@ import {
 	Checkbox, 
 	FileInput, 
 	HTMLSelect,
-	ProgressBar
+	ProgressBar,
+	Switch
 	} from "@blueprintjs/core";
 import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation, gisClear } from './gis-actions';
 import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
@@ -31,7 +32,15 @@ import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
 import Control from 'react-leaflet-control';
 import { Sidebar, Tab } from 'react-leaflet-sidetabs';
-import { FiHome, FiChevronRight, FiSearch, FiSettings, FiRadio, FiArrowRight, FiShare2, FiDatabase } from "react-icons/fi";
+import { FiHome, 
+	FiChevronRight, 
+	FiSearch, 
+	FiSettings, 
+	FiList,
+	FiRadio, 
+	FiArrowRight, 
+	FiShare2, 
+	FiDatabase } from "react-icons/fi";
 import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
@@ -54,6 +63,23 @@ class GISMap extends React.Component{
     static label = "GIS";
     constructor(props){
         super(props);
+		
+		//Raduis of sectors per technology
+		this.techRadii = {
+			'gsm': 700,
+			'umts': 500,
+			'lte': 250,
+			'5g': 200
+		};
+		
+		//Sector angle offset to handle overlapping sectors 
+		this.angularOffset = {
+			'gsm': 0,
+			'umts': 5,
+			'lte': 10,
+			'5g': 15
+		}
+		
         this.state = {
             lat: 51.505,
             lng: -0.09,
@@ -73,7 +99,17 @@ class GISMap extends React.Component{
 			importFile: "",
 			importFileFormat: IMPORT_FILE_FORMAT[0],
 			processingImport: false,
-			importStatusNotice: null
+			importStatusNotice: null,
+			
+			//Clear data in tables before loading
+			clearBeforeLoading: false,
+			
+			gsmRadius: this.techRadii['gsm'],
+			umtsRadius: this.techRadii['umts'],
+			lteRadius: this.techRadii['lte'],
+			
+			//
+			updateKey : 0
         }
         
         this.handleResize = this.handleResize.bind(this);
@@ -86,6 +122,8 @@ class GISMap extends React.Component{
 		
 		
 		this.importFileBGJobListener = null;
+		
+
     }
     
   onSideBarClose() {
@@ -149,6 +187,9 @@ class GISMap extends React.Component{
 	  
   }
   
+	updateRadii = () => {
+		this.setState({updateKey: this.state.updateKey+1});
+	}
     
 	componentWillUnmount(){
 		this.props.dispatch(gisClear());
@@ -241,7 +282,8 @@ class GISMap extends React.Component{
 		
 		let payload = {
 			importFile: this.state.importFile,
-			format: this.state.importFileFormat
+			format: this.state.importFileFormat,
+			truncateTable: this.state.clearBeforeLoading
 		}
 
 		//Set processing to true 
@@ -295,7 +337,31 @@ class GISMap extends React.Component{
         },1);
     }
     
+	handleClearSwitch = () => {
+		this.setState({clearBeforeLoading: !this.state.clearBeforeLoading});
+	}
+	
+	handleGSMRadiusChange = (e) => {
+		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
+		this.techRadii['gsm'] = e.target.value;
+		this.setState({gsmRadius: e.target.value});
+	}
+	
+	handleUMTSRadiusChange = (e) => {
+		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
+		this.techRadii['umts'] = e.target.value;
+		this.setState({umtsRadius: e.target.value});
+	}
+	
+	handleLTERadiusChange = (e) => {
+		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
+		this.techRadii['lte'] = e.target.value;
+		this.setState({lteRadius: e.target.value});
+	}
+	
+	
     render(){
+		
         const position = [this.state.lat, this.state.lng]
         const height = this.state.height;
 		let center = [this.state.lat, this.state.lng]
@@ -336,13 +402,15 @@ class GISMap extends React.Component{
 		.map((cellid, i) => {
 			const cell = this.props.cells[cellid];
 			const beamWidth = parseInt(cell.antenna_beam) > 0 && parseInt(cell.antenna_beam) !== NaN ?  cell.antenna_beam : 30;
+			const lcTech = cell.technology.toLowerCase(); 
+			const radius = this.techRadii[lcTech] || 500;
 			return (
 				<React.Fragment key={cell.ci}>
 					<SemiCircle 
 						position={[cell.latitude, cell.longitude]}
-						radius={500}
-						startAngle={cell.azimuth}
-						stopAngle={cell.azimuth + beamWidth}
+						radius={radius}
+						startAngle={cell.azimuth + this.angularOffset[lcTech]}
+						stopAngle={cell.azimuth + beamWidth + this.angularOffset[lcTech]}
 						weight={2}
 						key={cell.ci + "-cell"}
 						
@@ -438,9 +506,6 @@ class GISMap extends React.Component{
 		
 		const displayCellCount = cellMarkers.length;
 		
-		console.log("this.state.showGSMCells", this.state.showGSMCells);
-		
-		
 		let importFileEllipsis = this.state.importFile === '' ? "" : "file-text-dir-rtl"
 		
 		//Import status notices 
@@ -465,7 +530,8 @@ class GISMap extends React.Component{
 
                     <ResizeSensor onResize={this.handleResize}>
 				
-						<Map ref='map' 
+						<Map 
+							ref='map' 
 							attributionControl={false}
 							center={center} 
 							zoom={this.state.zoom} 
@@ -567,16 +633,69 @@ class GISMap extends React.Component{
 												className="mt-2 mr-2" 
 												onChange={this.onImportFileFormatChange}
 											/>
-											<Button disabled={this.state.processingImport}  icon="upload" className="mt-2" onClick={this.importMapData}/>
+											<Switch  disabled={this.state.processingImport} checked={this.state.clearBeforeLoading} label="Delete before loading" onChange={this.handleClearSwitch}/>
+											<Button text="Upload" disabled={this.state.processingImport}  icon="upload" className="mt-2" onClick={this.importMapData}/>
 										</div>
 									</div>
 							   </Tab> 
 							   
-							   <Tab id="gis_settings" header="Settings" anchor="bottom" icon={<FiSettings />}>
+							   <Tab id="gis_properties" header="Properties" icon={<FiList />}>
 									<div className="mt-2">
-									
+										<div>
+											<h6 className="horizontal-line">
+												<span className="horizontal-line-text">Radius</span>
+											</h6>
+												<div className="row">
+													<label htmlFor="gsm_radius" className="col-sm-2 col-form-label">GSM</label>
+													<div className="col-10">
+														<FormGroup
+															labelFor="gsm_radius"
+															inline={true}
+															className="mb-1"
+														>
+															<InputGroup 
+																id="gsm_radius" 
+																defaultValue={this.techRadii['gsm']}
+																onChange={this.handleGSMRadiusChange}
+															/>
+														</FormGroup>
+													</div>
+												</div>
+												
+												<div className="row">
+													<label htmlFor="umts_radius" className="col-sm-2 col-form-label">UMTS</label>
+													<div className="col-10">
+														<FormGroup
+															labelFor="umts_radius"
+															inline={true}
+															className="mb-1"
+														>
+															<InputGroup 
+																id="umts_radius" 
+																defaultValue={this.techRadii['umts']}
+																onChange={this.handleUMTSRadiusChange}
+															/>
+														</FormGroup>
+													</div>
+												</div>
+												
+												<div className="row">
+													<label htmlFor="lte_radius" className="col-sm-2 col-form-label">LTE</label>
+													<div className="col-10">
+														<FormGroup
+															labelFor="lte_radius"
+															inline={true}
+															className="mb-1"
+														>
+															<InputGroup id="lte_radius" defaultValue={this.techRadii['lte']} onChange={this.handleLTERadiusChange}/>
+														</FormGroup>
+													</div>
+												</div>
+
+										</div>
+										
 									</div>
-							   </Tab>           
+							   </Tab>          
 							</Sidebar>
 							
 						</Map>

@@ -1546,15 +1546,15 @@ async function deleteBaselineParameter(vendor, tech, mo, parameter){
 	}
 }
 
-async function importGISFile(fileName, format){
+async function importGISFile(fileName, format, truncateTable){
 	try{
 		if( format === 'BCF'){
-			await bcf.loadBodaCellFile(fileName);
+			await bcf.loadBodaCellFile(fileName, truncateTable);
 			return {status: 'success', message:  `Successfully imported ${fileName}` };
 		}
 		
 		if(format === 'TEMS'){
-			await tems.loadTEMSFile(fileName);
+			await tems.loadTEMSFile(fileName, truncateTable);
 			return {status: 'success', message:  `Successfully imported ${fileName}` };
 		}
 		return {status: 'error', message:  ` Import failed. Unsupported file format ${format}.` };
