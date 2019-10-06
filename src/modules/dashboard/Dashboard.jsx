@@ -140,6 +140,40 @@ class Dashboard extends React.Component {
                         </div>        
 
                 </fieldset>		
+				
+
+                <fieldset className="col-md-12 fieldset">    	
+                    <legend className="legend">General</legend>
+                    
+                    <div className="row dashboard-icon">
+
+                        <div className="col-md-2">
+                            <div className="icon-display">
+								<a 
+									title="Utilties" 
+									href="#/utilities" 
+									onClick={this.setSidePanel('UtilitiesSidePanel')}>
+									<FontAwesomeIcon icon="tools"/>
+								</a></div>
+                            <div className="icon-label">Utilties</div>
+                        </div>
+
+                        <div className="col-md-2">
+
+                        </div>
+
+                        <div className="col-md-2">
+
+                        </div>
+
+                        <div className="col-md-2">
+
+                        </div>
+						
+                        <div className="col-md-2">
+                        </div>
+                    </div>
+                </fieldset>
                
                 <fieldset className="col-md-12 fieldset">    	
                     <legend className="legend">System</legend>

@@ -25,9 +25,9 @@ const initialState = {
 	
 	//Radius of the sectors
 	sectorRadius: {
-		'gsm': 700,
-		'umts':500,
-		'lte': 250,
+		'gsm': 300,
+		'umts':200,
+		'lte': 100,
 	}
 };
 

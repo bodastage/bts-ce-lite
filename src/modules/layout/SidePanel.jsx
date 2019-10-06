@@ -4,11 +4,13 @@ import ReportsTree from '../reports/ReportsTree';
 import GISLeftPanel from '../gis/GISLeftPanel';
 import { connect } from 'react-redux';
 import './sidepanel.css'
+import UtilitiesSidePanel from '../utilities/UtilitiesSidePanel';
 
 const SidePanels = {
     "DashboardSidePanel": DashboardSidePanel,
 	"ReportsTree": ReportsTree,
-	"GISLeftPanel": GISLeftPanel
+	"GISLeftPanel": GISLeftPanel,
+	"UtilitiesSidePanel": UtilitiesSidePanel
 };
 
 class SidePanel extends React.Component{

@@ -18,6 +18,7 @@ const bgUtils = window.require('./bg-utils');
 const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
 const tems = window.require('./tems');
+const csvToExcelCombiner = window.require('./csv-to-excel-combiner');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -1575,6 +1576,18 @@ async function clearBaselineReference(){
 	}
 }
 
+async function combinedCSVsIntoExcel(csvDirectory){
+	try{
+		const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsx');
+		await csvToExcelCombiner.combine(csvDirectory, combinedExcelFile);
+		return {status: 'success', message:  combinedExcelFile };
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error occured while combining csv files. Check logs for details.`};		
+	}
+}
+
+exports.combinedCSVsIntoExcel = combinedCSVsIntoExcel;
 exports.clearBaselineReference = clearBaselineReference;
 exports.importGISFile = importGISFile;
 exports.addParamToBaselineRef = addParamToBaselineRef;

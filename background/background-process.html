@@ -863,6 +863,17 @@ async function  executeTask(task, options){
 		log.error(err)
 		sendLogToUI(task,'error', "Error occured while clearing the baseline reference.  Check logs for details.");
 	}
+	
+	//
+	try{
+		if(task === 'combine_csv_to_excel'){
+			const result = await utils.combinedCSVsIntoExcel(options.csvDirectory);
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error occured while combining csv files.  Check logs for details.");
+	}
 }
 
 

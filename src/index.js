@@ -27,7 +27,8 @@ import { faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
 	faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen,
 	faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle
 	,faAsterisk, faFileAlt,faFrown,faDatabase, faFileExcel, faFileCsv,
-	faBroadcastTower, faPencilRuler, faBook,faCloudUploadAlt
+	faBroadcastTower, faPencilRuler, faBook,faCloudUploadAlt,faTools,
+	faCandyCane
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
@@ -37,7 +38,7 @@ faChartArea, faBrain, faGem, faUserMd, faGlobeAfrica, faPeopleCarry,
 faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen, 
 faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle,
 faAsterisk, faFileAlt,faFrown, faDatabase, faFileExcel, faFileCsv,
-faBroadcastTower, faPencilRuler, faBook, faCloudUploadAlt);
+faBroadcastTower, faPencilRuler, faBook, faCloudUploadAlt, faTools, faCandyCane);
 
 const store = configureStore();
 
