@@ -5,7 +5,10 @@ import { GIS_CONFIRM_CELLS_RECEIVED, GIS_CONFIRM_NBRS_RECEIVED,
 		GIS_SHOW_INFO,
 		GIS_HIDE_CELL_NBRS,
 		GIS_HIDE_RELATION,
-		GIS_CLEAR} from './gis-actions';
+		GIS_CLEAR,
+		GIS_UPDATE_PLAN_CARRIERS,
+		GIS_UPDATE_CARRIER_COLOR,
+		GIS_UPDATE_SECTOR_RADIUS} from './gis-actions';
 
 const initialState = {
 	cells: [],
@@ -14,7 +17,18 @@ const initialState = {
 	
 	//List of relations to hide
 	hiddenRelations: {},
-	carrierLayer: {}
+	carrierLayer: {},
+	
+	//Colors to use for each carrier
+	carrierColors: ["#0251a6", "#498354", "#66aebd", "#4a8bae", "#2f4285", "#edb1ff", "#a960ed", "#007bff", "#432ab7", "#427ff5", "#88075f", "#cc5d96", "#fb0998", "#fa1bfc", "#9a789e", "#20c997", "#76480d", "#b1e632", "#19a71f", "#20f53d"],
+	carrierColorMap: {},
+	
+	//Radius of the sectors
+	sectorRadius: {
+		'gsm': 700,
+		'umts':500,
+		'lte': 250,
+	}
 };
 
 function gis(state = initialState, action) {
@@ -60,8 +74,33 @@ function gis(state = initialState, action) {
 					[action.svr_ci + "-" + action.nbr_ci]: {}
 				} 
 			}
+		case GIS_UPDATE_PLAN_CARRIERS:
+			var colorMap = {};
+			action.frequencies.forEach((f, i) => {
+				colorMap[f] = state.carrierColors[i];
+			});
+			return {
+				...state,
+				carrierColorMap: colorMap
+			}
 		case GIS_CLEAR:
 			return initialState;
+		case GIS_UPDATE_CARRIER_COLOR:
+			return {
+				...state,
+				carrierColorMap: {
+					...state.carrierColorMap,
+					[action.carrier]: action.color
+				}
+			}
+		case GIS_UPDATE_SECTOR_RADIUS:
+			return {
+				...state,
+				sectorRadius: {
+					...state.sectorRadius,
+					[action.tech]: action.radius || initialState.sectorRadius[action.tech]
+				}
+			}
         default:
             return state;	
 	}

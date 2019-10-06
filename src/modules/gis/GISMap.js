@@ -26,7 +26,16 @@ import {
 	ProgressBar,
 	Switch
 	} from "@blueprintjs/core";
-import { gisGetCells, gisGetNbrs, gisHideCellNbrs, gisHideRelation, gisClear } from './gis-actions';
+import { 
+	gisGetCells, 
+	gisGetNbrs, 
+	gisHideCellNbrs, 
+	gisHideRelation, 
+	gisClear,
+	gisFetchPlanFrequencies,
+	gisUpdateCarrierColor,
+	gisUpdateSectorRadius
+} from './gis-actions';
 import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
@@ -151,8 +160,6 @@ class GISMap extends React.Component{
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        		
-		console.log("handleEnabledChange:", value, name);
 				
         this.setState({
           [name]: value
@@ -198,6 +205,9 @@ class GISMap extends React.Component{
     componentDidMount () {
 		this.map = this.refs.map.leafletElement;
         const map = this.refs.map.leafletElement;
+		
+		//Update carrier colors
+		this.props.dispatch(gisFetchPlanFrequencies());
         
         //By the time the GIS tab is shown, the GIS component has already
         //been mounted. As a result, leaflet does not display correctly because
@@ -265,6 +275,9 @@ class GISMap extends React.Component{
 		});
 	}
 	
+	updateCarrierColor = (e) => {
+		this.props.dispatch(gisUpdateCarrierColor(e.target.name, e.target.value));
+	}
 	
 	importMapData = () => {
 		//Show error notice if user tries to upload empty file.
@@ -341,26 +354,16 @@ class GISMap extends React.Component{
 		this.setState({clearBeforeLoading: !this.state.clearBeforeLoading});
 	}
 	
-	handleGSMRadiusChange = (e) => {
-		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
-		this.techRadii['gsm'] = e.target.value;
-		this.setState({gsmRadius: e.target.value});
-	}
-	
-	handleUMTSRadiusChange = (e) => {
-		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
-		this.techRadii['umts'] = e.target.value;
-		this.setState({umtsRadius: e.target.value});
-	}
-	
-	handleLTERadiusChange = (e) => {
-		if(isNaN(e.target.value) || e.target.value <= 0 ) return;
-		this.techRadii['lte'] = e.target.value;
-		this.setState({lteRadius: e.target.value});
+	handleRadiusChange = (e) => {
+		const tech = e.target.name.replace("Radius", "");
+		const radius = e.target.value;
+		this.props.dispatch(gisUpdateSectorRadius(tech, radius));
 	}
 	
 	
     render(){
+		
+		console.log('Rendering....');
 		
         const position = [this.state.lat, this.state.lng]
         const height = this.state.height;
@@ -403,10 +406,18 @@ class GISMap extends React.Component{
 			const cell = this.props.cells[cellid];
 			const beamWidth = parseInt(cell.antenna_beam) > 0 && parseInt(cell.antenna_beam) !== NaN ?  cell.antenna_beam : 30;
 			const lcTech = cell.technology.toLowerCase(); 
-			const radius = this.techRadii[lcTech] || 500;
+			
+			 //Radius. Adjust by  twice the last digit in the ci 
+			 const lastDigit = cell.ci.toString()[cell.ci.toString().length-1] || 0;
+			
+			let radius = this.props.sectorRadius[lcTech] || 500 ;
+			radius = parseInt(radius) + (lastDigit-1)*4;
+
+			const color = this.props.carrierColors[cell.frequency] || null;
 			return (
 				<React.Fragment key={cell.ci}>
 					<SemiCircle 
+						color={color}
 						position={[cell.latitude, cell.longitude]}
 						radius={radius}
 						startAngle={cell.azimuth + this.angularOffset[lcTech]}
@@ -655,8 +666,9 @@ class GISMap extends React.Component{
 														>
 															<InputGroup 
 																id="gsm_radius" 
-																defaultValue={this.techRadii['gsm']}
-																onChange={this.handleGSMRadiusChange}
+																name="gsmRadius"
+																defaultValue={this.props.sectorRadius['gsm']}
+																onChange={this.handleRadiusChange}
 															/>
 														</FormGroup>
 													</div>
@@ -672,8 +684,9 @@ class GISMap extends React.Component{
 														>
 															<InputGroup 
 																id="umts_radius" 
-																defaultValue={this.techRadii['umts']}
-																onChange={this.handleUMTSRadiusChange}
+																name="umtsRadius"
+																defaultValue={this.props.sectorRadius['umts']}
+																onChange={this.handleRadiusChange}
 															/>
 														</FormGroup>
 													</div>
@@ -687,11 +700,36 @@ class GISMap extends React.Component{
 															inline={true}
 															className="mb-1"
 														>
-															<InputGroup id="lte_radius" defaultValue={this.techRadii['lte']} onChange={this.handleLTERadiusChange}/>
+															<InputGroup 
+																name="lteRadius"
+																id="lte_radius" 
+																defaultValue={this.props.sectorRadius['lte']} 
+																onChange={this.handleRadiusChange}/>
 														</FormGroup>
 													</div>
 												</div>
+										</div>
+										
+										<div>
+											<h6 className="horizontal-line">
+												<span className="horizontal-line-text">Carrier Colors</span>
+											</h6>
+											<div>
+											{Object.keys(this.props.carrierColors).map((v, i) => (
+												<div className="row">
+													<div className="col-3">{v}</div>
+													<div className="col-2">
+														<input 
+															type="color" 
+															name={v} 
+															value={this.props.carrierColors[v]} 
+															onChange={this.updateCarrierColor}/>
+													</div>
 
+												</div>
+											))}
+												
+											</div>
 										</div>
 										
 									</div>
@@ -713,7 +751,9 @@ function mapStateToProps(state){
 		cells: state.gis.cells || {},
 		relations: state.gis.relations || {},
 		redraw: state.gis.redraw,
-		hiddenRelations: state.gis.hiddenRelations || {}
+		hiddenRelations: state.gis.hiddenRelations || {},
+		carrierColors: state.gis.carrierColorMap,
+		sectorRadius: state.gis.sectorRadius
 	};
 }
 

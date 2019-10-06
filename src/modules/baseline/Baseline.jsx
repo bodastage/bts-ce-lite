@@ -117,6 +117,7 @@ export default class Baseline extends React.Component {
 		this.baselineRefDownloadListener = null;
 		this.addToBaselineRefListener = null;
 		this.deleteBaselineListener = null;
+		this.clearBaselineRefListener = null;
 		
 	}
 	
@@ -220,7 +221,7 @@ export default class Baseline extends React.Component {
 	}
 	
 	/**
-	* Delete parameter
+	* Delete parameter's baseline reference 
 	*/
 	deleteParameter = (vendor, technology, mo, parameter) => {
 		let payload = {
@@ -268,6 +269,54 @@ export default class Baseline extends React.Component {
 			
 		}
 		ipcRenderer.on('parse-cm-request', this.deleteBaselineListener);
+		
+	}
+	
+	/**
+	* Clear all parameters in the baseline reference
+	*/
+	clearBaselineReference = () => {
+		let payload = {
+		};
+		
+		//Set processing to true 
+		this.setState({processing: true });
+		
+		ipcRenderer.send('parse-cm-request', 'clear_baseline_reference', JSON.stringify(payload));
+		
+		this.clearBaselineRefListener = (event, task, args) => {
+			const obj = JSON.parse(args)
+			if(task !== 'clear_baseline_reference') return;
+			
+			//error
+			if(obj.status === 'error' && task === 'clear_baseline_reference' ){
+				this.setState({
+						notice: {type: 'danger', message: obj.message},
+						processing: false
+						});
+				ipcRenderer.removeListener("parse-cm-request", this.clearBaselineRefListener);
+			}
+			
+			//info
+			if(obj.status === 'info' && task === 'clear_baseline_reference' ){
+				this.setNotice('info', obj.message)
+			}
+			
+			if(obj.status === "success" && task === 'clear_baseline_reference' ){
+				this.setState({
+						notice: {
+							type: 'success', 
+							message: obj.message
+							},
+						processing: false
+						});
+
+				ipcRenderer.removeListener("parse-cm-request", this.clearBaselineRefListener);
+				this.refreshData();
+			}
+			
+		}
+		ipcRenderer.on('parse-cm-request', this.clearBaselineRefListener);
 		
 	}
 	
@@ -576,7 +625,8 @@ export default class Baseline extends React.Component {
 						<FormGroup>
 								<Button icon="refresh" onClick={this.refreshData} minimal={true}></Button>
 								<Button icon="download" onClick={this.downloadBaselineReference} minimal={true}></Button>
-								| &nbsp;
+								<Button icon="trash" onClick={this.clearBaselineReference} minimal={true} />
+								&nbsp;| &nbsp;
 								
 								<HTMLSelect options={this.VENDOR_LIST} className="mr-2" onChange={this.handleVendorSelect} name="vendor"/>
 								<HTMLSelect options={this.TECH_LIST} className="mr-2" onChange={this.handleTechSelect} name="tech"/>
@@ -584,7 +634,7 @@ export default class Baseline extends React.Component {
 								<HTMLSelect options={this.PARAM_LIST} className="mr-2" onChange={this.handleParameterSelect} name="parameter"/>
 								<input className="bp3-input" placeholder="Baseline value" name="baseline_value" defaultValue={this.state.baselineValue} onChange={this.handleValueChange}/>
 								 &nbsp;
-								<Icon icon="add" className="mr-2" onClick={this.addToBaselineReference}/>
+								<Button icon="add" onClick={this.addToBaselineReference} minimal={true}></Button>
 						</FormGroup>
 					</div>
 					<div className="ag-theme-balham" style={{width: '100%', height: "100%", boxSizing: "border-box"}}>
