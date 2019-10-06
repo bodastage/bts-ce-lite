@@ -16,6 +16,7 @@ import CreateCompositeReport from '../reports/CreateCompositeReport';
 import GISMap from '../gis/GISMap';
 import Baseline from '../baseline/Baseline';
 import ParameterLibrary from '../telecomlib/ParameterLibrary';
+import CSVToExcelCombiner from '../utilities/CSVToExcelCombiner';
 
 const Components = {
     "Help": Help,
@@ -29,7 +30,8 @@ const Components = {
 	"CreateCompositeReport": CreateCompositeReport,
 	"GISMap": GISMap,
 	"Baseline": Baseline,
-	"ParameterLibrary": ParameterLibrary
+	"ParameterLibrary": ParameterLibrary,
+	"CSVToExcelCombiner": CSVToExcelCombiner
     };
 
 class Tabs extends React.Component {
