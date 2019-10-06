@@ -17,9 +17,40 @@ export const GIS_CONFIRM_NBRS_RECEIVED = 'GIS_CONFIRM_NBRS_RECEIVED';
 export const GIS_HIDE_CELL_NBRS = 'GIS_HIDE_CELL_NBRS';
 
 export const GIS_HIDE_RELATION = 'GIS_HIDE_RELATION';
+
 export const GIS_SHOW_RELATION = 'GIS_SHOW_RELATION';
 
 export const GIS_CLEAR  = 'GIS_CLEAR';
+
+export const GIS_UPDATE_PLAN_CARRIERS = 'GIS_UPDATE_PLAN_CARRIERS';
+
+export const GIS_UPDATE_CARRIER_COLOR = 'GIS_UPDATE_CARRIER_COLOR';
+
+export const GIS_UPDATE_SECTOR_RADIUS = 'GIS_UPDATE_SECTOR_RADIUS';
+
+export function gisUpdateSectorRadius(tech, radius){
+	return {
+		type: GIS_UPDATE_SECTOR_RADIUS,
+		tech: tech,
+		radius: radius
+	}
+}
+
+export function gisUpdateCarrierColor(carrier, color){
+	return{
+		type: GIS_UPDATE_CARRIER_COLOR,
+		carrier: carrier,
+		color: color
+	}
+}
+
+export function gisUpdatePlanCarriers(frequencies){
+	return{
+		type: GIS_UPDATE_PLAN_CARRIERS,
+		frequencies: frequencies
+	}
+}
+
 
 //Convert array to object
 const arrayToObject = (array, id) =>
@@ -134,6 +165,19 @@ export function gisGetNbrs(svrCI){
 		
 		dispatch(gisConfirmNbrsReceived(svrCI, results.rows));
 		dispatch(gisShowSuccess("Neighbours successfull retrieved"));
+	}
+}
+
+export function gisFetchPlanFrequencies(){
+	return async (dispatch, getState) => {
+		
+		const results = await runQuery(`SELECT  DISTINCT  frequency  FROM plan_network.vw_cells`);
+		if(typeof results.error !== 'undefined'){
+			log.error(results.error);
+			return dispatch(gisShowError("Failed to retreive neighbours"));
+		}
+		
+		dispatch(gisUpdatePlanCarriers(results.rows.map(f => f.frequency)));
 	}
 }
 

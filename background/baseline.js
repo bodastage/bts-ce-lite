@@ -226,6 +226,7 @@ FROM
 ericsson_cm."${mo}" t1
 WHERE 
 	t1.data->>'BSC_NAME' IS NOT NULL 
+	AND TRIM(t1.data->>'BSC_NAME') != '' 
 GROUP BY 
     t1.data->>'BSC_NAME',
     t1.data->>'${parameter}'
@@ -249,6 +250,7 @@ FROM
 ericsson_cm."${mo}" t1 
 WHERE 
 	t1.data->>'SubNetwork_2_id' IS NOT NULL 
+	AND TRIM(t1.data->>'SubNetwork_2_id') != '' 
 GROUP BY 
     t1.data->>'SubNetwork_2_id',
     t1.data->>'${parameter}'
@@ -292,7 +294,7 @@ async function computeZTEBaselineScore(tech, mo, parameter){
 INSERT INTO baseline.scores 
 (vendor, technology, cluster, mo, parameter, value, score)
 SELECT 
-	'ERICSSON' as vendor,
+	'ZTE' as vendor,
 	'${tech}' as technology,
     t1.data->>'SubNetwork_2_id' AS "cluster",
     '${mo}' AS "mo",
@@ -300,9 +302,10 @@ SELECT
     t1.data->>'${parameter}' as "value",
     COUNT(1) AS "score"
 FROM 
-ericsson_cm."${mo}" t1 
+zte_cm."${mo}" t1 
 WHERE 
 	t1.data->>'SubNetwork_2_id' IS NOT NULL 
+	AND TRIM(t1.data->>'SubNetwork_2_id') != '' 
 GROUP BY 
     t1.data->>'SubNetwork_2_id',
     t1.data->>'${parameter}'
@@ -317,7 +320,7 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 INSERT INTO baseline.scores 
 (vendor, technology, cluster, mo, parameter, value, score) 
 SELECT 
-	'ERICSSON' as vendor, 
+	'ZTE' as vendor, 
 	'${tech}' as technology, 
     t1.data->>'meContext_id' AS "cluster", 
     '${mo}' AS "mo", 
@@ -325,7 +328,7 @@ SELECT
     t1.data->>'${parameter}' as "value", 
     COUNT(1) AS "score" 
 FROM 
-ericsson_cm."${mo}" t1 
+zte_cm."${mo}" t1 
 WHERE 
 	TRIM(t1.data->>'meContext_id') IS NOT NULL 
 	AND TRIM(t1.data->>'meContext_id') != '' 
