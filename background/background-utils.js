@@ -1565,6 +1565,17 @@ async function importGISFile(fileName, format, truncateTable){
 	}
 }
 
+async function clearBaselineReference(){
+	try{
+		await queryHelper.runQuery("TRUNCATE TABLE baseline.configuration RESTART IDENTITY");
+		return {status: 'success', message:  `Successfully cleared baseline reference` };
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error occured while importing ${format} file. Check logs for details.`};		
+	}
+}
+
+exports.clearBaselineReference = clearBaselineReference;
 exports.importGISFile = importGISFile;
 exports.addParamToBaselineRef = addParamToBaselineRef;
 exports.runBaseline = runBaseline;

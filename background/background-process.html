@@ -851,8 +851,20 @@ async function  executeTask(task, options){
 	}catch(err){
 		log.error(err)
 		sendLogToUI(task,'error', "Error occured while importing file.  Check logs for details.");
-	}		
+	}
+
+	//	clear_baseline_reference
+	try{
+		if(task === 'clear_baseline_reference'){
+			const result = await utils.clearBaselineReference();
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error occured while clearing the baseline reference.  Check logs for details.");
+	}
 }
+
 
 ipcRenderer.on('parse-cm-job', (event, task, args) => {
 	log.info(`Backgroup process: task: ${task} args: ${args}`);
