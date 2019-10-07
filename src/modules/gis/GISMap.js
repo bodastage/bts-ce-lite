@@ -49,7 +49,8 @@ import { FiHome,
 	FiRadio, 
 	FiArrowRight, 
 	FiShare2, 
-	FiDatabase } from "react-icons/fi";
+	FiDatabase,
+	FiFilter	} from "react-icons/fi";
 import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
@@ -578,7 +579,7 @@ class GISMap extends React.Component{
 							  onOpen={this.onSideBarOpen.bind(this)}
 							  onClose={this.onSideBarClose.bind(this)}
 							>
-							   <Tab id="gis_search" header="Filter" icon={<FiSearch />}>
+							   <Tab id="gis_search" header="Filter" icon={<FiFilter />}>
 									<div className="mt-2">
 										<FormGroup
 											label=""
