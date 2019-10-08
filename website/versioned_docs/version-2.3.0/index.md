@@ -1,7 +1,8 @@
 ---
-id: index
+id: version-2.3.0-index
 title: Contents
 sidebar_label: Table of contents
+original_id: index
 ---
 
 # Boda-Lite Documentation
@@ -13,8 +14,6 @@ Boda-Lite is a multi-vendor network management desktop application. It is a mini
 - [Parse and Import](parse_and_import.md) 
 - [Reports](reports.md) 
 - [GIS](gis.md) 
-- [Baseline](baseline.md) 
-- [Utilities](utilities.md) 
 - [Key Files and Folders](key_files_and_folders.md)
 - [Contributing](contributing.md)
 - [Development](development.md) 

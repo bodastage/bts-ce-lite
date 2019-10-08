@@ -1,0 +1,17 @@
+{
+  "version-0.3.0-docs": {
+    "Contents": [
+      "version-0.3.0-index",
+      "version-0.3.0-introduction",
+      "version-0.3.0-installation",
+      "version-0.3.0-parse_and_import",
+      "version-0.3.0-reports",
+      "version-0.3.0-gis",
+      "version-0.3.0-baseline",
+      "version-0.3.0-utilities",
+      "version-0.3.0-key_files_and_folders",
+      "version-0.3.0-contributing",
+      "version-0.3.0-development"
+    ]
+  }
+}
