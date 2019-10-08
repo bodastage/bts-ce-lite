@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Multi-vendor/technology desktop telecommunication management app",
     "docs": {
+      "baseline": {
+        "title": "Baseline Audit",
+        "sidebar_label": "Baseline Audit"
+      },
       "contributing": {
         "title": "Contributing",
         "sidebar_label": "Contributing"
@@ -38,6 +42,66 @@
         "sidebar_label": "Parse and Import"
       },
       "reports": {
+        "title": "Reports",
+        "sidebar_label": "Reports"
+      },
+      "utilities": {
+        "title": "Utilities",
+        "sidebar_label": "Utilities"
+      },
+      "version-0.3.0/version-0.3.0-baseline": {
+        "title": "Baseline Audit",
+        "sidebar_label": "Baseline Audit"
+      },
+      "version-0.3.0/version-0.3.0-gis": {
+        "title": "GIS",
+        "sidebar_label": "GIS"
+      },
+      "version-0.3.0/version-0.3.0-index": {
+        "title": "Contents",
+        "sidebar_label": "Table of contents"
+      },
+      "version-0.3.0/version-0.3.0-introduction": {
+        "title": "Introduction",
+        "sidebar_label": "Introduction"
+      },
+      "version-0.3.0/version-0.3.0-utilities": {
+        "title": "Utilities",
+        "sidebar_label": "Utilities"
+      },
+      "version-2.3.0/version-2.3.0-contributing": {
+        "title": "Contributing",
+        "sidebar_label": "Contributing"
+      },
+      "version-2.3.0/version-2.3.0-development": {
+        "title": "Development",
+        "sidebar_label": "Development Guide"
+      },
+      "version-2.3.0/version-2.3.0-gis": {
+        "title": "GIS",
+        "sidebar_label": "GIS"
+      },
+      "version-2.3.0/version-2.3.0-index": {
+        "title": "Contents",
+        "sidebar_label": "Table of contents"
+      },
+      "version-2.3.0/version-2.3.0-installation": {
+        "title": "Installation",
+        "sidebar_label": "Installation"
+      },
+      "version-2.3.0/version-2.3.0-introduction": {
+        "title": "Introduction",
+        "sidebar_label": "Introduction"
+      },
+      "version-2.3.0/version-2.3.0-key_files_and_folders": {
+        "title": "Key Files and Folders",
+        "sidebar_label": "Key Files and Folders"
+      },
+      "version-2.3.0/version-2.3.0-parse_and_import": {
+        "title": "Parse and Import",
+        "sidebar_label": "Parse and Import"
+      },
+      "version-2.3.0/version-2.3.0-reports": {
         "title": "Reports",
         "sidebar_label": "Reports"
       }

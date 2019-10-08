@@ -1,7 +1,8 @@
 ---
-id: introduction
+id: version-2.3.0-introduction
 title: Introduction
 sidebar_label: Introduction
+original_id: introduction
 ---
 The tool is a minimal feature version of [BTS-CE](https://github.com/bodastage/bts-ce). Where as BTS-CE is server based and resource intensive, Boda-Lite is 
  intentionally light weight and designed to meet the needs of the engineer and run from their personal computers. As such, Boda-Lite is desktop based and supports Windows, Linux and Mac OSX. 
@@ -21,8 +22,7 @@ Below is a summary of the steps needed to install and start the application:
 * Parsing and import of configuration management(CM), performance management(PM) and fault management(FM) network dumps 
 * Reports module that supports tabular, various graphical reports and composite/dashboard like reports
 * Advanced GIS module
-* Importation of planning network data through boda cell file
-* Useful utilities such as combining csv files to excel
+* Importation of planning network data
 
 
 ## Planned functionality

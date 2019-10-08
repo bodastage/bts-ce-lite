@@ -1,7 +1,8 @@
 ---
-id: index
+id: version-0.3.0-index
 title: Contents
 sidebar_label: Table of contents
+original_id: index
 ---
 
 # Boda-Lite Documentation

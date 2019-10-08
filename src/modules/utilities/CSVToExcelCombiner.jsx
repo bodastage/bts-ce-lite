@@ -32,6 +32,10 @@ export default class CSVToExcelCombiner extends React.Component {
 		this.combinerListener = null;
 	}
 	
+	dismissNotice = () => {
+		this.setState({notice: null});
+	}
+	
 	showFiles = () => {
 		if (!fs.existsSync(this.state.inputFolder)) {
 			this.setState({errorMessage: `${this.state.inputFolder} does not exist`})

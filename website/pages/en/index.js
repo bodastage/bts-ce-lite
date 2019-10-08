@@ -64,7 +64,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="https://github.com/bodastage/bts-ce-lite/releases/tag/v0.2.3">Download v0.2.3</Button>
+            <Button href="https://github.com/bodastage/bts-ce-lite/releases/tag/v0.3.0">Download v0.3.0</Button>
             <Button href={docUrl('introduction.html#quick-start')}>Quick start</Button>
           </PromoSection>
         </div>
@@ -203,6 +203,26 @@ class Index extends React.Component {
       );
     };
 
+    const Sponsors = () => {
+
+      const showcase = [
+		{name: "Bodastage Solutions", siteUrl: "https://www.bodastage.com", logoUrl: '/bts-ce-lite/img/bodastage_logo.png'},
+		{name: "Telecomhall", siteUrl: "https://www.telecomhall.net", logoUrl: '/bts-ce-lite/img/telecomhall_forum_Logo.png'}
+	  ].map(sp => (
+          <a href={sp.siteUrl} key={sp.siteUrl}>
+            <img src={sp.logoUrl} alt={sp.name} title={sp.name} />
+          </a>
+        ));
+
+      return (
+        <div className="productShowcaseSection paddingBottom">
+          <h2>Sponsors</h2>
+          <p>This project is sponsored by</p>
+          <div className="logos">{showcase}</div>
+        </div>
+      );
+    };
+	
     return (
       <div>
         <HomeSplash siteConfig={siteConfig} language={language} />
@@ -213,6 +233,7 @@ class Index extends React.Component {
           <ReportsBlock />
           <GISBlock />
           <Showcase />
+		  <Sponsors />
         </div>
       </div>
     );

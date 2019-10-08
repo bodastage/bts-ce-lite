@@ -1,7 +1,8 @@
 ---
-id: gis
+id: version-0.3.0-gis
 title: GIS
 sidebar_label: GIS
+original_id: gis
 ---
 
 This GIS module displays cells and sites and their properties on a map. It allows filtering based on technology, name, and environment. 

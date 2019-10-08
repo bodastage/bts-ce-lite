@@ -38,7 +38,7 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'index', label: 'Docs'},
+    {doc: '', label: 'Docs'},
     {blog: true, label: 'Blog'},
 	{page: 'users', label: 'Users'},
 	{
@@ -110,7 +110,7 @@ const siteConfig = {
   // docsSideNavCollapsible: true,
 
   // Show documentation's last contributor's name.
-  // enableUpdateBy: true,
+  enableUpdateBy: true,
 
   // Show documentation's last update time.
   // enableUpdateTime: true,
@@ -123,7 +123,7 @@ const siteConfig = {
     zIndex: 100,
   },
   
-  defaultVersionShown: '0.2.3',
+  defaultVersionShown: '0.3.0',
   editUrl: 'https://github.com/bodastage/bts-ce-lite/edit/master/docs/',
 };
 

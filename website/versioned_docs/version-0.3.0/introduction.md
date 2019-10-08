@@ -1,7 +1,8 @@
 ---
-id: introduction
+id: version-0.3.0-introduction
 title: Introduction
 sidebar_label: Introduction
+original_id: introduction
 ---
 The tool is a minimal feature version of [BTS-CE](https://github.com/bodastage/bts-ce). Where as BTS-CE is server based and resource intensive, Boda-Lite is 
  intentionally light weight and designed to meet the needs of the engineer and run from their personal computers. As such, Boda-Lite is desktop based and supports Windows, Linux and Mac OSX. 
