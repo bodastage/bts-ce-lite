@@ -2,12 +2,24 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://bodastage.org/bts-ce-lite/blog</id>
     <title>Boda-Lite Blog</title>
-    <updated>2019-08-20T06:00:00Z</updated>
+    <updated>2019-10-08T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://bodastage.org/bts-ce-lite/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Boda-Lite news and events.</subtitle>
     <logo>https://bodastage.org/bts-ce-lite/img/favicon.ico</logo>
     <rights>Copyright © 2019 Bodastage Solutions</rights>
+    <entry>
+        <title type="html"><![CDATA[Version 0.3.0 Release]]></title>
+        <id>https://bodastage.org/bts-ce-lite/blog/2019/10/08/new-version-0.3.0.html</id>
+        <link href="https://bodastage.org/bts-ce-lite/blog/2019/10/08/new-version-0.3.0.html">
+        </link>
+        <updated>2019-10-08T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>0.3.0 is now available. Below are changes</p> <ul> <li>Baseline computation</li> <li>Added GIS module that supports boda cell file and TEMS CEL and XML files</li> <li>Added csv to excel combiner</li> <li>Preserve column ordering when reports are exported</li> <li>Update documentation with boda cel...</li></ul>]]></summary>
+        <author>
+            <name>Emmanuel Robert Ssebaggala</name>
+            <uri>https://www.ssegga.com</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Version 0.3.0-alpha.4]]></title>
         <id>https://bodastage.org/bts-ce-lite/blog/2019/08/20/new-version-0.3.0-alpha.4.html</id>

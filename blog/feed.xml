@@ -4,7 +4,7 @@
         <title>Boda-Lite Blog</title>
         <link>https://bodastage.org/bts-ce-lite/blog</link>
         <description>The best place to stay up-to-date with the latest Boda-Lite news and events.</description>
-        <lastBuildDate>Tue, 20 Aug 2019 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 08 Oct 2019 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,13 @@
             <link>https://bodastage.org/bts-ce-lite/blog</link>
         </image>
         <copyright>Copyright © 2019 Bodastage Solutions</copyright>
+        <item>
+            <title><![CDATA[Version 0.3.0 Release]]></title>
+            <link>https://bodastage.org/bts-ce-lite/blog/2019/10/08/new-version-0.3.0.html</link>
+            <guid>https://bodastage.org/bts-ce-lite/blog/2019/10/08/new-version-0.3.0.html</guid>
+            <pubDate>Tue, 08 Oct 2019 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>0.3.0 is now available. Below are changes</p> <ul> <li>Baseline computation</li> <li>Added GIS module that supports boda cell file and TEMS CEL and XML files</li> <li>Added csv to excel combiner</li> <li>Preserve column ordering when reports are exported</li> <li>Update documentation with boda cel...</li></ul>]]></description>
+        </item>
         <item>
             <title><![CDATA[Version 0.3.0-alpha.4]]></title>
             <link>https://bodastage.org/bts-ce-lite/blog/2019/08/20/new-version-0.3.0-alpha.4.html</link>
