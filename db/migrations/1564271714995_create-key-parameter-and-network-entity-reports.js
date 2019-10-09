@@ -26,7 +26,9 @@ SELECT
 	CONCAT(trim(t1.data->>'ncc'),trim(t1.data->>'bcc')) AS "BSIC",
 	t3.NumberOfTRX AS "TRX"
 	FROM zte_cm."GsmCell" t1 
-LEFT JOIN QRY_CHANNEL_GROUP_TRX t3 on t1.data->>'FILENAME'=t3."FILENAME" and t1.data->>'MEID'=t3."MEID" and t1.data->>'GBtsSiteManagerId'=t3."GBtsSiteManagerId" and t1.data->>'GGsmCellId'=t3."GGsmCellId"
+LEFT JOIN QRY_CHANNEL_GROUP_TRX t3 on t1.data->>'FILENAME'=t3."FILENAME" and t1.data->>'MEID'=t3."MEID" 
+	and t1.data->>'GBtsSiteManagerId'=t3."GBtsSiteManagerId" and t1.data->>'GGsmCellId'=t3."GGsmCellId"
+	where t1.data->>'MEID' is not null
 UNION
 --2G Parameters / ZTE(bulk_CM)
 SELECT 
@@ -166,6 +168,50 @@ LEFT JOIN huawei_cm."UCELL_ACT" t6 ON t1.data->>'FILENAME' = t6.data->>'FILENAME
 LEFT JOIN huawei_cm."UCELL_BLK" t7 ON t1.data->>'FILENAME' = t7.data->>'FILENAME' 
     AND t1.data->>'CELLID' = t7.data->>'CELLID'
 UNION
+--Huawei NBIXML
+SELECT
+    t1.data->>'varDateTime' AS DATETIME,
+    'HUAWEI' AS "VENDOR",
+    '3G' AS "TECH",
+    t2.data->>'SYSDESC' AS "NENAME",
+    t1.data->>'neid' AS "NEID",
+    NULL AS "SITEPROP LAT",
+    NULL AS "SITEPROP LON",
+    t3.data->>'NODEBID' AS "SITE  ID",
+    t1.data->>'NODEBNAME' AS "SITENAME",
+    t1.data->>'CELLID' AS "CELLID",
+    t1.data->>'CELLNAME' AS "CELLNAME",
+    t1.data->>'LOCELL' AS "CI",
+    CASE 
+    	WHEN t1.data->>'ACTSTATUS' = '1' THEN 'Activated'
+	ELSE 'Not ACTIVATED' 
+    END AS "ACT_STATUS",
+    CASE 
+        WHEN t1.data->>'BLKSTATUS' = '1' THEN 'Blocked'
+        ELSE 'Not Blocked' 
+    END AS "BLKSTATUS",
+    NULL AS "DLBANDWIDTH",
+    t1.data->>'BANDIND' AS "BAND",
+   NULL AS "CARR",
+   t1.data->>'UARFCNDOWNLINK' AS "DLF",
+   t1.data->>'UARFCNUPLINK' AS "ULF",
+   t5.data->>'MCC' AS "MCC",
+   t5.data->>'MNC' AS "MNC",
+   (t1.data->>'LAC')::INTEGER AS "LAC",
+   (t1.data->>'RAC')::INTEGER AS "RAC",
+   CONCAT(t5.data->>'MCC', '-', t5.data->>'MNC', '-', (t1.data->>'LAC'), '-', t1.data->>'LOCELL') AS "CGI" ,
+   t1.data->>'PSCRAMBCODE' AS "3G_PSC",
+   NULL AS "3G_DLCE",
+   NULL AS "3G_ULCE"
+FROM huawei_cm."UCELL" t1
+INNER JOIN huawei_cm."SYS" t2 ON t1.data->>'FileName' = t2.data->>'FileName'
+    AND t1.data->>'neid'=t2.data->>'neid'
+INNER JOIN huawei_cm."UNODEB" t3 ON t1.data->>'FileName' = t3.data->>'FileName' 
+    AND t1.data->>'neid'=t3.data->>'neid' 
+    AND t1.data->>'NODEBNAME'=t3.data->>'NODEBNAME'
+INNER JOIN huawei_cm."UCNOPERATOR" t5 ON t1.data->>'FileName' = t5.data->>'FileName'
+    AND t1.data->>'neid'=t5.data->>'neid'
+UNION
 --ZTE (XLS)
 SELECT
     t1.data->>'DATETIME' AS "DATETIME",
@@ -197,6 +243,101 @@ SELECT
     null as "3G_ULCE"
 FROM zte_cm."UtranCellFDD" t1 
 INNER JOIN zte_cm."LogicalCell" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME' and t1.data->>'rncid'=t2.data->>'rncid' and t1.data->>'cid'=t2.data->>'cid' where t1.data->>'MEID' is not null
+UNION
+--ZTE (Bulk_CM)
+SELECT
+    t1.data->>'DATETIME' AS "DATETIME",
+    'ZTE' AS "VENDOR",
+	'3G' AS "TECH",
+	t2.data->>'userLabel' AS "NENAME",
+	t1.data->>'SubNetwork_2_id' AS "NEID",
+    t1.data->>'latitude' AS "SITEPROP LAT",
+	t1.data->>'longitude' AS "SITEPROP LON",
+    null AS "SITE ID",
+    null AS "SITENAME",
+    t1.data->>'cId' AS "CELL ID",
+    t1.data->>'userLabel' AS "CELL NAME",
+    t1.data->>'localCellId' AS "CI",
+    null AS ACTSTATUS,
+    null AS BLKSTATUS,
+    null AS BW,
+    t1.data->>'freqBandInd' AS "BAND",
+    null as CARR,
+    t1.data->>'uarfcnDl' AS "DLF",
+    t1.data->>'uarfcnUl' AS "ULF",
+    t4.data->>'mcc' AS MCC,
+    t4.data->>'mnc' AS MNC,
+    (t1.data->>'lac')::INTEGER AS LAC,
+    (t1.data->>'rac')::INTEGER AS RAC,
+    concat( t4.data->>'mcc','-', t4.data->>'mnc','-', t1.data->>'lac','-', t1.data->>'cId') AS CGI,    
+	t1.data->>'primaryScramblingCode' AS "PSC",
+    null as "3G_DLCE",
+    null as "3G_ULCE"
+FROM zte_cm."UtranCellFDD" t1
+INNER JOIN zte_cm."RncFunction" t4 on t1.data->>'FILENAME'=t4.data->>'FILENAME'and t1.data->>'SubNetwork_2_id'=t4.data->>'SubNetwork_2_id'
+INNER JOIN zte_cm."SubNetwork_2" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME'and t1.data->>'SubNetwork_2_id'=t2.data->>'SubNetwork_2_id'
+UNION
+--ERICSSON (Bulk_CM)
+SELECT 
+    t1.data->>'DATETIME' AS "DATETIME",
+	'ERICSSON' AS "VENDOR",
+	'3G' AS "TECHNOLOGY",
+	t1.data->>'MeContext_id' AS "NENAME",
+	t1.data->>'SubNetwork_2_id' AS "NEID" ,
+	null AS "SITEPROP LAT",
+	null AS "SITEPROP LON",
+	null AS "SITE ID",
+	null AS "SITENAME",
+	t1.data->>'cId' AS "CELLID",
+	t1.data->>'userLabel' AS "CELLNAME",
+	t1.data->>'localCellId' AS "CI",
+	null AS "ACTSTATUS",
+	null AS "BLKSTATUS",
+	null AS BW,
+	null AS BAND,
+	null AS CARR,
+	t1.data->>'uarfcnDl' AS "DLF",
+	t1.data->>'uarfcnUl' AS "ULF",
+	null AS MCC,
+	null AS MNC,
+	(t1.data->>'lac')::INTEGER AS "LAC",
+	(t1.data->>'rac')::INTEGER AS "RAC",
+	null AS CGI,
+	t1.data->>'primaryScramblingCode' AS "PSC",
+	null AS DLCE,
+	null AS ULCE
+FROM ericsson_cm."UtranCell"  t1
+UNION
+--NOKIA (RAML)
+SELECT 
+    t1.data->>'DATETIME' AS "DATETIME",
+	'NOKIA' AS "VENDOR",
+	'3G' AS "TECH",
+	null AS "NENAME",
+    null AS "NEID",
+    null AS LAT,
+    null AS LONG,
+    null AS "SITE ID",
+    null AS "SITE NAME",
+    t1.data->>'CId' AS "CELL ID",
+    t1.data->>'name' AS "CELL NAME",
+    null AS CI,
+    null AS ACTSTATUS,
+    null AS BLKSTATUS,
+    null AS BW,
+    null AS BAND,
+    null AS CARR,
+    t1.data->>'UARFCN' AS DLF,
+    null AS ULF,
+    t1.data->>'WCELMCC' AS "MCC",
+    t1.data->>'WCELMNC' AS "MNC",
+    (t1.data->>'LAC')::INTEGER AS "LAC",
+    (t1.data->>'RAC')::INTEGER AS "RAC",
+    concat(t1.data->>'WCELMCC','-',t1.data->>'WCELMNC','-',t1.data->>'LAC','-',t1.data->>'CId') AS "CGI",
+    t1.data->>'PriScrCode' AS "PSC",
+    null AS DLCE,
+    null AS ULCE
+FROM nokia_cm."WCEL" t1
 `
 
 const LTE_KEY_PARAMAETERS = `
