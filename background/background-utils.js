@@ -19,6 +19,7 @@ const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
 const tems = window.require('./tems');
 const csvToExcelCombiner = window.require('./csv-to-excel-combiner');
+const EXCEL = window.require('./excel');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -1576,11 +1577,42 @@ async function clearBaselineReference(){
 	}
 }
 
-async function combinedCSVsIntoExcel(csvDirectory){
+/*
+*
+* @param string csvDirectory
+* @param string excelFormat XLSX, XLSB
+* @param string combined Whether to combined into one workbook or separate workbooks. Values are: true or false
+* @param string outputFolder Output folder for combined === true 
+*/
+async function combinedCSVsIntoExcel(csvDirectory, excelFormat, combined, outputFolder){
 	try{
-		const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsx');
-		await csvToExcelCombiner.combine(csvDirectory, combinedExcelFile);
-		return {status: 'success', message:  combinedExcelFile };
+		const format = excelFormat || "XLSX";
+		
+		if(format === 'XLSX' && combined){
+			const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsx');
+			await csvToExcelCombiner.combine(csvDirectory, combinedExcelFile);
+			return {status: 'success', message:  combinedExcelFile };
+		}
+		
+		if(format === 'XLSX' && !combined){
+			const outFolder = outputFolder || app.getPath('downloads');
+			await EXCEL.csvToXLSX(csvDirectory, outFolder);
+			return {status: 'success', message:  outFolder };
+		}
+		
+		if(format === 'XLSB' && combined){
+			const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsb');
+			await EXCEL.combineCSVToXLSB(csvDirectory, combinedExcelFile);
+			return {status: 'success', message:  combinedExcelFile };
+		}
+		
+		if(format === 'XLSB' && !combined){
+			const outFolder = outputFolder || app.getPath('downloads');
+			await EXCEL.csvToXLSB(csvDirectory, outFolder);
+			return {status: 'success', message:  outFolder };
+		}
+		
+
 	}catch(e){
 		log.error(e);
 		return {status: 'error', message: `Error occured while combining csv files. Check logs for details.`};		

@@ -6,7 +6,7 @@ import {
 	Classes,
 	ProgressBar,
 	Intent,
-	
+	HTMLSelect
 } from "@blueprintjs/core";
 import  './utilities.css';
 
@@ -15,18 +15,29 @@ const { ipcRenderer} = window.require("electron")
 const fs = window.require('fs');
 const log = window.require('electron-log');
 
+const COMBINE_OPTIONS = [
+	"Combine into one Excel workbook",
+	"Separate into different workbooks"
+];
+
+const EXCEL_FORMATS = ["XLSX", "XLSB"];
+
 export default class CSVToExcelCombiner extends React.Component {
         
      static icon = "candy-cane";
-     static label = "CSV to Excel Combiner"
+     static label = "CSV to Excel"
 
 	constructor(props){
 		super(props);
 		
 		this.state = {
 			inputFolder: "Choose folder...",
+			outputFolder: "Choose folder...",
 			processing: false,
-			notice: null
+			notice: null,
+			howToProcess: COMBINE_OPTIONS[0], //0-combined
+			excelFormat: EXCEL_FORMATS[0],//0-xlsx
+			combine: true,
 		};
 		
 		this.combinerListener = null;
@@ -36,20 +47,47 @@ export default class CSVToExcelCombiner extends React.Component {
 		this.setState({notice: null});
 	}
 	
-	showFiles = () => {
-		if (!fs.existsSync(this.state.inputFolder)) {
-			this.setState({errorMessage: `${this.state.inputFolder} does not exist`})
+	showFiles = (folder) => {
+		if (!fs.existsSync(folder)) {
+			this.setState({errorMessage: `${folder} does not exist`})
 			return;
 		}
-		shell.openItem(this.state.inputFolder)
+		shell.openItem(folder)
+	}
+	
+	showOutputFolder = () => this.showFiles(this.state.outputFolder);
+	
+	showInputFolder = () => this.showFiles(this.state.inputFolder);
+	
+	onOutputFolderChange = (e) => {
+		if (!fs.existsSync(e.target.files[0].path)) {
+			this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
+			return;
+		}
+		
+		this.setState({outputFolder: e.target.files[0].path})
 	}
 	
 	/**
 	* Update the input folder state when the text field value changes
 	*/
 	onInputFileChange = (e) => {
+		if (!fs.existsSync(e.target.files[0].path)) {
+			this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
+			return;
+		}
+		
 		this.setState({inputFolder: e.target.files[0].path})
 	}
+
+	handleChangeCombineMethod = (e) => {
+		this.setState({
+			howToProcess: e.target.value,
+			combine: e.target.value === 'Combine into one Excel workbook' ? true : false
+		});
+	}
+	
+	handleFormatChange = (e) => this.setState({excelFormat: e.target.value});
 	
 	combineCSVFiles = () => {
 		//Confirm that the input folder exists
@@ -68,7 +106,10 @@ export default class CSVToExcelCombiner extends React.Component {
 		}
 		
 		let payload = {
-			csvDirectory: this.state.inputFolder
+			csvDirectory: this.state.inputFolder,
+			combine: this.state.combine,
+			excelFormat: this.state.excelFormat,
+			outputFolder: this.state.outputFolder
 		}
 		
 		//Set processing to true 
@@ -114,6 +155,7 @@ export default class CSVToExcelCombiner extends React.Component {
 	}
     render(){
 		let inputFolderEllipsis = this.state.inputFolder === 'Choose folder...' ? "" : "file-text-dir-rtl";
+		let outputFolderEllipsis = this.state.outputFolder === 'Choose folder...' ? "" : "file-text-dir-rtl";
 		
 		let notice = null;
 		if(this.state.notice !== null ){ 
@@ -128,7 +170,7 @@ export default class CSVToExcelCombiner extends React.Component {
             <div>
 
                 <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><FontAwesomeIcon icon="candy-cane"/> CSV to Excel Combiner</legend>
+                    <legend className="legend"><FontAwesomeIcon icon="candy-cane"/> CSV to Excel</legend>
                     
 					{ this.state.processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
 
@@ -143,7 +185,34 @@ export default class CSVToExcelCombiner extends React.Component {
 						  <FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFolder} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
-							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.showFiles(this.state.inputFolder)} disabled={this.state.processing}/>
+							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.showInputFolder()} disabled={this.state.processing}/>
+						</div>
+					  </div>
+					  
+					  {this.state.combine ? "" : (
+						  <div className="form-group row">
+							<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
+							<div className="col-sm-8">
+							  <FileInput className={"form-control " + outputFolderEllipsis} text={this.state.outputFolder} onInputChange={this.onOutputFolderChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
+							</div>
+							<div className="col-sm-2">
+								<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.showOutputFolder()} disabled={this.state.processing}/>
+							</div>
+						  </div>
+					  )}
+					  
+					  
+					  <div className="form-group row">
+						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Combine or Separate</label>
+						<div className="col-sm-10">
+						  <HTMLSelect options={COMBINE_OPTIONS} id="select_combine_method" value={this.state.howToProcess} onChange={this.handleChangeCombineMethod} disabled={this.state.processing} className="mr-2"/>
+						</div>
+					  </div>
+					  
+					  <div className="form-group row">
+						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Format</label>
+						<div className="col-sm-10">
+						  <HTMLSelect options={EXCEL_FORMATS} id="select_combine_method" value={this.state.excelFormat} onChange={this.handleFormatChange} disabled={this.state.processing} className="mr-2"/>
 						</div>
 					  </div>
 					  

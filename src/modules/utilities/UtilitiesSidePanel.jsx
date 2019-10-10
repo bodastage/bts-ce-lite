@@ -31,8 +31,8 @@ class UtilitiesSidePanel extends React.Component {
 				href="/#" 
 				onClick={this.addTab({
 					component: 'CSVToExcelCombiner',
-					title: 'CSV to Excel Combiner'
-				})}> <FontAwesomeIcon icon="candy-cane" /> CSV to Excel Combiner</a>  
+					title: 'CSV to Excel'
+				})}> <FontAwesomeIcon icon="candy-cane" /> CSV to Excel</a>  
 
 
 

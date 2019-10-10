@@ -867,7 +867,7 @@ async function  executeTask(task, options){
 	//
 	try{
 		if(task === 'combine_csv_to_excel'){
-			const result = await utils.combinedCSVsIntoExcel(options.csvDirectory);
+			const result = await utils.combinedCSVsIntoExcel(options.csvDirectory, options.excelFormat, options.combine, options.outputFolder);
 			sendLogToUI(task, result.status, result.message);
 		}
 	}catch(err){
