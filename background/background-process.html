@@ -830,7 +830,7 @@ async function  executeTask(task, options){
 	}		
 	
 	//
-	//Add parameter to baseline reference 
+	//delete parameter to baseline reference 
 	try{
 		if(task === 'delete_baseline_parameter'){
 			const result = await utils.deleteBaselineParameter(options.vendor, options.technology, options.mo, options.parameter);
