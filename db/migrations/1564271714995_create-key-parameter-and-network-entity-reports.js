@@ -147,7 +147,8 @@ SELECT
 	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'ci')) AS cgi,
 	t1.data->>'bcch_arfcn' AS bcch,
 	CONCAT(div((t1.data->>'bsic')::INTEGER,8), mod((t1.data->>'bsic')::INTEGER,8)) as BSIC,
-	null as TRXNO
+	(CHAR_LENGTH(t1.data->>'trx') - CHAR_LENGTH(REPLACE(t1.data->>'trx', ';', ''))) 
+/ CHAR_LENGTH(';')+2 AS TRX_NO
 FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
 
