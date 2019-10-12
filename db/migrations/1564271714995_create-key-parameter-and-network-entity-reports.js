@@ -139,7 +139,7 @@ SELECT
     'MOTOROLA' AS "VENDOR",
     '2G' AS "TECH",
 	t1.data->>'ci' AS ci,
-	t1.data->>'site_name' AS name,
+	concat(t1.data->>'site_name','_',right(t1.data->>'ci',1)) AS cellname,
 	t1.data->>'mcc' as mcc,
 	t1.data->>'mnc' as mnc,
 	t1.data->>'lac' AS lac,
@@ -147,7 +147,7 @@ SELECT
 	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'ci')) AS cgi,
 	t1.data->>'bcch_arfcn' AS bcch,
 	CONCAT(div((t1.data->>'bsic')::INTEGER,8), mod((t1.data->>'bsic')::INTEGER,8)) as BSIC,
-	null 
+	null as TRXNO
 FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
 
