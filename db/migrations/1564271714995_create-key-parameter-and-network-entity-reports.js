@@ -47,7 +47,7 @@ SELECT
 	null 
 FROM zte_cm."GsmCell" t1 where t1.data->>'SubNetwork_id' is not null
 UNION
---2G Parameters / Huawei(CFGMML&NBI)
+--2G Parameters / Huawei(CFGMML)
 SELECT 
 	t1.data->>'DATETIME' AS "DATETIME", 
 	'HUAWEI' AS "VENDOR", 
@@ -59,12 +59,44 @@ SELECT
 	t1.data->>'LAC' AS "LAC", 
 	null as rac,
 	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI",
-	t4.data->>'FREQ' AS "BCCHNO", 
+	t3.data->>'FREQ' AS "BCCHNO", 
 	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC",
-	null
+	count(t2.data->>'TRXNO') as trxno
 	FROM huawei_cm."GCELL" t1 
-INNER JOIN huawei_cm."GTRX" t4 ON t1.data->>'CELLID' = t4.data->>'CELLID' and t1.data->>'BSCID' = t4.data->>'BSCID' where t4.data->>'ISMAINBCCH' = 'YES'
+left join huawei_cm."GTRX" t2 on t1.data->>'FILENAME'=t2.data->>'FILENAME'and t1.data->>'BSCID'=t2.data->>'BSCID'and t1.data->>'CELLID'=t2.data->>'CELLID'	
+INNER JOIN huawei_cm."GTRX" t3 ON t1.data->>'FILENAME'=t3.data->>'FILENAME'and t1.data->>'CELLID' = t3.data->>'CELLID' and t1.data->>'BSCID' = t3.data->>'BSCID' where t3.data->>'ISMAINBCCH' = 'YES'
+group by t1.data->>'DATETIME',t1.data->>'CI',t3.data->>'FREQ',
+    t1.data->>'CELLNAME',t1.data->>'MCC',t1.data->>'MNC',t1.data->>'LAC',
+    t1.data->>'NCC', t1.data->>'BCC'
 UNION 
+--2G Parameters / Huawei NBIXML
+--WITH QRY_CHANNEL_GROUP_TRX AS (
+--SELECT
+--t1.data->>'FileName' as filename,
+--t1.data->>'neid' as neid,
+--t1.data->>'CELLID' as cellid,
+--count(t1.data->>'TRXNO') as trxno
+--FROM huawei_cm."GTRX" t1 WHERE t1.data->>'module_type'='Radio'
+--GROUP BY t1.data->>'CELLID', t1.data->>'FileName', t1.data->>'neid'
+--)
+SELECT 
+	t1.data->>'varDateTime' AS "DATETIME", 
+	'HUAWEI' AS "VENDOR", 
+	'2G' AS "TECHNOLOGY", 
+    t1.data->>'CI' AS "CI",
+	t1.data->>'CELLNAME' AS "CELLNAME", 
+	t1.data->>'MCC' AS "MCC", 
+	t1.data->>'MNC' AS "MNC", 
+	t1.data->>'LAC' AS "LAC", 
+	null as rac,
+	CONCAT(t1.data->>'MCC', '-', t1.data->>'MNC', '-', t1.data->>'LAC', '-', t1.data->>'CI') AS "CGI",
+	NULL AS BCCHNO,
+	--t3.data->>'FREQ' AS "BCCHNO", 
+	CONCAT(t1.data->>'NCC', t1.data->>'BCC') AS "BSIC",
+	--t2.trxno as trxno,
+	NULL AS TRXNO
+	FROM huawei_cm."GCELL" t1 where t1.data->>'module_type'='Radio'
+UNION
 --2G Parameters / Ericsson(Bulk_CM)
 SELECT
     t1.data->>'DATETIME' AS "DATETIME",
@@ -107,7 +139,7 @@ SELECT
     'MOTOROLA' AS "VENDOR",
     '2G' AS "TECH",
 	t1.data->>'ci' AS ci,
-	t1.data->>'site_name' AS name,
+	concat(t1.data->>'site_name','_',right(t1.data->>'ci',1)) AS cellname,
 	t1.data->>'mcc' as mcc,
 	t1.data->>'mnc' as mnc,
 	t1.data->>'lac' AS lac,
@@ -115,7 +147,8 @@ SELECT
 	CONCAT( TRIM(t1.data->>'mcc'),'-', TRIM(t1.data->>'mnc'),'-',TRIM(t1.data->>'lac'),'-',TRIM(t1.data->>'ci')) AS cgi,
 	t1.data->>'bcch_arfcn' AS bcch,
 	CONCAT(div((t1.data->>'bsic')::INTEGER,8), mod((t1.data->>'bsic')::INTEGER,8)) as BSIC,
-	null 
+	(CHAR_LENGTH(t1.data->>'trx') - CHAR_LENGTH(REPLACE(t1.data->>'trx', ';', ''))) 
+/ CHAR_LENGTH(';')+2 AS TRX_NO
 FROM motorola_cm."cell_x_export" t1 where t1.data->>'bsic' is not null
 `
 
