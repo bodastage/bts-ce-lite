@@ -1,1 +1,1 @@
-Powershell -ExecutionPolicy ByPass -File db\scripts\download_postgres.ps1
+Powershell -ExecutionPolicy ByPass -File %~dp0\download_postgres.ps1
