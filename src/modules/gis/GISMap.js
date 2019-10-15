@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { 
+    withLeaflet,
 	Map, 
 	TileLayer, 
 	Popup, 
@@ -55,9 +56,10 @@ import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
 import { renderToString } from 'react-dom/server'
+import { ReactLeafletSearch } from 'react-leaflet-search'
 
 const { ipcRenderer} = window.require("electron");
-
+const WrappedSearch = withLeaflet(ReactLeafletSearch)
 
 //Fix icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -560,6 +562,10 @@ class GISMap extends React.Component{
 							}]}
 							fullscreenControl
 						>
+							<WrappedSearch 
+								zoom={12}
+								inputPlaceholder="Find a place"
+								position="topleft"/>
 							
 							<TileLayer
 							  attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"

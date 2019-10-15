@@ -57,3 +57,23 @@ $ sudo apt install snapd
 # Install Boda-Lite span package
 $ sudo snap install Boda-Lite_VERSION_amd64.snap
 ```
+
+## Using PostgreSQL without installation
+Below are the steps to follow:
+### Running on Windows
+1. Create a folder for you postgres download (POSTGRES_FOLDER).
+2. Launch **cmd** and go to POSTGRES_FOLDER  <br />
+   `cd POSTGRES_FOLDER`
+3. Download PostgreSQL using the download script bundled with Boda-Lite  <br />
+   `
+   C:\Users\<USERNAME>\AppData\Local\Programs\Boda-Lite\resources\db\scripts\download_postgres.bat
+   `
+4. Initialize PostgreSQL  <br />
+`
+PostreSQL\pgsql\bin\initdb.exe -D ..\data --username=postgres -auth=trust
+`
+5. Run PostgreSQL database  <br />
+`PostreSQL\pgsql\bin\pg_ctl.exe start -D ../data`
+
+
+From the above setup, PostgreSQL is running on **localhost** on port **5432** and default user **postgres** with no password.
