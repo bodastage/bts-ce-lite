@@ -334,7 +334,7 @@ class GISMap extends React.Component{
 
 				ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
 				//Reload the carrier colors
-				if(this.props.carrierColors.length === 0) this.props.dispatch(gisFetchPlanFrequencies());
+				this.props.dispatch(gisFetchPlanFrequencies());
 				
 				this.refreshMap();
 			}
