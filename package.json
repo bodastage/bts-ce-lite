@@ -123,6 +123,7 @@
     "react-leaflet": "^2.0.0",
     "react-leaflet-control": "^2.1.1",
     "react-leaflet-fullscreen-control": "^0.0.4",
+    "react-leaflet-search": "^0.6.0",
     "react-leaflet-semicircle": "^2.0.5",
     "react-leaflet-sidetabs": "^1.0.1",
     "react-mosaic-component": "^2.1.0",

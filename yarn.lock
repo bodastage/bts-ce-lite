@@ -14990,6 +14990,11 @@ react-leaflet-fullscreen-control@^0.0.4:
     react "^16.3.2"
     react-leaflet "^1.9.1"
 
+react-leaflet-search@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/react-leaflet-search/-/react-leaflet-search-0.6.0.tgz#fac831b000466615e1a748b7e3f6929389ab36ef"
+  integrity sha512-5kzE4Szqs8tf96qSNZqUcMaWVXIjHXsxMLrzeaf8M99PdCFs9e7bLQjGKBCyvsDdJvcv3iNni20DjrMkwHjLEA==
+
 react-leaflet-semicircle@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/react-leaflet-semicircle/-/react-leaflet-semicircle-2.0.5.tgz#af86bb0e7107a30ff7df6fd053b4dbc28a1f8ec3"

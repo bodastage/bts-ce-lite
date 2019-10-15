@@ -58,6 +58,7 @@ import { renderToString } from 'react-dom/server'
 
 const { ipcRenderer} = window.require("electron");
 
+
 //Fix icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -557,7 +558,9 @@ class GISMap extends React.Component{
 								callback: this.centerMap.bind(this),
 								index: 0
 							}]}
-							fullscreenControl>
+							fullscreenControl
+						>
+							
 							<TileLayer
 							  attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
 							  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
