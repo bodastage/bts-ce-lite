@@ -107,6 +107,7 @@ class GISMap extends React.Component{
 			showGSMCells: true,
 			showUMTSCells: true,
 			showLTECells: true,
+			show5GCells: true,
 			
 			//Importing data
 			importFile: "",
@@ -616,6 +617,7 @@ class GISMap extends React.Component{
 											<Checkbox inline={true} checked={this.state.showGSMCells} name="showGSMCells" label="GSM" onChange={this.handleTechFilterCheckBox} />
 											<Checkbox inline={true} checked={this.state.showUMTSCells} name="showUMTSCells" label="UMTS" onChange={this.handleTechFilterCheckBox} />
 											<Checkbox inline={true} checked={this.state.showLTECells} name="showLTECells" label="LTE" onChange={this.handleTechFilterCheckBox} />
+											<Checkbox inline={true} checked={this.state.show5GCells} name="show5GCells" label="5G" onChange={this.handleTechFilterCheckBox} />
 										</div>
 										
 										<div>

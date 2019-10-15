@@ -10,3 +10,4 @@ authorURL: https://www.ssegga.com
 * Adds option to re-create the entire database or just apply the new changes 
 * Remove of BTS5900 during GExport pre-processing step
 * Fixes showing of carrier colors after upload on map
+* Search for a place on the map
