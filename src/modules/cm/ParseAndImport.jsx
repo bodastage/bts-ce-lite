@@ -1,8 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Intent, Button, FileInput, HTMLSelect, 
-		 ProgressBar, Classes, Switch   } from "@blueprintjs/core";
+import { 
+	Intent, 
+	Button, 
+	FileInput, 
+	HTMLSelect, 
+	ProgressBar, 
+	Classes, 
+	Switch
+	} from "@blueprintjs/core";
 import { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS } from './VendorFormats.js'
 import Timer from './Timer';
 import { saveCMParsingFolders } from './cm-actions';
@@ -71,6 +78,9 @@ class ParseAndImport extends React.Component {
 	* Update the output folder state when the text field value changes
 	*/
 	onOutputFolderInputChange = (e) => {
+		if(typeof e.target.files !== 'object'){
+			this.setState({errorMessage: 'Error reading file', successMessage: null, infoMessage:null, processing: false})
+		}
 		this.setState({outputFolderText: e.target.files[0].path})
 	}
 	
@@ -78,6 +88,10 @@ class ParseAndImport extends React.Component {
 	* Update the input folder state when the text field value changes
 	*/
 	onInputFileChange = (e) => {
+		if(typeof e.target.files !== 'object'){
+			this.setState({errorMessage: 'Error reading file', successMessage: null, infoMessage:null, processing: false})
+		}		
+		
 		this.setState({inputFileText: e.target.files[0].path})
 	}
 	
@@ -85,6 +99,7 @@ class ParseAndImport extends React.Component {
 	* Update the vendor format in state when the vendor format is selected
 	*/
 	onVendorFormatSelectChange =(e) => {
+
 		this.setState({currentFormat: e.target.value })
 	}
 
@@ -307,6 +322,7 @@ class ParseAndImport extends React.Component {
 	}
 	
     render(){
+
 		
 		let successNotice = null;
 		if(this.state.successMessage !== null ){ 
@@ -417,8 +433,14 @@ class ParseAndImport extends React.Component {
 
                   </div>
 
-				
-                    <Button icon="play" text="Process" className={Classes.INTENT_PRIMARY}  onClick={this.processDumps} disabled={this.state.processing}/> &nbsp;
+                    <Button 
+						icon="play" 
+						text="Process" 
+						className={Classes.INTENT_PRIMARY}  
+						onClick={this.processDumps}
+						disabled={this.state.processing}
+					/>
+					&nbsp;
 					<Button text="Clear" onClick={this.clearForm} disabled={this.state.processing}/>
             </div>    
               </fieldset>

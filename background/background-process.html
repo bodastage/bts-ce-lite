@@ -317,7 +317,7 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 	  from: [
 		/\"(CELLALGOSWITCH|GTPU|CNOPERATOR|USERPRIORITY)_BSC(6900|6910)(U|GU|UMTS)\"/ig,
 		/_(BSC6900GSM|BSC6900UMTS|BSC6900GU|BSC6910GSM|BSC6910UMTS|BSC6910GU)/ig,
-		/_(BTS3900|PICOBTS3900|BTS3911B|PICOBTS3911B|MICROBTS3900|MICROBTS3911B)/ig,
+		/_(BTS3900|PICOBTS3900|BTS3911B|PICOBTS3911B|MICROBTS3900|MICROBTS3911B|BTS5900)/ig,
 		/BSC(6910|6900)(UMTS|GSM)Function/ig,
 		/BSC(6910|6900)Equipment/ig,
 		/<class name=\"(.*)\"/ig,
@@ -830,7 +830,7 @@ async function  executeTask(task, options){
 	}		
 	
 	//
-	//Add parameter to baseline reference 
+	//delete parameter to baseline reference 
 	try{
 		if(task === 'delete_baseline_parameter'){
 			const result = await utils.deleteBaselineParameter(options.vendor, options.technology, options.mo, options.parameter);
@@ -867,7 +867,7 @@ async function  executeTask(task, options){
 	//
 	try{
 		if(task === 'combine_csv_to_excel'){
-			const result = await utils.combinedCSVsIntoExcel(options.csvDirectory);
+			const result = await utils.combinedCSVsIntoExcel(options.csvDirectory, options.excelFormat, options.combine, options.outputFolder);
 			sendLogToUI(task, result.status, result.message);
 		}
 	}catch(err){

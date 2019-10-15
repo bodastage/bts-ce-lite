@@ -1,7 +1,8 @@
 ---
-id: installation
+id: version-0.3.1-installation
 title: Installation
 sidebar_label: Installation
+original_id: installation
 ---
 - [System Requirements](#system-requirements)
 - [Installing Boda-Lite](#installing-laravel)

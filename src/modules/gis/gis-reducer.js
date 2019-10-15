@@ -77,7 +77,7 @@ function gis(state = initialState, action) {
 		case GIS_UPDATE_PLAN_CARRIERS:
 			var colorMap = {};
 			action.frequencies.forEach((f, i) => {
-				colorMap[f] = state.carrierColors[i];
+				colorMap[f] = state.carrierColorMap[f] || state.carrierColors[i];
 			});
 			return {
 				...state,

@@ -1,7 +1,8 @@
 ---
-id: utilities
+id: version-0.3.1-utilities
 title: Utilities
 sidebar_label: Utilities
+original_id: utilities
 ---
 
 

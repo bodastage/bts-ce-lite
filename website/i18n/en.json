@@ -69,6 +69,14 @@
         "title": "Utilities",
         "sidebar_label": "Utilities"
       },
+      "version-0.3.1/version-0.3.1-installation": {
+        "title": "Installation",
+        "sidebar_label": "Installation"
+      },
+      "version-0.3.1/version-0.3.1-utilities": {
+        "title": "Utilities",
+        "sidebar_label": "Utilities"
+      },
       "version-2.3.0/version-2.3.0-contributing": {
         "title": "Contributing",
         "sidebar_label": "Contributing"

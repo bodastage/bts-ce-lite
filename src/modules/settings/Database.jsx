@@ -2,7 +2,18 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { setSidePanel } from '../layout/uilayout-actions';
-import { Button, Intent, ProgressBar, Collapse, Callout } from "@blueprintjs/core";
+import { 
+	Button, 
+	Intent, 
+	ProgressBar, 
+	Collapse, 
+	Callout,
+	Popover, 
+	Menu, 
+	Position,
+	MenuItem,
+	Icon
+	} from "@blueprintjs/core";
 import { updateDBSettings, getDBSettings, clearDBUpdateError, clearDBUpdateSuccess, 
 		 checkConnection, showDBUpdateError, showDBUpdateSuccess, stopDBSettingsUpdate, 
 		 startDBSettingsUpdate } from './settings-actions';
@@ -92,7 +103,12 @@ class Database extends React.Component{
 		this.setState({notice: null});
 	}
 				
-	setupDB = () => {
+	/*
+	* Setup database
+	* 
+	* @param Boolean refreshSetup true -- re-create database, false -- upgrade
+	*/	
+	setupDB = (refreshSetup) => {
 		
 		this.props.dispatch(startDBSettingsUpdate());
 		
@@ -100,7 +116,8 @@ class Database extends React.Component{
 			hostname: this.state.hostname,
 			port: this.state.port,
 			username: this.state.username,
-			password: this.state.password
+			password: this.state.password,
+			refreshSetup: refreshSetup
 		}
 		
 		//Send request for background job
@@ -134,8 +151,21 @@ class Database extends React.Component{
 		//Listen on channel
 		ipcRenderer.on('parse-cm-request', this.setupDBListener);
 	}
-	
+	 
     render(){
+		
+		const setupMenu = (
+			<Menu>
+				<MenuItem 
+					text="Fresh setup" 
+					onClick={() => this.setupDB(true)} 
+					/>
+				<MenuItem 
+					text="Upgrade" 
+					onClick={() => this.setupDB(false)} 
+				/>
+			</Menu>
+		);
 		
 		let errorNotice = null
 		if(this.props.db.error !== null){
@@ -209,32 +239,18 @@ class Database extends React.Component{
 						  
 
 						  <Button type="submit" text="Update" intent={Intent.PRIMARY} disabled={this.props.updating || this.props.db.updating} /> &nbsp;
-						  <Button type="button" intent={Intent.SUCCESS} icon="play"  text="Setup database"  disabled={this.props.updating || this.props.db.updating} onClick={this.setupDB} /> &nbsp;
-						  <Button type="button" text="Test connection"  disabled={this.props.updating || this.props.db.updating} onClick={this.testDBConnection} /> &nbsp;
-						  <Button type="button" text="How to install PostgreSQL"  minimal={true} disabled={this.props.updating} icon="info-sign" onClick={(e) => { e.preventDefault(); this.handleOpenCollapse();}}/> &nbsp;
-						  
-						  <Collapse isOpen={this.state.collapseOpen} className="mt-2">
-							<Callout>
-								<p>
-									<strong>
-										We require you to manually install PostgreSQL as it requires elevated privileges to be run as a service.
-									</strong>
-								</p>
-								
-								
-								<ol>
-									<li>  Download version 10.9 installer from the <a href="https://www.enterprisedb.com/downloads/postgres-postgresql-downloads" onClick={this.handleOnHrefClick}>Enterprise DB Download page</a> </li>
-									<li> Run installation</li>
-									<li> Confirm <strong>psql</strong> command is available in the system PATH i.e. can be run from the terminal. Type <code>psql --help</code>  in the terminal to confirm.</li>
-									<li> Restart Boda-Lite application</li>
-								</ol>
-								
-								<p>
-								See documentation for more details.
-								</p>
-							</Callout>
-						  </Collapse>
-						  
+						    <Popover content={setupMenu} position={Position.RIGHT_TOP}>
+								<Button 
+									type="button" 
+									intent={Intent.SUCCESS} 
+									icon="database"  
+									text="Setup database"  
+									disabled={this.props.updating || this.props.db.updating}
+									rightIcon={<Icon icon="chevron-right" />}
+								/> 
+							</Popover>
+							&nbsp;
+							<Button type="button" text="Test connection"  disabled={this.props.updating || this.props.db.updating} onClick={this.testDBConnection} /> &nbsp;						  
 						</form>  
 				
 				</fieldset>

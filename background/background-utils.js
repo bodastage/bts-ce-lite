@@ -19,6 +19,7 @@ const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 		VENDOR_CM_PARSERS, VENDOR_PM_PARSERS, VENDOR_FM_PARSERS } = window.require('./vendor-formats');
 const tems = window.require('./tems');
 const csvToExcelCombiner = window.require('./csv-to-excel-combiner');
+const EXCEL = window.require('./excel');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -624,60 +625,65 @@ function getPathToPsqlOnMacOSX(){
 * @param string port 
 * @param string username 
 * @param string password 
+* @param boolean refreshSetup
 *
 * @since 0.3.0
 */
-async function runMigrations(hostname, port, username, password){
+async function runMigrations(hostname, port, username, password, refreshSetup){
 	
-	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/postgres`;
-	const client = new Client({
-		connectionString: connectionString,
-	});
-		
-	client.connect((err) => {
-		if(err){
-			return err;
-		}
-	});
-	
-	//@TODO: Check if user wants to recreate database or just update
-	try{
-		let results = await
-		new Promise( async (resolve, reject) => {
-			let res = await client.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = 'boda'");
-			res  = await client.query("DROP DATABASE IF EXISTS boda");
-			res  = await client.query("DROP ROLE IF EXISTS bodastage");
-			res  = await client.query("CREATE USER bodastage WITH PASSWORD 'password'");
-			res  = await client.query("CREATE DATABASE boda owner bodastage");
+	//Fresh installation
+	if(refreshSetup === true){
 
-			client.end();
-			if(typeof res.err !== 'undefined') reject("Error occured"); else resolve("Database and role created successfully.");
+		const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/postgres`;
+		const client = new Client({
+			connectionString: connectionString,
+		});
 			
-		});	
-	}catch(e){
-		return {status: 'error', message: 'Error occurred while running migrations. See log for details'}	
-	}
-	
-	//add tablefunc extension 
-	const connStr2 = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
-	const client2 = new Client({connectionString: connStr2});
-	client2.connect((err) => {
-		if(err){
-			log.error(err)
+		client.connect((err) => {
+			if(err){
+				return err;
+			}
+		});
+		
+		//@TODO: Check if user wants to recreate database or just update
+		try{
+			let results = await
+			new Promise( async (resolve, reject) => {
+				let res = await client.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = 'boda'");
+				res  = await client.query("DROP DATABASE IF EXISTS boda");
+				res  = await client.query("DROP ROLE IF EXISTS bodastage");
+				res  = await client.query("CREATE USER bodastage WITH PASSWORD 'password'");
+				res  = await client.query("CREATE DATABASE boda owner bodastage");
+
+				client.end();
+				if(typeof res.err !== 'undefined') reject("Error occured"); else resolve("Database and role created successfully.");
+				
+			});	
+		}catch(e){
+			return {status: 'error', message: 'Error occurred while running migrations. See log for details'}	
+		}
+		
+		//add tablefunc extension 
+		const connStr2 = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+		const client2 = new Client({connectionString: connStr2});
+		client2.connect((err) => {
+			if(err){
+				log.error(err)
+				return {status: 'error', message: 'Error occurred while creating tablefunc extension. See log for details'}	
+			}
+		});
+		
+		try{
+			let results = await
+			new Promise( async (resolve, reject) => {
+				const res  = await client2.query("CREATE EXTENSION IF NOT EXISTS  tablefunc");
+				client2.end();
+				if(typeof res.err !== 'undefined') reject("Error occured while creating tablefunc extension"); else resolve("tablefunc extension created successfully.");
+			});	
+		}catch(e){
 			return {status: 'error', message: 'Error occurred while creating tablefunc extension. See log for details'}	
 		}
-	});
-	
-	try{
-		let results = await
-		new Promise( async (resolve, reject) => {
-			const res  = await client2.query("CREATE EXTENSION IF NOT EXISTS  tablefunc");
-			client2.end();
-			if(typeof res.err !== 'undefined') reject("Error occured while creating tablefunc extension"); else resolve("tablefunc extension created successfully.");
-		});	
-	}catch(e){
-		return {status: 'error', message: 'Error occurred while creating tablefunc extension. See log for details'}	
-	}
+	}//if refreshSetup === true
 	
 	
 	//Get app base path
@@ -1576,11 +1582,42 @@ async function clearBaselineReference(){
 	}
 }
 
-async function combinedCSVsIntoExcel(csvDirectory){
+/*
+*
+* @param string csvDirectory
+* @param string excelFormat XLSX, XLSB
+* @param string combined Whether to combined into one workbook or separate workbooks. Values are: true or false
+* @param string outputFolder Output folder for combined === true 
+*/
+async function combinedCSVsIntoExcel(csvDirectory, excelFormat, combined, outputFolder){
 	try{
-		const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsx');
-		await csvToExcelCombiner.combine(csvDirectory, combinedExcelFile);
-		return {status: 'success', message:  combinedExcelFile };
+		const format = excelFormat || "XLSX";
+		
+		if(format === 'XLSX' && combined){
+			const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsx');
+			await csvToExcelCombiner.combine(csvDirectory, combinedExcelFile);
+			return {status: 'success', message:  combinedExcelFile };
+		}
+		
+		if(format === 'XLSX' && !combined){
+			const outFolder = outputFolder || app.getPath('downloads');
+			await EXCEL.csvToXLSX(csvDirectory, outFolder);
+			return {status: 'success', message:  outFolder };
+		}
+		
+		if(format === 'XLSB' && combined){
+			const combinedExcelFile = path.join(app.getPath('downloads'), 'combined_csv.xlsb');
+			await EXCEL.combineCSVToXLSB(csvDirectory, combinedExcelFile);
+			return {status: 'success', message:  combinedExcelFile };
+		}
+		
+		if(format === 'XLSB' && !combined){
+			const outFolder = outputFolder || app.getPath('downloads');
+			await EXCEL.csvToXLSB(csvDirectory, outFolder);
+			return {status: 'success', message:  outFolder };
+		}
+		
+
 	}catch(e){
 		log.error(e);
 		return {status: 'error', message: `Error occured while combining csv files. Check logs for details.`};		
