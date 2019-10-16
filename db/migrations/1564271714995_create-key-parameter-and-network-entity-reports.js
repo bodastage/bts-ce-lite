@@ -1321,6 +1321,66 @@ concat(t1.data->>'site_name','_',right(t1.data->>'source_ci',1)) as "SRV CELLNAM
 (t1.data->>'dest_ci')::INTEGER AS "NBR CELL ID",
 null as "NBR CELLNAME"
 FROM motorola_cm."cell_x_export" t1 where t1.data->>'dest_rnc_id' is not null
+UNION
+---3G-3G Relations (Nokia RAML)
+SELECT 
+'NOKIA' AS "SRV VENDOR",
+'3G' AS "SRV TECH",
+(t2.data->>'LAC')::INTEGER AS "SRV LAC",
+t2.data->>'CId' AS "SRV CI",
+t2.data->>'name' AS "SRV CELL NAME",
+'3G' AS "NBR TECH",
+(t1.data->>'AdjsLAC')::INTEGER AS "NBR LAC",
+(t1.data->>'AdjsCI')::INTEGER AS "NBR CI",
+t1.data->>'name' AS "NBR CELL NAME"
+FROM nokia_cm."ADJS" t1
+INNER JOIN nokia_cm."WCEL" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*WCEL-\d+')
+UNION	
+---3G-2G Relations (Nokia RAML)
+SELECT 
+'NOKIA' AS "SRV VENDOR",
+'3G' AS "SRV TECH",
+(t2.data->>'LAC')::INTEGER AS "SRV LAC",
+t2.data->>'CId' AS "SRV CI",
+t2.data->>'name' AS "SRV CELL NAME",
+'2G' AS "NBR TECH",
+(t1.data->>'AdjgLAC')::INTEGER AS "NBR LAC",
+(t1.data->>'AdjgCI')::INTEGER AS "NBR CI",
+t1.data->>'name' AS "NBR CELL NAME"
+FROM nokia_cm."ADJG" t1
+INNER JOIN nokia_cm."WCEL" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*WCEL-\d+')
+UNION	
+---2G-3G Relations (Nokia RAML)
+SELECT 
+'NOKIA' AS "SRV VENDOR",
+'2G' AS "SRV TECH",
+(t2.data->>'locationAreaIdLAC')::INTEGER AS "SRV LAC",
+t2.data->>'cellId' AS "SRV CI",
+t2.data->>'name' AS "SRV CELL NAME",
+'3G' AS "NBR TECH",
+(t1.data->>'lac')::INTEGER AS "NBR LAC",
+(t1.data->>'AdjwCId')::INTEGER AS "NBR CI",
+t1.data->>'name' AS "NBR CELL NAME"
+FROM nokia_cm."ADJW" t1
+INNER JOIN nokia_cm."BTS" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*BTS-\d+')
+UNION
+---2G-2G Relations (Nokia RAML)
+SELECT 
+'NOKIA' AS "SRV VENDOR",
+'2G' AS "SRV TECH",
+(t2.data->>'locationAreaIdLAC')::INTEGER AS "SRV LAC",
+t2.data->>'cellId' AS "SRV CI",
+t2.data->>'name' AS "SRV CELL NAME",
+'2G' AS "NBR TECH",
+(t1.data->>'adjacentCellIdLac')::INTEGER AS "NBR LAC",
+(t1.data->>'adjacentCellIdCI')::INTEGER AS "NBR CI",
+t1.data->>'name' AS "NBR CELL NAME"
+FROM nokia_cm."ADCE" t1
+INNER JOIN nokia_cm."BTS" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*BTS-\d+')
 `;
 const NETWORK_3G3G_RELATIONS = `
 --HUAWEI 3G3G RELATIONS 
