@@ -2,12 +2,24 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://bodastage.org/bts-ce-lite/blog</id>
     <title>Boda-Lite Blog</title>
-    <updated>2019-10-08T06:00:00Z</updated>
+    <updated>2019-10-15T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://bodastage.org/bts-ce-lite/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Boda-Lite news and events.</subtitle>
     <logo>https://bodastage.org/bts-ce-lite/img/favicon.ico</logo>
     <rights>Copyright © 2019 Bodastage Solutions</rights>
+    <entry>
+        <title type="html"><![CDATA[Version 0.3.1 Release]]></title>
+        <id>https://bodastage.org/bts-ce-lite/blog/2019/10/15/new-version-0.3.1.html</id>
+        <link href="https://bodastage.org/bts-ce-lite/blog/2019/10/15/new-version-0.3.1.html">
+        </link>
+        <updated>2019-10-15T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>0.3.1 adds the changes below:</p> <ul> <li>Adds Huawei 5G MO CM tables</li> <li>Adds options to export XLSX or XLSB when converting csv files to excel</li> <li>Adds option to re-create the entire database or just apply the new changes</li> <li>Remove of BTS5900 during GExport pre-processi...</li></ul>]]></summary>
+        <author>
+            <name>Emmanuel Robert Ssebaggala</name>
+            <uri>https://www.ssegga.com</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Version 0.3.0 Release]]></title>
         <id>https://bodastage.org/bts-ce-lite/blog/2019/10/08/new-version-0.3.0.html</id>
