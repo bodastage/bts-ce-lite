@@ -430,6 +430,11 @@ async function loadCMDataViaStream(vendor, format, csvFolder,truncateTables, bef
 			moName = 'invBSM';
 		}
 		
+		//Make sure Huawei MO names are always upper case 
+		if(vendor.toLowerCase() === 'huawei'){
+			moName = moName.toUpperCase();
+		}
+		
 		//Load Motorola Cell X Export
 		if(vendor.toLowerCase("motorola") && format === 'CELL_X_EXPORT'){
 			moName = 'cell_x_export';
