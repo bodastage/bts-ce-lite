@@ -685,12 +685,10 @@ async function  executeTask(task, options){
 	
 	try {
 		if(task === 'parse_data'){
-		
 			//@TODO: Move CM parsing to backgroup-utils.js
 			if(options.dataType === 'CM' && options.vendor !== 'BODASTAGE'){
 				processCMDumps(options.vendor, options.format, options.inputFolder, options.outputFolder)
 			}else{
-
 				const rtn = await utils.parseData(
 						options.dataType, 
 						options.vendor, 

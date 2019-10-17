@@ -20,6 +20,7 @@ const { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS,
 const tems = window.require('./tems');
 const csvToExcelCombiner = window.require('./csv-to-excel-combiner');
 const EXCEL = window.require('./excel');
+const bodaPM= window.require('./boda-pm');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -815,7 +816,7 @@ function parseNokiaPMXML(vendor, format, inputFolder, outputFolder, beforeFilePa
 	return {status: 'success', message: `${vendor} PM files successfully parsed.`} 
 }
 
-function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse){
+function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse, ){
 
 	if( vendor === 'ERICSSON' && format === 'MEAS_COLLEC_XML'){
 		return parseMeasuremenetCollectionXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
@@ -828,6 +829,12 @@ function parsePMFiles(vendor, format, inputFolder, outputFolder, beforeFileParse
 	if( vendor === 'NOKIA' && format === 'PM_XML'){
 		return parseNokiaPMXML(vendor, format, inputFolder, outputFolder, beforeFileParse, afterFileParse, beforeParse, afterParse)
 	}
+	
+	
+	if(vendor === 'BODASTAGE' && format === 'CSV'){
+		return {status: "success", message: "No parsing for PM data needed."}
+	}
+	
 	
 	return {status: 'error', message: 'PM processing not yet implemented.'}
 }
@@ -1360,7 +1367,7 @@ async function loadCSVFiles(table, tableFields, inputFolder, truncateTables, bef
 }
 
 async function loadPMData(vendor, format, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad){
-	
+
 	if(vendor === 'ERICSSON' && format === 'MEAS_COLLEC_XML'){
 		return await  loadEricssonMeasCollectXML(inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad);
 	}
@@ -1375,6 +1382,12 @@ async function loadPMData(vendor, format, inputFolder, truncateTables, beforeFil
 		let table = 'pm.nok_pm_xml';
 		let tableFields = ['filename','start_time','interval','base_id','local_moid','ne_type','measurement_type','counter_id','counter_value']
 		return loadCSVFiles(table, tableFields, inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad)	
+	}
+
+	if(vendor === 'BODASTAGE' && format === 'CSV'){
+		let table = 'pm.kpis';
+		await bodaPM.loadBodaCSVKPIsDataViaStream(inputFolder, truncateTables, beforeFileLoad, afterFileLoad, beforeLoad, afterLoad);
+		return {status: "success", message: "Loading PM data completed."}
 	}
 	
 	return {status: 'success', message: 'PM functionality is not ready!'}

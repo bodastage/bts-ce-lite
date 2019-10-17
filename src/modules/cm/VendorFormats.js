@@ -13,7 +13,7 @@ export const VENDOR_PM_FORMATS = {
 	'ZTE': ['MEAS_COLLEC_XML','EXCEL'],
 	'NOKIA': ['PM_XML'],
 	'MOTOROLA': [],
-	'BODASTAGE': []
+	'BODASTAGE': ["CSV","EXCEL"]
 }
 
 export const VENDOR_FM_FORMATS = {

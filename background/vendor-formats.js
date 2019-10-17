@@ -11,7 +11,7 @@ const VENDOR_PM_FORMATS = {
 	'HUAWEI': ['NE_BASED_MEAS_COLLEC_XML'],
 	'ZTE': ['BULKCM','XLS'],
 	'NOKIA': ['RAML'],
-	'BODASTAGE': []
+	'BODASTAGE': ["CSV", "EXCEL"]
 }
 
 const VENDOR_FM_FORMATS = {
