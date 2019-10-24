@@ -350,3 +350,4 @@ exports.checkStyleCondition = checkStyleCondition;
 exports.COMP_OPERATORS = COMP_OPERATORS;
 exports.COMP_VALUE_TYPES = COMP_VALUE_TYPES;
 exports.COMP_PROPERTIES = COMP_PROPERTIES;
+exports.cssColorToARGB = cssColorToARGB;

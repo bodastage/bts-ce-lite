@@ -216,7 +216,9 @@ class ParseAndImport extends React.Component {
 			return;
 		}
 		
-		if(this.state.outputFolderText === this.state.inputFileText){
+		if(this.state.outputFolderText === this.state.inputFileText && 
+			!(this.state.currentVendor === 'BODASTAGE' && this.state.currentDataType === 'PM' && this.state.currentFormat === 'CSV')
+		){
 			this.setState({errorMessage: `Input and output folders should be different.`})
 			return;
 		}

@@ -34,6 +34,15 @@ class UtilitiesSidePanel extends React.Component {
 					title: 'CSV to Excel'
 				})}> <FontAwesomeIcon icon="candy-cane" /> CSV to Excel</a>  
 
+            <a title="KML Generator" 
+				className="dropdown-item mt-2" 
+				href="/#" 
+				onClick={this.addTab({
+					component: 'KMLGenerator',
+					title: 'KML Generator'
+				})}> <FontAwesomeIcon icon="globe" /> KML Generator</a>  
+
+
 
 
 

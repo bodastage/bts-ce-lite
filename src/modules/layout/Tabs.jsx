@@ -17,6 +17,7 @@ import GISMap from '../gis/GISMap';
 import Baseline from '../baseline/Baseline';
 import ParameterLibrary from '../telecomlib/ParameterLibrary';
 import CSVToExcelCombiner from '../utilities/CSVToExcelCombiner';
+import KMLGenerator from '../utilities/KMLGenerator';
 
 const Components = {
     "Help": Help,
@@ -31,7 +32,8 @@ const Components = {
 	"GISMap": GISMap,
 	"Baseline": Baseline,
 	"ParameterLibrary": ParameterLibrary,
-	"CSVToExcelCombiner": CSVToExcelCombiner
+	"CSVToExcelCombiner": CSVToExcelCombiner,
+	"KMLGenerator": KMLGenerator
     };
 
 class Tabs extends React.Component {

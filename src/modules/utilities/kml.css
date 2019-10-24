@@ -1,0 +1,15 @@
+.horizontal-line{
+	border-color: #cccccc;
+}
+
+.query-builder{
+	margin: 0rem !important;
+}
+
+
+.group {
+    /*background: rgba(250, 240, 210, 0.5);*/
+    /*border: 1px solid #DCC896;*/
+	background: #FFFFFF;
+	border: 1px solid #FFFFFF;
+}

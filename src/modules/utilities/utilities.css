@@ -1,3 +1,7 @@
 .file-text-dir-rtl {
 	direction: rtl !important;
 }
+
+.horizontal-line{
+	border-color: #cccccc;
+}

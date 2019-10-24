@@ -7,6 +7,7 @@ import profile from './modules/profile/profile-reducers';
 import settings from './modules/settings/settings-reducer';
 import reports from './modules/reports/reports-reducer';
 import gis from './modules/gis/gis-reducer';
+import kml from './modules/utilities/kml-reducer';
 
 const appReducer = combineReducers({
   session,
@@ -16,7 +17,8 @@ const appReducer = combineReducers({
   profile,
   settings,
   reports,
-  gis
+  gis,
+  kml
 });
 
 export default appReducer;
