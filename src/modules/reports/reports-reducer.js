@@ -97,7 +97,18 @@ let initialState = {
     editCat: null, // edit category details here
 	
 	//Composite report
-	compReport: InitialCompositeReport
+	compReport: InitialCompositeReport,
+	//
+	qryBuilder:{
+		schemas:{
+			"pm": {},
+			"huawei_cm": {},
+			"nokia_cm": {},
+			"ericsson_cm": {},
+			"zte_cm": {},
+			"motorola_cm": {}
+		}
+	}
 };
 
 

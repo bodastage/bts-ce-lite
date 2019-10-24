@@ -872,6 +872,17 @@ async function  executeTask(task, options){
 		log.error(err)
 		sendLogToUI(task,'error', "Error occured while combining csv files.  Check logs for details.");
 	}
+	
+	//Generate KML
+	try{
+		if(task === 'generate_kml'){
+			const result = await utils.generateKML(options);
+			sendLogToUI(task, result.status, result.message);
+		}
+	}catch(err){
+		log.error(err)
+		sendLogToUI(task,'error', "Error occured while generating KML file.  Check logs for details.");
+	}
 }
 
 

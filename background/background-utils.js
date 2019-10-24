@@ -21,6 +21,7 @@ const tems = window.require('./tems');
 const csvToExcelCombiner = window.require('./csv-to-excel-combiner');
 const EXCEL = window.require('./excel');
 const bodaPM= window.require('./boda-pm');
+const KML = window.require('./kml');
 
 //Fix PATH env variable on Mac OSX
 if(process.platform === 'darwin'){ 
@@ -1642,6 +1643,17 @@ async function combinedCSVsIntoExcel(csvDirectory, excelFormat, combined, output
 	}
 }
 
+async function generateKML(options){
+	try{
+		const fileName = await KML.generate(options, 'kml' );
+		return {status: 'success', message:  fileName };
+	}catch(e){
+		log.error(e);
+		return {status: 'error', message: `Error occured while generating KML file. Check logs for details.`};	
+	}
+}
+
+exports.generateKML  = generateKML;
 exports.combinedCSVsIntoExcel = combinedCSVsIntoExcel;
 exports.clearBaselineReference = clearBaselineReference;
 exports.importGISFile = importGISFile;
