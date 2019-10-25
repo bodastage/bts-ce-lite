@@ -1,18 +1,13 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { connect } from 'react-redux';
-import { addTab, setSidePanel } from '../layout/uilayout-actions';
-import { Intent, Button, FileInput, HTMLSelect, Position,
-		 ProgressBar, Classes, Switch, Icon, Tooltip, FormGroup, MenuItem,
+import { Intent, Button, FileInput, HTMLSelect,
+		 ProgressBar, Classes, Switch, Icon, FormGroup,
 		 Collapse
 		 } from "@blueprintjs/core";
-import { Select } from "@blueprintjs/select";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
-import { renderToString } from 'react-dom/server';
 
 //styles
 import  './baseline.css';
@@ -490,7 +485,6 @@ export default class Baseline extends React.Component {
 							},
 						processing: false
 						});
-				const excelFile = obj.message;
 				ipcRenderer.removeListener("parse-cm-request", this.addToBaselineRefListener);
 				this.agTblReload += 1;
 				this.gridApi.refreshInfiniteCache();
@@ -579,8 +573,6 @@ export default class Baseline extends React.Component {
 				</button>
 			</div>)
 		}
-		
-		let outputFolderEllipsis = "file-text-dir-rtl"
 		
         return (
 

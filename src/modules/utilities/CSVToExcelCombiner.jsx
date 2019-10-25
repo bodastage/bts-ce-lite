@@ -10,7 +10,7 @@ import {
 } from "@blueprintjs/core";
 import  './utilities.css';
 
-const { app, shell } = window.require('electron').remote;
+const { shell } = window.require('electron').remote;
 const { ipcRenderer} = window.require("electron")
 const fs = window.require('fs');
 const log = window.require('electron-log');
@@ -24,7 +24,7 @@ const EXCEL_FORMATS = ["XLSX", "XLSB"];
 
 export default class CSVToExcelCombiner extends React.Component {
         
-     static icon = "candy-cane";
+     static icon = "file-excel";
      static label = "CSV to Excel"
 
 	constructor(props){
@@ -170,7 +170,7 @@ export default class CSVToExcelCombiner extends React.Component {
             <div>
 
                 <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend"><FontAwesomeIcon icon="candy-cane"/> CSV to Excel</legend>
+                    <legend className="legend"><FontAwesomeIcon icon="file-excel"/> CSV to Excel</legend>
                     
 					{ this.state.processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
 

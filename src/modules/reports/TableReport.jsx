@@ -6,12 +6,11 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
 import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
-		 Dialog, Popover, PopoverInteractionKind,  Spinner, Callout, 
+		 Dialog, Popover, Spinner, Callout, 
 		 Menu, MenuItem, Position, HTMLSelect } from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
-import { COMP_OPERATORS, COMP_VALUE_TYPES, COMP_PROPERTIES,
-		 generateStyleClass, numberParser, getTableStyleExpression } from './reports-utils';
+import { generateStyleClass, getTableStyleExpression } from './reports-utils';
 		 
 const { ipcRenderer} = window.require("electron")
 const { app, shell } = window.require('electron').remote;
@@ -184,7 +183,7 @@ class TableReport extends React.Component{
 		fileName = fileName.replace(/['"+]/g,"");
 		
 		//Preserve column order in export 
-		const columnOrder = this.gridColumnApi.getColumnState().filter(v  => v.hide == false ).map( v => v.colId)
+		const columnOrder = this.gridColumnApi.getColumnState().filter(v  => v.hide === false ).map( v => v.colId)
 		let downloadQuery = `SELECT "${columnOrder.join('","')}" FROM ( ${this.filteredSortedQuery} ) dq`
 
 		let payload = {
@@ -283,11 +282,6 @@ class TableReport extends React.Component{
 					
 					for(var idx in conditions){
 						const cond = conditions[idx];
-						const op = cond.op;
-						const rValType = cond.rValType;
-						const rValue = cond.rValue;
-						const propt = cond.property;
-						const propVal = cond.propertyValue;
 						
 						if(typeof cond.styleConditions === 'undefined') continue;
 						
@@ -417,6 +411,7 @@ class TableReport extends React.Component{
 					const propVal = cond.propertyValue;
 					
 					const className = generateStyleClass(reportId, field, i);
+					
 					tableStylesCSS += `
 					.${className} \{ ${propt}: ${propVal};\}
 					`;

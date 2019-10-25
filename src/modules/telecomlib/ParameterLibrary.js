@@ -1,9 +1,6 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { connect } from 'react-redux';
-import { addTab, setSidePanel } from '../layout/uilayout-actions';
-import { Intent, Button, FileInput, HTMLSelect, 
+import { Intent, Button, FileInput, 
 		 ProgressBar, Classes, Switch   } from "@blueprintjs/core";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
@@ -11,7 +8,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
 import  './telecomlib.css';
 
-const { app, shell } = window.require('electron').remote;
+const { shell } = window.require('electron').remote;
 const { ipcRenderer} = window.require("electron")
 
 export default class ParameterLibrary extends React.Component {
@@ -296,8 +293,8 @@ export default class ParameterLibrary extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Update reference</label>
 						<div className="col-sm-6">
-						  <FileInput className={"form-control " + outputFolderEllipsis} 
-						  text="Reference file" 
+						  <FileInput 
+						  className={"form-control " + outputFolderEllipsis} 
 						  onInputChange={this.onInputFileChange}  
 						  text={this.state.referenceFile} 
 						  disabled={this.state.processing}

@@ -6,7 +6,6 @@ import {
 	Button, 
 	Intent, 
 	ProgressBar, 
-	Collapse, 
 	Callout,
 	Popover, 
 	Menu, 

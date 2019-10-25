@@ -34,6 +34,10 @@ export default function kml(state = initialState, action){
 			return {
 				...state,
 				headers: action.headers,
+				config: {
+					...state.config,
+					dataFile: action.dataFile
+				},
 				processing: false
 			};
 		case KML_EXTRACTING_HEADERS:

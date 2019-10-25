@@ -640,7 +640,7 @@ async function runMigrations(hostname, port, username, password, refreshSetup){
 	
 	//Fresh installation
 	if(refreshSetup === true){
-
+		log.info("Running refresh database setup...");
 		const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/postgres`;
 		const client = new Client({
 			connectionString: connectionString,

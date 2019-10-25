@@ -8,10 +8,11 @@ export function kmlExtractingHeaders(){
 	}
 }
 
-export function kmlSaveFileHeaders(headers){
+export function kmlSaveFileHeaders(headers, dataFile){
 	return{
 		type: KML_SAVE_FILE_HEADERS,
-		headers: headers
+		headers: headers,
+		dataFile: dataFile
 	}
 }
 
@@ -46,7 +47,7 @@ export function kmlGetDataHeaders(dataFile, format){
 			}
 		}
 		
-		dispatch(kmlSaveFileHeaders(headers));
+		dispatch(kmlSaveFileHeaders(headers, dataFile));
 		
 	}
 	

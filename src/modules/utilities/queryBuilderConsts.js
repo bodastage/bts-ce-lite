@@ -2,7 +2,6 @@ import React from 'react';
 import { Widgets, Operators } from 'react-awesome-query-builder';
 import moment from 'moment';
 import en_US from 'antd/lib/locale-provider/en_US';
-import ru_RU from 'antd/lib/locale-provider/ru_RU';
 
 const {
     TextWidget,
@@ -78,6 +77,7 @@ export default {
                 valueLabel: "Name2",
                 valuePlaceholder: "Enter name2",
                 validateValue: (val, fieldDef) => {
+					// eslint-disable-next-line
                     return (val != 'test2');
                 },
             },
@@ -620,6 +620,7 @@ export default {
             label: 'Any in',
             labelForFormat: 'IN',
             formatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, isForDisplay) => {
+				// eslint-disable-next-line
                 if (valueSrc == 'value')
                     return `${field} IN (${values.join(', ')})`;
                 else
@@ -632,6 +633,7 @@ export default {
             label: 'Not in',
             labelForFormat: 'NOT IN',
             formatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, isForDisplay) => {
+				// eslint-disable-next-line
                 if (valueSrc == 'value')
                     return `${field} NOT IN (${values.join(', ')})`;
                 else
@@ -644,6 +646,8 @@ export default {
             label: 'Equals',
             labelForFormat: '==',
             formatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, isForDisplay) => {
+				
+				// eslint-disable-next-line
                 if (valueSrc == 'value')
                     return `${field} == [${values.join(', ')}]`;
                 else
@@ -656,7 +660,9 @@ export default {
             label: 'Not equals',
             labelForFormat: '!=',
             formatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, isForDisplay) => {
+				// eslint-disable-next-line
                 if (valueSrc == 'value')
+					// eslint-disable-next-line
                     return `${field} != [${values.join(', ')}]`;
                 else
                     return `${field} != ${values}`;
@@ -719,6 +725,7 @@ export default {
                 return isForDisplay ? '"' + val + '"' : JSON.stringify(val);
             },
             validateValue: (val, fieldDef) => {
+				// eslint-disable-next-line
                 return (val != "test");
             },
         },

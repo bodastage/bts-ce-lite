@@ -14,10 +14,8 @@ import 'leaflet/dist/leaflet.css';
 import './gis.css';
 import { 
 	ResizeSensor, 
-	Popover, 
 	Button, 
 	Intent, 
-	PopoverInteractionKind, 
 	Icon,
 	FormGroup, 
 	InputGroup, 
@@ -37,18 +35,14 @@ import {
 	gisUpdateCarrierColor,
 	gisUpdateSectorRadius
 } from './gis-actions';
-import { SemiCircle, SemiCircleMarker } from 'react-leaflet-semicircle';
+import { SemiCircle } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
 import Control from 'react-leaflet-control';
 import { Sidebar, Tab } from 'react-leaflet-sidetabs';
-import { FiHome, 
+import { 
 	FiChevronRight, 
-	FiSearch, 
-	FiSettings, 
 	FiList,
-	FiRadio, 
-	FiArrowRight, 
 	FiShare2, 
 	FiDatabase,
 	FiFilter	} from "react-icons/fi";
@@ -371,9 +365,6 @@ class GISMap extends React.Component{
 	
     render(){
 		
-		console.log('Rendering....');
-		
-        const position = [this.state.lat, this.state.lng]
         const height = this.state.height;
 		let center = [this.state.lat, this.state.lng]
 
@@ -412,7 +403,7 @@ class GISMap extends React.Component{
 		})
 		.map((cellid, i) => {
 			const cell = this.props.cells[cellid];
-			const beamWidth = parseInt(cell.antenna_beam) > 0 && parseInt(cell.antenna_beam) !== NaN ?  cell.antenna_beam : 30;
+			const beamWidth = parseInt(cell.antenna_beam) > 0 && !isNaN(parseInt(cell.antenna_beam)) ?  cell.antenna_beam : 30;
 			const lcTech = cell.technology.toLowerCase(); 
 			
 			 //Radius. Adjust by  twice the last digit in the ci 
