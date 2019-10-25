@@ -753,7 +753,7 @@ async function  executeTask(task, options){
 	try{
 		if(task === 'setup_database'){
 			//setupBodaDatabase(options.hostname, options.port, options.username, options.password);
-			const result = await utils.runMigrations(options.hostname, options.port, options.username, options.password);
+			const result = await utils.runMigrations(options.hostname, options.port, options.username, options.password, options.refreshSetup);
 			sendLogToUI('setup_database',result.status, result.message);
 		}
 	}catch(err){
