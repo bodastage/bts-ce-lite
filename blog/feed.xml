@@ -4,7 +4,7 @@
         <title>Boda-Lite Blog</title>
         <link>https://bodastage.org/bts-ce-lite/blog</link>
         <description>The best place to stay up-to-date with the latest Boda-Lite news and events.</description>
-        <lastBuildDate>Tue, 15 Oct 2019 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 25 Oct 2019 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,13 @@
             <link>https://bodastage.org/bts-ce-lite/blog</link>
         </image>
         <copyright>Copyright © 2019 Bodastage Solutions</copyright>
+        <item>
+            <title><![CDATA[Version 0.4.1 Release]]></title>
+            <link>https://bodastage.org/bts-ce-lite/blog/2019/10/25/new-version-0.4.1.html</link>
+            <guid>https://bodastage.org/bts-ce-lite/blog/2019/10/25/new-version-0.4.1.html</guid>
+            <pubDate>Fri, 25 Oct 2019 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>0.4.1 adds the changes below:</p> <ul> <li>Adds KML Generation Utility</li> <li>Updates Nokia RAML relation queries</li> <li>Fixes bug in database setup</li> </ul> ]]></description>
+        </item>
         <item>
             <title><![CDATA[Version 0.3.1 Release]]></title>
             <link>https://bodastage.org/bts-ce-lite/blog/2019/10/15/new-version-0.3.1.html</link>
