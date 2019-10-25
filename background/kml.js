@@ -59,7 +59,7 @@ function  checkStyleCondition(lValue, op, rValue){
 		return rValue.split(',').indexOf(lValue) == -1;
 	}
 	
-	if(op === 'end_with'){
+	if(op === 'ends_with'){
 		return new RegExp(`${rValue}\$`).test(lValue);
 	}
 	
@@ -87,6 +87,7 @@ function  checkStyleCondition(lValue, op, rValue){
 	if(op === 'length_greater'){
 		return lValue === null ? false : lValue.length > rValue;
 	}
+	383
 	
 	if(op === 'is_empty'){
 		return lValue.length === 0
@@ -346,6 +347,9 @@ async function generate(options, type){
 						const filterKey = filterKeys[k];
 						const filterVal = filter[filterKey];
 						const keyIndex = headers.indexOf(filterKey);
+						
+						if(worksheet[XLSX.utils.encode_cell({c: keyIndex, r:R})] === undefined) continue;
+						
 						const rowColVal= worksheet[XLSX.utils.encode_cell({c: keyIndex, r:R})].v;
 
 						if(filterVal !== rowColVal) { filterStatus = false; break } //skip this row's values
