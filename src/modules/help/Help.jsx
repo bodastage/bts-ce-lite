@@ -49,6 +49,11 @@ export default class Help extends React.Component {
 						<a href="https://github.com/bodastage/bts-ce-lite/issues" onClick={this.handleOnClick}
 						target="_blank" rel="noopener noreferrer"> Github issue tracker</a></b></li>
 
+                        <li>View <b>
+						<a href="https://www.bodastage.org/bts-ce-lite/docs/" onClick={this.handleOnClick}
+						target="_blank" rel="noopener noreferrer"> documentation</a></b> website</li>
+
+
                     </ul>    
 
                   </div>

@@ -5,18 +5,17 @@ import {Query, Builder, Utils as QbUtils} from 'react-awesome-query-builder';
 import { 
 	Select, 
 	Input,
-	Button as AntdButton 
+	Button as AntdButton,
+	Popover as AntPopover
 } from 'antd';
 import { 
 	FileInput,
 	Button,
-	HTMLSelect,
 	Icon,
 	ProgressBar,
-	Intent,
-	InputGroup
+	Intent
 	} from "@blueprintjs/core";
-import { kmlGetDataHeaders } from './kml-actions';
+import { kmlGetDataHeaders, kmlExtractingHeaders } from './kml-actions';
 import config from './queryBuilderConsts';
 import 'react-awesome-query-builder/css/styles.scss';
 import 'react-awesome-query-builder/css/compact_styles.scss';
@@ -24,15 +23,14 @@ import 'react-awesome-query-builder/css/denormalize.scss';
 import './kml.css';
 
 const { Option } = Select;
-
-const { app, shell } = window.require('electron').remote;
+const { shell } = window.require('electron').remote;
 const { ipcRenderer} = window.require("electron")
 const fs = window.require('fs');
-const log = window.require('electron-log');
 
 const FOLDER_VALUE_TYPES = ["Value", "Field"];
 const VALUE_TYPES = ["Value", "Field", "Condition"];
 const DEFAULT_COLOR =  '#3281a8';
+
 
 class Folder extends React.Component{
 	constructor(props){
@@ -79,7 +77,7 @@ class Folder extends React.Component{
 	render(){
 		
 		let ValueField = (
-			<Input placeholder="Value" onChange={this.handleInputValueChange} disbaled={this.props.disabled}/>
+			<Input placeholder="Value" onChange={this.handleInputValueChange} disabled={this.props.disabled}/>
 		);
 		
 		if( this.state.valueType === 'Field'){
@@ -88,7 +86,7 @@ class Folder extends React.Component{
 					defaultValue={this.state.valueType} 
 					style={{ width: 250 }} 
 					onChange={this.handleFieldValueChange}
-					disbaled={this.props.disabled}
+					disabled={this.props.disabled}
 				>
 				  {this.props.fields.map(v => (
 					<Option value={v} key={v}>{v}</Option>
@@ -106,7 +104,7 @@ class Folder extends React.Component{
 							defaultValue={this.state.valueType} 
 							style={{ width: 120 }} 
 							onChange={this.handleValueTypeChange}
-							disbaled={this.props.disabled}>
+							disabled={this.props.disabled}>
 						  {FOLDER_VALUE_TYPES.map(v => (
 							<Option value={v} key={v}>{v}</Option>
 						  ))}
@@ -140,40 +138,7 @@ class HeightValue extends React.Component{
 			
 			]
 		};
-		
-		const headers = this.props.fields;
-		
-		this.config = {
-			...config,
-			
-			fields: this.props.fields.reduce((result1, item1, index1, array1) => {
-				
-				result1[item1] = {
-					label: item1,
-					type: 'text',
-					defaultOperator: 'equal',
-					operators: [
-						"equal",
-						"not_equal",
-						"less",
-						"less_or_equal",
-						"greater",
-						"greater_or_equal",
-						"between",
-						"not_between",
-						"is_empty",
-						"is_not_empty",
-						"starts_with",
-						"ends_with",
-						"regexp"
-					]
-				};
 
-				return result1;
-			}, {}),
-			
-		}
-		
 	}
 	
 	handleValueTypeChange = (value) => { 
@@ -287,12 +252,57 @@ class HeightValue extends React.Component{
 				
 	render(){
 		
+		const valueTypeHelpContent = (
+			<div>
+				The value can be : Value, Field, or Condition. 
+				<ul>
+					<li>The <b>Value</b> type requires you to input a value. </li>
+					<li>The <b>Field</b> type picks the value from a column in the data file. </li>
+					<li>The <b>Condition</b> type allows you to specify a value depending on a series of conditions. </li>
+				</ul>
+
+			</div>
+		);
+		
+		//Update config
+		this.config = {
+			...config,
+			
+			fields: this.props.fields.reduce((result1, item1, index1, array1) => {
+				
+				result1[item1] = {
+					label: item1,
+					type: 'text',
+					defaultOperator: 'equal',
+					operators: [
+						"equal",
+						"not_equal",
+						"less",
+						"less_or_equal",
+						"greater",
+						"greater_or_equal",
+						"between",
+						"not_between",
+						"is_empty",
+						"is_not_empty",
+						"starts_with",
+						"ends_with",
+						"regexp"
+					]
+				};
+
+				return result1;
+			}, {}),
+			
+		};
+		
+		
 		let ValueField = (
 			<Input placeholder="Value" 
 				defaultValue={this.state.value} 
 				onChange={this.handleInputValueChange}
 				style={{width: '50%'}}
-				disbaled={this.props.disabled}
+				disabled={this.props.disabled}
 			/>
 		);
 		
@@ -302,7 +312,7 @@ class HeightValue extends React.Component{
 					defaultValue={this.state.value} 
 					style={{ width: 250 }} 
 					onChange={this.handleFieldValueChange}
-					disbaled={this.props.disabled}>
+					disabled={this.props.disabled}>
 				  {this.props.fields.map(v => (
 					<Option value={v} key={v}>{v}</Option>
 				  ))}
@@ -334,7 +344,7 @@ class HeightValue extends React.Component{
 				<div className="row">
 					<div className="col-8">
 						<Query 
-						  disbaled={this.props.disabled}
+						  disabled={this.props.disabled}
 						  {...this.config} 
 						  //you can pass object here, see treeJSON at onChange
 						  //value=transit.fromJSON(treeJSON)
@@ -345,7 +355,7 @@ class HeightValue extends React.Component{
 					<div className="col-4" style={{borderLeft: "1px solid #cccccc"}}>
 						<div className="mb-1">
 							<Select 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								size="small"
 								defaultValue={this.state.conditionValueType} 
 								style={{ width: 120 }} 
@@ -357,7 +367,7 @@ class HeightValue extends React.Component{
 						</div>
 						{this.state.conditionValueType === 'Value' ? (
 							<Input 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								placeholder="Value" 
 								defaultValue={this.state.conditionValue}
 								size="small"
@@ -365,7 +375,7 @@ class HeightValue extends React.Component{
 							/>
 						) : (
 							<Select 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								size="small"
 								defaultValue={this.state.conditionValue} 
 								style={{ width: 250 }} 
@@ -384,7 +394,7 @@ class HeightValue extends React.Component{
 						<AntdButton 
 							size="small" 
 							onClick={this.addCondition}
-							disbaled={this.props.disabled}>Add condition</AntdButton>
+							disabled={this.props.disabled}>Add condition</AntdButton>
 					</div>
 				</div>
 			</Fragment>
@@ -395,15 +405,20 @@ class HeightValue extends React.Component{
 			<div className="col-12">
 				<div className="mb-2">
 					<Select 
-						disbaled={this.props.disabled}
+						disabled={this.props.disabled}
 						defaultValue={this.state.valueType} 
 						style={{ width: 120 }} 
 						onChange={this.handleValueTypeChange}>
 					  {VALUE_TYPES.map(v => (
 						<Option value={v} key={v}>{v}</Option>
 					  ))}
-					</Select>
-					
+					</Select> &nbsp;
+					<AntPopover 
+						content={valueTypeHelpContent}
+						title={"? Value Type"}
+					>
+						<Icon icon="info-sign" />
+					</AntPopover>
 				</div>
 				<div className="mb-2">
 					{ValueField}
@@ -430,39 +445,6 @@ class RadiusValue extends React.Component{
 			
 			]
 		};
-		
-		const headers = this.props.fields;
-		
-		this.config = {
-			...config,
-			
-			fields: this.props.fields.reduce((result1, item1, index1, array1) => {
-				
-				result1[item1] = {
-					label: item1,
-					type: 'text',
-					defaultOperator: 'equal',
-					operators: [
-						"equal",
-						"not_equal",
-						"less",
-						"less_or_equal",
-						"greater",
-						"greater_or_equal",
-						"between",
-						"not_between",
-						"is_empty",
-						"is_not_empty",
-						"starts_with",
-						"ends_with",
-						"regexp"
-					]
-				};
-
-				return result1;
-			}, {}),
-			
-		}
 		
 	}
 	
@@ -572,9 +554,54 @@ class RadiusValue extends React.Component{
 				
 	render(){
 		
+		const valueTypeHelpContent = (
+			<div>
+				The value can be : Value, Field, or Condition. 
+				<ul>
+					<li>The <b>Value</b> type requires you to input a value. </li>
+					<li>The <b>Field</b> type picks the value from a column in the data file. </li>
+					<li>The <b>Condition</b> type allows you to specify a value depending on a series of conditions. </li>
+				</ul>
+
+			</div>
+		);
+		
+		//Configure query builder
+		this.config = {
+			...config,
+			
+			fields: this.props.fields.reduce((result1, item1, index1, array1) => {
+				
+				result1[item1] = {
+					label: item1,
+					type: 'text',
+					defaultOperator: 'equal',
+					operators: [
+						"equal",
+						"not_equal",
+						"less",
+						"less_or_equal",
+						"greater",
+						"greater_or_equal",
+						"between",
+						"not_between",
+						"is_empty",
+						"is_not_empty",
+						"starts_with",
+						"ends_with",
+						"regexp"
+					]
+				};
+
+				return result1;
+			}, {}),
+			
+		};
+
+		
 		let ValueField = (
 			<Input 
-				disbaled={this.props.disabled}
+				disabled={this.props.disabled}
 				placeholder="Value" 
 				defaultValue={this.state.value} 
 				onChange={this.handleInputValueChange}
@@ -585,7 +612,7 @@ class RadiusValue extends React.Component{
 		if( this.state.valueType === 'Field'){
 			ValueField = (
 				<Select 
-					disbaled={this.props.disabled}
+					disabled={this.props.disabled}
 					defaultValue={this.state.value} 
 					style={{ width: 250 }} 
 					onChange={this.handleFieldValueChange}>
@@ -620,7 +647,7 @@ class RadiusValue extends React.Component{
 				<div className="row">
 					<div className="col-8">
 						<Query 
-							disbaled={this.props.disabled}
+							disabled={this.props.disabled}
 						  {...this.config} 
 						  //you can pass object here, see treeJSON at onChange
 						  //value=transit.fromJSON(treeJSON)
@@ -631,7 +658,7 @@ class RadiusValue extends React.Component{
 					<div className="col-4" style={{borderLeft: "1px solid #cccccc"}}>
 						<div className="mb-1">
 							<Select 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								size="small"
 								defaultValue={this.state.conditionValueType} 
 								style={{ width: 120 }} 
@@ -643,7 +670,7 @@ class RadiusValue extends React.Component{
 						</div>
 						{this.state.conditionValueType === 'Value' ? (
 							<Input 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								placeholder="Value" 
 								defaultValue={this.state.conditionValue}
 								size="small"
@@ -651,7 +678,7 @@ class RadiusValue extends React.Component{
 							/>
 						) : (
 							<Select 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								size="small"
 								defaultValue={this.state.conditionValue} 
 								style={{ width: 250 }} 
@@ -670,7 +697,7 @@ class RadiusValue extends React.Component{
 						<AntdButton 
 							size="small" 
 							onClick={this.addCondition} 
-							disbaled={this.props.disabled}>Add condition</AntdButton>
+							disabled={this.props.disabled}>Add condition</AntdButton>
 					</div>
 				</div>
 			</Fragment>
@@ -681,15 +708,20 @@ class RadiusValue extends React.Component{
 			<div className="col-12">
 				<div className="mb-2">
 					<Select 
-						disbaled={this.props.disabled}
+						disabled={this.props.disabled}
 						defaultValue={this.state.valueType} 
 						style={{ width: 120 }} 
 						onChange={this.handleValueTypeChange}>
 					  {VALUE_TYPES.map(v => (
 						<Option value={v} key={v}>{v}</Option>
 					  ))}
-					</Select>
-					
+					</Select> &nbsp;
+					<AntPopover 
+						content={valueTypeHelpContent}
+						title={"? Value Type"}
+					>
+						<Icon icon="info-sign" />
+					</AntPopover>
 				</div>
 				<div className="mb-2">
 					{ValueField}
@@ -719,39 +751,6 @@ class ColorValue extends React.Component{
 			
 			]
 		};
-		
-		const headers = this.props.fields;
-		
-		this.config = {
-			...config,
-			
-			fields: this.props.fields.reduce((result1, item1, index1, array1) => {
-				
-				result1[item1] = {
-					label: item1,
-					type: 'text',
-					defaultOperator: 'equal',
-					operators: [
-						"equal",
-						"not_equal",
-						"less",
-						"less_or_equal",
-						"greater",
-						"greater_or_equal",
-						"between",
-						"not_between",
-						"is_empty",
-						"is_not_empty",
-						"starts_with",
-						"ends_with",
-						"regexp"
-					]
-				};
-
-				return result1;
-			}, {}),
-			
-		}
 		
 	}
 	
@@ -865,19 +864,62 @@ class ColorValue extends React.Component{
 	}
 				
 	render(){
+		const valueTypeHelpContent = (
+			<div>
+				The value can be : Value, Field, or Condition. 
+				<ul>
+					<li>The <b>Value</b> type requires you to input a value. </li>
+					<li>The <b>Field</b> type picks the value from a column in the data file. </li>
+					<li>The <b>Condition</b> type allows you to specify a value depending on a series of conditions. </li>
+				</ul>
+
+			</div>
+		);
+		
+		//configure query builder 
+		this.config = {
+			...config,
+			
+			fields: this.props.fields.reduce((result1, item1, index1, array1) => {
+				
+				result1[item1] = {
+					label: item1,
+					type: 'text',
+					defaultOperator: 'equal',
+					operators: [
+						"equal",
+						"not_equal",
+						"less",
+						"less_or_equal",
+						"greater",
+						"greater_or_equal",
+						"between",
+						"not_between",
+						"is_empty",
+						"is_not_empty",
+						"starts_with",
+						"ends_with",
+						"regexp"
+					]
+				};
+
+				return result1;
+			}, {}),
+			
+		};
 		
 		let ValueField = (
 			<input 
 				value={this.state.value} 
 				type="color" 
 				onChange={this.handleInputValueChange}
-				disbaled={this.props.disabled}/>
+				disabled={this.props.disabled}/>
 		);
 		
 		if( this.state.valueType === 'Field'){
 			ValueField = (
 				<Select 
-					disbaled={this.props.disabled}
+					disabled={this.props.disabled}
 					defaultValue={this.state.value} 
 					style={{ width: 250 }} 
 					onChange={this.handleFieldValueChange}>
@@ -914,7 +956,7 @@ class ColorValue extends React.Component{
 				<div className="row">
 					<div className="col-6">
 						<Query 
-							disbaled={this.props.disabled}
+							disabled={this.props.disabled}
 						  {...this.config} 
 						  //you can pass object here, see treeJSON at onChange
 						  //value=transit.fromJSON(treeJSON)
@@ -925,7 +967,7 @@ class ColorValue extends React.Component{
 					<div className="col-4" style={{borderLeft: "1px solid #cccccc"}}>
 						<div className="mb-1">
 							<Select 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								size="small"
 								defaultValue={this.state.conditionValueType} 
 								style={{ width: 120 }} 
@@ -937,7 +979,7 @@ class ColorValue extends React.Component{
 						</div>
 						{this.state.conditionValueType === 'Value' ? (
 							<input 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								value={this.state.conditionValue}
 								size="small"
 								onChange={this.handleConditionValueChange}
@@ -945,7 +987,7 @@ class ColorValue extends React.Component{
 							/>
 						) : (
 							<Select 
-								disbaled={this.props.disabled}
+								disabled={this.props.disabled}
 								size="small"
 								defaultValue={this.state.conditionValue} 
 								style={{ width: 250 }} 
@@ -963,7 +1005,7 @@ class ColorValue extends React.Component{
 							placeholder="Label" 
 							defaultValue={this.state.label} 
 							onChange={this.handleLabelChange}
-							disbaled={this.props.disabled}
+							disabled={this.props.disabled}
 						/>
 					</div>
 				</div>
@@ -972,7 +1014,7 @@ class ColorValue extends React.Component{
 						<AntdButton 
 							size="small" 
 							onClick={this.addCondition}
-							disbaled={this.props.disabled}
+							disabled={this.props.disabled}
 						>Add condition</AntdButton>
 					</div>
 				</div>
@@ -984,14 +1026,21 @@ class ColorValue extends React.Component{
 			<div className="col-12">
 				<div className="mb-2">
 					<Select 
-						disbaled={this.props.disabled}
+						disabled={this.props.disabled}
 						defaultValue={this.state.valueType} 
 						style={{ width: 120 }} 
 						onChange={this.handleValueTypeChange}>
 					  {VALUE_TYPES.map(v => (
 						<Option value={v} key={v}>{v}</Option>
 					  ))}
-					</Select>
+					</Select> &nbsp;
+
+					<AntPopover 
+						content={valueTypeHelpContent}
+						title={"? Value Type"}
+					>
+						<Icon icon="info-sign" />
+					</AntPopover>
 					
 				</div>
 				<div className="mb-2">
@@ -1029,7 +1078,6 @@ class KMLGenerator extends React.Component {
 			//description fields
 			descFields: [],
 			
-			height: {value: 10, valueType: 'Value'},
 			folders: [
 				{
 					value: "Cells",
@@ -1069,9 +1117,18 @@ class KMLGenerator extends React.Component {
 		}
 		
 		const dataFile  =  e.target.files[0].path;
-		this.setState({dataFile: dataFile});
 		
-		this.props.dispatch(kmlGetDataHeaders(dataFile));
+		this.setState({
+			dataFile: dataFile
+		});
+		
+		this.props.dispatch(kmlExtractingHeaders(dataFile));
+		
+		setTimeout(() => {
+			this.props.dispatch(kmlGetDataHeaders(dataFile));
+		}, 1000);
+		
+		
 	}
 	
 	showDataFile = () => {
@@ -1114,7 +1171,7 @@ class KMLGenerator extends React.Component {
 	
 	generateKML = () => {
 		let payload = {
-			dataFile: this.state.dataFile,
+			dataFile: this.props.config.dataFile,
 			latitudeField: this.state.latitudeField,
 			longitudeField: this.state.longitudeField,
 			azimuthField: this.state.azimuthField,
@@ -1173,6 +1230,25 @@ class KMLGenerator extends React.Component {
 
 	//faGlobe
 	render(){
+		const dataFile = this.props.config.dataFile ;
+		const folderHelpContent = (
+			<div>
+				Folders section allows you to group related data together for filtering purposes.
+			</div>
+		);
+		const requiredHelpContent = (
+			<div>
+				Latitude, Longitude, Azimuth, and Label are requried. The label is used for the popup info dialog.
+			</div>
+		);
+		
+		const descriptionFieldsHelpContent = (
+			<div>
+				Specify the fields to show in the details popup dialog when each cell is clicked.
+			</div>
+		);
+		
+		const processing = this.state.processing || this.props.processing;
 		
 		let notice = null;
 		if(this.state.notice !== null ){ 
@@ -1183,14 +1259,14 @@ class KMLGenerator extends React.Component {
 			</div>)
 		}
 		
-		let dataFileEllipsis = this.state.dataFile === 'Data file...' ? "" : "file-text-dir-rtl";
+		let dataFileEllipsis = dataFile === 'Data file...' ? "" : "file-text-dir-rtl";
 
 		return (
 			<div>
                 <fieldset className="col-md-12 fieldset">    	
                     <legend className="legend"><FontAwesomeIcon icon="globe"/> KML Generator</legend>
 
-					{ this.state.processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
+					{ processing ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
 
 					{notice}
 					
@@ -1199,7 +1275,7 @@ class KMLGenerator extends React.Component {
 
 						  <div className="form-group row">
 							<div className="col-sm-8">
-							  <FileInput className={"form-control " + dataFileEllipsis} text={this.state.dataFile} onInputChange={this.onDataFileChange}  disabled={this.state.processing}/>
+							  <FileInput className={"form-control " + dataFileEllipsis} text={dataFile} onInputChange={this.onDataFileChange}  disabled={this.state.processing}/>
 							</div>
 							<div className="col-sm-2">
 								<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.showDataFile()} disabled={this.state.processing}/>
@@ -1212,28 +1288,42 @@ class KMLGenerator extends React.Component {
 								<div>
 									<h6 className="horizontal-line">
 										<span className="horizontal-line-text">
-											Folders	<Icon icon="chevron-right" />								
+											Folders	&nbsp;
+											<AntPopover 
+												content={folderHelpContent}
+												title={"? Folders"}
+											>
+												<Icon icon="info-sign" />
+											</AntPopover> 
+											<Icon icon="chevron-right" />								
 										</span>
 									</h6>
 									<div>
 										<div className="mb-2">
 											<div className="mb-1">
+
+											
+											<ul style={{marginLeft: "0px", paddingLeft: "0px"}}>
 											{this.state.folders.map((v, fi) => (
 												<Fragment key={fi}>
-													<span><Icon icon="folder-close"/> {v.value}</span>
-													<Icon icon="cross" onClick={() => this.removeFolder(fi)} /> 
-													<Icon icon="chevron-right" onClick={(fi) => this.showFolderSettings(fi) }/>
+													<li style={{listStyleType: "none"}}>
+														{[...Array(fi*7)].map((e, ai) => <span className="busterCards" key={ai}>&nbsp;</span>)}
+														{"|---"}
+														<span><Icon icon="folder-close"/> {v.value}</span>
+														<Icon icon="cross" onClick={() => this.removeFolder(fi)} /> 
+													</li>
 												</Fragment>
 											))}		
+											</ul>
 											</div>
 											
 											<Folder 
 												fields={this.props.headers} 
 												defaultValue={this.state.folder} 
 												onChange={this.handleFolderChange}
-												disabled={this.processing}
+												disabled={processing}
 											/>
-											<AntdButton onClick={this.addFolder}>Add folder</AntdButton>
+											<AntdButton onClick={this.addFolder} disabled={processing}>Add folder</AntdButton>
 										</div>
 										
 									</div>
@@ -1242,7 +1332,14 @@ class KMLGenerator extends React.Component {
 							  <div>
 								<h6 className="horizontal-line">
 									<span className="horizontal-line-text">
-										Required <Icon icon="chevron-right" />
+										Required &nbsp;
+										<AntPopover 
+											content={requiredHelpContent}
+											title={"? Required"}
+										>
+											<Icon icon="info-sign" />
+										</AntPopover>
+										<Icon icon="chevron-right" />
 									</span>
 								</h6>
 								
@@ -1256,7 +1353,7 @@ class KMLGenerator extends React.Component {
 												defaultValue={this.state.latitudeField} 
 												style={{ width: 250 }} 
 												onChange={this.handleLatitudeChange}
-												 disabled={this.state.processing} 
+												 disabled={processing} 
 												>
 											  {this.props.headers.map(v => (
 												<Option value={v} key={v}>{v}</Option>
@@ -1273,7 +1370,7 @@ class KMLGenerator extends React.Component {
 												defaultValue={this.state.longitudeField} 
 												style={{ width: 250 }} 
 												onChange={this.handleLongitudeChange}
-												 disabled={this.state.processing} 
+												 disabled={processing} 
 												>
 											  {this.props.headers.map(v => (
 												<Option value={v} key={v}>{v}</Option>
@@ -1293,7 +1390,7 @@ class KMLGenerator extends React.Component {
 												defaultValue={this.state.azimuthField} 
 												style={{ width: 250 }} 
 												onChange={this.handleAzimuthChange}
-												 disabled={this.state.processing} 
+												 disabled={processing} 
 												>
 											  {this.props.headers.map(v => (
 												<Option value={v} key={v}>{v}</Option>
@@ -1310,7 +1407,7 @@ class KMLGenerator extends React.Component {
 												defaultValue={this.state.cellLabelField} 
 												style={{ width: 250 }} 
 												onChange={this.handleCellLabelChange}
-												 disabled={this.state.processing} 
+												 disabled={processing} 
 												>
 											  {this.props.headers.map(v => (
 												<Option value={v} key={v}>{v}</Option>
@@ -1333,7 +1430,7 @@ class KMLGenerator extends React.Component {
 									<HeightValue 
 										fields={this.props.headers}
 										onChange={this.handleHeightChange}
-										disabled={this.processing}
+										disabled={processing}
 									/>
 							</div>
 						  
@@ -1349,7 +1446,7 @@ class KMLGenerator extends React.Component {
 								<RadiusValue 
 									fields={this.props.headers}
 									onChange={this.handleRadiusChange}
-									disabled={this.processing}
+									disabled={processing}
 								/>
 							</div>
 							
@@ -1366,14 +1463,22 @@ class KMLGenerator extends React.Component {
 								<ColorValue 
 									fields={this.props.headers}
 									onChange={this.handleColorChange}
-									disabled={this.processing}
+									disabled={processing}
 								/>
 							</div>
 							
 						  <div>
 								<h6 className="horizontal-line">
 									<span className="horizontal-line-text">
-										Description fields<Icon icon="chevron-right" />
+										Description fields &nbsp;
+										<AntPopover 
+											content={descriptionFieldsHelpContent}
+											title={"? Description fields"}
+										>
+											<Icon icon="info-sign" />
+										</AntPopover>
+										<Icon icon="chevron-right" />
+										
 									</span>
 								</h6>
 						  </div>
@@ -1386,13 +1491,13 @@ class KMLGenerator extends React.Component {
 										defaultValue={this.state.descField} 
 										style={{ width: 250 }} 
 										onChange={this.handleDescFieldChange}
-										 disabled={this.state.processing} 
+										 disabled={processing} 
 										>
 									  {this.props.headers.filter(v => this.state.descFields.indexOf(v) < 0).map(v => (
 										<Option value={v} key={v}>{v}</Option>
 									  ))}
 									</Select>
-									<AntdButton onClick={this.addDescField} disabled={this.processing}>Add field</AntdButton>
+									<AntdButton onClick={this.addDescField} disabled={processing}>Add field</AntdButton>
 								</div>
 								
 								<div>
@@ -1412,7 +1517,7 @@ class KMLGenerator extends React.Component {
 							text="Generate KML" 
 							intent={Intent.PRIMARY}
 							onClick={this.generateKML}
-							disabled={this.processing}
+							disabled={processing}
 						/>
 						  
 						</form>
@@ -1429,7 +1534,8 @@ class KMLGenerator extends React.Component {
 function mapStateToProps(state, ownProps){
     return {
         headers: state.kml.headers,
-		config: state.kml.config
+		config: state.kml.config,
+		processing: state.kml.processing
     };
 }
 

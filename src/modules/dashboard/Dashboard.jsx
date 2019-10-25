@@ -143,23 +143,36 @@ class Dashboard extends React.Component {
 				
 
                 <fieldset className="col-md-12 fieldset">    	
-                    <legend className="legend">General</legend>
+                    <legend className="legend">Utilities</legend>
                     
                     <div className="row dashboard-icon">
 
                         <div className="col-md-2">
                             <div className="icon-display">
 								<a 
-									title="Utilties" 
-									href="#/utilities" 
-									onClick={this.setSidePanel('UtilitiesSidePanel')}>
-									<FontAwesomeIcon icon="tools"/>
+									title="CSV to Excel" 
+									href="#/#" 
+									onClick={this.addTab({
+										component: 'CSVToExcelCombiner',
+										title: 'CSV to Excel'
+									})}>
+									<FontAwesomeIcon icon="file-excel"/>
 								</a></div>
-                            <div className="icon-label">Utilties</div>
+                            <div className="icon-label">CSV to Excel</div>
                         </div>
-
+						
                         <div className="col-md-2">
-
+                            <div className="icon-display">
+								<a 
+									title="KML Generator" 
+									href="#/#" 
+									onClick={this.addTab({
+										component: 'KMLGenerator',
+										title: 'KML Generator'
+									})}>
+									<FontAwesomeIcon icon="globe"/>
+								</a></div>
+                            <div className="icon-label">KML Generator</div>
                         </div>
 
                         <div className="col-md-2">

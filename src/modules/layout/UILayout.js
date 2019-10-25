@@ -12,6 +12,7 @@ import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import './layout.less';
 import VERSION from '../../version';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 class UILayout extends React.Component {
 	constructor(props){
@@ -63,7 +64,33 @@ class UILayout extends React.Component {
 					icon="globe" 
 					text="GIS" 
 					onClick={this.addTab({component: 'GISMap',title: 'GIS'})}/>
+				
+				<MenuItem 
+					icon={<span><FontAwesomeIcon icon="pencil-ruler"/></span>} 
+					text="Baseline Audit" 
+					onClick={this.addTab({component: 'Baseline',title: 'Baseline Audit'})}/>
+					
+				<MenuItem 
+					icon={<span><FontAwesomeIcon icon="book"/></span>} 
+					text="Parameter Reference" 
+					onClick={this.addTab({component: 'ParameterLibrary',title: 'Parameter Reference'})}/>
+					
 				<MenuDivider />
+
+				<MenuItem 
+					icon={<span><FontAwesomeIcon icon="file-excel"/></span>} 
+					text="CSV to Excel" 
+					onClick={this.addTab({component: 'CSVToExcelCombiner',title: 'CSV to Excel'})}/>
+					
+				<MenuItem 
+					icon={<span><FontAwesomeIcon icon="globe"/></span>} 
+					text="KML Generator" 
+					onClick={this.addTab({component: 'KMLGenerator',title: 'KML Generator'})}/>
+					
+					
+				<MenuDivider />
+				
+				
                 <MenuItem icon="cog" text="Settings" onClick={this.addTab({
                                 component: 'Settings', title: 'Settings'})}/>
             </Menu>

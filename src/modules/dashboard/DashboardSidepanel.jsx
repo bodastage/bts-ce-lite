@@ -59,11 +59,40 @@ class DashboardSidePanel extends React.Component {
 
             <a title="Reports" className="dropdown-item" href="/#" onClick={this.setSidePanel('ReportsTree')}> <FontAwesomeIcon icon="table"/> Reports</a>
 			
-            <a title="Process CM dumps" className="dropdown-item" href="/#" onClick={this.addTab({
+            <a title="GIS" className="dropdown-item" href="/#" onClick={this.addTab({
                                             component: 'GISMap',
                                             title: 'GIS'
                                 })}> <FontAwesomeIcon icon="globe-africa" /> GIS</a>  
            
+		   
+            <a title="Baseline" className="dropdown-item" href="/#" onClick={this.addTab({
+                                            component: 'Baseline',
+                                            title: 'Baseline Audit'
+                                })}> <FontAwesomeIcon icon="pencil-ruler" /> Baseline</a>  
+								
+						
+            <a title="Parameter Reference" className="dropdown-item" href="/#" onClick={this.addTab({
+                                            component: 'ParameterLibrary',
+                                            title: 'Parameter Reference'
+                                })}> <FontAwesomeIcon icon="book" /> Parameter Reference</a>  
+								
+					
+						
+                <span className="dropdown-item-text legend w-100">Utilities</span>
+				
+						
+            <a title="CSV to Excel" className="dropdown-item" href="/#" onClick={this.addTab({
+                                            component: 'CSVToExcelCombiner',
+                                            title: 'CSV to Excel'
+                                })}> <FontAwesomeIcon icon="file-excel" /> CSV to Excel</a>  
+								
+            <a title="KML Generator" className="dropdown-item" href="/#" onClick={this.addTab({
+                                            component: 'KMLGenerator',
+                                            title: 'KML Generator'
+                                })}> <FontAwesomeIcon icon="file-excel" /> KML Generator</a>  
+								
+								
+						
                 <span className="dropdown-item-text legend w-100">System</span>
 
                 <a className="dropdown-item" title="Profile" href="/#" 

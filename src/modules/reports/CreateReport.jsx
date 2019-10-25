@@ -616,11 +616,6 @@ class CreateReport extends React.Component{
 				const reportId = this.props.reportInfo !== null ? this.props.reportInfo.id : 'undefined';
 				for(var idx in conditions){
 					const cond = conditions[idx];
-					const op = cond.op;
-					const rValType = cond.rValType;
-					const rValue = cond.rValue;
-					const propt = cond.property;
-					const propVal = cond.propertyValue;
 					
 					const className = generateStyleClass(reportId, columnName, idx);
 					const condExpr = getTableStyleExpression(cond.styleConditions);
@@ -967,7 +962,6 @@ class CreateReport extends React.Component{
 			let ky=0;
 			configureTable = [<b key={ky+"ab"}>Configure table</b>];
 			
-			let conditionCount = 0
 			for(var field in this.tableStyles){
 				const f = field;
 				const conditions = this.tableStyles[field].conditions;
@@ -1004,7 +998,7 @@ class CreateReport extends React.Component{
 						<div>
 							<Icon 
 								icon="cross" 
-								onClick={() => { this.removeFieldCondition(field, i)}}
+								onClick={() => { this.removeFieldCondition(field, i); }}
 							/> 
 							IF {f} 
 								{styleConditions.map((m,ii) => {

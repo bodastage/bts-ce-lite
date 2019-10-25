@@ -1,8 +1,6 @@
 import React from 'react';
-import ReportsTree from '../reports/ReportsTree';
-import GISLeftPanel from '../gis/GISLeftPanel';
 import { connect } from 'react-redux';
-import { addTab, setSidePanel } from '../layout/uilayout-actions';
+import { addTab } from '../layout/uilayout-actions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 class UtilitiesSidePanel extends React.Component {
