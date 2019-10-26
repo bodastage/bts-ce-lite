@@ -711,7 +711,7 @@ async function loadXMLFile(fileName){	//@TODO: Confirm file is XML
 async function loadTEMSFile(fileName, clearTables){
 	const fileFormat = await getFileFormat(fileName);
 	
-	if(fileFormat === null) throw new Error("Unknow TEMS file format.");
+	if(fileFormat === null) throw new Error("Unknown TEMS file format.");
 	
 	if(clearTables){
 		
