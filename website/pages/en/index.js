@@ -64,7 +64,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="https://github.com/bodastage/bts-ce-lite/releases/tag/v0.4.1">Download v0.4.1</Button>
+            <Button href="https://github.com/bodastage/bts-ce-lite/releases/tag/v0.4.2">Download v0.4.2</Button>
             <Button href={docUrl('introduction.html#quick-start')}>Quick start</Button>
           </PromoSection>
         </div>
@@ -95,7 +95,7 @@ class Index extends React.Component {
     //  <div
     //    className="productShowcaseSection paddingBottom"
     //    style={{textAlign: 'center'}}>
-    //    <h2><a href="https://github.com/bodastage/bts-ce-lite/releases">v0.4.1-alpha.5 is available for testing</a></h2>
+    //    <h2><a href="https://github.com/bodastage/bts-ce-lite/releases">v0.4.2-alpha.5 is available for testing</a></h2>
     //    <MarkdownBlock>This is a pre-release version.</MarkdownBlock>
     //  </div>
     //);
