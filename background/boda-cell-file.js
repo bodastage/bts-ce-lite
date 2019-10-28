@@ -80,7 +80,8 @@ const BCF_4G_PARAMS = {
 	longitude: {required: true},
 	height: {},
 	vendor: {},
-	cell_type: {}
+	cell_type: {},
+	localcellid: {}
 };
 
 const BCF_5G_PARAMS = {

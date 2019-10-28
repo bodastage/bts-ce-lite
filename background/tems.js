@@ -181,11 +181,10 @@ function generateParameterInsertQuery(fields, values){
 	
 	paramNames.forEach((p, i) => {
 	
-		
 		//Skip parameter that are not there
 		if(fields.indexOf(p) === -1 ) return;
 
-		paramValues[i] = values[fields.indexOf(p)];
+		paramValues[i] = values[fields.indexOf(p)] === undefined ? "" : values[fields.indexOf(p)];
 		updatePhrase.push(`${p} = EXCLUDED.${p}`);
 	});
 	
@@ -197,8 +196,7 @@ function generateParameterInsertQuery(fields, values){
 	 SET 
 		${updatePhrase.join(",")}
 	`;
-	
-	//console.log(sql)
+
 	return sql;
 
 }
@@ -429,7 +427,9 @@ async function loadXMLFile(fileName){	//@TODO: Confirm file is XML
 		"longitude",
 		"height",
 		"vendor",
-		"cell_type"
+		"cell_type",
+		"ci",
+		"localcellid"
 	]
 	
 	//GSM_CELL
@@ -647,7 +647,10 @@ async function loadXMLFile(fileName){	//@TODO: Confirm file is XML
 			
 			if(child.nodeName === 'LOCALCELLID') paramValues['localcellid'] = child.firstChild.data;
 			
+			//pci
 			if(child.nodeName === 'PCI') paramValues['pci'] = child.firstChild.data;
+			if(child.nodeName === 'PHYSICAL_LAYER_CELL_ID') paramValues['pci'] = child.firstChild.data;
+			
 			
 			if(child.nodeName === 'EARFCN_DL') paramValues['euarfcn'] = child.firstChild.data;
 			
@@ -668,6 +671,22 @@ async function loadXMLFile(fileName){	//@TODO: Confirm file is XML
 			
 			if(child.nodeName === 'ENODE_B_STATUS') paramValues['status'] = child.firstChild.data;
 
+			//CGI
+			if(child.nodeName === 'LTE_CGI'){
+				const children2 = child.childNodes;
+				for(var j =0; j < children2.length; j++){
+					const child2 = children2[j];
+					
+					if( typeof child2.localName === 'undefined') continue;
+					
+					if(child2.nodeName === 'MCC') paramValues['mcc'] = child2.firstChild.data;
+					if(child2.nodeName === 'MNC') paramValues['mnc'] = child2.firstChild.data;
+					if(child2.nodeName === 'TAC') paramValues['tac'] = child2.firstChild.data;
+				}
+				
+				paramValues['cgi'] = `${paramValues["mcc"]}-${paramValues["mnc"]}-${paramValues["lac"]}-${paramValues["ci"]}`
+			}
+			
 			//POSITION
 			if(child.nodeName === 'POSITION'){
 				const children2 = child.childNodes;
@@ -699,10 +718,14 @@ async function loadXMLFile(fileName){	//@TODO: Confirm file is XML
 		paramValues['technology'] = 'lte';
 		paramValues['node'] = paramValues['siteid'] || "ENODEB";
 		
-		const bcfLTEValues  = lteBcfFields.map(v => paramValues[v] || '');
+		paramValues['ci'] = paramValues['ci'] || paramValues['pci'];
+		paramValues['localcellid'] = paramValues['localcellid'] === undefined ? "0" : '';
 		
-		const InsertQry = generateParameterInsertQuery(lteBcfFields, bcfLTEValues);
-		await queryHelper.runQuery(InsertQry);
+		const bcfLTEValues  = lteBcfFields.map(v => paramValues[v] === undefined ? "" : paramValues[v]);
+		
+		const insertQry = generateParameterInsertQuery(lteBcfFields, bcfLTEValues);
+
+		await queryHelper.runQuery(insertQry);
 
 		node = nodes.iterateNext()
 	}
