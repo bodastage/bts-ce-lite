@@ -102,9 +102,8 @@ class ReportsTree extends React.Component{
                 <Menu>
                     <MenuItem icon="th" text="View report" onClick={(ev) => {ev.preventDefault(); this.showReportDataTab(node.label, node.reportId);}}/>
 					{node.inBuilt === true ? "" : <MenuItem icon="graph-remove" text="Delete report" onClick={(ev) => {ev.preventDefault(); this.removeReport(node.reportId);}}/> }	
-					{node.inBuilt === true || node.type === 'composite' ? 
-						<MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.createCompositeReport(node.reportId)}} />					: 
-						<MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.showEditTab(node.reportId)}} /> }	
+					{ node.inBuilt === false && node.type === 'composite' ? <MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.createCompositeReport(node.reportId)}} /> : "" }
+					{ node.inBuilt === false && node.type !== 'composite' ? <MenuItem icon="edit" text="Edit report" onClick={(ev) => {ev.preventDefault(); this.createCompositeReport(node.reportId)}} /> : "" }
 					
                 </Menu>,
                 { left: e.clientX, top: e.clientY },

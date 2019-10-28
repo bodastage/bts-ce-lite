@@ -1247,6 +1247,25 @@ class KMLGenerator extends React.Component {
 				Specify the fields to show in the details popup dialog when each cell is clicked.
 			</div>
 		);
+
+		
+		const radiusHelpContent = (
+			<div>
+				Specifiy the coverage radius in this section. The radius value can be  <br/>
+				manaully in-put, selected from a column in the data file or can depend a series  of conditions
+			</div>
+		);
+		
+		const colorHelpContent = (
+			<div>
+				Pick or provide the color to use for the cell. If the color is manually <br />
+				provided, a <b>hexadecimal</b> color value of the form "<code>#FFFFFF</code>" is <br />
+				expected.
+			</div>
+		);
+		
+		
+		//
 		
 		const processing = this.state.processing || this.props.processing;
 		
@@ -1437,7 +1456,14 @@ class KMLGenerator extends React.Component {
 						  <div>
 								<h6 className="horizontal-line">
 									<span className="horizontal-line-text">
-										Radius <Icon icon="chevron-right" />
+										Radius &nbsp;
+										<AntPopover 
+											content={radiusHelpContent}
+											title={"? Radius"}
+										>
+											<Icon icon="info-sign" />
+										</AntPopover>
+										<Icon icon="chevron-right" />
 									</span>
 								</h6>
 						  </div>
@@ -1454,7 +1480,16 @@ class KMLGenerator extends React.Component {
 							<div>
 								<h6 className="horizontal-line">
 									<span className="horizontal-line-text">
-										Colors <Icon icon="chevron-right" />
+										
+										Colors &nbsp;
+										<AntPopover 
+											content={colorHelpContent}
+											title={"? Color"}
+										>
+											<Icon icon="info-sign" />
+										</AntPopover>
+										<Icon icon="chevron-right" />
+
 									</span>
 								</h6>
 							</div>

@@ -345,6 +345,32 @@ cleanHuaweiGexportFiles = async (exportFolder) => {
 }
 
 
+
+/**
+* Clean Huawei GExport files.
+*
+*	sed -i -r "
+*	s/<MO className="(BSC6900GSM|BSC6900UMTS|BSC6900GU|BSC6910GSM|BSC6910UMTS|BSC6910GU)(.*)/<MO className="\1/ig;
+*	" /mediation/data/cm/huawei/raw/motree/*.xml
+*
+* @exportFolder String Folder with the MO Tree dump XML files to be cleaned
+*/
+cleanHuaweiMOTreeFiles = async (exportFolder) => {	
+	const replaceOptions = {
+	  files: path.join(exportFolder,'*'),
+	  from: [
+		/<MO className="(BSC6900GSM|BSC6900UMTS|BSC6900GU|BSC6910GSM|BSC6910UMTS|BSC6910GU)/g
+	  ],
+	  to: [
+		"<MO className=\""
+	  ],
+	};
+	
+	return await replace.sync(replaceOptions)
+}
+
+
+
 /*Use gnu sed.exe on windows
 * 
 */
@@ -378,6 +404,42 @@ cleanHuaweiGExportWithSed = (inputFolder) => {
 	}
 
 }
+
+
+/*
+* Clean Huawei MO Tree XML files.
+* @param string inputFolder
+*/
+cleanHuaweiMOTreeWithSed = (inputFolder) => {
+	let libPath = app.getAppPath();
+
+	if (!isDev) {
+	  libPath = process.resourcesPath;
+	} 
+	
+	let files = fs.readdirSync(inputFolder,  { withFileTypes: true }).filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+		
+	const sedScript = path.join(libPath,'libraries', 'motree_cleanup.sed');
+	const sed = path.join(libPath,'libraries','sed.exe');
+		
+	for (let i=0; i<files.length; i++) {
+		f = files[i];
+		inputFile = path.join(inputFolder,f);
+		
+		log.info(`Cleaning ${f}...`);
+		sendLogToUI('parse_data','info', `Cleaning  ${f}...`);
+		
+		const child = spawnSync(sed, ['-i', '-r', '-f', sedScript, inputFile]);
+		log.info(`${sed} -i -r -f ${sedScript} ${inputFile}`);
+
+		if(child.error){
+			log.info(`[parse_cm_job] error:${child.error.toString()}`);
+			throw child.error.toString();
+		}
+	}
+
+}
+
 
 /*
 * Take the latest file when there is more than one file from the same node .
@@ -460,7 +522,7 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 			removeDublicateHuaweiGExportFiles(inputFolder)
 						
 			log.info(`[parse_cm_job] Uncompressing files GExport XML files...`)
-			sendLogToUI('parse_data','info',`Uncompressing files GExport XML files...` );
+			sendLogToUI('parse_data','info',"Uncompressing files GExport XML files...");
 			
 			uncompressFolder(inputFolder);
 			
@@ -488,17 +550,53 @@ processCMDumps = async (vendor, format, inputFolder, outputFolder) => {
 		}
 		
 	}
+	
+	//Clean Huawei MOTree files 
+	else if(vendor === 'HUAWEI' && format === 'MOTREE_XML'){
+		try{
+						
+			log.info(`Uncompressing files MOTree XML files...`);
+			sendLogToUI('parse_data','info', "Uncompressing files MOTree XML files...");
+			
+			uncompressFolder(inputFolder);
+			
+			log.info(`Uncompressing files MOTree XML files...`)
+			sendLogToUI('parse_data','info',"Cleaning MOTree XML files...");
+			
+			if(process.platform === "win32"){
+				//If windows test, with sed.exe 
+				cleanHuaweiMOTreeWithSed(inputFolder);
+			}else{
+				await cleanHuaweiMOTreeFiles(inputFolder);
+			}
+			
+			log.info(`Cleanup of MOTree XML files completed.`);
+			sendLogToUI('parse_data','info',"Cleanup of MOTree XML files completed.");
+			
+		}catch(error){
+			log.error('Error occurred:', error);
+			if(typeof error === 'undefined'){
+				sendLogToUI('parse_data','error', 'Error occured.');
+				return;
+			}
+			sendLogToUI('parse_data','error',error.toString());
+			return;
+		}
+		
+	}
+	
+	
 	//Uncompress files for other vendor format combinations except huawei gexport 
 	//The reason for this is we want to first remove the duplicates in the dumps, before wasting time 
 	//uncompressing what does not need to be uncompressed 
-	//else if(vendor !== 'HUAWEI' && format !== 'GEXPORT_XML'){
+	//else if(vendor !== 'HUAWEI' && (format !== 'GEXPORT_XML' || format !== 'MOTREE_XML')){
 	else{
-		sendLogToUI('parse_data','info',`Uncompressing files...` );
-		log.info(`Uncompressing files...`)
+		sendLogToUI('parse_data','info',"Uncompressing files...");
+		log.info("Uncompressing files...")
 		uncompressFolder(inputFolder);
 	}
 	
-	sendLogToUI('parse_data','info', `Parsing files...`);
+	sendLogToUI('parse_data','info', "Parsing files...");
 	log.info("Parsing files...")
 	
 
