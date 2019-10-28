@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Parse and Import · Boda-Lite</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The **Parse and Import** module parses network dumps and optionally loads them into the database.  Below is a "/><meta name="docsearch:version" content="0.4.1"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Parse and Import · Boda-Lite"/><meta property="og:type" content="website"/><meta property="og:url" content="https://bodastage.org/bts-ce-lite/"/><meta property="og:description" content="The **Parse and Import** module parses network dumps and optionally loads them into the database.  Below is a "/><meta property="og:image" content="https://bodastage.org/bts-ce-lite/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://bodastage.org/bts-ce-lite/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/bts-ce-lite/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://bodastage.org/bts-ce-lite/blog/atom.xml" title="Boda-Lite Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://bodastage.org/bts-ce-lite/blog/feed.xml" title="Boda-Lite Blog RSS Feed"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/bts-ce-lite/js/scrollSpy.js"></script><link rel="stylesheet" href="/bts-ce-lite/css/main.css"/><script src="/bts-ce-lite/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/bts-ce-lite/"><img class="logo" src="/bts-ce-lite/img/favicon.ico" alt="Boda-Lite"/><h2 class="headerTitleWithLogo">Boda-Lite</h2></a><a href="/bts-ce-lite/versions"><h3>0.4.1</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/bts-ce-lite/docs/0.4.1/" target="_self">Docs</a></li><li class=""><a href="/bts-ce-lite/blog/" target="_self">Blog</a></li><li class=""><a href="/bts-ce-lite/users" target="_self">Users</a></li><li class=""><a href="https://github.com/bodastage/bts-ce-lite" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Contents</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Contents</h3><ul class=""><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/">Table of contents</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/introduction">Introduction</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/installation">Installation</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/parse_and_import">Parse and Import</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/reports">Reports</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/gis">GIS</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/baseline">Baseline Audit</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/utilities">Utilities</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/key_files_and_folders">Key Files and Folders</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/contributing">Contributing</a></li><li class="navListItem"><a class="navItem" href="/bts-ce-lite/docs/0.4.1/development">Development Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/bodastage/bts-ce-lite/edit/master/docs/parse_and_import.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Parse and Import</h1></header><article><div><span><p>The <strong>Parse and Import</strong> module parses network dumps and optionally loads them into the database.  Below is a
+screenshot of the module.</p>
+<p><img src="/bts-ce-lite/img/parse_and_import.png" alt="Parse and Import"></p>
+<p>The <strong>Data type</strong> field has three options: CM, FM, and PM. CM for configuration management files, PM for performance management files, and FM for fault management network dumps.</p>
+<p>The <strong>Load into database</strong> switch determines whether to only stop on parsing. or to load the data into the database after parsing. The <strong>Clear tables before loading</strong> truncatebls
+the database table before loading new data. Otherwise new data is added to the table without deleting the previous one.</p>
+<h2><a class="anchor" aria-hidden="true" id="vendor-file-formats"></a><a href="#vendor-file-formats" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Vendor File Formats</h2>
+<p>The formats below are supported as of version 0.3.0.</p>
+<table>
+<thead>
+<tr><th>Data type</th><th>Vendor</th><th>Format</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>CM</td><td>ERICSSON</td><td>BULKCM</td><td>Bulk CM XML</td></tr>
+<tr><td>CM</td><td>ERICSSON</td><td>CNAIV2</td><td></td></tr>
+<tr><td>CM</td><td>ERICSSON</td><td>BSM</td><td></td></tr>
+<tr><td>CM</td><td>ERICSSON</td><td>EAW</td><td></td></tr>
+<tr><td>CM</td><td>HUAWEI</td><td>GEXPORT_XML</td><td></td></tr>
+<tr><td>CM</td><td>HUAWEI</td><td>NBI_XML</td><td></td></tr>
+<tr><td>CM</td><td>HUAWEI</td><td>CFGMML</td><td></td></tr>
+<tr><td>CM</td><td>HUAWEI</td><td>AUTOBAK_XML</td><td></td></tr>
+<tr><td>CM</td><td>ZTE</td><td>BULKCM</td><td></td></tr>
+<tr><td>CM</td><td>ZTE</td><td>XLS</td><td>Excel Plan Template Data Workbook</td></tr>
+<tr><td>CM</td><td>NOKIA</td><td>RAML</td><td>RAML XML</td></tr>
+<tr><td>CM</td><td>MOTOROLA</td><td>CELL_X_EXPORT</td><td>Cell X Export dump</td></tr>
+<tr><td>CM</td><td>BODSTAGE</td><td>BCF_CSV</td><td>Boda Cell File in csv format</td></tr>
+<tr><td>PM</td><td>ERICSSON</td><td>MEAS_COLLEC_XML</td><td>3GPP TS 32.432(SA5) Performance Management Files</td></tr>
+<tr><td>PM</td><td>HUAWEI</td><td>NE_BASED_MEAS_COLLEC_XML</td><td>NE Based Performance Management Files</td></tr>
+<tr><td>PM</td><td>ZTE</td><td>MEAS_COLLEC_XML</td><td>3GPP TS 32.432(SA5) Performance Management Files</td></tr>
+<tr><td>PM</td><td>NOKIA</td><td>PM_XML</td><td></td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="boda-cell-file-bcf"></a><a href="#boda-cell-file-bcf" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Boda Cell File (BCF)</h2>
+<p>Boda Cell File is a text file used to import network data into boda-lite. This data is loaded into the tools
+plan environment. The data source could be a planning tool or any other external source.
+The boda cell file can load 2G, 3G, and 4G cell parameters.</p>
+<h3><a class="anchor" aria-hidden="true" id="how-to-import"></a><a href="#how-to-import" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>How to import</h3>
+<p>To import the Boda cell file data into Boda-lite</p>
+<ol>
+<li>Go to the <strong>Parse and Import</strong> module</li>
+<li>Select <strong>CM</strong> from the <strong>Data type</strong> select field</li>
+<li>Select <strong>BODASTAGE/BCF_CSV</strong> from the <strong>Vendor/Format</strong> select field</li>
+<li>Select the input folder with the location of the cell files</li>
+<li>Process</li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="2g-cell-parameters"></a><a href="#2g-cell-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2G Cell Parameters</h3>
+<table>
+<thead>
+<tr><th>Parameters</th><th>Comments</th></tr>
+</thead>
+<tbody>
+<tr><td>technology</td><td>Required. Values: <strong>GSM</strong></td></tr>
+<tr><td>ci</td><td>Required</td></tr>
+<tr><td>cellname</td><td>Required</td></tr>
+<tr><td>siteid</td><td>Required</td></tr>
+<tr><td>carrier_layer</td><td></td></tr>
+<tr><td>azimuth</td><td></td></tr>
+<tr><td>electrical_tilt</td><td></td></tr>
+<tr><td>mechanical_tilt</td><td></td></tr>
+<tr><td>lac</td><td></td></tr>
+<tr><td>node</td><td></td></tr>
+<tr><td>bcch</td><td>Required</td></tr>
+<tr><td>trx_frequencies</td><td></td></tr>
+<tr><td>antenna_beam</td><td></td></tr>
+<tr><td>latitude</td><td>Required</td></tr>
+<tr><td>longitude</td><td>Required</td></tr>
+<tr><td>height</td><td></td></tr>
+<tr><td>vendor</td><td></td></tr>
+<tr><td>cell_type</td><td></td></tr>
+<tr><td>bsic</td><td>Required</td></tr>
+<tr><td>bcc</td><td></td></tr>
+<tr><td>ncc</td><td></td></tr>
+<tr><td>mnc</td><td></td></tr>
+<tr><td>mcc</td><td></td></tr>
+<tr><td>cgi</td><td></td></tr>
+<tr><td>nbr_1</td><td>Values are neighbour cell CIs</td></tr>
+<tr><td>nbr_n</td><td></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="3g-cell-parameters"></a><a href="#3g-cell-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3G Cell Parameters</h3>
+<table>
+<thead>
+<tr><th>Parameter</th><th>Comments</th></tr>
+</thead>
+<tbody>
+<tr><td>technology</td><td>Values: <strong>UMTS</strong></td></tr>
+<tr><td>ci</td><td>Required</td></tr>
+<tr><td>cellname</td><td>Required</td></tr>
+<tr><td>siteid</td><td>Required</td></tr>
+<tr><td>carrier_layer</td><td></td></tr>
+<tr><td>azimuth</td><td>Required</td></tr>
+<tr><td>electrical_tilt</td><td></td></tr>
+<tr><td>mechanical_tilt</td><td></td></tr>
+<tr><td>lac</td><td></td></tr>
+<tr><td>rac</td><td></td></tr>
+<tr><td>sac</td><td></td></tr>
+<tr><td>node</td><td></td></tr>
+<tr><td>psc</td><td>Required</td></tr>
+<tr><td>uarfcn</td><td>Required</td></tr>
+<tr><td>antenna_beam</td><td></td></tr>
+<tr><td>latitude</td><td>Required</td></tr>
+<tr><td>longitude</td><td>Required</td></tr>
+<tr><td>height</td><td></td></tr>
+<tr><td>vendor</td><td></td></tr>
+<tr><td>cell_type</td><td></td></tr>
+<tr><td>mnc</td><td></td></tr>
+<tr><td>mcc</td><td></td></tr>
+<tr><td>cgi</td><td></td></tr>
+<tr><td>rncid</td><td></td></tr>
+<tr><td>nbr_1</td><td>Values are neighbour cell CIs</td></tr>
+<tr><td>nbr_n</td><td></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="4g-cell-parameters"></a><a href="#4g-cell-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4G Cell Parameters</h3>
+<table>
+<thead>
+<tr><th>technology</th><th>Comments</th></tr>
+</thead>
+<tbody>
+<tr><td>technology</td><td>Value options are <strong>LTE</strong></td></tr>
+<tr><td>ci</td><td>Required</td></tr>
+<tr><td>cellname</td><td>Required</td></tr>
+<tr><td>siteid</td><td>Required</td></tr>
+<tr><td>enodeb_id</td><td></td></tr>
+<tr><td>carrier_layer</td><td></td></tr>
+<tr><td>azimuth</td><td></td></tr>
+<tr><td>electrical_tilt</td><td></td></tr>
+<tr><td>mechanical_tilt</td><td></td></tr>
+<tr><td>tac</td><td></td></tr>
+<tr><td>node</td><td></td></tr>
+<tr><td>pci</td><td>Required</td></tr>
+<tr><td>euarfcn</td><td>Required</td></tr>
+<tr><td>bandwidth</td><td></td></tr>
+<tr><td>ecgi</td><td></td></tr>
+<tr><td>mnc</td><td></td></tr>
+<tr><td>mcc</td><td></td></tr>
+<tr><td>antenna_beam</td><td></td></tr>
+<tr><td>latitude</td><td>Required</td></tr>
+<tr><td>longitude</td><td>Required</td></tr>
+<tr><td>height</td><td></td></tr>
+<tr><td>vendor</td><td></td></tr>
+<tr><td>cell_type</td><td></td></tr>
+<tr><td>nbr_1</td><td>Values are neighbour cell CIs</td></tr>
+<tr><td>nbr_n</td><td></td></tr>
+</tbody>
+</table>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated by Emmanuel Robert Ssebaggala</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/bts-ce-lite/docs/0.4.1/installation"><span class="arrow-prev">← </span><span>Installation</span></a><a class="docs-next button" href="/bts-ce-lite/docs/0.4.1/reports"><span>Reports</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#vendor-file-formats">Vendor File Formats</a></li><li><a href="#boda-cell-file-bcf">Boda Cell File (BCF)</a><ul class="toc-headings"><li><a href="#how-to-import">How to import</a></li><li><a href="#2g-cell-parameters">2G Cell Parameters</a></li><li><a href="#3g-cell-parameters">3G Cell Parameters</a></li><li><a href="#4g-cell-parameters">4G Cell Parameters</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/bts-ce-lite/" class="nav-home"><img src="/bts-ce-lite/img/favicon.ico" alt="Boda-Lite" width="66" height="58"/></a><div><h5>Docs</h5><a href="/bts-ce-lite/docs/en/installation.html">Installation</a></div><div><h5>Community</h5><a href="/bts-ce-lite/en/users.html">User Showcase</a><a href="https://telecomhall.net" target="_blank" rel="noreferrer noopener">Forum</a></div><div><h5>More</h5><a href="/bts-ce-lite/blog">Blog</a><a href="https://github.com/bodastage/bts-ce-lite">GitHub</a><a class="github-button" href="https://github.com/bodastage/bts-ce-lite" data-icon="octicon-star" data-count-href="/bodastage/bts-ce-lite/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Bodastage Solutions</section></footer></div></body></html>
