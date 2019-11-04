@@ -40,7 +40,7 @@ export function checkIfJavaIsInstalled(){
 			if (javaVersion != false) {
 				// TODO: We have Java installed
 				//return callback(null, javaVersion);
-				dispatch(addDashboardNotice(null));
+				dispatch(clearNotice());
 				
 			} else {
 				log.error("Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download");
