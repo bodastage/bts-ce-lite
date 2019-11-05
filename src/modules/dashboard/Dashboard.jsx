@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import  './dashboard.css';
 import { connect } from 'react-redux';
 import { addTab, setSidePanel } from '../layout/uilayout-actions';
+import { checkIfJavaIsInstalled, clearNotice } from './dashboard-actions';
 import { Toaster, Intent } from "@blueprintjs/core";
 
 const { shell } = window.require('electron').remote;
@@ -21,6 +22,14 @@ class Dashboard extends React.Component {
 		this.setSidePanel = this.setSidePanel.bind(this);
 		
 		this.toaster = new Toaster();
+		
+		const that = this;
+		
+		//Check if Java is installed
+		setTimeout(() => {
+			that.props.dispatch(checkIfJavaIsInstalled());
+		},1000);
+		
 
     }
     
@@ -69,6 +78,10 @@ class Dashboard extends React.Component {
 		let tabId = options.component;
         this.props.dispatch(addTab(tabId, options.component, {title: options.title}));
 	}
+	
+	dismissNotice = () => {
+		this.props.dispatch(clearNotice());
+	}
     
 	showGISModule= (options) => (e) => { 
         e.preventDefault();
@@ -82,9 +95,22 @@ class Dashboard extends React.Component {
 	}
 	
     render(){   
+	
+		let notice = null;
+		if(this.props.notice !== null ){ 
+			notice = (<div className={`alert alert-${this.props.notice.type} p-2 mt-2`} role="alert">{this.props.notice.message}
+					<button type="button" className="close"  aria-label="Close" onClick={this.dismissNotice}>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>)
+		}
+		
+		console.log(this.props.notice);
+		
         return (
 
             <div>
+				{notice}
                 <fieldset className="col-md-12 fieldset">    	
                     <legend className="legend">Radio Access Network</legend>
                     
@@ -227,12 +253,10 @@ class Dashboard extends React.Component {
     
 }
 
-//function mapStateToProps(state) {
-//  return {
-//    tabs: state.tabs
-//  }
-//}
-//
-//export default connect(mapStateToProps)(Dashboard);
-    
-export default connect()(Dashboard)
+function mapStateToProps(state) {
+  return {
+	  notice: state.dashboard.notice
+  }
+}
+
+export default connect(mapStateToProps)(Dashboard);

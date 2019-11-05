@@ -10,6 +10,8 @@ platform telecommunication management desktop app.
 * Parsing and loading telecommunication performance management(PM) network dumps
 * Reports module that supports tabular, graphs, and composite(dashboard-like) reports
 * Advanced GIS module
+* Network baseline audit
+* Utilities: CSV to Excel, KML Generator
 
 ## Built with 
 * [Electron](https://electronjs.org)

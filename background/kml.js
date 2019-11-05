@@ -363,10 +363,21 @@ async function generate(options, type){
 						continue;
 					}
 					
+					
+					if( worksheet[XLSX.utils.encode_cell({c:longitudeIndex, r:R})] === undefined){
+						log.warn(`LONGITUDE value is missing! for row=${R} and column=${longitudeIndex+1}`);
+						continue;
+					}
+					
+					if( worksheet[XLSX.utils.encode_cell({c:azimuthIndex, r:R})] === undefined){
+						log.warn(`AZIMUTH value is missing! for row=${R} and column=${azimuthIndex+1}`);
+						continue;
+					}
+					
 					const latitude = worksheet[XLSX.utils.encode_cell({c:latitudeIndex, r:R})].v;
 					const longitude = worksheet[XLSX.utils.encode_cell({c:longitudeIndex, r:R})].v;
 					const azimuth = worksheet[XLSX.utils.encode_cell({c:azimuthIndex, r:R})].v;
-					const cellLabel = worksheet[XLSX.utils.encode_cell({c:cellLabelIndex, r:R})].v ;
+					const cellLabel = worksheet[XLSX.utils.encode_cell({c:cellLabelIndex, r:R})].v || "UNDEFINED" ;
 					const height = getSomeValue(options.height, R);
 					const azSteps = 6;
 					const radius = getSomeValue(options.radius, R);
@@ -493,16 +504,16 @@ async function generate(options, type){
 	
 	var fs = require('fs');
 	
-	await new Promise((resolve, reject) => {
+	var retStatus = await new Promise((resolve, reject) => {
 		var stream = fs.createWriteStream(fileName, {emitClose: true});
 		stream.on('error', function (err) {
-			log.err(err);
-			reject()
+			log.error(err);
+			reject({status: 'success', message: 'Parsing finished'});
 			throw new Error("Error creating kml file.");
 		});
 		
 		stream.on('finish', function () {
-			resolve();
+			resolve({status: 'success', message: 'Parsing finished'});
 		});
 		
 		
@@ -526,7 +537,12 @@ async function generate(options, type){
 			//  <size x="0" y="0" xunits="pixels" yunits="pixels"/>
 			//</ScreenOverlay>`);
 			
-			processFolders(options.folders, stream, {});
+			try{
+				processFolders(options.folders, stream, {});
+			}catch(e){
+				log.error(e)
+				reject({message: 'Error occurred', status: 'error'});
+			}
 			
 			stream.write('</Document>\n');
 		    stream.write('</kml>\n');
@@ -536,7 +552,7 @@ async function generate(options, type){
 		});
 
 	})
-	
+
 	return fileName;
 	
 }
