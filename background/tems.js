@@ -40,59 +40,59 @@ const TEMS_BCF_MAP = {
 };
 
 const TEMS_BCF_MAP_2G = {
-	"Network_CellID":  "siteid",
-	"Cell":  "cellname",
-	"Lat" : "latitude",
-	"Latitude" : "latitude",
-	"Lon" : "longitude",
-	"Longitude" : "longitude",
-	"MCC" : "mcc",
-	"MNC" : "mnc",
-	"LAC" : "lac",
-	"RA" : "rac",
-	"CI" : "ci",
-	"ANT_DIRECTION" : "azimuth",
-	"ANT DIR" : "azimuth",
-	"ANT ORIENTATION": "azimuth",
-	"ANT_BEAM_WIDTH" : "antenna_beam",
-	"ANT_TYPE": "antenna_type",
-	"ANT_HEIGHT": "height",
-	"ANT_TILT": "mechanical_tilt",
-	"CELL_TYPE": "cell_type",
-	"ARFCN": "bcch",
-	"BSIC": "bsic"
+	"network_cellid":  "siteid",
+	"cell":  "cellname",
+	"lat" : "latitude",
+	"latitude" : "latitude",
+	"lon" : "longitude",
+	"longitude" : "longitude",
+	"mcc" : "mcc",
+	"mnc" : "mnc",
+	"lac" : "lac",
+	"ra" : "rac",
+	"ci" : "ci",
+	"ant_direction" : "azimuth",
+	"ant dir" : "azimuth",
+	"ant orientation": "azimuth",
+	"ant_beam_width" : "antenna_beam",
+	"ant_type": "antenna_type",
+	"ant_height": "height",
+	"ant_tilt": "mechanical_tilt",
+	"cell_type": "cell_type",
+	"arfcn": "bcch",
+	"bsic": "bsic"
 }
 
 const TEMS_BCF_MAP_3G = {
-	"Network_CellID":  null,
-	"Cell":  "cellname",
-	"Lat" : "latitude",
-	"Latitude" : "latitude",
-	"Lon" : "longitude",
-	"Longitude" : "longitude",
-	"MCC" : "mcc",
-	"MNC" : "mnc",
-	"LAC" : "lac",
-	"RA" : "rac",
-	"CI" : "ci",
-	"ANT_DIRECTION" : "azimuth",
-	"ANT DIR" : "azimuth",
-	"ANT ORIENTATION": "azimuth",
-	"ANT_BEAM_WIDTH" : "antenna_beam",
-	"ANT_TYPE": "antenna_type",
-	"ANT_HEIGHT": "height",
-	"ANT_TILT": "mechanical_tilt",
-	"CELL_TYPE": "cell_type",
-	"UARFCN": "uarfcn",
-	"RNC-ID": "rncid",
-	"SC": "psc",
-	"C-ID": "ci",
-	"URA": "ura",
-	"TIME_OFFSET": null,
-	"CPICH_POWER": "cpich_power",
-	"MAX_TX_POWER": "max_tx_power",
-	"NODE_B": "siteid",
-	"NODE_B_STATUS": null,
+	"network_cellid":  null,
+	"cell":  "cellname",
+	"lat" : "latitude",
+	"latitude" : "latitude",
+	"lon" : "longitude",
+	"longitude" : "longitude",
+	"mcc" : "mcc",
+	"mnc" : "mnc",
+	"lac" : "lac",
+	"ra" : "rac",
+	"ci" : "ci",
+	"ant_direction" : "azimuth",
+	"ant dir" : "azimuth",
+	"ant orientation": "azimuth",
+	"ant_beam_width" : "antenna_beam",
+	"ant_type": "antenna_type",
+	"ant_height": "height",
+	"ant_tilt": "mechanical_tilt",
+	"cell_type": "cell_type",
+	"uarfcn": "uarfcn",
+	"rnc-id": "rncid",
+	"sc": "psc",
+	"c-id": "ci",
+	"ura": "ura",
+	"time_offset": null,
+	"cpich_power": "cpich_power",
+	"max_tx_power": "max_tx_power",
+	"node_b": "siteid",
+	"node_b_status": null,
 }
 
 /**
@@ -283,12 +283,12 @@ async function loadCELFile(fileName, truncateTables){
 		lineCnt += 1;
 		if(lineCnt === 1) return;
 		if(lineCnt === 2) {
-			parameterList = line.split("\t");
+			parameterList = line.split("\t").map(v => v.toLowerCase());
 		}
 		
 		values = line.split("\t");
 	
-		if(parameterList.indexOf("ARFCN") > -1 && values[parameterList.indexOf("ARFCN")].length > 0){
+		if(parameterList.indexOf("arfcn") > -1 && values[parameterList.indexOf("arfcn")].length > 0){
 			bcfFields = parameterList.map( p => { 
 				return typeof TEMS_BCF_MAP_2G[p] === 'undefined' ? null : TEMS_BCF_MAP_2G[p];
 			}).filter(v => v != null)
@@ -311,7 +311,7 @@ async function loadCELFile(fileName, truncateTables){
 			
 		}
 
-		if(parameterList.indexOf("UARFCN") > -1 && values[parameterList.indexOf("UARFCN")].length > 0){
+		if(parameterList.indexOf("uarfcn") > -1 && values[parameterList.indexOf("uarfcn")].length > 0){
 			bcfFields = parameterList.map( p => { 
 				return typeof TEMS_BCF_MAP_3G[p] === 'undefined' ? null : TEMS_BCF_MAP_3G[p];
 			}).filter(v => v != null)
