@@ -1075,6 +1075,10 @@ class KMLGenerator extends React.Component {
 			cellLabelField: this.props.headers[0] || null,
 			descField: this.props.headers[0] || null,
 			
+			legendLabel: 'Theme1',
+			legendColor: DEFAULT_COLOR,
+			legendOptions: [], //{color:..., label:...}
+			
 			//description fields
 			descFields: [],
 			
@@ -1168,7 +1172,31 @@ class KMLGenerator extends React.Component {
 	
 	handleColorChange = (value) => this.setState({color: value});
 	
+	handleLegendLabelChange = (e) => this.setState({legendLabel: e.target.value});
 	
+	handleLegendColorChange = (e) => this.setState({legendColor: e.target.value});
+	
+	deleteLegendKey = (index) => {
+		let legendOptions = this.state.legendOptions;
+		legendOptions.splice(index, 1);
+		this.setState({legendOptions: legendOptions});	
+	}
+
+	
+	addLegendKey = () => {
+		
+		this.setState({
+			legendOptions: [
+				...this.state.legendOptions,
+				{
+					color: this.state.legendColor,
+					label: this.state.legendLabel
+				}
+			]
+		});
+		
+	}
+		
 	generateKML = () => {
 		let payload = {
 			dataFile: this.props.config.dataFile,
@@ -1180,7 +1208,8 @@ class KMLGenerator extends React.Component {
 			radius: this.state.radius,
 			height: this.state.height,
 			color: this.state.color,
-			descFields: this.state.descFields
+			descFields: this.state.descFields,
+			legendOptions: this.state.legendOptions
 		}
 		
 		//Set processing to true 
@@ -1248,6 +1277,11 @@ class KMLGenerator extends React.Component {
 			</div>
 		);
 
+		const legendHelpContent = (
+			<div>
+				Legend for the color themes
+			</div>
+		);
 		
 		const radiusHelpContent = (
 			<div>
@@ -1502,6 +1536,70 @@ class KMLGenerator extends React.Component {
 								/>
 							</div>
 							
+							<div>
+								<h6 className="horizontal-line">
+									<span className="horizontal-line-text">
+										
+										Legend &nbsp;
+										<AntPopover 
+											content={legendHelpContent}
+											title={"? Legend"}
+										>
+											<Icon icon="info-sign" />
+										</AntPopover>
+										<Icon icon="chevron-right" />
+
+									</span>
+								</h6>
+							</div>
+							
+						  
+						  <div className=" form-group row">
+							<div className="col-12">
+								
+								<ul style={{listStyleType: "none", paddingLeft:"1px"}}>
+									{this.state.legendOptions.map((v, idx) => (
+										<li key={idx}> 
+											<Icon icon="remove" onClick={() => this.deleteLegendKey(idx)}/>
+											<Icon icon="symbol-square" style={{color: v.color}} iconSize={20}/> 
+											{v.label}
+										</li>
+									))}
+								</ul>
+				
+								<table width="500px">
+									<tr>
+										<td>
+											<Input 
+												type="color" 
+												style={{width: "50px"}}
+												defaultValue={this.state.legendColor} 
+												onChange={this.handleLegendColorChange}
+											/>
+										</td>
+										<td>								
+											<Input placeholder="Value" 
+												defaultValue={this.state.legendLabel} 
+												onChange={this.handleLegendLabelChange}
+												style={{width: '400px'}}
+												disabled={processing}
+											/>
+										</td>
+										<td>
+											<AntdButton 
+												onClick={this.addLegendKey} 
+												disabled={processing}
+											>
+												Add color key
+											</AntdButton>
+										</td>
+									</tr>
+								</table>
+							
+
+							</div>
+						  </div>
+						  
 						  <div>
 								<h6 className="horizontal-line">
 									<span className="horizontal-line-text">
@@ -1517,6 +1615,7 @@ class KMLGenerator extends React.Component {
 									</span>
 								</h6>
 						  </div>
+
 						  
 							<div className=" form-group row">
 								<div className="col-12">
