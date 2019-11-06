@@ -63,7 +63,6 @@
     "ag-grid-community": "^20.0.0",
     "ag-grid-react": "^20.0.0",
     "ajv": "^6.5.2",
-    "archiver": "^3.1.1",
     "async": "^3.0.1",
     "axios": "^0.18.1",
     "bfj": "6.1.1",

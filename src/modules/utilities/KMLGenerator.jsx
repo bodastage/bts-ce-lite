@@ -1568,6 +1568,7 @@ class KMLGenerator extends React.Component {
 								</ul>
 				
 								<table width="500px">
+									<tbody>
 									<tr>
 										<td>
 											<Input 
@@ -1594,6 +1595,7 @@ class KMLGenerator extends React.Component {
 											</AntdButton>
 										</td>
 									</tr>
+									</tbody>
 								</table>
 							
 
