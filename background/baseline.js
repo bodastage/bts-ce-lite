@@ -84,6 +84,8 @@ FROM
 huawei_cm."${mo}" t1
 INNER JOIN huawei_cm."SYS" t2 
     ON t1.data->>'FILENAME' = t2.data->>'FILENAME'
+WHERE 
+	t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t2.data->>'SYSOBJECTID',
     t1.data->>'${parameter}'
@@ -106,7 +108,9 @@ SELECT
 FROM 
 huawei_cm."${mo}" t1
 INNER JOIN huawei_cm."CNOPERATORTA" t2 
-	ON t2.data->>'FILENAME' = t1.data->>'FILENAME'
+	ON t2.data->>'FILENAME' = t1.data->>'FILENAME' 
+WHERE 
+	t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t2.data->>'TAC',
     t1.data->>'${parameter}'
@@ -141,6 +145,7 @@ INNER JOIN nokia_cm."BSC" t2
 	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*BSC-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*BSC-\\d+')
 WHERE 
 	t2.data->>'name' IS NOT NULL 
+	AND t1.data->>'${parameter}' IS NOT NULL
 	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
 GROUP BY 
     t2.data->>'name',
@@ -167,6 +172,7 @@ INNER JOIN nokia_cm."RNC" t2
 	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*RNC-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*RNC-\\d+')  
 WHERE 
 	t2.data->>'name' IS NOT NULL 
+	AND t1.data->>'${parameter}' IS NOT NULL
 	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
 GROUP BY 
     t2.data->>'name',
@@ -196,6 +202,7 @@ INNER JOIN nokia_cm."MRBTS" t2
 	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*MRBTS-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*MRBTS-\\d+')   
 WHERE  
 	t2.data->>'name' IS NOT NULL 
+	AND t1.data->>'${parameter}' IS NOT NULL 
 	AND t1.data->>'FILENAME' = t2.data->>'FILENAME' 
 GROUP BY 
     t2.data->>'name', 
@@ -227,9 +234,10 @@ ericsson_cm."${mo}" t1
 WHERE 
 	t1.data->>'BSC_NAME' IS NOT NULL 
 	AND TRIM(t1.data->>'BSC_NAME') != '' 
+	AND t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t1.data->>'BSC_NAME',
-    t1.data->>'${parameter}'
+    t1.data->>'${parameter}' 
 ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET 
   score=EXCLUDED.score + scores.score
 	`
@@ -251,6 +259,7 @@ ericsson_cm."${mo}" t1
 WHERE 
 	t1.data->>'SubNetwork_2_id' IS NOT NULL 
 	AND TRIM(t1.data->>'SubNetwork_2_id') != '' 
+	AND t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t1.data->>'SubNetwork_2_id',
     t1.data->>'${parameter}'
@@ -277,6 +286,7 @@ ericsson_cm."${mo}" t1
 WHERE 
 	TRIM(t1.data->>'meContext_id') IS NOT NULL 
 	AND TRIM(t1.data->>'meContext_id') != '' 
+	AND t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t1.data->>'meContext_id', 
     t1.data->>'${parameter}' 
@@ -306,6 +316,7 @@ zte_cm."${mo}" t1
 WHERE 
 	t1.data->>'SubNetwork_2_id' IS NOT NULL 
 	AND TRIM(t1.data->>'SubNetwork_2_id') != '' 
+	AND t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t1.data->>'SubNetwork_2_id',
     t1.data->>'${parameter}'
@@ -332,6 +343,7 @@ zte_cm."${mo}" t1
 WHERE 
 	TRIM(t1.data->>'meContext_id') IS NOT NULL 
 	AND TRIM(t1.data->>'meContext_id') != '' 
+	AND t1.data->>'${parameter}' IS NOT NULL 
 GROUP BY 
     t1.data->>'meContext_id', 
     t1.data->>'${parameter}' 
