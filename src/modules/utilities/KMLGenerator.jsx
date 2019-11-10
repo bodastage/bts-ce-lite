@@ -1239,7 +1239,7 @@ class KMLGenerator extends React.Component {
 				this.setState({
 						notice: {
 							type: 'success', 
-							message: 'KML file generated at ' + obj.message
+							message: 'KMZ file generated at ' + obj.message
 							},
 						processing: false
 						});
@@ -1650,7 +1650,7 @@ class KMLGenerator extends React.Component {
 					</div>
 
 						<Button 
-							text="Generate KML" 
+							text="Generate KMZ" 
 							intent={Intent.PRIMARY}
 							onClick={this.generateKML}
 							disabled={processing}
