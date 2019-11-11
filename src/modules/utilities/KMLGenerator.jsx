@@ -1083,10 +1083,11 @@ class KMLGenerator extends React.Component {
 			descFields: [],
 			
 			folders: [
-				{
-					value: "Cells",
-					valueType: "Value", //Value or Field
-				}
+				//Remove initial Cells group -- since @0.4.5
+				//{
+				//	value: "Cells",
+				//	valueType: "Value", //Value or Field
+				//}
 			],
 			
 			radius: { value: 10, valueType: 'Value'},
