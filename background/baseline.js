@@ -124,7 +124,12 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
   score=EXCLUDED.score + scores.score
 		`;
 	}
-	const result = await queryHelper.runQuery(sql);
+	
+	try{
+		const result = await queryHelper.runQuery(sql);
+	}catch(e){
+		log.error(e);
+	}
 }
 
 /*
@@ -222,7 +227,11 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	}
 	
 	//console.log(sql);
-	const result = await queryHelper.runQuery(sql);
+	try{
+		const result = await queryHelper.runQuery(sql);
+	}catch(e){
+		log.error(e);
+	}
 }
 
 
@@ -244,7 +253,6 @@ WHERE
 	t1.data->>'BSC_NAME' IS NOT NULL 
 	AND TRIM(t1.data->>'BSC_NAME') != '' 
 	AND t1.data->>'${parameter}' IS NOT NULL 
-	t1.data->>'BSC_NAME' IS NOT NULL
 GROUP BY 
     t1.data->>'BSC_NAME',
     t1.data->>'${parameter}' 
@@ -304,7 +312,12 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
   score=EXCLUDED.score + scores.score 
 		`;
 	}
-	const result = await queryHelper.runQuery(sql);
+	
+	try{
+		const result = await queryHelper.runQuery(sql);
+	}catch(e){
+		log.error(e);
+	}
 }
 
 async function computeZTEBaselineScore(tech, mo, parameter){
@@ -361,7 +374,12 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
   score=EXCLUDED.score + scores.score 
 		`;
 	}
-	const result = await queryHelper.runQuery(sql);
+	
+	try{
+		const result = await queryHelper.runQuery(sql);
+	}catch(e){
+		log.error(e);
+	}
 }
 
 
@@ -645,12 +663,15 @@ async function uploadUserBaseline(baselineFile, truncate){
 		}
 		
 		let values = paramIndices.map(v => { 
-			return v === vendorIndex ? dataRow[v].toUpperCase() : dataRow[v];
+			const value = v === vendorIndex ? dataRow[v].toUpperCase() : dataRow[v];
+			
+			//limit value length to 200
+			return value.toString().slice(0,200);
 		});
 		const sql = `INSERT INTO baseline."configuration"
 			(${parameterList.join(",")})
 		VALUES
-			('${values.join("','")}')
+			($$${values.join("$$,$$")}$$)
 		 ON CONFLICT ON CONSTRAINT unq_configuration DO UPDATE
 		 SET 
 			${updatePhrase.join(",")}
