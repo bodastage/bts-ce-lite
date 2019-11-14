@@ -362,6 +362,10 @@ async function generate(options, type){
 		
 		if( valObj.valueType === 'Field'){
 			const c = headers.indexOf(valObj.value);
+			
+			//
+			if(worksheet[XLSX.utils.encode_cell({c:c, r:r})] === undefined) return 0;
+			
 			return worksheet[XLSX.utils.encode_cell({c:c, r:r})].v
 		}
 		
@@ -450,7 +454,12 @@ async function generate(options, type){
 							
 							let dV = "";
 							try{
-								dV = worksheet[XLSX.utils.encode_cell({c: fI, r: R})].v ;
+								if(worksheet[XLSX.utils.encode_cell({c: fI, r: R})] === undefined) { 
+									dV = 0
+								}
+								else{
+									dV = worksheet[XLSX.utils.encode_cell({c: fI, r: R})].v ;
+								}
 							}catch(e){
 								log.error(e)
 							}

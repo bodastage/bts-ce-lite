@@ -16,6 +16,7 @@ import { GraphOptionsContainer } from './GraphOptions'
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 import { COMP_OPERATORS, COMP_VALUE_TYPES, COMP_PROPERTIES,
 		 generateStyleClass, numberParser, getTableStyleExpression } from './reports-utils';
+import QueryWizard from './QueryWizard';
 
 //Empty container
 function EmptyContain(props){
@@ -1041,6 +1042,9 @@ class CreateReport extends React.Component{
                     <legend className="legend"><FontAwesomeIcon icon="table"/> {tabTitle}</legend>
                     
             {this.props.creating === true || this.fetchingReportInfo === true ? <ProgressBar intent={Intent.PRIMARY} className="mb-2"></ProgressBar> : ""}
+			<div>
+				<QueryWizard />
+			</div>
             <div className="row">
                 <div className="col-sm">
                     <div className="mb-2">

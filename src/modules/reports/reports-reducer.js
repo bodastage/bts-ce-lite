@@ -27,7 +27,14 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		CLEAR_REPORT_TREE_ERROR,
 		
 		//Clear
-		CLEAR_NEW_RPT_CATEGORY
+		CLEAR_NEW_RPT_CATEGORY,
+		
+		//Wizrd 
+		UPDATE_DATABASE_TABLES,
+		UPDATE_AVAILABLE_COLUMNS,
+		DELETE_AVAILABLE_COLUMN,
+		ADD_JOIN_CONDITION,
+		REMOVE_JOIN_CONDITION
 		} from './reports-actions';
 
 		
@@ -108,6 +115,14 @@ let initialState = {
 			"zte_cm": {},
 			"motorola_cm": {}
 		}
+	},
+	
+	//Query Wizrd
+	qrywiz: {
+		tables: [],
+		joins: [],
+		availableColumns: [],
+		selectedColumns: []
 	}
 };
 
@@ -327,6 +342,82 @@ export default function reports(state = initialState, action){
                     ...state,
                     requestError: null
                 }
+			//QUERY WIZARD
+			case UPDATE_DATABASE_TABLES:
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						//Get the index for each table for use in the joins and queries 
+						tables: action.tables.map((v, i) => { return {...v, tableIndex: i};})
+					}
+				}
+			case UPDATE_AVAILABLE_COLUMNS:
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						availableColumns:[
+							...state.qrywiz.availableColumns,
+							...action.tableColumns.map((v, i) => { return { ...v, tableAlias: action.tableAlias, joinIndex: action.joinIndex};})
+						]
+					}
+				}
+			case DELETE_AVAILABLE_COLUMN:
+			
+				let availableColumns = state.qrywiz.availableColumns;
+				availableColumns.splice(action.index, 1);
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						availableColumns: availableColumns
+					}
+				}
+			case ADD_JOIN_CONDITION:
+				const len = state.qrywiz.joins.length + 1;
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						joins: [
+							...state.qrywiz.joins,
+							{ ...action.joinCondtion, joinIndex: len-1 }
+						]
+					}
+				};
+			case REMOVE_JOIN_CONDITION: 
+				
+				const join = state.qrywiz.joins[action.joinIndex];
+				
+				//Remove columns 
+				const availColumns = state.qrywiz.availableColumns.filter( 
+					v => v.joinIndex !== action.joinIndex
+				).map(
+					v => { 
+						const jIdx = v.joinIndex < action.joinIndex ? v.joinIndex : v.joinIndex - 1;
+						const tAlias = `tl${jIdx}`;
+						return {
+							...v,
+							joinIndex: jIdx,
+							tableAlias: tAlias
+							
+						
+					}; }
+				);
+			
+				//Remove condition
+				let joins = state.qrywiz.joins;
+				joins.splice(action.joinIndex, 1);
+				
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						joins: joins.map((v, i) => { return {...v, joinIndex: i};}),
+						availableColumns: availColumns
+					}
+				}
             default:
                 return state;
 		}
