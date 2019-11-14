@@ -13,7 +13,7 @@ exports.up = async (pgm) => {
 			technology: {type: "varchar(20)", notNull: true},
 			mo: {type: "varchar(100)", notNull: true},
 			parameter: {type: "varchar(300)", notNull: true},
-			baseline: {type: "varchar(200)"}, //manually provided baseline value
+			baseline: {type: "varchar(300)"}, //manually provided baseline value
 			extra_fields: {type: "JSON"},
 			created_at: "createdAt", 
 			modified_at: "createdAt", 
