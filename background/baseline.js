@@ -221,7 +221,7 @@ ON CONFLICT ON CONSTRAINT unq_scores DO UPDATE SET
 	`
 	}
 	
-	console.log(sql);
+	//console.log(sql);
 	const result = await queryHelper.runQuery(sql);
 }
 
@@ -605,6 +605,7 @@ async function uploadUserBaseline(baselineFile, truncate){
 	var worksheet = workbook.Sheets[firstSheetName];
 	var range = XLSX.utils.decode_range(worksheet['!ref']);
 	var headers = [];
+	var vendorIndex = 0;
 	
 	for(var R = range.s.r; R <= range.e.r; ++R) {
 		var dataRow = [];
@@ -621,12 +622,10 @@ async function uploadUserBaseline(baselineFile, truncate){
 			
 			//Make sure the rows match the headers
 			if(C > headers.length-1) continue;
-			console.log("R:", R, " C:", C, "headers.length:", headers.length);
 			
 			const cellValue = cell === undefined ? "" : cell.v;
 			dataRow.push(cellValue); 
 		}
-		console.log("dataRow:", dataRow.join(","));
 		
 		//Validate headers 
 		if( headers.indexOf('vendor') === -1 ) throw new Error('vendor field is missing');
@@ -640,10 +639,14 @@ async function uploadUserBaseline(baselineFile, truncate){
 				.map(v => v.toLowerCase())
 				.map( v => headers.indexOf(v)).filter(v => v > -1);
 			
+			//Get position of vendor field
+			vendorIndex = headers.indexOf('vendor') > -1 ? headers.indexOf('vendor') : vendorIndex;
 			continue;
 		}
 		
-		let values = paramIndices.map(v => dataRow[v])
+		let values = paramIndices.map(v => { 
+			return v === vendorIndex ? dataRow[v].toUpperCase() : vendorIndex;
+		});
 		const sql = `INSERT INTO baseline."configuration"
 			(${parameterList.join(",")})
 		VALUES
