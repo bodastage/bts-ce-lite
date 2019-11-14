@@ -645,7 +645,7 @@ async function uploadUserBaseline(baselineFile, truncate){
 		}
 		
 		let values = paramIndices.map(v => { 
-			return v === vendorIndex ? dataRow[v].toUpperCase() : vendorIndex;
+			return v === vendorIndex ? dataRow[v].toUpperCase() : dataRow[v];
 		});
 		const sql = `INSERT INTO baseline."configuration"
 			(${parameterList.join(",")})
