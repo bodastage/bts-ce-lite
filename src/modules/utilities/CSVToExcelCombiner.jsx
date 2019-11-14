@@ -139,7 +139,7 @@ export default class CSVToExcelCombiner extends React.Component {
 				this.setState({
 						notice: {
 							type: 'success', 
-						message: ` Combined file generated at: ${obj.message}`
+						message: ` Processed file generated at: ${obj.message}`
 							},
 						processing: false
 						});
@@ -221,7 +221,7 @@ export default class CSVToExcelCombiner extends React.Component {
                   </div>
 				  
 				  
-				  <Button icon="play" text="Combine" className={Classes.INTENT_PRIMARY}  onClick={this.combineCSVFiles} disabled={this.state.processing}/> &nbsp;
+				  <Button icon="play" text="Process" className={Classes.INTENT_PRIMARY}  onClick={this.combineCSVFiles} disabled={this.state.processing}/> &nbsp;
 				  </fieldset>
             </div>    
         );

@@ -86,6 +86,7 @@ INNER JOIN huawei_cm."SYS" t2
     ON t1.data->>'FILENAME' = t2.data->>'FILENAME'
 WHERE 
 	t1.data->>'${parameter}' IS NOT NULL 
+	AND t1.data->>'${parameter}' != '' 
 GROUP BY 
     t2.data->>'SYSOBJECTID',
     t1.data->>'${parameter}'
@@ -111,6 +112,7 @@ INNER JOIN huawei_cm."CNOPERATORTA" t2
 	ON t2.data->>'FILENAME' = t1.data->>'FILENAME' 
 WHERE 
 	t1.data->>'${parameter}' IS NOT NULL 
+	AND t1.data->>'${parameter}' != '' 
 GROUP BY 
     t2.data->>'TAC',
     t1.data->>'${parameter}'
@@ -146,6 +148,7 @@ INNER JOIN nokia_cm."BSC" t2
 WHERE 
 	t2.data->>'name' IS NOT NULL 
 	AND t1.data->>'${parameter}' IS NOT NULL
+	AND t1.data->>'${parameter}' != '' 
 	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
 GROUP BY 
     t2.data->>'name',
@@ -172,7 +175,8 @@ INNER JOIN nokia_cm."RNC" t2
 	ON SUBSTRING(t2.data->>'DISTNAME' FROM '^.*RNC-\\d+') =  SUBSTRING(t1.data->>'DISTNAME' FROM '^.*RNC-\\d+')  
 WHERE 
 	t2.data->>'name' IS NOT NULL 
-	AND t1.data->>'${parameter}' IS NOT NULL
+	AND t1.data->>'${parameter}' IS NOT NULL 
+	AND t1.data->>'${parameter}' != '' 
 	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
 GROUP BY 
     t2.data->>'name',
@@ -203,6 +207,7 @@ INNER JOIN nokia_cm."MRBTS" t2
 WHERE  
 	t2.data->>'name' IS NOT NULL 
 	AND t1.data->>'${parameter}' IS NOT NULL 
+	AND t1.data->>'${parameter}' != '' 
 	AND t1.data->>'FILENAME' = t2.data->>'FILENAME' 
 GROUP BY 
     t2.data->>'name', 
