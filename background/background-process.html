@@ -875,11 +875,11 @@ async function  executeTask(task, options){
 	try{
 		if(task === 'upload_baseline'){
 			const result = await utils.uploadUserBaseline(options.baselineFile);
-			sendLogToUI('upload_baseline',result.status, result.message);
+			sendLogToUI(task,result.status, result.message);
 		}
 	}catch(err){
 		log.error(err)
-		sendLogToUI('upload_baseline','error', "Error while running baseline.  Check logs for details.");
+		sendLogToUI(task,'error', "Error while running baseline.  Check logs for details.");
 	}	
 	
 	//Upload parameter reference

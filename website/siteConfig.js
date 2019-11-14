@@ -123,7 +123,7 @@ const siteConfig = {
     zIndex: 100,
   },
   
-  defaultVersionShown: '0.4.2',
+  defaultVersionShown: '0.4.4',
   editUrl: 'https://github.com/bodastage/bts-ce-lite/edit/master/docs/',
 };
 
