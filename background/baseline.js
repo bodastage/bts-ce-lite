@@ -1,4 +1,6 @@
+const XLSX = window.require('xlsx');
 const queryHelper = window.require('./query-helpers');
+
 //Move baseline logic into classes and use an interface to here. This will allow different 
 //algorithmes to be easily used fo clustering and scoring values
 //
@@ -87,6 +89,7 @@ INNER JOIN huawei_cm."SYS" t2
 WHERE 
 	t1.data->>'${parameter}' IS NOT NULL 
 	AND t1.data->>'${parameter}' != '' 
+	AND t2.data->>'SYSOBJECTID' IS NOT NULL
 GROUP BY 
     t2.data->>'SYSOBJECTID',
     t1.data->>'${parameter}'
@@ -113,6 +116,7 @@ INNER JOIN huawei_cm."CNOPERATORTA" t2
 WHERE 
 	t1.data->>'${parameter}' IS NOT NULL 
 	AND t1.data->>'${parameter}' != '' 
+	AND t2.data->>'TAC' IS NOT NULL 
 GROUP BY 
     t2.data->>'TAC',
     t1.data->>'${parameter}'
@@ -136,7 +140,7 @@ INSERT INTO baseline.scores
 SELECT 
 	'NOKIA' as vendor,
 	'${tech}' as technology,
-    t2.data->>'name' AS "cluster",
+    t2.data->>'name' AS "cluster", 
     '${mo}' AS "mo",
     '${parameter}' AS "parameter",
     t1.data->>'${parameter}' as "value",
@@ -149,7 +153,7 @@ WHERE
 	t2.data->>'name' IS NOT NULL 
 	AND t1.data->>'${parameter}' IS NOT NULL
 	AND t1.data->>'${parameter}' != '' 
-	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
+	AND t1.data->>'FILENAME' = t2.data->>'FILENAME' 
 GROUP BY 
     t2.data->>'name',
     t1.data->>'${parameter}'
@@ -177,7 +181,7 @@ WHERE
 	t2.data->>'name' IS NOT NULL 
 	AND t1.data->>'${parameter}' IS NOT NULL 
 	AND t1.data->>'${parameter}' != '' 
-	AND t1.data->>'FILENAME' = t2.data->>'FILENAME'
+	AND t1.data->>'FILENAME' = t2.data->>'FILENAME' 
 GROUP BY 
     t2.data->>'name',
     t1.data->>'${parameter}'
@@ -240,6 +244,7 @@ WHERE
 	t1.data->>'BSC_NAME' IS NOT NULL 
 	AND TRIM(t1.data->>'BSC_NAME') != '' 
 	AND t1.data->>'${parameter}' IS NOT NULL 
+	t1.data->>'BSC_NAME' IS NOT NULL
 GROUP BY 
     t1.data->>'BSC_NAME',
     t1.data->>'${parameter}' 
@@ -594,47 +599,64 @@ async function uploadUserBaseline(baselineFile, truncate){
 		queryHelper.runQuery('TRUNCATE TABLE baseline.configuration RESTART IDENTITY');
 	}
 	
-	await new Promise((resolve, reject) => {
-		csv({output: "csv", noheader:true, trim:true})
-		.fromFile(baselineFile)
-		.subscribe(async (csvRow, index)=>{
-			
-			//Header column 
-			if(index === 0){
-				//parameterList = csvRow;
-				
-				//Populate parameter indices 
-				//only consider values in the parameterList i.e with a filter
-				paramIndices = parameterList
-					.map(v => v.toLowerCase())
-					.map( v => csvRow.indexOf(v)).filter(v => v > -1)
-				
-				return;
+	
+	var workbook = XLSX.readFile(baselineFile);
+	var firstSheetName = workbook.SheetNames[0];
+	var worksheet = workbook.Sheets[firstSheetName];
+	var range = XLSX.utils.decode_range(worksheet['!ref']);
+	var headers = [];
+	
+	for(var R = range.s.r; R <= range.e.r; ++R) {
+		var dataRow = [];
+		for(var C = range.s.c; C <= range.e.c; ++C) {
+			var cellAddress = {c:C, r:R};
+			var cellRef = XLSX.utils.encode_cell(cellAddress);
+			var cell = worksheet[cellRef];
+
+			if(R === 0 ){
+				if (cell === undefined) continue;
+				headers.push(cell.v);
+				continue;
 			}
 			
-			let values = paramIndices.map(v => csvRow[v])
+			//Make sure the rows match the headers
+			if(C > headers.length-1) continue;
+			console.log("R:", R, " C:", C, "headers.length:", headers.length);
 			
-			const sql = `INSERT INTO baseline."configuration"
-				(${parameterList.join(",")})
-			VALUES
-				('${values.join("','")}')
-			 ON CONFLICT ON CONSTRAINT unq_configuration DO UPDATE
-			 SET 
-				${updatePhrase.join(",")}
-			`;
+			const cellValue = cell === undefined ? "" : cell.v;
+			dataRow.push(cellValue); 
+		}
+		console.log("dataRow:", dataRow.join(","));
+		
+		//Validate headers 
+		if( headers.indexOf('vendor') === -1 ) throw new Error('vendor field is missing');
+		if( headers.indexOf('mo') === -1 ) throw new Error('mo field is missing');
+		if( headers.indexOf('technology') === -1 ) throw new Error('technology field is missing');
+		if( headers.indexOf('parameter') === -1 ) throw new Error('parameter field is missing');
+		if( headers.indexOf('baseline') === -1 ) throw new Error('baseline field is missing');
+		
+		if(R === 0 ){
+			paramIndices = parameterList
+				.map(v => v.toLowerCase())
+				.map( v => headers.indexOf(v)).filter(v => v > -1);
 			
-			log.log(sql);
-			await queryHelper.runQuery(sql);
-			
-		},(err) => {//onError
-			log.error(`csvJoJson.onError: ${err.toString()}`);
-			resolve();
-		},
-		()=>{//onComplete
-			log.info(`End of csvToJson for ${baselineFile}.`)
-			resolve();
-		});
-	});//eof: promise
+			continue;
+		}
+		
+		let values = paramIndices.map(v => dataRow[v])
+		const sql = `INSERT INTO baseline."configuration"
+			(${parameterList.join(",")})
+		VALUES
+			('${values.join("','")}')
+		 ON CONFLICT ON CONSTRAINT unq_configuration DO UPDATE
+		 SET 
+			${updatePhrase.join(",")}
+		`;
+		
+		log.log(sql);
+		await queryHelper.runQuery(sql);
+	}
+	
 }
 
 
