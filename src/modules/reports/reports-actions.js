@@ -926,8 +926,7 @@ export function confirmCompReportCreation(reportId, data){
 }
 
 
-//WIZARD 
-
+//QUERY WIZARD 
 export const FETCH_DATABASE_TABLES = 'FETCH_DATABASE_TABLES';
 
 export const UPDATE_DATABASE_TABLES = 'UPDATE_DATABASE_TABLES';
@@ -945,6 +944,14 @@ export const REMOVE_TABLE_FROM_JOIN = 'REMOVE_TABLE_FROM_JOIN';
 export const ADD_JOIN_CONDITION = 'ADD_JOIN_CONDITION';
 
 export const REMOVE_JOIN_CONDITION = 'REMOVE_JOIN_CONDITION';
+
+export const DELETE_FROM_SELECTED_COLUMN_LIST = 'DELETE_FROM_SELECTED_COLUMN_LIST';
+
+export const RPT_UPDATE_JOIN_TYPE   = 'RPT_UPDATE_JOIN_TYPE';
+
+export const RPT_ADD_CONDITION_TO_JOIN_CLAUSE  = 'RPT_ADD_CONDITION_TO_JOIN_CLAUSE';
+
+export const RPT_DELETE_CONDITION_CLAUSE  = 'RPT_DELETE_CONDITION_CLAUSE';
 
 export function fetchTableColumns(){
 	return {
@@ -973,7 +980,7 @@ export function getTableColumns(tableSchema, tableName, joinIndex, tableAlias){
 	return async (dispatch, getState) => {
 		dispatch(fetchTableColumns());
 		
-		const qry = `
+		var qry = `
 		SELECT DISTINCT  
 		table_schema, 
 		table_name, 
@@ -986,6 +993,23 @@ export function getTableColumns(tableSchema, tableName, joinIndex, tableAlias){
 		AND table_schema = '${tableSchema}' 
 		ORDER by table_schema, table_name
 		`;
+		
+		//
+		if(tableSchema === 'ericsson_cm' 
+		|| tableSchema === 'huawei_cm' 
+		|| tableSchema === 'zte_cm'
+		|| tableSchema === 'nokia_cm'
+		|| tableSchema === 'motorola_cm'){
+			qry = `
+			SELECT DISTINCT 
+			'${tableSchema}' AS table_schema, 
+			'${tableName}' AS table_name, 
+			jsonb_object_keys(data) AS column_name, 
+			'jsonb' AS data_type ,
+			'data' AS data_field
+			FROM ${tableSchema}."${tableName}" 				
+			`;
+		}
 		
 		const results = await runQuery(qry);
 		
@@ -1027,10 +1051,13 @@ export function deleteAvailableColumn(index){
 	}
 }
 
-export function addColumnToSelectedColumns(tableSchema, tableName, columnName, alias){
+/*
+* @param integer availableColumnIndex
+*/
+export function addColumnToSelectedColumns(availableColumnIndex){
 	return {
 		type: ADD_COLUMN_TO_SELECTED_COLUMNS,
-		column: { tableSchema, tableName, columnName, alias }
+		availableColumnIndex
 	}
 }
 
@@ -1053,5 +1080,45 @@ export function removeJoinCondition(joinIndex){
 	return {
 		type: REMOVE_JOIN_CONDITION,
 		joinIndex
+	}
+}
+
+/**
+*@param integer index Column index
+*/
+export function deleteFromSelectedColumn(index){
+	return {
+		type: DELETE_FROM_SELECTED_COLUMN_LIST,
+		index
+	}
+}
+
+/**
+* Update the join type for a given join specified by the index
+*
+* @param integer joinIndex
+* @param string joinType One of INNER, LEFT, RIGHT
+*/
+export function updateJoinType(joinIndex, joinType){
+	return {
+		type: RPT_UPDATE_JOIN_TYPE,
+		joinIndex,
+		joinType
+	}
+}
+
+export function addConditionToJoinClause(joinIndex, joinClause){
+	return {
+		type: RPT_ADD_CONDITION_TO_JOIN_CLAUSE,
+		joinIndex,
+		joinClause
+	}
+}
+
+export function deleteConditionClause(joinIndex, clauseIndex){
+	return {
+		type: RPT_DELETE_CONDITION_CLAUSE,
+		joinIndex,
+		clauseIndex
 	}
 }

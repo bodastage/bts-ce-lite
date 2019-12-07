@@ -812,6 +812,10 @@ class CreateReport extends React.Component{
         this.setState({plotReloadCount: this.state.plotReloadCount+1});
     }
     
+	updateQuery = (qry) => {
+		console.log("qry:", qry);
+		this.aceEditorValue = qry;
+	}
     
     render(){
         const { spinnerSize, spinnerIntent, loadPreview, category } = this.state;
@@ -1043,8 +1047,9 @@ class CreateReport extends React.Component{
                     
             {this.props.creating === true || this.fetchingReportInfo === true ? <ProgressBar intent={Intent.PRIMARY} className="mb-2"></ProgressBar> : ""}
 			<div>
-				<QueryWizard />
+				<QueryWizard onChange={this.updateQuery} />
 			</div>
+			
             <div className="row">
                 <div className="col-sm">
                     <div className="mb-2">

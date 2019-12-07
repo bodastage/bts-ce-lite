@@ -29,12 +29,17 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		//Clear
 		CLEAR_NEW_RPT_CATEGORY,
 		
-		//Wizrd 
+		//Query Wizard 
 		UPDATE_DATABASE_TABLES,
 		UPDATE_AVAILABLE_COLUMNS,
 		DELETE_AVAILABLE_COLUMN,
 		ADD_JOIN_CONDITION,
-		REMOVE_JOIN_CONDITION
+		REMOVE_JOIN_CONDITION,
+		ADD_COLUMN_TO_SELECTED_COLUMNS,
+		DELETE_FROM_SELECTED_COLUMN_LIST,
+		RPT_UPDATE_JOIN_TYPE,
+		RPT_ADD_CONDITION_TO_JOIN_CLAUSE,
+		RPT_DELETE_CONDITION_CLAUSE
 		} from './reports-actions';
 
 		
@@ -120,6 +125,14 @@ let initialState = {
 	//Query Wizrd
 	qrywiz: {
 		tables: [],
+		
+		//join: {
+		//   type: INNER, LEFT_JOIN, RIGHT_JOIN,
+		//   table: {...},
+		//   conditions: [
+		//
+		//	]
+		//}
 		joins: [],
 		availableColumns: [],
 		selectedColumns: []
@@ -342,6 +355,8 @@ export default function reports(state = initialState, action){
                     ...state,
                     requestError: null
                 }
+				
+				
 			//QUERY WIZARD
 			case UPDATE_DATABASE_TABLES:
 				return {
@@ -365,7 +380,7 @@ export default function reports(state = initialState, action){
 				}
 			case DELETE_AVAILABLE_COLUMN:
 			
-				let availableColumns = state.qrywiz.availableColumns;
+				let availableColumns = state.qrywiz.availableColumns.slice();
 				availableColumns.splice(action.index, 1);
 				return {
 					...state,
@@ -390,13 +405,13 @@ export default function reports(state = initialState, action){
 				
 				const join = state.qrywiz.joins[action.joinIndex];
 				
-				//Remove columns 
+				//Remove available columns 
 				const availColumns = state.qrywiz.availableColumns.filter( 
 					v => v.joinIndex !== action.joinIndex
 				).map(
 					v => { 
 						const jIdx = v.joinIndex < action.joinIndex ? v.joinIndex : v.joinIndex - 1;
-						const tAlias = `tl${jIdx}`;
+						const tAlias = `t${jIdx}`;
 						return {
 							...v,
 							joinIndex: jIdx,
@@ -406,6 +421,22 @@ export default function reports(state = initialState, action){
 					}; }
 				);
 			
+				//Remove selected columns 
+				const selColumns = state.qrywiz.selectedColumns.filter( 
+					v => v.joinIndex !== action.joinIndex
+				).map(
+					v => { 
+						const jIdx = v.joinIndex < action.joinIndex ? v.joinIndex : v.joinIndex - 1;
+						const tAlias = `t${jIdx}`;
+						return {
+							...v,
+							joinIndex: jIdx,
+							tableAlias: tAlias
+							
+						
+					}; }
+				);
+				
 				//Remove condition
 				let joins = state.qrywiz.joins;
 				joins.splice(action.joinIndex, 1);
@@ -415,7 +446,70 @@ export default function reports(state = initialState, action){
 					qrywiz: {
 						...state.qrywiz,
 						joins: joins.map((v, i) => { return {...v, joinIndex: i};}),
-						availableColumns: availColumns
+						availableColumns: availColumns,
+						selectedColumns: selColumns
+					}
+				}
+			case ADD_COLUMN_TO_SELECTED_COLUMNS:
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						selectedColumns: [
+							...state.qrywiz.selectedColumns,
+							state.qrywiz.availableColumns[action.availableColumnIndex]
+						]
+					}
+				}
+			case DELETE_FROM_SELECTED_COLUMN_LIST: 
+				let selectedColumns = state.qrywiz.selectedColumns.slice();
+				selectedColumns.splice(action.index, 1);
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						selectedColumns: selectedColumns
+					}
+				}
+			case RPT_UPDATE_JOIN_TYPE:
+				let jns  = state.qrywiz.joins.slice();
+				jns[action.joinIndex].type = action.joinType;
+				
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						joins: jns
+					}
+				}
+			case RPT_ADD_CONDITION_TO_JOIN_CLAUSE:
+				let jns2  = state.qrywiz.joins.slice();
+				jns2[action.joinIndex].conditions.push(action.joinClause);
+				
+
+				
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						joins: jns2
+					}
+				}
+			case RPT_DELETE_CONDITION_CLAUSE:
+				let joinConds1  = state.qrywiz.joins[action.joinIndex].conditions.slice();
+				let jns3  = state.qrywiz.joins.slice();
+				
+				//Remove joinClauseIndex
+				joinConds1.splice(action.clauseIndex, 1);
+				
+				//Update the join conditions for action.joinIndex
+				jns3[action.joinIndex].conditions = joinConds1;
+				console.log("jns3:", jns3);
+				return {
+					...state,
+					qrywiz: {
+						...state.qrywiz,
+						joins: jns3
 					}
 				}
             default:

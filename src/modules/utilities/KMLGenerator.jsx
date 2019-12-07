@@ -187,10 +187,6 @@ class HeightValue extends React.Component{
 	onQueryBuilderChange = (tree) => {
 		
 		this.setState({value: tree});
-		
-		console.log("tree:", tree);
-		
-		console.log(QbUtils.queryString(tree, this.config));
 	}
 	
 	addCondition = () => {
