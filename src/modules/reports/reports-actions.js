@@ -95,6 +95,7 @@ export const LOAD_COMP_RPT_INFO_FOR_EDIT = 'LOAD_REPORT_INFO_FOR_EDIT';
 //Confirm composite report is created
 export const CONFIRM_COMP_RPT_CREATION = 'CONFIRM_COMP_RPT_CREATION';
 
+
 export function loadCompReportInfoForEdit(reportId){
 	return {
 		type: LOAD_COMP_RPT_INFO_FOR_EDIT,
@@ -922,4 +923,202 @@ export function confirmCompReportCreation(reportId, data){
 		data: data,
 		reportId: reportId
 	};
+}
+
+
+//QUERY WIZARD 
+export const FETCH_DATABASE_TABLES = 'FETCH_DATABASE_TABLES';
+
+export const UPDATE_DATABASE_TABLES = 'UPDATE_DATABASE_TABLES';
+
+export const FETCH_TABLE_COLUMNS = 'FETCH_TABLE_COLUMNS';
+
+export const UPDATE_AVAILABLE_COLUMNS = 'UPDATE_AVAILABLE_COLUMNS';
+
+export const DELETE_AVAILABLE_COLUMN = 'DELETE_AVAILABLE_COLUMN';
+
+export const ADD_COLUMN_TO_SELECTED_COLUMNS = 'ADD_COLUMN_TO_SELECTED_COLUMNS';
+
+export const REMOVE_TABLE_FROM_JOIN = 'REMOVE_TABLE_FROM_JOIN';
+
+export const ADD_JOIN_CONDITION = 'ADD_JOIN_CONDITION';
+
+export const REMOVE_JOIN_CONDITION = 'REMOVE_JOIN_CONDITION';
+
+export const DELETE_FROM_SELECTED_COLUMN_LIST = 'DELETE_FROM_SELECTED_COLUMN_LIST';
+
+export const RPT_UPDATE_JOIN_TYPE   = 'RPT_UPDATE_JOIN_TYPE';
+
+export const RPT_ADD_CONDITION_TO_JOIN_CLAUSE  = 'RPT_ADD_CONDITION_TO_JOIN_CLAUSE';
+
+export const RPT_DELETE_CONDITION_CLAUSE  = 'RPT_DELETE_CONDITION_CLAUSE';
+
+export function fetchTableColumns(){
+	return {
+		type: FETCH_TABLE_COLUMNS
+	}
+}
+
+export function updateAvailableColumns(tableSchema, tableName, tableColumns, joinIndex, tableAlias){
+	return{
+		type: UPDATE_AVAILABLE_COLUMNS,
+		tableSchema,
+		tableName,
+		tableColumns,
+		joinIndex,
+		tableAlias
+	}
+}
+
+export function fetchDatabaseTables(){
+	return {
+		type: FETCH_DATABASE_TABLES
+	}
+}
+
+export function getTableColumns(tableSchema, tableName, joinIndex, tableAlias){
+	return async (dispatch, getState) => {
+		dispatch(fetchTableColumns());
+		
+		var qry = `
+		SELECT DISTINCT  
+		table_schema, 
+		table_name, 
+		column_name ,
+		data_type
+		FROM 
+		information_schema.columns t 
+		WHERE 
+		table_name = '${tableName}' 
+		AND table_schema = '${tableSchema}' 
+		ORDER by table_schema, table_name
+		`;
+		
+		//
+		if(tableSchema === 'ericsson_cm' 
+		|| tableSchema === 'huawei_cm' 
+		|| tableSchema === 'zte_cm'
+		|| tableSchema === 'nokia_cm'
+		|| tableSchema === 'motorola_cm'){
+			qry = `
+			SELECT DISTINCT 
+			'${tableSchema}' AS table_schema, 
+			'${tableName}' AS table_name, 
+			jsonb_object_keys(data) AS column_name, 
+			'jsonb' AS data_type ,
+			'data' AS data_field
+			FROM ${tableSchema}."${tableName}" 				
+			`;
+		}
+		
+		const results = await runQuery(qry);
+		
+		dispatch(updateAvailableColumns(tableSchema, tableName, results.rows, joinIndex, tableAlias));		
+	}
+}
+
+export function updateDatabaseTables(tables){
+	return {
+		type: UPDATE_DATABASE_TABLES,
+		tables: tables
+	}
+}
+
+export function getQueryTables(){
+	return async (dispatch, getState) => {
+		dispatch(fetchDatabaseTables());
+		
+		const qry = `
+		SELECT DISTINCT 
+		table_schema,
+		table_name
+		FROM 
+		information_schema.tables t
+		ORDER by table_schema, table_name
+		`;
+		
+		const results = await runQuery(qry);
+		
+		dispatch(updateDatabaseTables(results.rows));
+	}
+}
+
+
+export function deleteAvailableColumn(index){
+	return {
+		type: DELETE_AVAILABLE_COLUMN,
+		index: index
+	}
+}
+
+/*
+* @param integer availableColumnIndex
+*/
+export function addColumnToSelectedColumns(availableColumnIndex){
+	return {
+		type: ADD_COLUMN_TO_SELECTED_COLUMNS,
+		availableColumnIndex
+	}
+}
+
+export function removeTableFromJoin(tableAlias){
+	return {
+		type: REMOVE_TABLE_FROM_JOIN,
+		tableAlias: tableAlias
+	}
+}
+
+export function addJoinCondition(joinCondtion){
+	return {
+		type: ADD_JOIN_CONDITION,
+		joinCondtion
+	}
+}
+
+
+export function removeJoinCondition(joinIndex){
+	return {
+		type: REMOVE_JOIN_CONDITION,
+		joinIndex
+	}
+}
+
+/**
+*@param integer index Column index
+*/
+export function deleteFromSelectedColumn(index){
+	return {
+		type: DELETE_FROM_SELECTED_COLUMN_LIST,
+		index
+	}
+}
+
+/**
+* Update the join type for a given join specified by the index
+*
+* @param integer joinIndex
+* @param string joinType One of INNER, LEFT, RIGHT
+*/
+export function updateJoinType(joinIndex, joinType){
+	return {
+		type: RPT_UPDATE_JOIN_TYPE,
+		joinIndex,
+		joinType
+	}
+}
+
+export function addConditionToJoinClause(joinIndex, joinClause){
+	return {
+		type: RPT_ADD_CONDITION_TO_JOIN_CLAUSE,
+		joinIndex,
+		joinClause
+	}
+}
+
+export function deleteConditionClause(joinIndex, clauseIndex){
+	return {
+		type: RPT_DELETE_CONDITION_CLAUSE,
+		joinIndex,
+		clauseIndex
+	}
 }
