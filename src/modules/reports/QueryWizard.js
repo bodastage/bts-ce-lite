@@ -80,8 +80,12 @@ class QueryWizard extends React.Component{
 				alias: tableAlias,
 				tableIndex: tableIndex
 			},
-			type: null,
-			conditions:[]
+			type: 'INNER',
+			conditions:[
+			{
+				left: this.props.availableColumns[0],
+				right: this.props.availableColumns[0]
+			}]
 		}
 		//this.setState({joins: [...this.state.joins, joinCondition]});
 		
@@ -137,7 +141,7 @@ class QueryWizard extends React.Component{
 			let onStmt = "";
 			if(i > 0) { 
 				fromWord = `${v.type} JOIN `;
-				onStmt = " ON ";
+				onStmt = " \n    ON ";
 			}
 			
 			//join clause conditions 
@@ -151,9 +155,9 @@ class QueryWizard extends React.Component{
 				`${vJ.right.tableAlias}.${vJ.right.column_name}`;
 				
 				return `${leftColumn} = ${rightColumn}`;
-			}).join(' \nAND ');
+			}).join(' \n    AND ');
 			
-			return `${fromWord} ${v.table.tableSchema}."${v.table.tableName}" ${tableAlias} \n${onStmt} ${joinClauseConds}`;
+			return `${fromWord} ${v.table.tableSchema}."${v.table.tableName}" ${tableAlias} ${onStmt} ${joinClauseConds}`;
 			
 			
 			

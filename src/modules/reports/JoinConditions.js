@@ -39,7 +39,7 @@ class JoinConditions extends React.Component{
 	
 	handleLeftColumn = (e) => { 
 		const value = JSON.parse(e.target.value);
-		this.setState({right: value}) 
+		this.setState({left: value}) 
 	}
 	
 	handleRightColumn = (e) => { 
