@@ -60,7 +60,7 @@ class JoinConditions extends React.Component{
 						})}
 						onChange={this.handleLeftColumn}
 					/>
-					==
+	<Icon icon="equals" size={16}/>
 					<HTMLSelect 
 						options={this.props.availableColumns.map(
 							avR => { 

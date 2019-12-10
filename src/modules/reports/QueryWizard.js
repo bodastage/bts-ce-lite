@@ -145,21 +145,22 @@ class QueryWizard extends React.Component{
 			}
 			
 			//join clause conditions 
-			const joinClauseConds = v.conditions.map(vJ => {
-				const leftColumn  = vJ.left.data_type === 'jsonb' && vJ.left.data_field !== undefined ? 
-				`${vJ.left.tableAlias}.${vJ.left.data_field}->>'${vJ.left.column_name}'` : 
-				`${vJ.left.tableAlias}.${vJ.left.column_name}`;
+			let joinClauseConds = "";
+			if(i > 0){
+				joinClauseConds = v.conditions.map(vJ => {
+					
+					const leftColumn  = vJ.left.data_type === 'jsonb' && vJ.left.data_field !== undefined ? 
+					`${vJ.left.tableAlias}.${vJ.left.data_field}->>'${vJ.left.column_name}'` : 
+					`${vJ.left.tableAlias}.${vJ.left.column_name}`;
 
-				const rightColumn  = vJ.right.data_type === 'jsonb' && vJ.right.data_field !== undefined ? 
-				`${vJ.right.tableAlias}.${vJ.right.data_field}->>'${vJ.right.column_name}'` : 
-				`${vJ.right.tableAlias}.${vJ.right.column_name}`;
-				
-				return `${leftColumn} = ${rightColumn}`;
-			}).join(' \n    AND ');
-			
+					const rightColumn  = vJ.right.data_type === 'jsonb' && vJ.right.data_field !== undefined ? 
+					`${vJ.right.tableAlias}.${vJ.right.data_field}->>'${vJ.right.column_name}'` : 
+					`${vJ.right.tableAlias}.${vJ.right.column_name}`;
+					
+					return `${leftColumn} = ${rightColumn}`;
+				}).join(' \n    AND ');
+			}
 			return `${fromWord} ${v.table.tableSchema}."${v.table.tableName}" ${tableAlias} ${onStmt} ${joinClauseConds}`;
-			
-			
 			
 		}).join('\n');
 
@@ -236,6 +237,7 @@ class QueryWizard extends React.Component{
 		}
 		
 
+		console.log("this.props.joins:", this.props.joins);
 		
 		return (
 			<div className="container mb-2">
@@ -280,6 +282,7 @@ class QueryWizard extends React.Component{
 								<Icon icon="remove" onClick={() => this.removeJoin(index)}/> &nbsp;
 									{ index === 0 ? <Icon iconSize={16} icon="full-circle" /> : <Icon icon="inner-join" />} &nbsp;
 								{`${v.table.tableSchema}.${v.table.tableName}(t${v.joinIndex})`}
+
 								
 								{index === 0 ? "" : (<span> &nbsp;
 									<Select size="small" style={{width: 150}} 
@@ -290,23 +293,23 @@ class QueryWizard extends React.Component{
 										<Option value="RIGHT">RIGHT</Option>
 									</Select>
 									<Icon icon="chevron-right" />
-									</span>)}
+									</span>)
+								}
 									
-									<br/>
+								<br/>
+								{index === 0 ? "" : (
+									//Join clause conditions 
+									v.conditions.map((vClause, vClauseIndex) => (<span>
+										<Icon icon="small-minus" onClick={() => this.removeConditionClause(index, vClauseIndex)}/>
+										<span>{`${vClause.left.tableAlias}.${vClause.left.column_name} == ${vClause.right.tableAlias}.${vClause.right.column_name}`}</span><br/>
+									</span>))
+									)
+								}
 									
-									{
-										//Join clause conditions 
-										v.conditions.map((vClause, vClauseIndex) => (<span>
-											<Icon icon="small-minus" onClick={() => this.removeConditionClause(index, vClauseIndex)}/>
-											<span>{`${vClause.left.tableAlias}.${vClause.left.column_name} == ${vClause.right.tableAlias}.${vClause.right.column_name}`}</span><br/>
-										</span>))
-										
-									}
-									
-									{//Join condition clause 
-										index === 0 ? "" :
-										<JoinConditions  onChange={(joinClause) => this.addJoinClauseCondition(index, joinClause)}/>
-									}
+								{//Join condition clause 
+									index === 0 ? "" :
+									<JoinConditions  onChange={(joinClause) => this.addJoinClauseCondition(index, joinClause)}/>
+								}
 								
 							</div>
 						)}
