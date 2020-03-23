@@ -242,7 +242,7 @@ t2.data->>'name' AS "SRV CELL NAME",
 t1.data->>'name' AS "NBR CELL NAME"
 FROM nokia_cm."ADJS" t1
 INNER JOIN nokia_cm."WCEL" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
-    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*WCEL-\d+')
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*WCEL-\\d+')
 UNION	
 ---3G-2G Relations (Nokia RAML)
 SELECT 
@@ -257,7 +257,7 @@ t2.data->>'name' AS "SRV CELL NAME",
 t1.data->>'name' AS "NBR CELL NAME"
 FROM nokia_cm."ADJG" t1
 INNER JOIN nokia_cm."WCEL" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
-    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*WCEL-\d+')
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*WCEL-\\d+')
 UNION	
 ---2G-3G Relations (Nokia RAML)
 SELECT 
@@ -272,7 +272,7 @@ t2.data->>'name' AS "SRV CELL NAME",
 t1.data->>'name' AS "NBR CELL NAME"
 FROM nokia_cm."ADJW" t1
 INNER JOIN nokia_cm."BTS" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
-    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*BTS-\d+')
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*BTS-\\d+')
 UNION
 ---2G-2G Relations (Nokia RAML)
 SELECT 
@@ -287,7 +287,7 @@ t2.data->>'name' AS "SRV CELL NAME",
 t1.data->>'name' AS "NBR CELL NAME"
 FROM nokia_cm."ADCE" t1
 INNER JOIN nokia_cm."BTS" t2 ON t1.data->>'FILENAME'=t2.data->>'FILENAME'
-    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*BTS-\d+')
+    AND t2.data->>'DISTNAME' = SUBSTRING(t1.data->>'DISTNAME', '.*BTS-\\d+')
 `;
 
 
