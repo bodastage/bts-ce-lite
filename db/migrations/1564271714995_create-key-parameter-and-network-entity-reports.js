@@ -124,7 +124,7 @@ SELECT
     t1.data->>'locationAreaIdMCC' as MCC,
     t1.data->>'locationAreaIdMNC' as MNC,
     t1.data->>'locationAreaIdLAC' as LAC,
-    null,
+    t1.data->>'rac' as RAC,
     CONCAT( TRIM(t1.data->>'locationAreaIdMCC'),'-', TRIM(t1.data->>'locationAreaIdMNC'),'-',TRIM(t1.data->>'locationAreaIdLAC'),'-',TRIM(t1.data->>'cellId')) AS cgi,
     t2.data->>'initialFrequency' AS bcch,
     CONCAT(TRIM(t1.data->>'bsIdentityCodeNCC'), TRIM(t1.data->>'bsIdentityCodeBCC')) AS bsic,
@@ -132,6 +132,8 @@ SELECT
 FROM nokia_cm."BTS" t1
 INNER JOIN nokia_cm."TRX" t2 ON
     t1.data->>'DISTNAME' = SUBSTRING(t2.data->>'DISTNAME', '.*BTS-\\d+')
+WHERE 
+	t2.data->>'channel0Type' = 'MBCCH'
 UNION
 --2G_Key_Parameters/Motorola Cell_X_Export
 SELECT
@@ -576,6 +578,7 @@ SELECT
 	t1.data->>'locationAreaIdLAC' AS lac,
 	CONCAT( TRIM(t1.data->>'locationAreaIdMCC'),'-', TRIM(t1.data->>'locationAreaIdMNC'),'-',TRIM(t1.data->>'locationAreaIdLAC'),'-',TRIM(t1.data->>'cellId')) AS cgi,
 	t1.data->>'angle' AS azimuth,
+	t1.data->>'channel0Maio' AS maio,
 	t1.data->>'hoppingSequenceNumber1' AS hsn,
 	t1.data->>'hoppingMode' AS "hoppingType",
 	t1.data->>'locationAreaIdMCC' as mcc,
@@ -587,7 +590,7 @@ INNER JOIN nokia_cm."BCF" t3 ON
 	t3.data->>'FILENAME' = t1.data->>'FILENAME' 
 	AND CONCAT(TRIM(t3.data->>'DISTNAME'), '/BTS-',TRIM(t1.data->>'segmentId')) = TRIM(t1.data->>'DISTNAME')
 WHERE 
-  TRIM(t2.data->>'preferredBcchMark') = 'The TRX is a preferred TRX (P)'
+	t2.data->>'channel0Type' = 'MBCCH'
 `
 
 //eslint-disable-next-line
