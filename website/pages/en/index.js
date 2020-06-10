@@ -64,7 +64,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="https://github.com/bodastage/bts-ce-lite/releases/tag/v0.4.5">Download v0.4.5</Button>
+            <Button href="https://github.com/bodastage/bts-ce-lite/releases/tag/v0.5.2">Download v0.5.2</Button>
             <Button href={docUrl('introduction.html#quick-start')}>Quick start</Button>
           </PromoSection>
         </div>
