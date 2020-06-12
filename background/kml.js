@@ -306,6 +306,7 @@ async function generate(options, type){
 		const hx = hex.replace("#","")
 		var r = hx.slice(0,2)
 		var g = hx.slice(2,4)
+		var g = hx.slice(2,4)
 		var b = hx.slice(4)
 		return "ff" + `${b}${g}${r}`
 	}
