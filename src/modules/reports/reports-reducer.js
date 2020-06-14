@@ -39,7 +39,10 @@ import { REQUEST_REPORTS, REQUEST_REPORT_FIELDS, RECEIVE_REPORTS,
 		DELETE_FROM_SELECTED_COLUMN_LIST,
 		RPT_UPDATE_JOIN_TYPE,
 		RPT_ADD_CONDITION_TO_JOIN_CLAUSE,
-		RPT_DELETE_CONDITION_CLAUSE
+		RPT_DELETE_CONDITION_CLAUSE,
+		
+		//Clear report state especiall the error object
+		CREATE_RPT_CLEAR_ERROR
 		} from './reports-actions';
 
 		
@@ -185,7 +188,8 @@ export default function reports(state = initialState, action){
                     ...state,
                     reportsInfo: {
                         ...state.reportsInfo, 
-                        [action.reportId]: {...action.reportInfo, error: null}
+                        //[action.reportId]: {...action.reportInfo, error: null}
+						[action.reportId]: {...action.reportInfo}
                     }
                 }
             case RECEIVE_REPORT_FIELDS:
@@ -504,13 +508,21 @@ export default function reports(state = initialState, action){
 				
 				//Update the join conditions for action.joinIndex
 				jns3[action.joinIndex].conditions = joinConds1;
-				console.log("jns3:", jns3);
 				return {
 					...state,
 					qrywiz: {
 						...state.qrywiz,
 						joins: jns3
 					}
+				}
+			case CREATE_RPT_CLEAR_ERROR: 
+				const { [action.reportId]: value, ...minusReport } = state.reportsInfo;
+				console.log("state.reportsInfo:", state.reportsInfo);
+				console.log("action.reportId:", action.reportId);
+				console.log("minusReport:", minusReport);
+				return {
+					...state,
+					reportsInfo: minusReport
 				}
             default:
                 return state;

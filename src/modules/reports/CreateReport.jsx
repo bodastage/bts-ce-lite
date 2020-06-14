@@ -8,8 +8,11 @@ import { FormGroup, InputGroup, Button, TextArea, Intent, Spinner,
          Callout, Menu, MenuItem, ProgressBar, HTMLSelect , Popover, Position, Icon } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { AgGridReact } from 'ag-grid-react';
-import { requestCreateReportFields, clearPreviewReportError,  
-         createOrUpdateReport, getReportInfo } from './reports-actions';
+import { requestCreateReportFields, 
+		 clearPreviewReportError,  
+         createOrUpdateReport, 
+		 getReportInfo,
+		 clearReportError		 } from './reports-actions';
 import Plot from 'react-plotly.js';
 import './create-report-styles.css'
 import { GraphOptionsContainer } from './GraphOptions'
@@ -818,6 +821,10 @@ class CreateReport extends React.Component{
 	}
     
     render(){
+		
+		console.log("TRUMPTRUMPTRUMPTRUMPTRUMPTRUMPTRUMPTRUMPTRUMP");
+		console.log("this.props.reportInfo:", this.props.reportInfo);
+		
         const { spinnerSize, spinnerIntent, loadPreview, category } = this.state;
         const tabTitle = this.props.options.title;
         
@@ -1160,9 +1167,15 @@ function mapStateToProps(state, ownProps){
         const reportId = ownProps.options.reportId
         if(typeof state.reports.reportsInfo[reportId] !== 'undefined'){ 
             reportInfo = state.reports.reportsInfo[reportId] 
+
             if(reportInfo.options === null) reportInfo.options  = {}
+			
+			if(typeof reportInfo.id === 'undefined') reportInfo = null;
         }
+		
     }
+	
+
     
     return {
         previewError: state.reports.create.error,
