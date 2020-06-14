@@ -95,6 +95,8 @@ export const LOAD_COMP_RPT_INFO_FOR_EDIT = 'LOAD_REPORT_INFO_FOR_EDIT';
 //Confirm composite report is created
 export const CONFIRM_COMP_RPT_CREATION = 'CONFIRM_COMP_RPT_CREATION';
 
+//Clear report query preview error
+export const CREATE_PREVIEW_CLEAR_ERROR = 'CREATE_PREVIEW_CLEAR_ERROR';
 
 export function loadCompReportInfoForEdit(reportId){
 	return {
@@ -543,9 +545,17 @@ export function clearReportCreateState(){
 }
 
 
-export function clearPreviewReportError(){
+export function clearPreviewReportError(reportId){
     return {
-        type: CREATE_RPT_CLEAR_ERROR
+        type: CREATE_PREVIEW_CLEAR_ERROR,
+		reportId
+    }
+}
+
+export function clearReportError(reportId){
+    return {
+        type: CREATE_RPT_CLEAR_ERROR,
+		reportId
     }
 }
 
