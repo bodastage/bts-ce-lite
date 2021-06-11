@@ -49,7 +49,7 @@ function createWindow () {
 
     // and load the index.html of the app.
     mainWindow.loadURL(startUrl);
-	
+
 	if(typeof process.env.ELECTRON_START_URL !== 'undefined'){
 		// Open the DevTools.
 		mainWindow.webContents.openDevTools();				
@@ -78,11 +78,13 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 //app.on('ready', createWindow)
 
+app.allowRendererProcessReuse = false
+
 	
 app.on('ready', ()  => {
 	//Launch main renderer process
 	createWindow()
-	
+
 	//Create background process windows 
 	jobRenderer = createParseCMBgWindow()
 	
