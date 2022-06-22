@@ -64,7 +64,7 @@
     "ag-grid-community": "^20.0.0",
     "ag-grid-react": "^20.0.0",
     "ajv": "^6.5.2",
-    "async": "^3.0.1",
+    "async": "^3.2.2",
     "axios": "^0.21.1",
     "bfj": "6.1.1",
     "bootstrap": "^4.1.2",
