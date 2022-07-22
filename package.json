@@ -81,7 +81,7 @@
     "exceljs": "^1.14.0",
     "file-loader": "2.0.0",
     "file-saver": "^2.0.2",
-    "file-type": "^11.0.0",
+    "file-type": "^16.5.4",
     "firstline": "^2.0.2",
     "fix-path": "^2.1.0",
     "fork-ts-checker-webpack-plugin-alt": "0.4.14",
