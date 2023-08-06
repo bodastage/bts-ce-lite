@@ -7,3 +7,4 @@ venv
 nbproject
 
 docs/_build
+boda-lite.sqlite3

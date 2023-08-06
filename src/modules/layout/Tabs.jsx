@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dashboard from '../dashboard/Dashboard';
@@ -18,6 +18,7 @@ import Baseline from '../baseline/Baseline';
 import ParameterLibrary from '../telecomlib/ParameterLibrary';
 import CSVToExcelCombiner from '../utilities/CSVToExcelCombiner';
 import KMLGenerator from '../utilities/KMLGenerator';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Components = {
     "Help": Help,
@@ -34,49 +35,40 @@ const Components = {
 	"ParameterLibrary": ParameterLibrary,
 	"CSVToExcelCombiner": CSVToExcelCombiner,
 	"KMLGenerator": KMLGenerator
-    };
+};
 
-class Tabs extends React.Component {
-    constructor(props){
-        super(props);
-        
-        this.closeTab = this.closeTab.bind(this);
-        this.renderOverflow = this.renderOverflow.bind(this);
-        this.renderBreadcrumb = this.renderBreadcrumb.bind(this);
-        this.renderOverflow = this.renderOverflow.bind(this);
-        
-        this.state = {
-            collapseFrom: Boundary.END,
-            width: 50,
-        }
-    }
+const Tabs = (props) =>  {
+    const dispatch = useDispatch();
+    const { activeTab, tabs } = useSelector(state => state.uiLayout);
+    const [ collapseFrom, setCollapseFrom ] = useState(Boundary.END);
+    const [ width, setWidth ] = useState(50);
+    //const [items, setItems] = useState([]);
 
-    setActiveTab = (tabId) => (e) => { 
+    const setTheActiveTab = (tabId) => (e) => { 
         e.stopPropagation();
         e.preventDefault();
         
-        this.props.dispatch(setActiveTab(tabId));
+        dispatch(setActiveTab(tabId));
         
     }
     
-    closeTab = (tabId) => (e) => { 
+    const closeTheTab = (tabId) => (e) => { 
         e.stopPropagation();
         e.preventDefault();
         
-        this.props.dispatch(closeTab(tabId));
+        dispatch(closeTab(tabId));
     }
     
-    renderOverflow = (items) => {
-        const { collapseFrom } = this.state;
+    const renderOverflow = (its) => {
         const position = collapseFrom === Boundary.END ? Position.BOTTOM_RIGHT : Position.BOTTOM_LEFT;
-        let orderedItems = items;
-        if (this.state.collapseFrom === Boundary.START) {
-            orderedItems = items.slice().reverse();
+        let orderedItems = its;
+        if (collapseFrom === Boundary.START) {
+            orderedItems = its.slice().reverse();
         }
         const menuItems = orderedItems.map(
                 (item, index) => <MenuItem {...item} key={index} 
-                                    onClick={this.setActiveTab(item.tabid)} 
-                                    labelElement={<Icon icon="cross" onClick={this.closeTab(item.tabid)}/>} />);
+                                    onClick={setTheActiveTab(item.tabid)} 
+                                    labelElement={<Icon icon="cross" onClick={closeTheTab(item.tabid)}/>} />);
         return (
             <li>
                 <Popover position={position}>
@@ -87,61 +79,71 @@ class Tabs extends React.Component {
         );
     };
     
-    renderBreadcrumb(props, index) {
+    const renderBreadcrumb = (props, index) => {
         const tabId = props.tabid;
-        const Tag = Components[ this.props.tabs[tabId].component];
-        const options = this.props.tabs[tabId].options;
-        
-        const activeClass = this.props.activeTab === tabId ? 'active show' : ""; 
+        const Tag = Components[tabs[tabId].component];
+        const options = tabs[tabId].options;
+        const activeClass = activeTab === tabId ? 'active show' : ""; 
         
         return (
             <li className="nav-item" key={tabId}>
-                <a className={"nav-link " + activeClass} id={tabId+"-tab"} data-toggle="tab" href={"#"+tabId} role="tab" aria-controls={tabId} aria-selected="false" onClick={this.setActiveTab(tabId)} style={{whiteSpace: "nowrap"}}>
-                { this.props.tabs[tabId].component === 'Dashboard' ? "" :
-                <button type="button" className="close" aria-label="Close" onClick={this.closeTab(tabId)} style={{marginLeft: "5px"}}>
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                }            
+                <a 
+                    className={"nav-link " + activeClass} 
+                    id={tabId+"-tab"} 
+                    data-toggle="tab" 
+                    href={"#"+tabId} 
+                    role="tab" aria-controls={tabId} aria-selected="false" onClick={setTheActiveTab(tabId)} style={{whiteSpace: "nowrap"}}>
+                    
                 <FontAwesomeIcon icon={Tag.icon}/> <span className="tab-label">{options.title}&nbsp;</span>
-
+                { tabs[tabId].component === 'Dashboard' ? "" :   <button type="button" className="btn-close right" data-bs-dismiss="alert" aria-label="Close" onClick={closeTheTab(tabId)} ></button>
+               
+            }    
                 </a>
             </li>
         );
     }
     
-    render(){
-        let tabContents = [];
-        for( let tabId in this.props.tabs){
-            const Tag = Components[ this.props.tabs[tabId].component];
-            const options = this.props.tabs[tabId].options;
-            const activeClass = this.props.activeTab === tabId ? "active show" : ""; 
+    //tabContents
+    let tabContents = [];
+    for( let tabId in tabs){
+        const Tag = Components[tabs[tabId].component];
+        const options = tabs[tabId].options;
+        const activeClass = activeTab === tabId ? "active show" : ""; 
 
-            tabContents.push(
-                    <div key={tabId} className={"tab-pane fade " + activeClass} id={tabId} role="tabpanel" aria-labelledby={ tabId + "-tab"}><Tag options={options}/></div>
-            );
-        }
-        
-        const { collapseFrom } = this.state;
-        let items = [];
-        for (var tabId in this.props.tabs){
-            const Tag = Components[ this.props.tabs[tabId].component];
-            const options = this.props.tabs[tabId].options;
-            items.push(
-                {   href: "#", 
-                    icon: <FontAwesomeIcon icon={Tag.icon}/>, 
-                    text: options.title, tabid: tabId
-                }
-            );
-        }
-        return (
+        tabContents.push(
+            <div key={tabId} 
+                className={"tab-pane fade " + activeClass} 
+                id={tabId} 
+                role="tabpanel" 
+                aria-labelledby={ tabId + "-tab"}>
+                    <Tag options={options}/>
+            </div>
+        );
+    }
+
+    //tabs
+    let items = [];
+    for (var tabId in tabs){
+        const Tag = Components[tabs[tabId].component];
+        const options = tabs[tabId].options;
+        items.push(
+            {   href: "#", 
+                icon: <FontAwesomeIcon icon={Tag.icon}/>, 
+                text: options.title, tabid: tabId
+            }
+        );
+    }    
+
+    return (
             <div>
                 <ul className="nav nav-tabs" id="bts_tabs" role="tablist">
                     <OverflowList
                         collapseFrom={collapseFrom}
                         items={items}
-                        overflowRenderer={this.renderOverflow}
-                        visibleItemRenderer={this.renderBreadcrumb}
+                        overflowRenderer={renderOverflow}
+                        visibleItemRenderer={renderBreadcrumb}
                         observeParents={true}
+                        key={items.length}
                         />
                 </ul>
                 
@@ -150,7 +152,7 @@ class Tabs extends React.Component {
                 </div>      
             </div>
         );
-    }
+
 }
 
-export default connect()(Tabs);
+export default Tabs;

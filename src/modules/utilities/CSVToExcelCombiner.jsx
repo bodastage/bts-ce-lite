@@ -10,9 +10,8 @@ import {
 } from "@blueprintjs/core";
 import  './utilities.css';
 
-const { shell } = window.require('electron').remote;
-const { ipcRenderer} = window.require("electron")
-const fs = window.require('fs');
+const { ipcRenderer, shell} = window.require("electron")
+//const fs = window.require('fs');
 const log = window.require('electron-log');
 
 const COMBINE_OPTIONS = [
@@ -48,10 +47,10 @@ export default class CSVToExcelCombiner extends React.Component {
 	}
 	
 	showFiles = (folder) => {
-		if (!fs.existsSync(folder)) {
-			this.setState({errorMessage: `${folder} does not exist`})
-			return;
-		}
+		// if (!fs.existsSync(folder)) {
+		// 	this.setState({errorMessage: `${folder} does not exist`})
+		// 	return;
+		// }
 		shell.openItem(folder)
 	}
 	
@@ -60,10 +59,10 @@ export default class CSVToExcelCombiner extends React.Component {
 	showInputFolder = () => this.showFiles(this.state.inputFolder);
 	
 	onOutputFolderChange = (e) => {
-		if (!fs.existsSync(e.target.files[0].path)) {
-			this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
-			return;
-		}
+		// if (!fs.existsSync(e.target.files[0].path)) {
+		// 	this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
+		// 	return;
+		// }
 		
 		this.setState({outputFolder: e.target.files[0].path})
 	}
@@ -72,10 +71,10 @@ export default class CSVToExcelCombiner extends React.Component {
 	* Update the input folder state when the text field value changes
 	*/
 	onInputFileChange = (e) => {
-		if (!fs.existsSync(e.target.files[0].path)) {
-			this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
-			return;
-		}
+		// if (!fs.existsSync(e.target.files[0].path)) {
+		// 	this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
+		// 	return;
+		// }
 		
 		this.setState({inputFolder: e.target.files[0].path})
 	}
@@ -91,19 +90,19 @@ export default class CSVToExcelCombiner extends React.Component {
 	
 	combineCSVFiles = () => {
 		//Confirm that the input folder exists
-		if( !fs.existsSync(this.state.inputFolder)){
-			log.info(`Input folder: ${this.state.inputFolder} does not exist`);
-			this.setState(
-				{
-					notice: {
-						type: 'danger', 
-						message: `Input folder: ${this.state.inputFolder} does not exist`
-					},
-					processing: false
-				}
-			);
-			return;
-		}
+		// if( !fs.existsSync(this.state.inputFolder)){
+		// 	log.info(`Input folder: ${this.state.inputFolder} does not exist`);
+		// 	this.setState(
+		// 		{
+		// 			notice: {
+		// 				type: 'danger', 
+		// 				message: `Input folder: ${this.state.inputFolder} does not exist`
+		// 			},
+		// 			processing: false
+		// 		}
+		// 	);
+		// 	return;
+		// }
 		
 		let payload = {
 			csvDirectory: this.state.inputFolder,

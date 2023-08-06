@@ -23,9 +23,8 @@ import 'react-awesome-query-builder/css/denormalize.scss';
 import './kml.css';
 
 const { Option } = Select;
-const { shell } = window.require('electron').remote;
-const { ipcRenderer} = window.require("electron")
-const fs = window.require('fs');
+const { ipcRenderer, shell} = window.require("electron")
+//const fs = window.require('fs');
 
 const FOLDER_VALUE_TYPES = ["Value", "Field"];
 const VALUE_TYPES = ["Value", "Field", "Condition"];
@@ -1112,10 +1111,10 @@ class KMLGenerator extends React.Component {
 	handleDescFieldChange = (val) => this.setState({descField: val});
 	
 	onDataFileChange = (e) => {
-		if (!fs.existsSync(e.target.files[0].path)) {
-			this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
-			return;
-		}
+		// if (!fs.existsSync(e.target.files[0].path)) {
+		// 	this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
+		// 	return;
+		// }
 		
 		const dataFile  =  e.target.files[0].path;
 		
@@ -1133,10 +1132,10 @@ class KMLGenerator extends React.Component {
 	}
 	
 	showDataFile = () => {
-		if (!fs.existsSync(this.state.dataFile)) {
-			this.setState({errorMessage: `${this.state.dataFile} does not exist`})
-			return;
-		}
+		// if (!fs.existsSync(this.state.dataFile)) {
+		// 	this.setState({errorMessage: `${this.state.dataFile} does not exist`})
+		// 	return;
+		// }
 		
 		shell.openItem(this.state.dataFile);
 	}

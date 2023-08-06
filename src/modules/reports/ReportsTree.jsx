@@ -4,10 +4,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getReports, setReportFilter, deleteReport, getReportInfo,
          clearReportTreeError } from './reports-actions';
 import { addTab, closeTab } from '../layout/uilayout-actions';
-import { Classes, Icon, Tree, FormGroup, InputGroup, 
-         ContextMenu, Menu, MenuItem,
-        ProgressBar, Dialog, TextArea, Intent, Spinner, Button} 
-		from "@blueprintjs/core";
+import { 
+    Classes, 
+    Icon, 
+    Tree, 
+    FormGroup, 
+    InputGroup, 
+    ButtonGroup,
+    ContextMenu, 
+    Menu, 
+    MenuItem,
+    ProgressBar, 
+    Dialog, 
+    TextArea, 
+    Intent, 
+    Spinner, 
+    Button,
+    Divider
+} from "@blueprintjs/core";
 import './reports-panel.css';
 import { saveCategory, clearReportCreateState, removeCategory, getCategory,
 		clearEditCategoryState, clearCreateCompReportState, 
@@ -430,15 +444,17 @@ class ReportsTree extends React.Component{
         return (
             
         <div>
-		<span className="dropdown-item-text legend w-100 mb-2">
-			<FontAwesomeIcon icon={ReportsTree.icon}/> Reports
-			
-			<a href="/#" title="Reload report tree" onClick={e => e.preventDefault()}><Icon icon="refresh" className="float-right ml-2" onClick={this.refreshReportTree}/></a>&nbsp;
-			<a href="/#" title="Create report category" onClick={e => e.preventDefault()}><Icon icon="folder-new" className="float-right ml-2" onClick={this.openCreateCategoryDialog}/></a> &nbsp; 
-			<a href="/#" title="Create report" onClick={e => e.preventDefault()}><Icon icon="plus" className="float-right ml-2" onClick={this.createReport}/></a> &nbsp;
-			<a href="/#" title="Create composite report" onClick={e => e.preventDefault()}><Icon icon="new-object" className="float-right ml-2" onClick={this.createCompositeReport}/></a> &nbsp;
-		</span>
-
+        <div className="legend w-100 mb-2">
+            <ButtonGroup minimal={true} vertical={false}>
+                <Button icon="refresh" onClick={this.refreshReportTree} />
+                <Divider/>
+                <Button onClick={this.openCreateCategoryDialog} icon="folder-new" />
+                <Divider/>
+                <Button onClick={this.createReport} icon="plus"/>
+                <Divider/>
+                <Button onClick={this.createCompositeReport} icon="new-object"/>
+            </ButtonGroup>
+        </div>
                 <div>
                 <FormGroup
                     label=""

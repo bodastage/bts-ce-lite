@@ -1,6 +1,6 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-const { shell } = window.require('electron').remote;
+const { shell } = window.require('electron');
 
 export default class Help extends React.Component {
         

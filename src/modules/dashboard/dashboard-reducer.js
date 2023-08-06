@@ -8,7 +8,7 @@ const INITIAL_DASHBOARD_STATE = {
 	notice: null
 }
 
-export default function dashboard(state = INITIAL_DASHBOARD_STATE, action){
+export default function dashboard(state = INITIAL_DASHBOARD_STATE, action: any){
 	switch (action.type) {
 		case DASHBOARD_ADD_NOTICE:
 			return {

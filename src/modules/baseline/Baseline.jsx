@@ -12,8 +12,7 @@ import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
 //styles
 import  './baseline.css';
 
-const { app, shell } = window.require('electron').remote;
-const { ipcRenderer} = window.require("electron")
+const { ipcRenderer, app, shell} = window.require("electron")
 
 export default class Baseline extends React.Component {
     static icon = "pencil-ruler";

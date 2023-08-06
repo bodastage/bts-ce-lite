@@ -24,6 +24,17 @@ platform telecommunication management desktop app.
 
 ![BTS-CE-Lite GIS](/gis.jpeg?raw=true "GIS")
 
+
+
+## Running dev mode
+``` bash
+export SKIP_PREFLIGHT_CHECK=true
+yarn run start 
+
+#
+yarn run electron-dev-unix
+```
+
 ## Getting help
 To report issues with the application or request new features use the issue tracker. For help and customizations send an email to info@bodastage.com.
 

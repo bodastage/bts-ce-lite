@@ -12,8 +12,7 @@ import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 import { generateStyleClass, getTableStyleExpression } from './reports-utils';
 		 
-const { ipcRenderer} = window.require("electron")
-const { app, shell } = window.require('electron').remote;
+const { ipcRenderer, shell , app} = window.require("electron")
 
 class TableReport extends React.Component{
     static icon = "table";

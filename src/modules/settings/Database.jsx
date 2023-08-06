@@ -17,8 +17,7 @@ import { updateDBSettings, getDBSettings, clearDBUpdateError, clearDBUpdateSucce
 		 checkConnection, showDBUpdateError, showDBUpdateSuccess, stopDBSettingsUpdate, 
 		 startDBSettingsUpdate } from './settings-actions';
 
-const { ipcRenderer} = window.require("electron")
-const { shell } = window.require('electron').remote;
+const { ipcRenderer, shell} = window.require("electron")
 const log = window.require('electron-log');
 
 class Database extends React.Component{

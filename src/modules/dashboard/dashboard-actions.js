@@ -11,10 +11,10 @@ export function clearNotice(){
 	};
 }
 
-export function addDashboardNotice(notice){
+export function addDashboardNotice(notice: any){
 	return {
 		type: DASHBOARD_ADD_NOTICE,
-		notice: notice
+		notice
 	};
 }
 
@@ -22,18 +22,18 @@ export function addDashboardNotice(notice){
 * Check if is installed
 */
 export function checkIfJavaIsInstalled(){
-    return (dispatch, getState) => {
+    return (dispatch : any, getState : any) => {
 		var spawn = window.require('child_process').spawn('java', ['-version']);
-		spawn.on('error', function(err){
+		spawn.on('error', function(err : any){
 			//return callback(err, null);
 			log.error(err);
 		})
 		
-		spawn.stdout.on('data', function(data) {
+		spawn.stdout.on('data', function(data: any) {
 			console.log("spawn.stdout.on:", data);
 		});
 		
-		spawn.stderr.on('data', function(data) {
+		spawn.stderr.on('data', function(data: any) {
 			
 			//Check if java is in string data
 			var javaCheck = new RegExp('java', 'i').test(data);
@@ -51,7 +51,7 @@ export function checkIfJavaIsInstalled(){
 				dispatch(addDashboardNotice({
 					message: "Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download",
 					type: 'danger'
-				}))
+				}));
 				//@TODO: No Java installed
 			}
 		});

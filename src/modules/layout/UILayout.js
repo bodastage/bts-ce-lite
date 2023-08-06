@@ -33,7 +33,7 @@ class UILayout extends React.Component {
 		event.preventDefault();
 		this.props.dispatch({
 			type: "LOGOUT"
-		});
+		});	
 	}
     
 	/*
@@ -132,7 +132,7 @@ class UILayout extends React.Component {
         
 	render(){
             return (
-                <div className="react-mosaic-example-app">
+                <div className="react-mosaic-example-app bp5-ui-text">
                 {this.renderNavBar()}
                     <SplitterLayout vertical={false} secondaryInitialSize={322} primaryIndex={1} >
                         <SidePanel/>

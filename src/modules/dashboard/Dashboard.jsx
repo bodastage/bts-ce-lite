@@ -4,9 +4,11 @@ import  './dashboard.css';
 import { connect } from 'react-redux';
 import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import { checkIfJavaIsInstalled, clearNotice } from './dashboard-actions';
-import { Toaster, Intent } from "@blueprintjs/core";
+import { Toaster, ToasterPosition, Intent, OverlayToaster } from "@blueprintjs/core";
 
-const { shell } = window.require('electron').remote;
+//const { shell } = window.require('electron').remote;
+const { shell } = window.require('electron');
+
 const log = window.require('electron-log');
 const fs = window.require('fs');
 
@@ -15,13 +17,13 @@ class Dashboard extends React.Component {
     static icon = "home";
     static label = "Home"
     
-    constructor(props){
+    constructor(props: any){
         super(props);
         
         this.addTab = this.addTab.bind(this);
 		this.setSidePanel = this.setSidePanel.bind(this);
 		
-		this.toaster = new Toaster();
+		this.toaster = Toaster;
 		
 		const that = this;
 		
@@ -33,6 +35,12 @@ class Dashboard extends React.Component {
 
     }
     
+    toaster = null;
+
+    refHandlers = {
+        toaster: (ref) => (this.toaster = ref),
+    };
+
     addTab = (options) => (e) => { 
         e.preventDefault();
 
@@ -99,13 +107,9 @@ class Dashboard extends React.Component {
 		let notice = null;
 		if(this.props.notice !== null ){ 
 			notice = (<div className={`alert alert-${this.props.notice.type} p-2 mt-2`} role="alert">{this.props.notice.message}
-					<button type="button" className="close"  aria-label="Close" onClick={this.dismissNotice}>
-					<span aria-hidden="true">&times;</span>
-				</button>
+					<button type="button" className="btn-close right float-end" data-bs-dismiss="alert" aria-label="Close" onClick={this.dismissNotice}></button>
 			</div>)
 		}
-		
-		console.log(this.props.notice);
 		
         return (
 
@@ -247,6 +251,8 @@ class Dashboard extends React.Component {
                         </div>
                     </div>
                 </fieldset>
+
+                <OverlayToaster {...this.state} ref={this.refHandlers.toaster} />
             </div>
         );
     }

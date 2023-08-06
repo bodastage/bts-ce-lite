@@ -1,6 +1,6 @@
-import { SQLITE3_DB_PATH } from "../session/db-settings";
+//import { SQLITE3_DB_PATH } from "../session/db-settings";
 
-const sqlite3 = window.require('sqlite3').verbose()
+// const sqlite3 = window.require('sqlite3').verbose()
 const log = window.require('electron-log');
 const { Client } = window.require('pg');
 
@@ -44,26 +44,26 @@ export function getDBSettings(){
 	return (dispatch, getState) => {
 		startDBSettingsUpdate();
 		
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM databases WHERE name = ?", ["postgres"] , (err, row) => {
-				if(err !== null){
-					log.error(row);
-					dispatch(showDBUpdateError(err.toString()));
-					return;
-				}
+		// let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		// db.all("SELECT * FROM databases WHERE name = ?", ["postgres"] , (err, row) => {
+		// 		if(err !== null){
+		// 			log.error(row);
+		// 			dispatch(showDBUpdateError(err.toString()));
+		// 			return;
+		// 		}
 				
-				if(row.length > 0){
-					dispatch(updateStateDBSettings({
-						hostname: row[0].hostname, 
-						port: row[0].port, 
-						username: row[0].username, 
-						password: row[0].password, 
-						}));
-				}else{
-					dispatch(showDBUpdateError("Settings for database boda donot exist!"));
-				}
+		// 		if(row.length > 0){
+		// 			dispatch(updateStateDBSettings({
+		// 				hostname: row[0].hostname, 
+		// 				port: row[0].port, 
+		// 				username: row[0].username, 
+		// 				password: row[0].password, 
+		// 				}));
+		// 		}else{
+		// 			dispatch(showDBUpdateError("Settings for database boda donot exist!"));
+		// 		}
 				
-		});
+		// });
 		
 	}
 }
@@ -92,28 +92,28 @@ export function updateDBSettings(settings){
     return (dispatch, getState) => {
 		dispatch(startDBSettingsUpdate());
 		
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(() => {
-			try{
-				let query = "UPDATE databases SET hostname = ?, port = ?, username = ?, password = ? ";
-				let values= [settings.hostname, 
-							 settings.port, 
-							 settings.username, 
-							 settings.password]
+		// let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		// db.serialize(() => {
+		// 	try{
+		// 		let query = "UPDATE databases SET hostname = ?, port = ?, username = ?, password = ? ";
+		// 		let values= [settings.hostname, 
+		// 					 settings.port, 
+		// 					 settings.username, 
+		// 					 settings.password]
 
-				query += " WHERE name = 'postgres'";
+		// 		query += " WHERE name = 'postgres'";
 				
-				var stmt = db.prepare(query,values);
+		// 		var stmt = db.prepare(query,values);
 					
-				stmt.run();
-				stmt.finalize();
-				dispatch(updateStateDBSettings(settings));
-				dispatch(showDBUpdateSuccess("Database settings updated."));
-			}catch(e){
-				dispatch(showDBUpdateError("Update failed"));
-			}
+		// 		stmt.run();
+		// 		stmt.finalize();
+		// 		dispatch(updateStateDBSettings(settings));
+		// 		dispatch(showDBUpdateSuccess("Database settings updated."));
+		// 	}catch(e){
+		// 		dispatch(showDBUpdateError("Update failed"));
+		// 	}
 			
-		});
+		// });
 	}  
 }
 

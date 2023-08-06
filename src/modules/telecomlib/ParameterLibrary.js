@@ -8,8 +8,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
 import  './telecomlib.css';
 
-const { shell } = window.require('electron').remote;
-const { ipcRenderer} = window.require("electron")
+const { ipcRenderer, shell} = window.require("electron")
 
 export default class ParameterLibrary extends React.Component {
     static icon = "book";

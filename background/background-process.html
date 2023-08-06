@@ -2,7 +2,8 @@
 <script type="text/javascript">
 	
 const {ipcRenderer} = window.require('electron');
-const { app, process } = window.require('electron').remote;
+//const { app, process } = window.require('electron').remote;
+const { app, process } = window.require('@electron/remote');
 const { spawn, spawnSync, execSync } = window.require('child_process') 
 const path = window.require('path');
 const isDev = window.require('electron-is-dev');

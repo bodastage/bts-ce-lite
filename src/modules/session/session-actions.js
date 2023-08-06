@@ -97,12 +97,7 @@ export function waitForDatabaseSetup(notice){
 export function clearSQLiteDB(){
     return (dispatch, getState) => {
 		
-		var stats = fs.statSync(SQLITE3_DB_PATH);
-			
-		if(fs.existsSync(SQLITE3_DB_PATH) && stats.size === 0 ){
-			fs.unlinkSync(SQLITE3_DB_PATH);
-			log.info(`Deleting boda-lite.sqlite3 because it's size is 0`);
-		}
+		window.BodaAPI.clearSQLiteDB()
 		
 		dispatch(resetState());
 	}
@@ -115,9 +110,10 @@ export function checkDBSetupStatus(){
         
 		try{ 
 		
+			//check if databae exists 
 
 			
-			//Database already exists
+			// //Database already exists
 			if(fs.existsSync(SQLITE3_DB_PATH) ){
 				
 				var stats = fs.statSync(SQLITE3_DB_PATH);
@@ -188,6 +184,10 @@ export function attemptAuthentication(loginDetails){
     return (dispatch, getState) => {
         dispatch(authenticateUser(loginDetails));
 		
+		//check if user exists 
+		// if error , mark login as failed
+		// if user exists, log in
+
 		let db = new sqlite3.Database(SQLITE3_DB_PATH);
 		db.all("SELECT * FROM users WHERE email = ? AND password = ?", 
 			[loginDetails.username, loginDetails.password] , (err, row) => {

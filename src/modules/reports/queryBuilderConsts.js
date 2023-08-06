@@ -1,7 +1,7 @@
 import React from 'react';
 import { Widgets, Operators } from 'react-awesome-query-builder';
 import moment from 'moment';
-import en_US from 'antd/lib/locale-provider/en_US';
+//import en_US from "antd/lib/locale/en_US";
 
 const {
     TextWidget,
@@ -615,7 +615,7 @@ export default {
         locale: {
             short: 'en',
             full: 'en-US',
-            antd: en_US,
+            //antd: en_US,
         },
         maxLabelsLength: 50,
         hideConjForOne: true,

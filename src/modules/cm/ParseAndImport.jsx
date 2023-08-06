@@ -8,7 +8,8 @@ import {
 	HTMLSelect, 
 	ProgressBar, 
 	Classes, 
-	Switch
+	Switch,
+	Divider
 	} from "@blueprintjs/core";
 import { VENDOR_CM_FORMATS, VENDOR_PM_FORMATS, VENDOR_FM_FORMATS } from './VendorFormats.js'
 import Timer from './Timer';
@@ -18,8 +19,8 @@ import { saveCMParsingFolders } from './cm-actions';
 import  './process.css';
 
 const { ipcRenderer} = window.require("electron")
-const { shell } = window.require('electron').remote; 
-const fs = window.require('fs');
+const { shell } = window.require('electron');
+//const fs = window.require('fs');
 const log = window.require('electron-log');
 
 
@@ -202,19 +203,19 @@ class ParseAndImport extends React.Component {
 		this.props.dispatch(saveCMParsingFolders(this.state.inputFileText, this.state.outputFolderText))
 		
 		//Confirm that the input folder exists
-		if( !fs.existsSync(this.state.inputFileText)){
-			log.info(`Input folder: ${this.state.inputFileText} does not exist`);
-			this.setState({errorMessage: `Input folder: ${this.state.inputFileText} does not exist`})
-			return;
-		}
+		// if( !fs.existsSync(this.state.inputFileText)){
+		// 	log.info(`Input folder: ${this.state.inputFileText} does not exist`);
+		// 	this.setState({errorMessage: `Input folder: ${this.state.inputFileText} does not exist`})
+		// 	return;
+		// }
 		
 		
 		//Confirm that the output folder exists
-		if( !fs.existsSync(this.state.outputFolderText)){
-			log.info(`Output folder: ${this.state.outputFolderText} does not exist`);
-			this.setState({errorMessage: `Output folder: ${this.state.outputFolderText} does not exist`})
-			return;
-		}
+		// if( !fs.existsSync(this.state.outputFolderText)){
+		// 	log.info(`Output folder: ${this.state.outputFolderText} does not exist`);
+		// 	this.setState({errorMessage: `Output folder: ${this.state.outputFolderText} does not exist`})
+		// 	return;
+		// }
 		
 		if(this.state.outputFolderText === this.state.inputFileText && 
 			!(this.state.currentVendor === 'BODASTAGE' && this.state.currentDataType === 'PM' && this.state.currentFormat === 'CSV')
@@ -297,10 +298,10 @@ class ParseAndImport extends React.Component {
 	*/	
 	launchFolderExplorer = (folderName) => {
 		
-		if (!fs.existsSync(folderName)) {
-			this.setState({errorMessage: `${folderName} does not exist`})
-			return;
-		}
+		// if (!fs.existsSync(folderName)) {
+		// 	this.setState({errorMessage: `${folderName} does not exist`})
+		// 	return;
+		// }
 		shell.openItem(folderName)
 		
 	}
@@ -387,7 +388,7 @@ class ParseAndImport extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="select_vendor" className="col-sm-2 col-form-label">Vendor/Format</label>
 						<div className="col-sm-10">
-						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange} disabled={this.state.processing} className="mr-2"/>
+						  <HTMLSelect options={this.state.vendors} id="select_vendor" value={this.state.currentVendor} onChange={this.onVendorSelectChange} disabled={this.state.processing} className="mr-2"/> &nbsp;
 						  <HTMLSelect id="select_file_format"options={this.vendorFormats[this.state.currentVendor]} value={this.state.currentFormat} onChange={this.onVendorFormatSelectChange} disabled={this.state.processing}/>
 						</div>
 					  </div>
@@ -416,7 +417,7 @@ class ParseAndImport extends React.Component {
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label"></label>
 						<div className="col-sm-8">
 						  <Switch checked={this.state.loadIntoDB} label="Load into database" onChange={this.handleLoadIntoDBChange} disabled={this.state.processing}/> 
-						  <Switch checked={this.state.clearTables} label="Clear tables before loading" onChange={this.handlClearTablesChange} disabled={this.state.processing}/>
+						  <Switch checked={this.state.clearTables} label="Clear previous data" onChange={this.handlClearTablesChange} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							

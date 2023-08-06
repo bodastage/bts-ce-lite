@@ -3,6 +3,7 @@
     font-weight: bold;
     margin-bottom: 0px;
     width: 35%;
+    float: none !important;
     /*border: 1px solid #ddd;*/
     border: 1px solid #BDC3C7;
     
@@ -34,3 +35,9 @@
 .dashboard-icon .fa, .dashboard-icon .glyphicon { font-size: 100px; color: black;}
 .dashboard-icon .icon-label { text-align: center; font-weight:bold;}
 .dashboard-icon .icon-display { text-align: center; font-size: 40px;}
+
+.sidebar-item{
+    margin-top: 10px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+}

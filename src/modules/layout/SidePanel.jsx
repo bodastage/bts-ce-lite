@@ -7,13 +7,14 @@ import './sidepanel.css'
 import UtilitiesSidePanel from '../utilities/UtilitiesSidePanel';
 
 const SidePanels = {
-    "DashboardSidePanel": DashboardSidePanel,
+  "DashboardSidePanel": DashboardSidePanel,
 	"ReportsTree": ReportsTree,
 	"GISLeftPanel": GISLeftPanel,
 	"UtilitiesSidePanel": UtilitiesSidePanel
 };
 
 class SidePanel extends React.Component{
+
     render(){
         const CurrentPanel = SidePanels[this.props.activePanel] || DashboardSidePanel;
         return (

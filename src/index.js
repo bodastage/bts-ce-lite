@@ -1,8 +1,9 @@
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { Provider } from 'react-redux';
-import configureStore from './configure-store';
+import { store, persistor } from './configure-store';
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistStore } from 'redux-persist'
 import Loading from './modules/session/Loading';
@@ -17,6 +18,7 @@ import 'normalize.css/normalize.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import 'reflect-metadata';
+
 
 // Icons
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -41,18 +43,14 @@ faAsterisk, faFileAlt,faFrown, faDatabase, faFileExcel, faFileCsv,
 faBroadcastTower, faPencilRuler, faBook, faCloudUploadAlt, faTools, 
 faCandyCane, faHatWizard, faGlobe, faEllipsisH);
 
-const store = configureStore();
-
-const persistor = persistStore(store);
-
-ReactDOM.render(
-        <Provider store={store} key="provider">
-            <PersistGate loading={<Loading show={true}/>} persistor={persistor}>
-                <App persistor={persistor}/>
-            </PersistGate>
-        </Provider>,
-    document.getElementById('root'));
-
+const root = createRoot(document.getElementById('root'));
+root.render(
+	<Provider store={store} key="provider">
+		<PersistGate loading={<Loading show={true}/>} persistor={persistor}>
+			<App persistor={persistor}/>
+		</PersistGate>
+	</Provider>
+);
 	
 
 // If you want your app to work offline and load faster, you can change

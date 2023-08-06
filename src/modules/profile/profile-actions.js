@@ -1,5 +1,5 @@
 import { SQLITE3_DB_PATH } from "../session/db-settings";
-const sqlite3 = window.require('sqlite3').verbose()
+//const sqlite3 = window.require('sqlite3').verbose()
 
 export const SEND_PROFILE_UPDATE_REQUEST = 'SEND_PROFILE_UPDATE_REQUEST';
 
@@ -41,31 +41,31 @@ export function updateUserProfile(profileData){
     return (dispatch, getState) => {
         dispatch(sendProfileUpdateRequest(profileData));
         
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.serialize(() => {
-			try{
-				let query = "UPDATE users SET email = ?, first_name = ?, last_name = ?, other_names = ? ";
-				let values= [profileData.email, 
-							 profileData.first_name, 
-							 profileData.last_name, 
-							 profileData.other_names]
-				if(profileData.password !== null && profileData.password !== ""){
-					query += ", password = ? "
-					values.push(profileData.password);
-				}
-				query += " WHERE email = ?";
-				values.push(profileData.email);
+		// let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		// db.serialize(() => {
+		// 	try{
+		// 		let query = "UPDATE users SET email = ?, first_name = ?, last_name = ?, other_names = ? ";
+		// 		let values= [profileData.email, 
+		// 					 profileData.first_name, 
+		// 					 profileData.last_name, 
+		// 					 profileData.other_names]
+		// 		if(profileData.password !== null && profileData.password !== ""){
+		// 			query += ", password = ? "
+		// 			values.push(profileData.password);
+		// 		}
+		// 		query += " WHERE email = ?";
+		// 		values.push(profileData.email);
 				
-				var stmt = db.prepare(query,values);
+		// 		var stmt = db.prepare(query,values);
 					
-				stmt.run();
-				stmt.finalize();
+		// 		stmt.run();
+		// 		stmt.finalize();
 				
-				dispatch(notifyProfileUpdateSuccess());
-			}catch(e){
-				dispatch(notifyProfileUpdateFailure("Update failed"));
-			}
+		// 		dispatch(notifyProfileUpdateSuccess());
+		// 	}catch(e){
+		// 		dispatch(notifyProfileUpdateFailure("Update failed"));
+		// 	}
 			
-		});
+		// });
     }
 }
