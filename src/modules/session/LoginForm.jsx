@@ -82,9 +82,8 @@ class LoginForm extends React.Component {
                     {this.props.loginError == null ? "" :
                         <div className={`alert alert-${errorAlertType} p-2`} role="alert">
                             {this.props.loginError}
-                        <button type="button" className="close"  aria-label="Close" onClick={this.dismissError}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+
+                            <button type="button" className="btn-close right float-end" data-bs-dismiss="alert" aria-label="Close" onClick={this.dismissError}></button>
                         </div>
                     }
                     

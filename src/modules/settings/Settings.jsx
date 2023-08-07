@@ -30,10 +30,7 @@ class Settings extends React.Component{
                 <fieldset className="col-md-12 fieldset">    	
                     <legend className="legend"><FontAwesomeIcon icon="cog"/> Settings</legend>
                     
-                    <a href="/#" className="launch-cm-menu" 
-						onClick={this.addTab({
-                        component: 'Database', 
-                        title:'Database'})}><FontAwesomeIcon icon="arrow-right"/><span> Database</span></a>
+                 
 				
 				</fieldset>
             </div>

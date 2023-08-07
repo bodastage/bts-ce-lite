@@ -9,7 +9,6 @@ import { OverflowList, Boundary, Position, Classes, MenuItem,
 import Help from '../help/Help';
 import UserProfile from '../profile/UserProfile';
 import Settings from '../settings/Settings';
-import Database from '../settings/Database';
 import ReportContainer from '../reports/ReportContainer';
 import CreateReport from '../reports/CreateReport';
 import CreateCompositeReport from '../reports/CreateCompositeReport';
@@ -26,7 +25,6 @@ const Components = {
 	"ParseAndImport": ParseAndImport,
 	"UserProfile": UserProfile,
 	"Settings": Settings,
-	"Database": Database,
 	"ReportContainer": ReportContainer,
 	"CreateReport": CreateReport,
 	"CreateCompositeReport": CreateCompositeReport,
