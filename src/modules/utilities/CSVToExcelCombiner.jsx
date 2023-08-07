@@ -51,7 +51,7 @@ export default class CSVToExcelCombiner extends React.Component {
 		// 	this.setState({errorMessage: `${folder} does not exist`})
 		// 	return;
 		// }
-		shell.openItem(folder)
+		shell.openPath(folder)
 	}
 	
 	showOutputFolder = () => this.showFiles(this.state.outputFolder);

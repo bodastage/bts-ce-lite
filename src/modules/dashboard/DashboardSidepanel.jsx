@@ -31,7 +31,7 @@ class DashboardSidePanel extends React.Component {
             });
             return;
         }
-        shell.openItem(logPath)
+        shell.openPath(logPath)
     }
 
     addTab = (options) => (e) => {

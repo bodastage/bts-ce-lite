@@ -1137,7 +1137,7 @@ class KMLGenerator extends React.Component {
 		// 	return;
 		// }
 		
-		shell.openItem(this.state.dataFile);
+		shell.openPath(this.state.dataFile);
 	}
 	
 	removeFolder = (index) => {

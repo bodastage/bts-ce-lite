@@ -65,7 +65,7 @@ class Dashboard extends React.Component {
 			});
 			return;
 		}
-		shell.openItem(logPath)
+		shell.openPath(logPath)
 	}
 	
 	/**

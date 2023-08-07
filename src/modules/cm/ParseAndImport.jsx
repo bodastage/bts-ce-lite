@@ -302,7 +302,7 @@ class ParseAndImport extends React.Component {
 		// 	this.setState({errorMessage: `${folderName} does not exist`})
 		// 	return;
 		// }
-		shell.openItem(folderName)
+		shell.openPath(folderName)
 		
 	}
 	
