@@ -23,38 +23,38 @@ export function addDashboardNotice(notice: any){
 */
 export function checkIfJavaIsInstalled(){
     return (dispatch : any, getState : any) => {
-		var spawn = window.require('child_process').spawn('java', ['-version']);
-		spawn.on('error', function(err : any){
-			//return callback(err, null);
-			// log.error(err);
-		})
+		// var spawn = window.require('child_process').spawn('java', ['-version']);
+		// spawn.on('error', function(err : any){
+		// 	//return callback(err, null);
+		// 	// log.error(err);
+		// })
 		
-		spawn.stdout.on('data', function(data: any) {
-			console.log("spawn.stdout.on:", data);
-		});
+		// spawn.stdout.on('data', function(data: any) {
+		// 	console.log("spawn.stdout.on:", data);
+		// });
 		
-		spawn.stderr.on('data', function(data: any) {
+		// spawn.stderr.on('data', function(data: any) {
 			
-			//Check if java is in string data
-			var javaCheck = new RegExp('java', 'i').test(data);
+		// 	//Check if java is in string data
+		// 	var javaCheck = new RegExp('java', 'i').test(data);
 			
-			//
-			data = data.toString().split('\n')[0];
-			var javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
+		// 	//
+		// 	data = data.toString().split('\n')[0];
+		// 	var javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
 
-			if (javaCheck != false) {
-				// TODO: We have Java installed
-				dispatch(clearNotice());
+		// 	if (javaCheck != false) {
+		// 		// TODO: We have Java installed
+		// 		dispatch(clearNotice());
 				
-			} else {
-				//log.error("Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download");
-				dispatch(addDashboardNotice({
-					message: "Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download",
-					type: 'danger'
-				}));
-				//@TODO: No Java installed
-			}
-		});
+		// 	} else {
+		// 		//log.error("Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download");
+		// 		dispatch(addDashboardNotice({
+		// 			message: "Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download",
+		// 			type: 'danger'
+		// 		}));
+		// 		//@TODO: No Java installed
+		// 	}
+		// });
         
     }
 }

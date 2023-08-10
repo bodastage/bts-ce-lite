@@ -190,13 +190,27 @@ export function checkDBSetupStatus(){
 }
 
 export function attemptAuthentication(loginDetails){
-    return (dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(authenticateUser(loginDetails));
 
-		const { username, password } = loginDetails;
+		const { email, password } = loginDetails;
 
-		const res = btslite_api.dbQuery(`SELECT * FROM users WHERE username = "${username}" AND password = "${password}"`);
+		const row = await btslite_api.dbQuery(`SELECT * FROM users WHERE email = "${email}" AND password = "${password}"`);
 		
+		console.log(row);
+
+		if(row.length > 0){
+			dispatch(logIntoApp({
+				first_name: row[0].first_name, 
+				username: row[0].username, 
+				email: row[0].email, 
+				other_names: row[0].other_names, 
+				last_name: row[0].last_name}));
+		}else{
+			dispatch(markLoginAsFailed("Wrong email and password! Try again."));
+		}
+
+
 		//check if user exists 
 		// if error , mark login as failed
 		// if user exists, log in

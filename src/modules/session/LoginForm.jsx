@@ -14,7 +14,7 @@ class LoginForm extends React.Component {
         super(props);
 
         this.state = {
-            username: "",
+            email: "",
             password: ""
         };
         
@@ -27,7 +27,7 @@ class LoginForm extends React.Component {
     
     componentDidMount(){
         if(typeof this.props.userDetails !== 'undefined' && this.props.userDetails !== null ){
-            this.setState({username: this.props.userDetails.username});
+            this.setState({email: this.props.userDetails.email});
 			return;
         }
         
@@ -50,7 +50,7 @@ class LoginForm extends React.Component {
         event.preventDefault();
 
           this.props.dispatch(attemptAuthentication({
-              username: this.state['username'],
+              email: this.state['email'],
               password: this.state['password']
           }));
         
@@ -96,7 +96,7 @@ class LoginForm extends React.Component {
                                 <InputGroup id="session_email" placeholder="Email" 
                                     required={true}
                                     leftIcon="user" 
-                                    name="username"
+                                    name="email"
                                     type="email"
                                     onChange={this.handleInputChange} />
                             </FormGroup>
@@ -105,7 +105,7 @@ class LoginForm extends React.Component {
                     
                     {typeof this.props.userDetails === 'undefined' || this.props.userDetails === null? '' : 
                         <React.Fragment>
-                            <label htmlFor="username" className="sr-only">Username</label>
+                            <label htmlFor="email" className="sr-only">email</label>
                             <div className="input-group">
                             <span className="font-weight-light">Login as </span>  &nbsp;
                                 <span className="font-weight-bold">{this.props.userDetails.first_name + ", " +  this.props.userDetails.last_name}</span>

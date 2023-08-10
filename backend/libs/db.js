@@ -3,8 +3,6 @@ const Umzug = require('umzug');
 const path = require('path');
 const { sequelize, Sequelize } = require(path.join(__dirname, '../../', 'db', 'models', 'index.js'));
 
-console.log(sequelize.models.users);
-
 const migrateUp = async () => {
     const umzug = new Umzug({
         migrations: {

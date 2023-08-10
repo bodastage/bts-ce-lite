@@ -12,7 +12,19 @@ module.exports = {
       username: {
         type: Sequelize.STRING
       },
+      email: {
+        type: Sequelize.STRING
+      },
       password: {
+        type: Sequelize.STRING
+      },
+      first_name: {
+        type: Sequelize.STRING
+      },
+      last_name: {
+        type: Sequelize.STRING
+      },
+      other_names: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -26,7 +38,11 @@ module.exports = {
     });
 
     await queryInterface.bulkInsert('users', [{
-      username: 'expert@telecomhall.net',
+      username: 'expert',
+      last_name: 'Telecomhall',
+      other_names: '',
+      first_name: 'Expert',
+      email: 'expert@telecomhall.net',
       password: 'password',
       createdAt: new Date(),
       updatedAt: new Date()

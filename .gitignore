@@ -9,3 +9,4 @@ nbproject
 docs/_build
 boda-lite.sqlite3
 db/boda-lite.sqlite3
+boda-lite.sqlite*
