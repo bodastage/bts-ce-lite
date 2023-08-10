@@ -13,6 +13,7 @@ import 'react-splitter-layout/lib/index.css';
 import './layout.less';
 import VERSION from '../../version';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { setUpdating } from '../session/session-actions';
 
 class UILayout extends React.Component {
 	constructor(props){
@@ -34,6 +35,11 @@ class UILayout extends React.Component {
 		this.props.dispatch({
 			type: "LOGOUT"
 		});	
+	}
+
+	updateApp(event) {
+		event.preventDefault();
+		this.props.dispatch(setUpdating(true));
 	}
     
 	/*
@@ -102,6 +108,7 @@ class UILayout extends React.Component {
                         component: 'UserProfile', 
                         title:'Profile'})}/>
 				<MenuItem icon="eraser" text="Reset UI" onClick={this.resetUI.bind(this)} />		
+				<MenuItem icon="wrench" text="Update" onClick={this.updateApp.bind(this)} />		
                 <MenuItem icon="power" text="Logout" className={classNames(Classes.MINIMAL, Classes.INTENT_DANGER)} onClick={this.logout} />
             </Menu>
             );

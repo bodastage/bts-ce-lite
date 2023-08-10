@@ -1,6 +1,5 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-const { shell } = window.require('electron');
 
 export default class Help extends React.Component {
         
@@ -13,7 +12,7 @@ export default class Help extends React.Component {
 	handleOnClick = (event) => {
 		event.preventDefault();
 		let lnk = event.target.href;
-		shell.openExternal(lnk);
+        btslite_api.shellOpenPath(lnk);
 	}
 	
     render(){

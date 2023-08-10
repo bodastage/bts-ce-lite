@@ -1,8 +1,8 @@
 //import { SQLITE3_DB_PATH } from "../session/db-settings";
 
 // const sqlite3 = window.require('sqlite3').verbose()
-const log = window.require('electron-log');
-const { Client } = window.require('pg');
+// const log = window.require('electron-log');
+//const { Client } = window.require('pg');
 
 export const START_DB_SETTINGS_UPDATE = 'START_DB_SETTINGS_UPDATE';
 export const SHOW_DB_UPDATE_SUCCESS = 'SHOW_DB_UPDATE_SUCCESS';
@@ -121,23 +121,23 @@ export function checkConnection(settings){
     return (dispatch, getState) => {
 		dispatch(startDBSettingsUpdate());
 
-		const connectionString = `postgresql://${settings.username}:${settings.password}@${settings.hostname}:${settings.port}/postgres`
+		// const connectionString = `postgresql://${settings.username}:${settings.password}@${settings.hostname}:${settings.port}/postgres`
 		
-		const client = new Client({
-		  connectionString: connectionString,
-		})
+		// const client = new Client({
+		//   connectionString: connectionString,
+		// })
 		
-		client.connect((err) => {
-			if(err !== null){
-				dispatch(showDBUpdateError(`Failed to connect to ${connectionString}. ${err}`));
-				log.error(`Failed to connect to ${connectionString}. ${err}`)
-				return;
-			}
+		// client.connect((err) => {
+		// 	if(err !== null){
+		// 		dispatch(showDBUpdateError(`Failed to connect to ${connectionString}. ${err}`));
+		// 		log.error(`Failed to connect to ${connectionString}. ${err}`)
+		// 		return;
+		// 	}
 
-			dispatch(showDBUpdateSuccess("Connected successfully to server"));
+		// 	dispatch(showDBUpdateSuccess("Connected successfully to server"));
 
-			client.end();
-		});
+		// 	client.end();
+		// });
 
 	}
 	

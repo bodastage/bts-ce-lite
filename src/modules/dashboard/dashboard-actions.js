@@ -1,4 +1,4 @@
-const log = window.require('electron-log');
+// const log = window.require('electron-log');
 
 export const DASHBOARD_ADD_NOTICE = 'DASHBOARD_ADD_NOTICE';
 
@@ -26,7 +26,7 @@ export function checkIfJavaIsInstalled(){
 		var spawn = window.require('child_process').spawn('java', ['-version']);
 		spawn.on('error', function(err : any){
 			//return callback(err, null);
-			log.error(err);
+			// log.error(err);
 		})
 		
 		spawn.stdout.on('data', function(data: any) {
@@ -47,7 +47,7 @@ export function checkIfJavaIsInstalled(){
 				dispatch(clearNotice());
 				
 			} else {
-				log.error("Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download");
+				//log.error("Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download");
 				dispatch(addDashboardNotice({
 					message: "Java cannot be detected on your system. It is required by the application. Download Java from https://www.java.com/en/download",
 					type: 'danger'

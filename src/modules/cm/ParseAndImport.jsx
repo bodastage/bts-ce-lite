@@ -18,10 +18,10 @@ import { saveCMParsingFolders } from './cm-actions';
 //styles
 import  './process.css';
 
-const { ipcRenderer} = window.require("electron")
-const { shell } = window.require('electron');
+// const { ipcRenderer} = window.require("electron")
+// const { shell } = window.require('electron');
 //const fs = window.require('fs');
-const log = window.require('electron-log');
+// const log = window.require('electron-log');
 
 
 /**
@@ -233,13 +233,14 @@ class ParseAndImport extends React.Component {
 				"outputFolder": this.state.outputFolderText
 			}
 
-		ipcRenderer.send('parse-cm-request', 'parse_data', JSON.stringify(payload));
-		log.info(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
+		// ipcRenderer.send('parse-cm-request', 'parse_data', JSON.stringify(payload));
+		btslite_api.parseCmData(payload);
+		btslite_api.addToLog(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
 		//Wait for response
 		this.processFilesListener = (event, task, args) => {
 			
-			log.info(`Received message from IPC channel "parse-cm-request with message ${args}"`)	
+			btslite_api.addToLog(`Received message from IPC channel "parse-cm-request with message ${args}"`)	
 			
 			const obj = JSON.parse(args)
 			
@@ -302,7 +303,8 @@ class ParseAndImport extends React.Component {
 		// 	this.setState({errorMessage: `${folderName} does not exist`})
 		// 	return;
 		// }
-		shell.openPath(folderName)
+		//shell.openPath(folderName)
+		btslite_api.shellOpenPath(folderName);
 		
 	}
 	
@@ -330,9 +332,7 @@ class ParseAndImport extends React.Component {
 		let successNotice = null;
 		if(this.state.successMessage !== null ){ 
 			successNotice = (<div className="alert alert-success m-1 p-2" role="alert">{this.state.successMessage}
-					<button type="button" className="close"  aria-label="Close" onClick={this.dismissSuccessMessage}>
-					<span aria-hidden="true">&times;</span>
-				</button>
+				<button type="button" className="btn-close right float-end" data-bs-dismiss="alert" aria-label="Close" onClick={this.dismissSuccessMessage}></button>
 			</div>)
 		}
 		
@@ -341,9 +341,7 @@ class ParseAndImport extends React.Component {
 		if(this.state.errorMessage !== null){
 			errorNotice = (<div className="alert alert-danger m-1 p-2" role="alert">
 						{this.state.errorMessage}
-						<button type="button" className="close"  aria-label="Close" onClick={this.dismissErrorMessage}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+						<button type="button" className="btn-close right float-end" data-bs-dismiss="alert" aria-label="Close" onClick={this.dismissErrorMessage}></button>
 					</div>)
 		}
 		

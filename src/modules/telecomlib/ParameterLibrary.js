@@ -8,7 +8,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
 import  './telecomlib.css';
 
-const { ipcRenderer, shell} = window.require("electron")
+// const { ipcRenderer, shell} = window.require("electron")
 
 export default class ParameterLibrary extends React.Component {
     static icon = "book";
@@ -84,7 +84,7 @@ export default class ParameterLibrary extends React.Component {
 			});
 			return;
 		}
-		shell.showItemInFolder(this.state.referenceFile);
+		btslite_api.shellShowItemInFolder(this.state.referenceFile);
 	}
 	
 	
@@ -161,7 +161,8 @@ export default class ParameterLibrary extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'upload_parameter_reference', JSON.stringify(payload));
+		// ipcRenderer.send('parse-cm-request', 'upload_parameter_reference', JSON.stringify(payload));
+		btslite_api.uploadParameterReference(payload);
 		
 		this.uploadParameterRefListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -173,7 +174,7 @@ export default class ParameterLibrary extends React.Component {
 						notice: {type: 'danger', message: obj.message},
 						processing: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.uploadParameterRefListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.uploadParameterRefListener);
 			}
 			
 			//info
@@ -190,12 +191,12 @@ export default class ParameterLibrary extends React.Component {
 						processing: false
 						});
 
-				ipcRenderer.removeListener("parse-cm-request", this.uploadParameterRefListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.uploadParameterRefListener);
 				this.refreshData();
 			}
 			
 		}
-		ipcRenderer.on('parse-cm-request', this.uploadParameterRefListener);
+		// ipcRenderer.on('parse-cm-request', this.uploadParameterRefListener);
 	}
 	
 	
@@ -215,7 +216,8 @@ export default class ParameterLibrary extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'auto_generate_param_ref', JSON.stringify(payload));
+		//ipcRenderer.send('parse-cm-request', 'auto_generate_param_ref', JSON.stringify(payload));
+		btslite_api.authoGenerateParameterRef(payload);
 		
 		this.autoGenerateParamRefListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -227,7 +229,7 @@ export default class ParameterLibrary extends React.Component {
 						notice: {type: 'danger', message: obj.message},
 						processing: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.autoGenerateParamRefListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.autoGenerateParamRefListener);
 			}
 			
 			//info
@@ -244,11 +246,11 @@ export default class ParameterLibrary extends React.Component {
 						processing: false
 						});
 
-				ipcRenderer.removeListener("parse-cm-request", this.autoGenerateParamRefListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.autoGenerateParamRefListener);
 			}
 			
 		}
-		ipcRenderer.on('parse-cm-request', this.autoGenerateParamRefListener);
+		// ipcRenderer.on('parse-cm-request', this.autoGenerateParamRefListener);
 	}
 	
 	

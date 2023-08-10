@@ -12,7 +12,7 @@ import { runQuery, getSortAndFilteredQuery } from '../reports/DBQueryHelper.js';
 //styles
 import  './baseline.css';
 
-const { ipcRenderer, app, shell} = window.require("electron")
+// const { ipcRenderer, app, shell} = window.require("electron")
 
 export default class Baseline extends React.Component {
     static icon = "pencil-ruler";
@@ -178,7 +178,8 @@ export default class Baseline extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'run_baseline', JSON.stringify(payload));
+		// ipcRenderer.send('parse-cm-request', 'run_baseline', JSON.stringify(payload));
+		btslite_api.baselineRun(payload);
 		
 		this.baselineListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -190,7 +191,7 @@ export default class Baseline extends React.Component {
 						notice: {type: 'danger', message: obj.message},
 						processing: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.baselineListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.baselineListener);
 			}
 			
 			//info
@@ -207,7 +208,7 @@ export default class Baseline extends React.Component {
 						processing: false
 						});
 
-				ipcRenderer.removeListener("parse-cm-request", this.baselineListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.baselineListener);
 			}
 			
 		}
@@ -240,7 +241,7 @@ export default class Baseline extends React.Component {
 						notice: {type: 'danger', message: obj.message},
 						processing: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
 			}
 			
 			//info
@@ -257,12 +258,12 @@ export default class Baseline extends React.Component {
 						processing: false
 						});
 
-				ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.deleteBaselineListener);
 				this.refreshData();
 			}
 			
 		}
-		ipcRenderer.on('parse-cm-request', this.deleteBaselineListener);
+		// ipcRenderer.on('parse-cm-request', this.deleteBaselineListener);
 		
 	}
 	
@@ -305,12 +306,12 @@ export default class Baseline extends React.Component {
 						processing: false
 						});
 
-				ipcRenderer.removeListener("parse-cm-request", this.clearBaselineRefListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.clearBaselineRefListener);
 				this.refreshData();
 			}
 			
 		}
-		ipcRenderer.on('parse-cm-request', this.clearBaselineRefListener);
+		// ipcRenderer.on('parse-cm-request', this.clearBaselineRefListener);
 		
 	}
 	
@@ -353,7 +354,8 @@ export default class Baseline extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'upload_baseline', JSON.stringify(payload));
+		// ipcRenderer.send('parse-cm-request', 'upload_baseline', JSON.stringify(payload));
+		btslite_api.baselineUpload(payload);
 		
 		this.uploadBaselineListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -400,7 +402,7 @@ export default class Baseline extends React.Component {
 		let payload = {
 			"fileName": "baseline_reference",
 			"format": "excel",
-			"outputFolder": app.getPath('downloads'),
+			"outputFolder": btslite_api.getPath('downloads')
 		}
 		
 		//Set processing to true 
@@ -435,8 +437,8 @@ export default class Baseline extends React.Component {
 						processing: false
 						});
 				const excelFile = obj.message;
-				shell.showItemInFolder(excelFile);
-				ipcRenderer.removeListener("parse-cm-request", this.baselineRefDownloadListener);
+				btslite_api.shellShowItemInFolder(excelFile);
+				//ipcRenderer.removeListener("parse-cm-request", this.baselineRefDownloadListener);
 			}
 			
 		}
@@ -553,7 +555,7 @@ export default class Baseline extends React.Component {
 			});
 			return;
 		}
-		shell.showItemInFolder(this.state.baselineFile);
+		btslite_api.shellShowItemInFolder(this.state.baselineFile);
 	}
 	
 	handleConfigureChange = (e) => {

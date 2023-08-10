@@ -23,7 +23,7 @@ import 'react-awesome-query-builder/css/denormalize.scss';
 import './kml.css';
 
 const { Option } = Select;
-const { ipcRenderer, shell} = window.require("electron")
+// const { ipcRenderer, shell} = window.require("electron")
 //const fs = window.require('fs');
 
 const FOLDER_VALUE_TYPES = ["Value", "Field"];
@@ -1211,7 +1211,8 @@ class KMLGenerator extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'generate_kml', JSON.stringify(payload));
+		// ipcRenderer.send('parse-cm-request', 'generate_kml', JSON.stringify(payload));
+		btslite_api.kmlGenerateKMLFile(payload);
 		
 		this.generateKMLListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -1223,7 +1224,7 @@ class KMLGenerator extends React.Component {
 						notice: {type: 'danger', message: obj.message},
 						processing: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.generateKMLListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.generateKMLListener);
 			}
 			
 			//info
@@ -1241,12 +1242,12 @@ class KMLGenerator extends React.Component {
 						});
 				const kmlFile = obj.message;
 				shell.showItemInFolder(kmlFile);
-				ipcRenderer.removeListener("parse-cm-request", this.generateKMLListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.generateKMLListener);
 			}
 			
 		}
 
-		ipcRenderer.on('parse-cm-request', this.generateKMLListener);	
+		// ipcRenderer.on('parse-cm-request', this.generateKMLListener);	
 	}
 	
 	dismissNotice = () => {

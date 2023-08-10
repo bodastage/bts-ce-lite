@@ -52,7 +52,7 @@ import 'leaflet.icon.glyph'
 import { renderToString } from 'react-dom/server'
 import { ReactLeafletSearch } from 'react-leaflet-search'
 
-const { ipcRenderer} = window.require("electron");
+// const { ipcRenderer} = window.require("electron");
 const WrappedSearch = withLeaflet(ReactLeafletSearch)
 
 //Fix icons
@@ -301,7 +301,8 @@ class GISMap extends React.Component{
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'upload_gis_file', JSON.stringify(payload));
+		// ipcRenderer.send('parse-cm-request', 'upload_gis_file', JSON.stringify(payload));
+		btslite_api.gisUploadFile(payload);
 		
 		this.importFileBGJobListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -313,7 +314,7 @@ class GISMap extends React.Component{
 						importStatusNotice: {type: 'danger', message: obj.message},
 						processingImport: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
 			}
 			
 			//info
@@ -330,7 +331,7 @@ class GISMap extends React.Component{
 						processingImport: false
 						});
 
-				ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
+				//ipcRenderer.removeListener("parse-cm-request", this.importFileBGJobListener);
 				//Reload the carrier colors
 				this.props.dispatch(gisFetchPlanFrequencies());
 				
@@ -338,7 +339,7 @@ class GISMap extends React.Component{
 			}
 			
 		}
-		ipcRenderer.on('parse-cm-request', this.importFileBGJobListener);
+		//ipcRenderer.on('parse-cm-request', this.importFileBGJobListener);
 	}
 	
 	setImportStatusNotice = (type,message) => {this.setState({importStatusNotice: {type: type, message: message}})}

@@ -1,9 +1,10 @@
 import 'url-search-params-polyfill';
-import { SQLITE3_DB_PATH } from "./db-settings";
+//import { SQLITE3_DB_PATH, migrateUp } from "./db-settings";
+//import { Sequelize } from 'sequelize';
 
-const fs = window.require('fs');
-const sqlite3 = window.require('sqlite3').verbose()
-const log = window.require('electron-log');
+//const fs = window.require('fs');
+//const sqlite3 = window.require('sqlite3').verbose()
+// const log = window.require('electron-log');
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
@@ -15,6 +16,14 @@ export const CHECK_DB_SETUP_STATUS = 'CHECK_DB_SETUP_STATUS';
 export const CONFIRM_DB_READY = 'CONFIRM_DB_READY';
 export const CLEAR_NOTICES = 'CLEAR_NOTICES';
 export const RESET_STATE = 'RESET_STATE';
+export const SET_UPDATING = 'SET_UPDATING';
+
+export function setUpdating(status){
+	return {
+		type: SET_UPDATING,
+		status
+	};
+}
 
 export function resetState(){
 	
@@ -114,67 +123,67 @@ export function checkDBSetupStatus(){
 
 			
 			// //Database already exists
-			if(fs.existsSync(SQLITE3_DB_PATH) ){
+			// if(fs.existsSync(SQLITE3_DB_PATH) ){
 				
-				var stats = fs.statSync(SQLITE3_DB_PATH);
-				if(stats.size > 0 ){
-					dispatch(clearNotices());
-					return;					
-				}
+			// 	var stats = fs.statSync(SQLITE3_DB_PATH);
+			// 	if(stats.size > 0 ){
+			// 		dispatch(clearNotices());
+			// 		return;					
+			// 	}
 
-			}
+			// }
 			
-			if(fs.existsSync(SQLITE3_DB_PATH)){
-				fs.unlinkSync(SQLITE3_DB_PATH);
-				log.info(`Deleting boda-lite.sqlite3 because it's size is 0`);
-			}
+			// if(fs.existsSync(SQLITE3_DB_PATH)){
+			// 	fs.unlinkSync(SQLITE3_DB_PATH);
+			// 	log.info(`Deleting boda-lite.sqlite3 because it's size is 0`);
+			// }
 			
 			//@TODO: Move this logic to a different file 
-			let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			db.serialize(function() {
-				//Create users table
-				db.run("CREATE TABLE users (" +
-					  "		first_name TEXT NOT NULL, " + 
-					  "		last_name TEXT NOT NULL," +
-					  "		other_names TEXT NOT NULL," +
-					  " 	email TEXT NOT NULL UNIQUE," +
-					  " 	password TEXT NOT NULL" +
-					  ")");
+			// let db = new sqlite3.Database(SQLITE3_DB_PATH);
+			// db.serialize(function() {
+			// 	//Create users table
+			// 	db.run("CREATE TABLE users (" +
+			// 		  "		first_name TEXT NOT NULL, " + 
+			// 		  "		last_name TEXT NOT NULL," +
+			// 		  "		other_names TEXT NOT NULL," +
+			// 		  " 	email TEXT NOT NULL UNIQUE," +
+			// 		  " 	password TEXT NOT NULL" +
+			// 		  ")");
 				
-				let stmt = db.prepare("INSERT INTO users " +
-				" (first_name, last_name, other_names, email, password)" +
-				" VALUES ('Expert','TelecomHall','','expert@telecomhall.net','password')," + 
-				" ('Boda','Lite','Bodastage','btsuser@bodastage.org','password')" 
-				);
+			// 	let stmt = db.prepare("INSERT INTO users " +
+			// 	" (first_name, last_name, other_names, email, password)" +
+			// 	" VALUES ('Expert','TelecomHall','','expert@telecomhall.net','password')," + 
+			// 	" ('Boda','Lite','Bodastage','btsuser@bodastage.org','password')" 
+			// 	);
 				
-				stmt.run();
-				stmt.finalize();
+			// 	stmt.run();
+			// 	stmt.finalize();
 				
-				//create database settings table 
-				db.run("CREATE TABLE databases (" +
-					  "		hostname TEXT NOT NULL, " + 
-					  "		port TEXT NOT NULL," +
-					  "		username TEXT NOT NULL," +
-					  " 	password TEXT NOT NULL," +
-					  " 	name TEXT NOT NULL UNIQUE," +
-					  " 	db_type TEXT NOT NULL" +
-					  ")");
+			// 	//create database settings table 
+			// 	db.run("CREATE TABLE databases (" +
+			// 		  "		hostname TEXT NOT NULL, " + 
+			// 		  "		port TEXT NOT NULL," +
+			// 		  "		username TEXT NOT NULL," +
+			// 		  " 	password TEXT NOT NULL," +
+			// 		  " 	name TEXT NOT NULL UNIQUE," +
+			// 		  " 	db_type TEXT NOT NULL" +
+			// 		  ")");
 					  
-				stmt = db.prepare("INSERT INTO databases " +
-				" (hostname, port, username, password, name, db_type)" +
-				" VALUES " +
-				" ('127.0.0.1','5432','bodastage','password','boda','postgresql')," + 
-				" ('127.0.0.1','5432','postgres','postgres','postgres','postgresql')"
-				);
+			// 	stmt = db.prepare("INSERT INTO databases " +
+			// 	" (hostname, port, username, password, name, db_type)" +
+			// 	" VALUES " +
+			// 	" ('127.0.0.1','5432','bodastage','password','boda','postgresql')," + 
+			// 	" ('127.0.0.1','5432','postgres','postgres','postgres','postgresql')"
+			// 	);
 				
-				stmt.run();
-				stmt.finalize();
+			// 	stmt.run();
+			// 	stmt.finalize();
 				
-				dispatch(clearNotices());
-			});
+			// 	dispatch(clearNotices());
+			// });
 			
 		}catch(e){
-			log.log(e.toString());
+			// log.log(e.toString());
 			dispatch(clearNotices());
 		}	
     }
@@ -188,29 +197,38 @@ export function attemptAuthentication(loginDetails){
 		// if error , mark login as failed
 		// if user exists, log in
 
-		let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		db.all("SELECT * FROM users WHERE email = ? AND password = ?", 
-			[loginDetails.username, loginDetails.password] , (err, row) => {
-				if(err !== null){
-					dispatch(markLoginAsFailed(err.toString()));
-					return;
-				}
+		// let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		// db.all("SELECT * FROM users WHERE email = ? AND password = ?", 
+		// 	[loginDetails.username, loginDetails.password] , (err, row) => {
+		// 		if(err !== null){
+		// 			dispatch(markLoginAsFailed(err.toString()));
+		// 			return;
+		// 		}
 				
-				if(row.length > 0){
-					dispatch(logIntoApp({
-						first_name: row[0].first_name, 
-						username: row[0].email, 
-						email: row[0].email, 
-						other_names: row[0].other_names, 
-						last_name: row[0].last_name}));
-				}else{
-					dispatch(markLoginAsFailed("Wrong email and password! Try again."));
-				}
+		// 		if(row.length > 0){
+		// 			dispatch(logIntoApp({
+		// 				first_name: row[0].first_name, 
+		// 				username: row[0].email, 
+		// 				email: row[0].email, 
+		// 				other_names: row[0].other_names, 
+		// 				last_name: row[0].last_name}));
+		// 		}else{
+		// 			dispatch(markLoginAsFailed("Wrong email and password! Try again."));
+		// 		}
 				
-		});
+		// });
 	
 	
     }
+}
+
+export function handleMigration(){
+	return async (dispatch, getState) => {
+		//Check if the database is ready
+		await migrateUp();
+
+		dispatch(setUpdating(false));
+	}
 }
 
 export default { logIntoApp, logOutOfApp, authenticateUser, attemptAuthentication };

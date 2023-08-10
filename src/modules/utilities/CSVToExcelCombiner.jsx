@@ -10,9 +10,9 @@ import {
 } from "@blueprintjs/core";
 import  './utilities.css';
 
-const { ipcRenderer, shell} = window.require("electron")
+// const { ipcRenderer, shell} = window.require("electron")
 //const fs = window.require('fs');
-const log = window.require('electron-log');
+// const log = window.require('electron-log');
 
 const COMBINE_OPTIONS = [
 	"Combine into one Excel workbook",
@@ -51,7 +51,7 @@ export default class CSVToExcelCombiner extends React.Component {
 		// 	this.setState({errorMessage: `${folder} does not exist`})
 		// 	return;
 		// }
-		shell.openPath(folder)
+		btslite_api.openPath(folder);
 	}
 	
 	showOutputFolder = () => this.showFiles(this.state.outputFolder);
@@ -114,7 +114,8 @@ export default class CSVToExcelCombiner extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'combine_csv_to_excel', JSON.stringify(payload));
+		// ipcRenderer.send('parse-cm-request', 'combine_csv_to_excel', JSON.stringify(payload));
+		btslite_api.convertCSVtoExcel(payload);
 		
 		this.combinerListener = (event, task, args) => {
 			const obj = JSON.parse(args)
@@ -144,11 +145,11 @@ export default class CSVToExcelCombiner extends React.Component {
 						});
 
 				shell.showItemInFolder(obj.message);
-				ipcRenderer.removeListener("parse-cm-request", this.combinerListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.combinerListener);
 			}
 			
 		}
-		ipcRenderer.on('parse-cm-request', this.combinerListener);
+		// ipcRenderer.on('parse-cm-request', this.combinerListener);
 		
 		
 	}

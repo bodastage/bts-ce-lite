@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 module.exports = function override(config, env) {
+    config.externals = ['pg', 'tedious', 'pg-hstore'];
     config.target = 'electron-renderer';
     config.resolve.fallback = {
         //assert: require.resolve('assert'),

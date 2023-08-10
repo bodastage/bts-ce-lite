@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 import { generateStyleClass, getTableStyleExpression } from './reports-utils';
 		 
-const { ipcRenderer, shell , app} = window.require("electron")
+// const { ipcRenderer, shell , app} = window.require("electron")
 
 class TableReport extends React.Component{
     static icon = "table";
@@ -189,11 +189,13 @@ class TableReport extends React.Component{
 			reportId: this.props.options.reportId,
 			query: downloadQuery,
 			filename: fileName, //Name of the file to be downloaded  without extension
-			outputFolder: app.getPath('downloads'),
+			// outputFolder: app.getPath('downloads'), 
+			outputFolder: btslite_api.getPath('downloads'), 
 			format: format,
 		}
 		
-		ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
+		//ipcRenderer.send('parse-cm-request', 'download_report', JSON.stringify(payload));
+		const downloadStatus = btslite_api.reportsDownload(payload);
 		
 		this.downloadReportListener = (event, task, args) => {
 
@@ -206,7 +208,7 @@ class TableReport extends React.Component{
 						notice: {type: 'error', message: obj.message},
 						processing: false
 						});
-				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
+				//ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
 			}
 			
 			if(obj.status === 'info' && task === 'download_report' ){
@@ -221,12 +223,12 @@ class TableReport extends React.Component{
 							},
 						processing: false
 						});
-				shell.showItemInFolder(obj.message);
-				ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
+				btslite_api.shellShowItemInFolder(obj.message);
+				//ipcRenderer.removeListener("parse-cm-request", this.downloadReportListener);
 			}
 		}
 		
-		ipcRenderer.on('parse-cm-request', this.downloadReportListener);
+		//ipcRenderer.on('parse-cm-request', this.downloadReportListener);
     }
     
     /*

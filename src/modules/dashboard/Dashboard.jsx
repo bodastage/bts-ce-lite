@@ -7,10 +7,11 @@ import { checkIfJavaIsInstalled, clearNotice } from './dashboard-actions';
 import { Toaster, ToasterPosition, Intent, OverlayToaster } from "@blueprintjs/core";
 
 //const { shell } = window.require('electron').remote;
-const { shell } = window.require('electron');
+// const { shell } = window.require('electron'); 
+//btslite_api.shellOpenPath
 
-const log = window.require('electron-log');
-const fs = window.require('fs');
+//const log = window.require('electron-log');
+//const fs = window.require('fs');
 
 class Dashboard extends React.Component {
     
@@ -55,17 +56,19 @@ class Dashboard extends React.Component {
 	}
 	
 	showLogFile = (e) => {
-		const logPath = log.transports.file.findLogPath()
-		if (!fs.existsSync(logPath)) {
-			log.warn(`[dashboard] ${logPath} does not exist.`)
-			this.toaster.show({
-                icon: "info-sign",
-                intent: Intent.WARNING,
-                message: `${logPath} does not exist.`,
-			});
-			return;
-		}
-		shell.openPath(logPath)
+		// const logPath = log.transports.file.findLogPath()
+		// if (!fs.existsSync(logPath)) {
+		// 	log.warn(`[dashboard] ${logPath} does not exist.`)
+		// 	this.toaster.show({
+        //         icon: "info-sign",
+        //         intent: Intent.WARNING,
+        //         message: `${logPath} does not exist.`,
+		// 	});
+		// 	return;
+		// }
+		//shell.openPath(logPath)
+        btslite_api.shellOpenPath(logPath);
+
 	}
 	
 	/**

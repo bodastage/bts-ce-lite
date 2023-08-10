@@ -1,0 +1,32 @@
+{
+  "development": {
+    "dialect": "sqlite",
+    "storage": "boda-lite.sqlite.dev",
+    "host": "0.0.0.0",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
+  },
+  "test": {
+    "dialect": "sqlite",
+    "storage": "boda-lite.sqlite.test",
+    "host": "0.0.0.0",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
+  },
+  "production": {
+    "dialect": "sqlite",
+    "storage": "boda-lite.sqlite",
+    "host": "0.0.0.0",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
+  }
+}

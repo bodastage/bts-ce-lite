@@ -1,5 +1,5 @@
 import { runQuery } from '../reports/DBQueryHelper.js';
-const log = window.require('electron-log');
+// const log = window.require('electron-log');
 
 //Start fetching cells 
 export const GIS_FETCH_CELLS = 'GIS_FETCH_CELLS';
@@ -138,7 +138,7 @@ export function gisGetCells(){
 		
 		const results = await runQuery('SELECT * FROM plan_network.vw_cells');
 		if(typeof results.error !== 'undefined'){
-			log.error(results.error);
+			btslite_api.addToLog(results.error, 'error');
 			return dispatch(gisShowError("Failed to retreive cells"));
 		}
 		
@@ -159,7 +159,7 @@ export function gisGetNbrs(svrCI){
 		
 		const results = await runQuery(`SELECT svr_ci, nbr_ci FROM plan_network.relations r WHERE svr_ci = ${svrCI}`);
 		if(typeof results.error !== 'undefined'){
-			log.error(results.error);
+			btslite_api.addToLog(results.error, 'error');
 			return dispatch(gisShowError("Failed to retreive neighbours"));
 		}
 		
@@ -173,7 +173,7 @@ export function gisFetchPlanFrequencies(){
 		
 		const results = await runQuery(`SELECT  DISTINCT  frequency  FROM plan_network.vw_cells`);
 		if(typeof results.error !== 'undefined'){
-			log.error(results.error);
+			btslite_api.addToLog(results.error, 'error');
 			return dispatch(gisShowError("Failed to retreive neighbours"));
 		}
 		

@@ -2,8 +2,6 @@ import React from 'react'
 import { Intent, Button, Classes } from "@blueprintjs/core";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const log = window.require('electron-log');
-
 export default  class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -16,7 +14,7 @@ export default  class ErrorBoundary extends React.Component {
   }
 
 	componentDidCatch(error, info) {
-		log.info(error.toString());
+		btslite_api.addToLog(error.toString());
 	}
   
 	resetState = () => { 

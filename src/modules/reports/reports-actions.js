@@ -1,5 +1,5 @@
 import { runQuery, getQueryFieldsInfo } from './DBQueryHelper.js';
-const log = window.require('electron-log');
+// const log = window.require('electron-log');
 
 
 export const REQUEST_REPORTS = 'REQUEST_REPORTS';
@@ -192,7 +192,7 @@ export function getReportInfo(reportId){
 		const results = await runQuery(query);
 
 		if(typeof results.error !== 'undefined'){
-			log.error(results.error);
+			btslite_api.addToLog(results.error, 'error');
 			dispatch(notifyReportRequestError(results.error));
 			return;
 		}
@@ -233,7 +233,7 @@ export function getReportFields(reportId){
 		const results2 = await runQuery(`SELECT * FROM (${query2}) t LIMIT 0`);
 		//@TODO: Check for connection error and 
 		if(typeof results2.error !== 'undefined'){
-			log.error(results2.error);
+			btslite_api.addToLog(results2.error, 'error');
 			return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while getting reports fileds. See log for detials."));
 		}
 		
@@ -260,7 +260,8 @@ export function getReports(){
 			
 		const results = await runQuery(query);
 		if(typeof results.error !== 'undefined'){
-			log.error(results.error);
+			btslite_api.addToLog(results.error, 'error');
+
 			return dispatch(notifyReportRequestError(results.error));
 		}
 		
@@ -405,7 +406,7 @@ export  function saveCategory(catName, catNotes, catId){
 					id = ${catId}`;
 				const result = await runQuery(qry);
 				if(typeof result.error !== 'undefined'){
-					log.error(result.error)
+					btslite_api.addToLog(results.error, 'error');
 					return dispatch(notifyReportCategoryCreationError('Error updating report. Check log for details'));
 				}
 
@@ -419,7 +420,7 @@ export  function saveCategory(catName, catNotes, catId){
 
 				const result = await runQuery(qry);
 				if(typeof result.error !== 'undefined'){
-					log.error(result.error)
+					btslite_api.addToLog(results.error, 'error');
 					return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
 				}
 			}			
@@ -463,7 +464,7 @@ export function removeCategory(catId){
 			const results = await runQuery(query);
 			
 			if(typeof results.error !== 'undefined'){
-				log.error(results.error);
+				btslite_api.addToLog(results.error, 'error');
 				return dispatch(notifyReportCategoryCreationError("Error while deleting category."));
 			}
 			
@@ -526,7 +527,7 @@ export function getCategory(categoryId){
 		//@TODO: Check result status
 		
 		if(typeof results.error !== 'undefined'){
-			log.error(results.error);
+			btslite_api.addToLog(results.error, 'error');
 			return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
 		}
 		
@@ -581,7 +582,7 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
 				const results = await runQuery(query);
 
 				if(typeof results.error !== 'undefined'){
-					log.error(results.error)
+					btslite_api.addToLog(results.error, 'error');
 					return dispatch(createReportPreviewError('Error updating report. Check log for details'));
 				}
 				
@@ -615,7 +616,7 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
 				console.log(results);
 
 				if(typeof results.error !== 'undefined'){
-					log.error(results.error)
+					btslite_api.addToLog(results.error, 'error');
 					return dispatch(createReportPreviewError('Error updating report. Check log for details'));
 				}
 	
@@ -723,7 +724,7 @@ export function deleteReport(reportId){
 			const results = await runQuery(query);
 			
 			if(typeof results.error !== 'undefined'){
-				log.error(results.error);
+				btslite_api.addToLog(results.error, error)
 				dispatch(notifyReportRequestError(results.error));
 				return;
 			}
@@ -774,7 +775,7 @@ export function getGraphData(reportId){
 		const rptQry = qResults.rows[0].query;
 		
 		if(typeof qResults.error !== 'undefined'){
-			log.error(qResults.error);
+			btslite_api.addToLog(qResults.error, error)
 			
 			//@TODO: Confirm that this is not the correct notify action
 			dispatch(notifyReportRequestError(qResults.error));
@@ -785,7 +786,7 @@ export function getGraphData(reportId){
 			const results = await runQuery(rptQry);
 			return dispatch(receiveGraphData(reportId, results.rows));
 		}catch(err2){
-			log.error(err2);
+			btslite_api.addToLog(err2, error)
 			//@TODO: Confirm that this is not the correct notify action
 			return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured. See log for detials."));
 		}
@@ -849,7 +850,7 @@ export function saveCompositeReport(reportId, name, catId, options){
 				const results = await runQuery(qry);
 
 				if(typeof results.error !== 'undefined'){
-					log.error(results.error);
+					btslite_api.addToLog(results.error, 'error');
 					//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
 					return;
 				}
@@ -879,7 +880,7 @@ export function saveCompositeReport(reportId, name, catId, options){
 				
 				const results = await runQuery(qry);
 				if(typeof results.error !== 'undefined'){
-					log.error(results.error);
+					btslite_api.addToLog(results.error, 'error');
 					//return dispatch(createReportPreviewError('Error updating report. Check log for details'));
 					return;
 				}

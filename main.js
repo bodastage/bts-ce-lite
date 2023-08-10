@@ -5,11 +5,6 @@ const path = require('path');
 const url = require('url');
 const fs = require('fs');
 
-//const { sequelize } = require('./db/models/index.js');
-const { sequelize, Sequelize,  } = require(path.join(__dirname, 'db', 'models', 'index.js'));
-
-console.log(sequelize.models.users);
-
 // in the main process:
 require('@electron/remote/main').initialize()
 
@@ -31,9 +26,11 @@ function createParseCMBgWindow() {
 			height: 600,
 			webPreferences: {
 				nodeIntegration: true,
-				contextIsolation: false,
+				contextIsolation: true,
 				webSecurity: false,
-			}
+				preload: path.join(__dirname, 'preload.js')
+			},
+
 		});
 		result.webContents.openDevTools();
 	} else {
@@ -41,8 +38,9 @@ function createParseCMBgWindow() {
 			"show": false,
 			webPreferences: {
 				nodeIntegration: true,
-				contextIsolation: false,
+				contextIsolation: true,
 				webSecurity: false,
+				preload: path.join(__dirname, 'preload.js')
 			}
 		});
 	}
@@ -62,8 +60,9 @@ function createWindow() {
 		height: 600,
 		webPreferences: {
 			nodeIntegration: true,
-			contextIsolation: false,
+			contextIsolation: true,
 			webSecurity: false,
+			preload: path.join(__dirname, 'preload.js')
 		}
 	})
 
@@ -107,6 +106,11 @@ function createWindow() {
 
 
 app.on('ready', () => {
+
+	//initialte ipc listeners
+	require(path.join(__dirname, 'backend', 'ipc', 'init.js'));
+
+
 	//Launch main renderer process
 	createWindow()
 

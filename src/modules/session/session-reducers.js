@@ -1,7 +1,16 @@
-import { LOGIN, LOGOUT, AUTHENTICATE, AUTHENTICATION_FAILED, CLEAR_AUTH_ERROR,
-    CLEAR_OLD_SESSION, WAIT_FOR_DATABASE_SETUP, CONFIRM_DB_READY, CLEAR_NOTICES,
-	RESET_STATE} 
-    from './session-actions';
+import { 
+    LOGIN, 
+    LOGOUT, 
+    AUTHENTICATE, 
+    AUTHENTICATION_FAILED, 
+    CLEAR_AUTH_ERROR,
+    CLEAR_OLD_SESSION, 
+    WAIT_FOR_DATABASE_SETUP, 
+    CONFIRM_DB_READY, 
+    CLEAR_NOTICES,
+	RESET_STATE,
+    SET_UPDATING
+} from './session-actions';
 import VERSION from '../../version';
 
 let initialState = {
@@ -9,7 +18,8 @@ let initialState = {
     authenticating: false,
     loginError: null,
     waitingForDB: false,
-	version: VERSION
+	version: VERSION,
+    updating: false
 };
 function session(state = initialState, action) {
     switch (action.type) {
@@ -76,6 +86,11 @@ function session(state = initialState, action) {
 			}
 		case RESET_STATE:
 			return initialState;
+        case SET_UPDATING:
+            return {
+                ...state,
+                updating: action.status
+            }
         default:
             return state;
     }

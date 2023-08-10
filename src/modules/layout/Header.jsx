@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import logo from '../../images/logo-no-text.svg';
 import { addTab } from '../layout/uilayout-actions';
 import { setSidePanel } from '../layout/uilayout-actions';
+import { setUpdate } from '../session/session-actions';
 
 class Header extends React.Component {
     constructor(props){
@@ -19,6 +20,11 @@ class Header extends React.Component {
         this.props.dispatch({
             type: "LOGOUT"
         });
+    }
+
+    updateApp = (e) => {
+        e.preventDefault();
+        this.dispatch(setUpdate(true));
     }
     
     setSidePanel(){
@@ -50,6 +56,7 @@ class Header extends React.Component {
                     component: 'Help', title: 'Help'})}><FontAwesomeIcon icon="question-circle" className="mb-1"/> Help</a>
                 <a className="p-2 text-secondary" href="/#" onClick={this.addTab({
                     component: 'UserProfile', title: 'Profile'})}><FontAwesomeIcon icon="user" className="mb-1"/> {this.props.userDetails.first_name}</a>
+                <a className="p-2 text-secondary" href="/#" onClick={this.updateApp}><FontAwesomeIcon icon="wrench" className="mb-1"/> Update</a>
                 <a className="p-2 text-secondary" href="/#"><FontAwesomeIcon icon="power-off" className="mb-1" onClick={this.logout}/></a>
                 
               </nav>

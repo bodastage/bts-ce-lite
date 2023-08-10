@@ -1,8 +1,8 @@
-import { SQLITE3_DB_PATH } from "../session/db-settings";
+//import { SQLITE3_DB_PATH } from "../session/db-settings";
 
-const sqlite3 = window.require('sqlite3').verbose()
-const log = window.require('electron-log');
-const { Client } = window.require('pg');
+//const sqlite3 = window.require('sqlite3').verbose()
+// const log = window.require('electron-log');
+//const { Client } = window.require('pg');
 
 
 /**
@@ -13,22 +13,27 @@ export async function getSQLiteDBConnectionDetails(dbName){
 		let details = await
 		await new Promise((resolve, reject) => {
 			
-			let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			db.all("SELECT * FROM databases WHERE name = ?", [dbName] , (err, row) => {
-				if(err !== null){
-					log.error(row);
-					//@TODO: Show table data log error
-					return reject(err);
+			row = btslite_api.dbQuery("SELECT * FROM databases WHERE name = ?", [dbName]);
+			console.log(row);
+
+			resolve(row);
+
+			// let db = new sqlite3.Database(SQLITE3_DB_PATH);
+			// db.all("SELECT * FROM databases WHERE name = ?", [dbName] , (err, row) => {
+			// 	if(err !== null){
+			// 		log.error(row);
+			// 		//@TODO: Show table data log error
+			// 		return reject(err);
 					
-				}
+			// 	}
 				
-				return resolve({
-					hostname : row[0].hostname,
-					port : row[0].port,
-					username : row[0].username,
-					password : row[0].password
-				});
-			});
+			// 	return resolve({
+			// 		hostname : row[0].hostname,
+			// 		port : row[0].port,
+			// 		username : row[0].username,
+			// 		password : row[0].password
+			// 	});
+			// });
 			
 		});
 
@@ -37,22 +42,22 @@ export async function getSQLiteDBConnectionDetails(dbName){
 
 
 export async function getSQLiteReportInfo(reportId){
-		let reportInfo = await
-		new Promise((resolve, reject) => {
+		// let reportInfo = await
+		// new Promise((resolve, reject) => {
 			
-			let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			db.all("SELECT * FROM reports r WHERE rowid = ?",[reportId], (rErr, rRows) => {
-				if(rErr !== null){
-					log.error(rRows);
-					//@TODO: Show table data log error
-					reject(rErr);
+		// 	let db = new sqlite3.Database(SQLITE3_DB_PATH);
+		// 	db.all("SELECT * FROM reports r WHERE rowid = ?",[reportId], (rErr, rRows) => {
+		// 		if(rErr !== null){
+		// 			log.error(rRows);
+		// 			//@TODO: Show table data log error
+		// 			reject(rErr);
 					
-				}
+		// 		}
 				
-				resolve(rRows[0]);
-			});
+		// 		resolve(rRows[0]);
+		// 	});
 			
-		});
+		// });
 
 		return reportInfo;
 }
@@ -71,39 +76,36 @@ export async function runQuery(query){
 	const port = dbConDetails.port;
 	const username = dbConDetails.username;
 	const password = dbConDetails.password;
+
+	let results = [];
 	
-	const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
-	const client = new Client({
-		connectionString: connectionString,
-	});
+	// const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
+	// const client = new Client({
+	// 	connectionString: connectionString,
+	// });
 		
-	client.connect((err) => {
-		if(err){
-			log.error(err);
-			client.end();
-			return err;
-		}
-	});
-	
-	//console.log(client);
-	//if(client.processID === null){
-	//	log.error('Failed to connect to database');
-	//	return {error: 'Failed to connect to database'};
-	//}
+	// client.connect((err) => {
+	// 	if(err){
+	// 		log.error(err);
+	// 		client.end();
+	// 		return err;
+	// 	}
+	// });
+
 			
-	let results = await
-	new Promise((resolve, reject) => {
-		client.query(query)
-		.then( result => {
-			return resolve(result);
-		} )
-		.catch(e => {
-			//@TODO: Error notice
-			reject(e);
+	// let results = await
+	// new Promise((resolve, reject) => {
+	// 	client.query(query)
+	// 	.then( result => {
+	// 		return resolve(result);
+	// 	} )
+	// 	.catch(e => {
+	// 		//@TODO: Error notice
+	// 		reject(e);
 			
-		})
-		.then(() => client.end());
-	});	
+	// 	})
+	// 	.then(() => client.end());
+	// });	
 	
 	return results;
 	

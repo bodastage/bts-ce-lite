@@ -5,9 +5,9 @@ import { connect } from 'react-redux';
 import { addTab, setSidePanel } from '../layout/uilayout-actions';
 import { Intent } from "@blueprintjs/core";
 
-const log = window.require('electron-log');
-const { shell } = window.require('electron');
-const fs = window.require('fs');
+// const log = window.require('electron-log');
+// const { shell } = window.require('electron');
+// const fs = window.require('fs');
 
 class DashboardSidePanel extends React.Component {
     constructor(props) {
@@ -21,17 +21,19 @@ class DashboardSidePanel extends React.Component {
     showLogFile = (e) => {
         e.preventDefault();
 
-        const logPath = log.transports.file.findLogPath()
-        if (!fs.existsSync(logPath)) {
-            log.warn(`[dashboard] ${logPath} does not exist.`)
-            this.toaster.show({
-                icon: "info-sign",
-                intent: Intent.WARNING,
-                message: `${logPath} does not exist.`,
-            });
-            return;
-        }
-        shell.openPath(logPath)
+        // const logPath = log.transports.file.findLogPath()
+        // if (!fs.existsSync(logPath)) {
+        //     log.warn(`[dashboard] ${logPath} does not exist.`)
+        //     this.toaster.show({
+        //         icon: "info-sign",
+        //         intent: Intent.WARNING,
+        //         message: `${logPath} does not exist.`,
+        //     });
+        //     return;
+        // }
+        // shell.openPath(logPath)
+        btslite_api.openLogFile()
+
     }
 
     addTab = (options) => (e) => {
