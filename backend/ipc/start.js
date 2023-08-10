@@ -9,7 +9,7 @@ const start = async (actions = []) => {
         ipcMain.handle(`${action.name}`, async (event, arg) => {
             // Test args here:
             // console.log('arg here', arg) // prints arg
-            const result = await action.handler.method(arg)
+            const result = await action.handler(arg)
             // event.returnValue -> synchronous reply
             // event.reply -> async reply
             return event.reply = result

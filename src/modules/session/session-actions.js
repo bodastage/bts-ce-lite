@@ -192,6 +192,10 @@ export function checkDBSetupStatus(){
 export function attemptAuthentication(loginDetails){
     return (dispatch, getState) => {
         dispatch(authenticateUser(loginDetails));
+
+		const { username, password } = loginDetails;
+
+		const res = btslite_api.dbQuery(`SELECT * FROM users WHERE username = "${username}" AND password = "${password}"`);
 		
 		//check if user exists 
 		// if error , mark login as failed
@@ -225,7 +229,7 @@ export function attemptAuthentication(loginDetails){
 export function handleMigration(){
 	return async (dispatch, getState) => {
 		//Check if the database is ready
-		await migrateUp();
+		await btslite_api.migrateUp();
 
 		dispatch(setUpdating(false));
 	}

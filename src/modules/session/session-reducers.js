@@ -19,7 +19,7 @@ let initialState = {
     loginError: null,
     waitingForDB: false,
 	version: VERSION,
-    updating: false
+    updating: true
 };
 function session(state = initialState, action) {
     switch (action.type) {

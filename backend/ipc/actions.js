@@ -1,12 +1,16 @@
 const { shell, app } = require('electron');
+const db = require('../libs/db');
 
 const ACTIONS = [
 
     //generic database query
     {
         name: 'db.query',
-        handler: (args) => {
-            return 'db.query';
+        handler: async (args) => {
+            console.log('db.query:', args);
+            const results = await db.runQuery(args);
+            console.log('lllllllllllllllll:', results);
+            return results;
         }
     },
 
@@ -14,6 +18,7 @@ const ACTIONS = [
         name: 'db.migrate-up',
         handler: (args) => {
             console.log('db.migrate-up');
+            return db.migrateUp();
             return true;
         }
     },

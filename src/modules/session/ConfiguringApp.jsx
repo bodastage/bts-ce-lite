@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { handleMigration } from './session-actions';
+import { Spinner } from '@blueprintjs/core';
 
 const ConfiguringApp = (props) => {
     const dispatch = useDispatch();
@@ -10,8 +11,9 @@ const ConfiguringApp = (props) => {
         dispatch(handleMigration());
     });
 
-    return (<div>
+    return (<div >
         <h1>Configuring App</h1>
+        <Spinner size={Spinner.SIZE_LARGE} title='Configuring...' />
     </div>);
 }
 

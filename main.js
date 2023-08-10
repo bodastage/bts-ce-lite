@@ -12,46 +12,6 @@ require('@electron/remote/main').initialize()
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-
-//Create parse cm background renderer
-function createParseCMBgWindow() {
-	//use is 
-	result = null
-
-	//Show hidden window when in dev mode
-	if (typeof process.env.ELECTRON_START_URL !== 'undefined') {
-		result = new BrowserWindow({
-			"show": true,
-			width: 900,
-			height: 600,
-			webPreferences: {
-				nodeIntegration: true,
-				contextIsolation: true,
-				webSecurity: false,
-				preload: path.join(__dirname, 'preload.js')
-			},
-
-		});
-		result.webContents.openDevTools();
-	} else {
-		result = new BrowserWindow({
-			"show": false,
-			webPreferences: {
-				nodeIntegration: true,
-				contextIsolation: true,
-				webSecurity: false,
-				preload: path.join(__dirname, 'preload.js')
-			}
-		});
-	}
-	//
-	result.loadURL('file://' + __dirname + '/../background/background-process.html')
-	result.on('closed', () => {
-		console.log('background window closed')
-	});
-	return result
-}
-
 //Create application window
 function createWindow() {
 	// Create the browser window.
