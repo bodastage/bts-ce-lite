@@ -12,7 +12,7 @@ export default class Help extends React.Component {
 	handleOnClick = (event) => {
 		event.preventDefault();
 		let lnk = event.target.href;
-        btslite_api.shellOpenPath(lnk);
+        btslite_api.openLink(lnk);
 	}
 	
     render(){

@@ -27,8 +27,14 @@ contextBridge.exposeInMainWorld('btslite_api', {
     },
 
     //parse cm data 
-    async parseCMData(config) {
+    async parseCmData(config) {
         const result = await ipcRenderer.invoke('cm.parse-cm-data', config);
+        return result;
+    },
+
+    //parse cm data 
+    async loadCmData(config) {
+        const result = await ipcRenderer.invoke('cm.load-cm-data', config);
         return result;
     },
 
@@ -51,6 +57,21 @@ contextBridge.exposeInMainWorld('btslite_api', {
 
     async openPath(path){
         const result = await ipcRenderer.invoke('shell.open-path', path);
+        return result;
+    },
+
+    async openDirectory(path){
+        const result = await ipcRenderer.invoke('dialog.open-directory', path);
+        return result;
+    },
+
+    async openLogFile(){
+        const result = await ipcRenderer.invoke('log.open-file', path);
+        return result;
+    },
+
+    async openLink(path){
+        const result = await ipcRenderer.invoke('shell.open-link', path);
         return result;
     },
     async gisUploadFile(filename){

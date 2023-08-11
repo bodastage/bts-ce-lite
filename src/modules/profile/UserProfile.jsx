@@ -16,7 +16,7 @@ class UserProfile extends React.Component{
         this.dismissError = this.dismissError.bind(this);
         
         this.state = {
-            email: this.props.userDetails.username,
+            email: this.props.userDetails.email,
             first_name: this.props.userDetails.first_name,
             last_name: this.props.userDetails.last_name,
             other_names: this.props.userDetails.other_names,

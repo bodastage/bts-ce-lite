@@ -1,5 +1,9 @@
-const { shell, app } = require('electron');
+const { shell, app, dialog } = require('electron');
 const db = require('../libs/db');
+const path = require('path');
+const excel = require('../libs/excel');
+const workerHelper = require('../workers/worker-helper');
+  
 
 const ACTIONS = [
 
@@ -23,11 +27,29 @@ const ACTIONS = [
         }
     },
     {
-        name: 'shell.open_path',
+        name: 'shell.open-path',
         handler: (args) => {
-            console.log('shell.open_path');
-            shell.openPath(args.path);
+            console.log('shell.open-path', args);
+            shell.openPath(args);
             return true;
+        }
+    },
+    {
+        name: 'shell.open-link',
+        handler: (args) => {
+            console.log('shell.open-link', args);
+            shell.openExternal(args);
+            return true;
+        }
+    },
+    {
+        name: 'dialog.open-directory',
+        handler: (args) => {
+            console.log('dialog.open-directory', args);
+            var path = dialog.showOpenDialog({
+                properties: ['openDirectory']
+            });
+            return path;
         }
     },
     {
@@ -38,7 +60,22 @@ const ACTIONS = [
         }
     },
     {
+        name: 'log.open-file',
+        handler: (args) => {
+            console.log('log.add');
+            return true;
+        }
+    },
+    {
         name: 'cm.parse-cm-data',
+        handler: (args) => {
+            //@TODO: use a worker thread to parse cm data
+            console.log('cm.parse-cm-data');
+            return true;
+        }
+    },
+    {
+        name: 'cm.load-cm-data',
         handler: (args) => {
             //@TODO: use a worker thread to parse cm data
             console.log('cm.parse-cm-data');
@@ -107,9 +144,21 @@ const ACTIONS = [
     },
     {
         name: 'utilities.convert-csv-to-excel',
-        handler: (args) => {
+        handler: async (args) => {
             console.log('utilities.convert-csv-to-excel', args);
-            return true;
+
+            const worker_script = path.join(__dirname, '..', 'workers/csv-to-excel.js');
+            result = await workerHelper.runWorkerScript(worker_script, {
+                ...args,
+                outputFolder: args.outputFolder || app.getPath('downloads')
+            });
+
+            console.log("result: ++++>", result);
+            return {
+                status: 'success',
+                message: 'File converted successfully',
+                data: result
+            };
         }
     },
     {

@@ -88,21 +88,7 @@ export default class CSVToExcelCombiner extends React.Component {
 	
 	handleFormatChange = (e) => this.setState({excelFormat: e.target.value});
 	
-	combineCSVFiles = () => {
-		//Confirm that the input folder exists
-		// if( !fs.existsSync(this.state.inputFolder)){
-		// 	log.info(`Input folder: ${this.state.inputFolder} does not exist`);
-		// 	this.setState(
-		// 		{
-		// 			notice: {
-		// 				type: 'danger', 
-		// 				message: `Input folder: ${this.state.inputFolder} does not exist`
-		// 			},
-		// 			processing: false
-		// 		}
-		// 	);
-		// 	return;
-		// }
+	combineCSVFiles = async () => {
 		
 		let payload = {
 			csvDirectory: this.state.inputFolder,
@@ -115,43 +101,10 @@ export default class CSVToExcelCombiner extends React.Component {
 		this.setState({processing: true });
 		
 		// ipcRenderer.send('parse-cm-request', 'combine_csv_to_excel', JSON.stringify(payload));
-		btslite_api.convertCSVtoExcel(payload);
+		const result = await btslite_api.convertCsvToExcel(payload);
+		console.log(result);
 		
-		this.combinerListener = (event, task, args) => {
-			const obj = JSON.parse(args)
-			if(task !== 'combine_csv_to_excel') return;
-			
-			//error
-			if(obj.status === 'error' && task === 'combine_csv_to_excel' ){
-				this.setState({
-						notice: {type: 'danger', message: obj.message},
-						processing: false
-						});
-				ipcRenderer.removeListener("parse-cm-request", this.combinerListener);
-			}
-			
-			//info
-			if(obj.status === 'info' && task === 'combine_csv_to_excel' ){
-				this.setNotice('info', obj.message)
-			}
-			
-			if(obj.status === "success" && task === 'combine_csv_to_excel' ){
-				this.setState({
-						notice: {
-							type: 'success', 
-						message: ` Processed file generated at: ${obj.message}`
-							},
-						processing: false
-						});
 
-				shell.showItemInFolder(obj.message);
-				// ipcRenderer.removeListener("parse-cm-request", this.combinerListener);
-			}
-			
-		}
-		// ipcRenderer.on('parse-cm-request', this.combinerListener);
-		
-		
 	}
     render(){
 		let inputFolderEllipsis = this.state.inputFolder === 'Choose folder...' ? "" : "file-text-dir-rtl";
@@ -182,7 +135,13 @@ export default class CSVToExcelCombiner extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
 						<div className="col-sm-8">
-						  <FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFolder} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
+						  <FileInput 
+						  	className={"form-control " + inputFolderEllipsis} 
+							text={this.state.inputFolder} 
+							onInputChange={this.onInputFileChange} 
+							inputProps={{webkitdirectory: "", mozdirectoryt:"", odirectory:"", directory:"", msdirectory:""}} 
+							disabled={this.state.processing} 
+							/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.showInputFolder()} disabled={this.state.processing}/>

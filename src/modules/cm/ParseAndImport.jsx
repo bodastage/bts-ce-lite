@@ -246,7 +246,7 @@ class ParseAndImport extends React.Component {
 			
 			if(obj.status === 'success' && task === 'parse_data' && !this.state.loadIntoDB){
 				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
-				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
+				// ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
 				this.processFilesListener = null;
 			}
 			
@@ -260,7 +260,8 @@ class ParseAndImport extends React.Component {
 					"csvFolder": this.state.outputFolderText,
 					"truncateTables": this.state.clearTables
 				}
-				ipcRenderer.send('parse-cm-request', 'load_data', JSON.stringify(loadPayload))				
+				//ipcRenderer.send('parse-cm-request', 'load_data', JSON.stringify(loadPayload))	
+				btslite_api.cmloadData(loadPayload);			
 			}
 			
 			if(obj.status === 'success' && task === 'load_data' && this.state.loadIntoDB){
@@ -284,7 +285,7 @@ class ParseAndImport extends React.Component {
 
 		}
 		
-		ipcRenderer.on('parse-cm-request', this.processFilesListener);
+		//ipcRenderer.on('parse-cm-request', this.processFilesListener);
 		return;
 	}
 	
