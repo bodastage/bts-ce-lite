@@ -1,6 +1,7 @@
+const path = require('path');
 const { shell, app, dialog } = require('electron');
 const db = require('../libs/db');
-const path = require('path');
+const reports = require('../libs/reports');
 const excel = require('../libs/excel');
 const workerHelper = require('../workers/worker-helper');
   
@@ -13,7 +14,6 @@ const ACTIONS = [
         handler: async (args) => {
             console.log('db.query:', args);
             const results = await db.runQuery(args);
-            console.log('lllllllllllllllll:', results);
             return results;
         }
     },
@@ -23,7 +23,28 @@ const ACTIONS = [
         handler: (args) => {
             console.log('db.migrate-up');
             return db.migrateUp();
-            return true;
+        }
+    },
+
+    {
+        name: 'reports.create-category',
+        handler: (args) => {
+            console.log('reports.create-category');
+            return reports.createCategory(args);
+        }
+    },
+    {
+        name: 'reports.create-report',
+        handler: (args) => {
+            console.log('reports.create-report');
+            return reports.createReport(args);
+        }
+    },
+    {
+        name: 'reports.update-report',
+        handler: (args) => {
+            console.log('reports.update-report');
+            return reports.updateReport(args);
         }
     },
     {
@@ -146,19 +167,14 @@ const ACTIONS = [
         name: 'utilities.convert-csv-to-excel',
         handler: async (args) => {
             console.log('utilities.convert-csv-to-excel', args);
+                const worker_script = path.join(__dirname, '..', 'workers/csv-to-excel.js');
+                result = await workerHelper.runWorkerScript(worker_script, {
+                    ...args,
+                    outputFolder: '/Users/ssebaggala/Development/BodastageGithub/bts-ce-lite' //args.outputFolder || app.getPath('downloads')
+                });
 
-            const worker_script = path.join(__dirname, '..', 'workers/csv-to-excel.js');
-            result = await workerHelper.runWorkerScript(worker_script, {
-                ...args,
-                outputFolder: args.outputFolder || app.getPath('downloads')
-            });
-
-            console.log("result: ++++>", result);
-            return {
-                status: 'success',
-                message: 'File converted successfully',
-                data: result
-            };
+                return result;
+            
         }
     },
     {
@@ -178,6 +194,13 @@ const ACTIONS = [
         name: 'log.open-log-file',
         handler: (args) => {
             console.log('log.open-log-file', args);
+            return true;
+        }
+    },
+    {
+        name: 'baseline.download-ref',
+        handler: (args) => {
+            console.log('baseline.download-ref', args);
             return true;
         }
     }

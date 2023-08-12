@@ -397,7 +397,7 @@ export default class Baseline extends React.Component {
 	* Download baseline reference
 	*
 	*/
-	downloadBaselineReference = () => {
+	downloadBaselineReference = async () => {
 
 		let payload = {
 			"fileName": "baseline_reference",
@@ -408,42 +408,10 @@ export default class Baseline extends React.Component {
 		//Set processing to true 
 		this.setState({processing: true });
 		
-		ipcRenderer.send('parse-cm-request', 'download_baseline_reference', JSON.stringify(payload));
-		
-		this.baselineRefDownloadListener = (event, task, args) => {
-			const obj = JSON.parse(args)
-			if(task !== 'download_baseline_reference') return;
-			
-			//error
-			if(obj.status === 'error' && task === 'download_baseline_reference' ){
-				this.setState({
-						notice: {type: 'danger', message: obj.message},
-						processing: false
-						});
-				ipcRenderer.removeListener("parse-cm-request", this.baselineRefDownloadListener);
-			}
-			
-			//info
-			if(obj.status === 'info' && task === 'download_baseline_reference' ){
-				this.setNotice('info', obj.message)
-			}
-			
-			if(obj.status === "success" && task === 'download_baseline_reference' ){
-				this.setState({
-						notice: {
-							type: 'success', 
-							message: obj.message
-							},
-						processing: false
-						});
-				const excelFile = obj.message;
-				btslite_api.shellShowItemInFolder(excelFile);
-				//ipcRenderer.removeListener("parse-cm-request", this.baselineRefDownloadListener);
-			}
-			
-		}
+		//ipcRenderer.send('parse-cm-request', 'download_baseline_reference', JSON.stringify(payload));
+		const result = await btslite_api.downloadBaseLineRef(payload);
+		//btslite_api.shellShowItemInFolder(excelFile);
 
-		ipcRenderer.on('parse-cm-request', this.baselineRefDownloadListener);
 	}
 	
 	addToBaselineReference = () => {

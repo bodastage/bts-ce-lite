@@ -10,7 +10,10 @@
 ## Migrations 
 ```
 #create model
-npx sequelize-cli model:generate --name eri_cm_cnai_UTRAN_NREL --attributes load_datetime:date,data:string
+npx sequelize-cli model:generate --name reports_categories --attributes name:string,parent_id:integer,notes:text,in_built:boolean,created_by:integer,updated_by:integer,created_at:date,updated_at:date
+
+npx sequelize-cli model:generate --name reports --attributes name:string,parent_id:integer,notes:text,query:text,options:text,type:string,category_id:integer,in_built:boolean,created_by:integer,updated_by:integer,created_at:date,updated_at:date
+
 
 #running migrations
 npx sequelize-cli db:migrate

@@ -28,6 +28,11 @@ function runWorkerScript(script_file, workerData) {
 };
 
 
+
+/**
+ * Return worker results to main thread
+ * @param {'*'} results 
+ */
 function sendWorkerResults(results) {
     parentPort.postMessage(results);
     //worker.terminate();

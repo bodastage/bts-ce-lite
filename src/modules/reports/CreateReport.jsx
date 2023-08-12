@@ -315,7 +315,6 @@ class CreateReport extends React.Component{
     }
  
 	removeConfigField = (fieldName) => {
-		console.log("fieldName:", fieldName);
 		delete this.tableStyles[fieldName];
 		
 		//Update the currently selected fields in the table configurations
@@ -333,7 +332,6 @@ class CreateReport extends React.Component{
 	* @param integer index the index of the condition in the conditions arrays
 	*/
 	removeFieldCondition = (field, index) => {
-		console.log("field, index:", field, index);
 		this.tableStyles[field].conditions.splice(index, 1)
 		this.setState({changeUIState: this.state.changeUIState + 1});
 	}
@@ -525,11 +523,12 @@ class CreateReport extends React.Component{
 						params.sortModel, params.filterModel, _columnApi.getAllColumns());
 				
 				//Count is the last row
-				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
-				
+                const countResult = await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`);
+                const count = countResult.length === 0 ? 0 : countResult[0].count;
+
 				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
 				
-				params.successCallback(queryResult.rows, count); 
+				params.successCallback(queryResult, count); 
 				
             }
         };
@@ -603,6 +602,7 @@ class CreateReport extends React.Component{
 	updateColumnDefs(){
         this.columnDef = [];
         if( typeof this.props.fields === 'undefined'  ) return;
+
         for(var key in this.props.fields){
             let columnName = this.props.fields[key]
 			
@@ -620,7 +620,6 @@ class CreateReport extends React.Component{
 					
 					const className = generateStyleClass(reportId, columnName, idx);
 					const condExpr = getTableStyleExpression(cond.styleConditions);
-					console.log("condExpr:", condExpr);
 					cellClassRules[className] = condExpr
 				}
 			}
@@ -634,6 +633,7 @@ class CreateReport extends React.Component{
 					cellClassRules: cellClassRules,
 					//valueParser: numberParser
 				 });
+
         }
     }
     
@@ -813,7 +813,6 @@ class CreateReport extends React.Component{
     }
     
 	updateQuery = (qry) => {
-		console.log("qry:", qry);
 		this.aceEditorValue = qry;
 	}
     

@@ -188,7 +188,7 @@ export function receiveReport(reportId, reportInfo){
 export function getReportInfo(reportId){
     return async (dispatch, getState) => {
         dispatch(requestReport(reportId));
-		const query = `SELECT t.* FROM reports.reports t WHERE t.id = ${reportId}`;
+		const query = `SELECT t.* FROM reports t WHERE t.id = ${reportId}`;
 		const results = await runQuery(query);
 
 		if(typeof results.error !== 'undefined'){
@@ -197,7 +197,7 @@ export function getReportInfo(reportId){
 			return;
 		}
 		
-		let reportInfo = results.rows[0]
+		let reportInfo = results[0]
 		dispatch(receiveReport(reportId, reportInfo));
     }
 }
@@ -223,21 +223,23 @@ export function getReportFields(reportId){
         dispatch(requestReportFields(reportId));
 		
 		//@TODO: only select query
-		const query = `SELECT * FROM reports.reports r WHERE r.id =${reportId}`;
+		const query = `SELECT * FROM reports r WHERE r.id =${reportId}`;
 		const results = await runQuery(query);
 		
 		//@TODO: Handle connection error 
 		
-		let query2 = results.rows[0].query;
+		console.log('getReportFields->results', results);
+		let query2 = results[0].query;
 		
-		const results2 = await runQuery(`SELECT * FROM (${query2}) t LIMIT 0`);
+		const results2 = await runQuery(`SELECT * FROM (${query2}) t LIMIT 1`);
 		//@TODO: Check for connection error and 
 		if(typeof results2.error !== 'undefined'){
 			btslite_api.addToLog(results2.error, 'error');
 			return dispatch(notifyReceiveReportFieldsFailure(reportId, "Error occured while getting reports fileds. See log for detials."));
 		}
 		
-		let fields = results2.fields.map((v,i) => v.name );
+		let fields = results2.length === 0 ? [] : Object.keys(results2[0]);
+		console.log('fieldsfieldsfieldsfieldsfields---------------------->: ', fields);
 		return dispatch(receiveReportFields(reportId, fields));
 
     }
@@ -255,8 +257,8 @@ export function getReports(){
 					c.name as cat_name, 
 					r.in_built as r_in_built, 
 					c.in_built as c_in_built 
-				FROM reports.categories c 
-				LEFT join reports.reports r  ON r.category_id = c.id`;
+				FROM reports_categories c 
+				LEFT join reports r  ON r.category_id = c.id`;
 			
 		const results = await runQuery(query);
 		if(typeof results.error !== 'undefined'){
@@ -271,7 +273,9 @@ export function getReports(){
 		let reports = [];
 		let catIndexMap = {}; //Map of category names to ids
 		
-		results.rows.forEach((item, index) => {
+		console.log(results);
+
+		results.forEach((item, index) => {
 			
 			if(typeof catIndexMap[item.cat_name] === 'undefined'){ //this is a new category
 				reports.push({
@@ -400,8 +404,8 @@ export  function saveCategory(catName, catNotes, catId){
 			if(catId !== null){
 
 				let qry = `
-					UPDATE reports.categories t SET 
-					name = $$${catName}$$, notes = $$${catNotes}$$
+					UPDATE reports_categories t SET 
+					name = '${catName}', notes = '${catNotes}'
 					WHERE
 					id = ${catId}`;
 				const result = await runQuery(qry);
@@ -411,14 +415,18 @@ export  function saveCategory(catName, catNotes, catId){
 				}
 
 			}else{
-				let qry = `
-					INSERT INTO reports.categories 
-					 (name, notes, parent_id)
-					 VALUES
-					($$${catName}$$, $$${catNotes}$$,0)
-					`;
 
-				const result = await runQuery(qry);
+				const result = await btslite_api.createCategory({ name: catName, notes: catNotes, parent_id: 0 });
+
+				// let qry = `
+				// 	INSERT INTO reports_categories 
+				// 	 (name, notes, parent_id)
+				// 	 VALUES
+				// 	('${catName}', '${catNotes}',0)
+				// 	`;
+
+				// const result = await runQuery(qry);
+				
 				if(typeof result.error !== 'undefined'){
 					btslite_api.addToLog(results.error, 'error');
 					return dispatch(notifyReportCategoryCreationError('Error inserting category. Check log for details'));
@@ -460,7 +468,7 @@ export function removeCategory(catId){
         dispatch(sendDeleteCategoryRequest());
         		
 		try{
-			const query = `DELETE FROM reports.categories WHERE id = ${catId}`;
+			const query = `DELETE FROM reports_categories WHERE id = ${catId}`;
 			const results = await runQuery(query);
 			
 			if(typeof results.error !== 'undefined'){
@@ -522,7 +530,7 @@ export function getCategory(categoryId){
     return async (dispatch, getState) => {
         dispatch(requestReportCategory(categoryId))
         
-		const query = `SELECT * FROM reports.categories c WHERE id = ${categoryId} `;
+		const query = `SELECT * FROM reports_categories c WHERE id = ${categoryId} `;
 		const results = await runQuery(query);
 		//@TODO: Check result status
 		
@@ -531,7 +539,7 @@ export function getCategory(categoryId){
 			return dispatch(notifyReportCategoryCreationError('Error occured while getting category.'));
 		}
 		
-		return dispatch(confirmReportCategoryReceived(categoryId, results.rows[0]));
+		return dispatch(confirmReportCategoryReceived(categoryId, results[0]));
 
     }
 }
@@ -568,24 +576,7 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
 
 			//Update if reportId not null
 			if(reportId !== null){
-				let query = `
-					UPDATE reports.reports SET 
-					name = $$${name}$$, 
-					notes = $$${notes}$$, 
-					category_id = ${category_id}, 
-					query = $$${qry}$$, 
-					options = $$${JSON.stringify(options)}$$, 
-					type = '${reportType}' 
-					WHERE
-					id = ${reportId}`;
-
-				const results = await runQuery(query);
-
-				if(typeof results.error !== 'undefined'){
-					btslite_api.addToLog(results.error, 'error');
-					return dispatch(createReportPreviewError('Error updating report. Check log for details'));
-				}
-				
+			
 				const data = {
 					name: name,
 					category_id: category_id,
@@ -594,26 +585,32 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
 					options: options,
 					id: reportId
 				}
+
+				const results = await btslite_api.createUpdate(data);
+				console.log('results:',results );
+
+				if(typeof results.error !== 'undefined'){
+					btslite_api.addToLog(results.error, 'error');
+					return dispatch(createReportPreviewError('Error updating report. Check log for details'));
+				}
+
 				//Update the report tree incase the report name changed
 				dispatch(getReports());
 				return dispatch(confirmReportCreation(reportId, data));
 
 			}else{
-			
-				//Insert/create new report
-				let query = `
-					INSERT INTO reports.reports
-					(name, notes, category_id, query, options, type)
-					VALUES
-					($$${name}$$, $$${notes}$$, ${category_id}, $$${qry}$$, $$${JSON.stringify(options)}$$, '${reportType}')
-					RETURNING id;
-				`;
-				
-				console.log(qry);
-				const results = await runQuery(query);
-				
-				console.log("+++++++++++++++++++++++++++++");
-				console.log(results);
+
+				const createStatus = await btslite_api.createReport({
+					name: name,
+					notes: notes,
+					category_id: category_id,
+					query: qry,
+					options: JSON.stringify(options),
+					type: reportType,
+					in_built: 0
+				});
+
+				let results = createStatus.dataValues;
 
 				if(typeof results.error !== 'undefined'){
 					btslite_api.addToLog(results.error, 'error');
@@ -621,7 +618,7 @@ export function createOrUpdateReport({name, category_id, notes, qry, reportId, o
 				}
 	
 					
-				const reportId = results.rows[0].id;
+				const reportId = results.id;
 				const data = {
 					name: name,
 					category_id: category_id,
@@ -677,11 +674,11 @@ export function requestCreateReportFields(name,qry, options){
     return async (dispatch, getState) => {
         dispatch(createReportFields(name,qry, options));
 
-		const fieldsInfo = await getQueryFieldsInfo(qry);
-		if( typeof fieldsInfo.error !== 'undefined'){
-			return dispatch(createReportPreviewError(fieldsInfo.error.toString()));
+		const fields = await getQueryFieldsInfo(qry);
+		console.log('fieldsInfo: ', fields);
+		if( typeof fields.error !== 'undefined'){
+			return dispatch(createReportPreviewError(fields.error.toString()));
 		}
-		const fields = fieldsInfo.map((v,i) => v.name );
 		return dispatch(receiveCreateReportFields(fields));
     }
 }
@@ -720,7 +717,7 @@ export function deleteReport(reportId){
         dispatch(requestReportDeletion());
 
 		try{
-			const query = `DELETE FROM reports.reports WHERE id =  ${reportId}`;
+			const query = `DELETE FROM reports WHERE id =  ${reportId}`;
 			const results = await runQuery(query);
 			
 			if(typeof results.error !== 'undefined'){
@@ -769,7 +766,7 @@ export function getGraphData(reportId){
     return async (dispatch, getState) => {
         dispatch(requestGraphData(reportId))
         
-		const query = `SELECT t.* FROM reports.reports t WHERE t.id = ${reportId}`;
+		const query = `SELECT t.* FROM reports t WHERE t.id = ${reportId}`;
 		const qResults = await runQuery(query);
 
 		const rptQry = qResults.rows[0].query;
@@ -837,11 +834,11 @@ export function saveCompositeReport(reportId, name, catId, options){
 			//Update if reportId not null
 			if(reportId !== null){
 				let qry = `
-					UPDATE reports.reports SET
-					 name = $$${name}$$, 
+					UPDATE reports SET
+					 name = '${name}', 
 					 notes = '', 
 					 category_id = ${catId}, 
-					 options = $$${JSON.stringify(opts)}$$,
+					 options = '${JSON.stringify(opts)}',
 					 type = 'composite',
 					 query = ''
 					 WHERE  
@@ -871,10 +868,10 @@ export function saveCompositeReport(reportId, name, catId, options){
 			}else{
 				//Insert/create new report
 				let qry = `
-					INSERT INTO reports.reports 
+					INSERT INTO reports 
 					(name, notes, category_id, query, options, type) 
 					VALUES 
-					($$${name}$$, '', ${catId}, '', $$${JSON.stringify(opts)}$$, 'composite')
+					('${name}', '', ${catId}, '', '${JSON.stringify(opts)}', 'composite')
 					RETURNING id
 				`;
 				
@@ -980,37 +977,8 @@ export function fetchDatabaseTables(){
 export function getTableColumns(tableSchema, tableName, joinIndex, tableAlias){
 	return async (dispatch, getState) => {
 		dispatch(fetchTableColumns());
-		
-		var qry = `
-		SELECT DISTINCT  
-		table_schema, 
-		table_name, 
-		column_name ,
-		data_type
-		FROM 
-		information_schema.columns t 
-		WHERE 
-		table_name = '${tableName}' 
-		AND table_schema = '${tableSchema}' 
-		ORDER by table_schema, table_name
-		`;
-		
-		//
-		if(tableSchema === 'ericsson_cm' 
-		|| tableSchema === 'huawei_cm' 
-		|| tableSchema === 'zte_cm'
-		|| tableSchema === 'nokia_cm'
-		|| tableSchema === 'motorola_cm'){
-			qry = `
-			SELECT DISTINCT 
-			'${tableSchema}' AS table_schema, 
-			'${tableName}' AS table_name, 
-			jsonb_object_keys(data) AS column_name, 
-			'jsonb' AS data_type ,
-			'data' AS data_field
-			FROM ${tableSchema}."${tableName}" 				
-			`;
-		}
+
+		var qry = `SELECT name FROM PRAGMA_TABLE_INFO('${tableName}');`
 		
 		const results = await runQuery(qry);
 		
@@ -1029,18 +997,11 @@ export function getQueryTables(){
 	return async (dispatch, getState) => {
 		dispatch(fetchDatabaseTables());
 		
-		const qry = `
-		SELECT DISTINCT 
-		table_schema,
-		table_name
-		FROM 
-		information_schema.tables t
-		ORDER by table_schema, table_name
-		`;
+		const qry = `SELECT name FROM sqlite_master WHERE type = "table"`;
 		
 		const results = await runQuery(qry);
-		
-		dispatch(updateDatabaseTables(results.rows));
+
+		dispatch(updateDatabaseTables(results.map(t => t.name)));
 	}
 }
 

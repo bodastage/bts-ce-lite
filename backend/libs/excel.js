@@ -26,14 +26,13 @@ async function combineCSVToXLSB(inputFolder, outputFile){
 				.subscribe( (csvRow)=>{
 					wbData.push(csvRow);
 				},(err) => {//onError
-					log.error(`combineCSVtoXLSB.csvJoJson.onError: ${err.toString()}`);
-					reject();
+					reject(`combineCSVtoXLSB.csvJoJson.onError: ${err.toString()}`);
 				},
 				()=>{//onComplete
 					resolve(undefined);
 				}); 
 			}catch(e){
-				log.error(e);
+                reject(e);
 			}
 			
 		});
@@ -61,7 +60,7 @@ async function combineCSVToXLSB(inputFolder, outputFile){
 * @param string outputFolder Output folder for combined === true 
 */
 async function combineCSVsIntoExcel(csvDirectory, excelFormat, combined, outputFolder){
-    console.log('combineCSVsIntoExcel............');
+    console.log('combineCSVsIntoExcel............', ' csvDirectory:', csvDirectory, 'excelFormat: ', excelFormat, 'combined: ', combined, 'outputFolder: ', outputFolder);
 	try{
 		const format = excelFormat || "XLSX";
 		
@@ -70,32 +69,30 @@ async function combineCSVsIntoExcel(csvDirectory, excelFormat, combined, outputF
             console.log('outputFolder:', outputFolder);
 			const combinedExcelFile = path.join(outputFolder, 'combined_csv.xlsx');
 			await combineCSVFiles(csvDirectory, combinedExcelFile);
-			return {status: 'success', message:  combinedExcelFile };
+			return {status: 'success', data:  combinedExcelFile };
 		}
 		
 		if(format === 'XLSX' && !combined){
 			const outFolder = outputFolder || csvDirectory;
 			await csvToXLSX(csvDirectory, outFolder);
-			return {status: 'success', message:  outFolder };
+			return {status: 'success', data:  outFolder };
 		}
 		
 		if(format === 'XLSB' && combined){
             const outFolder = outputFolder || csvDirectory;
 			const combinedExcelFile = path.join(outFolder, 'combined_csv.xlsb');
 			await combineCSVToXLSB(csvDirectory, combinedExcelFile);
-			return {status: 'success', message:  combinedExcelFile };
+			return {status: 'success', data:  combinedExcelFile };
 		}
 		
 		if(format === 'XLSB' && !combined){
 			const outFolder = outputFolder || csvDirectory;
 			await csvToXLSB(csvDirectory, outFolder);
-			return {status: 'success', message:  outFolder };
+			return {status: 'success', data:  outFolder };
 		}
 		
 
 	}catch(e){
-		//log.error(e);
-        console.log(e);
 		return {status: 'error', message: `Error occured while combining csv files. Check logs for details.`};		
 	}
 }
@@ -134,14 +131,13 @@ async function combineCSVToXLSX(csvFolder, combineExcelFile){
 					worksheet.addRow(csvRow).commit();
 
 				},(err) => {//onError
-					log.error(`CSVToExcelCombiner.csvJoJson.onError: ${err.toString()}`);
-					reject();
+					reject(`CSVToExcelCombiner.csvJoJson.onError: ${err.toString()}`);
 				},
 				()=>{//onComplete
 					resolve(undefined);
 				}); 
 			}catch(e){
-				log.error(e);
+				reject(e);
 			}
 			
 		});
@@ -182,14 +178,13 @@ async function csvToXLSX(csvFolder, outputFolder){
 					worksheet.addRow(csvRow).commit();
 
 				},(err) => {//onError
-					log.error(`CSVToExcelCombiner.csvJoJson.onError: ${err.toString()}`);
-					reject();
+					reject(`CSVToExcelCombiner.csvJoJson.onError: ${err.toString()}`);
 				},
 				()=>{//onComplete
 					resolve(undefined);
 				}); 
 			}catch(e){
-				log.error(e);
+				reject(e);
 			}
 			
 		});
@@ -224,14 +219,13 @@ async function csvToXLSB(inputFolder, outputFolder){
 				.subscribe( (csvRow)=>{
 					wbData.push(csvRow);
 				},(err) => {//onError
-					log.error(`combineCSVtoXLSB.csvJoJson.onError: ${err.toString()}`);
-					reject();
+					reject(`combineCSVtoXLSB.csvJoJson.onError: ${err.toString()}`);
 				},
 				()=>{//onComplete
 					resolve(undefined);
 				}); 
 			}catch(e){
-				log.error(e);
+				reject(e);
 			}
 			
 		});
@@ -284,14 +278,13 @@ async function combineCSVFiles(csvFolder, combineExcelFile){
 					worksheet.addRow(csvRow).commit();
 
 				},(err) => {//onError
-					log.error(`CSVToExcelCombiner.csvJoJson.onError: ${err.toString()}`);
-					reject();
+					reject(`CSVToExcelCombiner.csvJoJson.onError: ${err.toString()}`);
 				},
 				()=>{//onComplete
 					resolve(undefined);
 				}); 
 			}catch(e){
-				log.error(e);
+                reject(e);
 			}
 			
 		});

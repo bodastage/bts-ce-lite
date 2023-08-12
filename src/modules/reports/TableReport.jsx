@@ -5,9 +5,23 @@ import { getReportFields, getReportInfo } from './reports-actions';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css'; 
-import { ProgressBar, Intent, ButtonGroup, Button, Classes, Toaster,
-		 Dialog, Popover, Spinner, Callout, 
-		 Menu, MenuItem, Position, HTMLSelect } from "@blueprintjs/core"; 
+import { 
+	ProgressBar, 
+	Intent, 
+	ButtonGroup, 
+	Button, 
+	Classes,
+	Toaster, 
+	OverlayToaster,
+	Dialog, 
+	Popover, 
+	Spinner, 
+	Callout, 
+	Menu, 
+	MenuItem, 
+	Position, 
+	HTMLSelect 
+} from "@blueprintjs/core"; 
 import classNames from 'classnames';
 import { runQuery, getSortAndFilteredQuery } from './DBQueryHelper.js';
 import { generateStyleClass, getTableStyleExpression } from './reports-utils';
@@ -22,7 +36,7 @@ class TableReport extends React.Component{
         
         this.columnDefs = []
         
-        this.toaster = new Toaster();
+        this.toaster = Toaster;
         
         this.downloadInterval = null;
         this.progressToastInterval = null;
@@ -271,8 +285,7 @@ class TableReport extends React.Component{
 		const reportId = this.props.reportInfo.id;
 		
         for(var key in this.props.fields){
-            let columnName = this.props.fields[key]
-
+           let columnName = this.props.fields[key]
 			
 			//Cell Styles 
 			let cellClassRules = {};
@@ -342,10 +355,12 @@ class TableReport extends React.Component{
 				that.filteredSortedQuery = filteredSortedQuery;
 				
 				//Count is the last row
-				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
+				let countResult = await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`);
+				let count = countResult.length === 0 ? 0 : countResult[0].count;
+
 				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
 				
-				params.successCallback(queryResult.rows, count); 
+				params.successCallback(queryResult, count); 
 				
             }
         };
@@ -387,7 +402,7 @@ class TableReport extends React.Component{
         if( this.props.fields.length === 0 && this.props.requestError !== null ){
             return (<div>
                     <Callout intent={Intent.DANGER}> {this.props.requestError}</Callout>
-					<Toaster {...this.state} ref={this.refHandlers.toaster} />
+					<OverlayToaster {...this.state} ref={this.refHandlers.toaster} />
 					</div>
 				);
         }
@@ -441,7 +456,7 @@ class TableReport extends React.Component{
 							<Popover content={downloadFileTypesMenu} position={Position.BOTTOM}>
 								<Button icon="download"></Button>
 							</Popover>
-                            <Toaster {...this.state} ref={this.refHandlers.toaster} />
+                            <OverlayToaster {...this.state} ref={this.refHandlers.toaster} />
                             <Button icon="info-sign" onClick={this.handleDialogOpen}></Button>
 							
 							

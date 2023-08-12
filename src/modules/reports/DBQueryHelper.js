@@ -1,121 +1,13 @@
-//import { SQLITE3_DB_PATH } from "../session/db-settings";
-
-//const sqlite3 = window.require('sqlite3').verbose()
-// const log = window.require('electron-log');
-//const { Client } = window.require('pg');
-
-
-/**
-* Get database connection details
-*/
-export async function getSQLiteDBConnectionDetails(dbName){
-		
-		let details = await
-		await new Promise((resolve, reject) => {
-			
-			row = btslite_api.dbQuery("SELECT * FROM databases WHERE name = ?", [dbName]);
-			console.log(row);
-
-			resolve(row);
-
-			// let db = new sqlite3.Database(SQLITE3_DB_PATH);
-			// db.all("SELECT * FROM databases WHERE name = ?", [dbName] , (err, row) => {
-			// 	if(err !== null){
-			// 		log.error(row);
-			// 		//@TODO: Show table data log error
-			// 		return reject(err);
-					
-			// 	}
-				
-			// 	return resolve({
-			// 		hostname : row[0].hostname,
-			// 		port : row[0].port,
-			// 		username : row[0].username,
-			// 		password : row[0].password
-			// 	});
-			// });
-			
-		});
-
-		return details;
-}
-
-
-export async function getSQLiteReportInfo(reportId){
-		// let reportInfo = await
-		// new Promise((resolve, reject) => {
-			
-		// 	let db = new sqlite3.Database(SQLITE3_DB_PATH);
-		// 	db.all("SELECT * FROM reports r WHERE rowid = ?",[reportId], (rErr, rRows) => {
-		// 		if(rErr !== null){
-		// 			log.error(rRows);
-		// 			//@TODO: Show table data log error
-		// 			reject(rErr);
-					
-		// 		}
-				
-		// 		resolve(rRows[0]);
-		// 	});
-			
-		// });
-
-		return reportInfo;
-}
-
-
-/**
-* Run report query
-*
-* @param string query
-*/
 export async function runQuery(query){
-	
-	const dbConDetails  = await getSQLiteDBConnectionDetails('boda');
-
-	const hostname = dbConDetails.hostname;
-	const port = dbConDetails.port;
-	const username = dbConDetails.username;
-	const password = dbConDetails.password;
-
-	let results = [];
-	
-	// const connectionString = `postgresql://${username}:${password}@${hostname}:${port}/boda`;
-	// const client = new Client({
-	// 	connectionString: connectionString,
-	// });
-		
-	// client.connect((err) => {
-	// 	if(err){
-	// 		log.error(err);
-	// 		client.end();
-	// 		return err;
-	// 	}
-	// });
-
-			
-	// let results = await
-	// new Promise((resolve, reject) => {
-	// 	client.query(query)
-	// 	.then( result => {
-	// 		return resolve(result);
-	// 	} )
-	// 	.catch(e => {
-	// 		//@TODO: Error notice
-	// 		reject(e);
-			
-	// 	})
-	// 	.then(() => client.end());
-	// });	
-	
-	return results;
-	
+	return await btslite_api.dbQuery(query);
 }
 
 export async function getQueryFieldsInfo(query){
 	let result = null;
 	try{
-		result = await runQuery(`SELECT * FROM (${query}) ttt LIMIT 0`);
-		return result.fields;
+		result = await btslite_api.dbQuery(`SELECT * FROM (${query}) ttt LIMIT 1`);
+		console.log(result);
+		return result.length === 0 ? [] : Object.keys(result[0]);
 	}catch(e){
 		return {error: e}
 	}

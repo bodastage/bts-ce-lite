@@ -75,7 +75,7 @@ export default class CSVToExcelCombiner extends React.Component {
 		// 	this.setState({errorMessage: `${e.target.files[0].path} does not exist`})
 		// 	return;
 		// }
-		
+		console.log('e.target.files[0].path:',e.target.files[0].path);
 		this.setState({inputFolder: e.target.files[0].path})
 	}
 
@@ -103,6 +103,16 @@ export default class CSVToExcelCombiner extends React.Component {
 		// ipcRenderer.send('parse-cm-request', 'combine_csv_to_excel', JSON.stringify(payload));
 		const result = await btslite_api.convertCsvToExcel(payload);
 		console.log(result);
+
+		this.setState({		
+			processing: false,
+			notice: {	
+				type: result.status ,
+				message: result.status === 'error' ? 'Error converting CSV files to Excel' : `CSV files converted to Excel successfully. ${result.data}`
+			}
+		});
+
+		btslite_api.openPath(result.data);
 		
 
 	}
@@ -113,9 +123,7 @@ export default class CSVToExcelCombiner extends React.Component {
 		let notice = null;
 		if(this.state.notice !== null ){ 
 			notice = (<div className={`alert alert-${this.state.notice.type} p-2`} role="alert">{this.state.notice.message}
-					<button type="button" className="close"  aria-label="Close" onClick={this.dismissNotice}>
-					<span aria-hidden="true">&times;</span>
-				</button>
+				<button type="button" className="btn-close right float-end" data-bs-dismiss="alert" aria-label="Close" onClick={this.dismissNotice}></button>
 			</div>)
 		}
 		
@@ -138,9 +146,15 @@ export default class CSVToExcelCombiner extends React.Component {
 						  <FileInput 
 						  	className={"form-control " + inputFolderEllipsis} 
 							text={this.state.inputFolder} 
-							onInputChange={this.onInputFileChange} 
+							//onInputChange={this.onInputFileChange} 
 							inputProps={{webkitdirectory: "", mozdirectoryt:"", odirectory:"", directory:"", msdirectory:""}} 
 							disabled={this.state.processing} 
+							onClick={ async (e) => {
+								e.preventDefault();
+								const result = await btslite_api.openDirectory();
+								console.log(result.filePaths[0]);
+								this.setState({inputFolder: result.filePaths[0]});
+							}}
 							/>
 						</div>
 						<div className="col-sm-2">

@@ -14,6 +14,26 @@ contextBridge.exposeInMainWorld('btslite_api', {
         return result
     },
 
+    async createCategory(data) {
+        const result = await ipcRenderer.invoke('reports.create-category', data);
+        return result;
+    },
+
+    async updateCategory(data) {
+        const result = await ipcRenderer.invoke('reports.update-category', data);
+        return result;
+    },
+
+    async createReport(data) {
+        const result = await ipcRenderer.invoke('reports.create-report', data);
+        return result;
+    },
+
+    async updateReport(data) {
+        const result = await ipcRenderer.invoke('reports.update-report', data);
+        return result;
+    },
+
     //launch file selection window
     async shellOpenPath(path) {
         const result = await ipcRenderer.invoke('shell.open-path', path);
@@ -125,6 +145,12 @@ contextBridge.exposeInMainWorld('btslite_api', {
     //open log file 
     async logOpenLogFile(config){
             const result = await ipcRenderer.invoke('log.open-log-file', config);
+            return result;
+    },
+
+    //open log file 
+    async downloadBaseLineRef(config){
+            const result = await ipcRenderer.invoke('baseline.download-ref', config);
             return result;
     }
 
