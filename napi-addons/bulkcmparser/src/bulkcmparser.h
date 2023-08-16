@@ -1,8 +1,60 @@
 #include <napi.h>
 #include <iostream>
+#include <map>
+
+//Logging
+#include "spdlog/spdlog.h"
+#include "spdlog/cfg/env.h"  // support for loading levels from the environment variable
+#include "spdlog/fmt/ostr.h" // support for user defined types
+
 using namespace std;
 namespace bodastage
 {
+
+    enum ParserStates { 
+        
+        //managed object parser extraction stage 
+        EXTRACTING_PARAMETERS = 1, 
+        
+        //Parameter value extraction stage
+        EXTRACTING_VALUES = 2,
+
+        //parsing done
+        EXTRACTING_DONE = 3
+    };
+
+    class BulkCMParser
+    {
+        public: 
+            string version = "1.0.0";
+
+            string logger = "bulkcmparser";
+
+            /**
+             * @brief Tracks XML elements
+             * 
+             * @since 1.0.0
+            */
+            vector<string> xml_tag_stack;
+
+            /**
+             * @brief Tracks how deep a managed object in is this XML hierarchy
+             * 
+             * @since 1.0.0
+            */
+           int depth = 0;
+
+            /**
+            * @brief Tracks XML attributes per managed object
+            * 
+            * @since 1.0.0
+            */
+           std::map<int, std::map<string, string>> xml_attr_stack;
+
+
+
+    };
+
     /**
      * @brief parse input file or directory into output directory
      * 

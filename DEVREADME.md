@@ -45,6 +45,13 @@ cc --version
 make --version
 ```
 
+## Add externals folder to vscode include path 
+
+* go to the extension settings 
+* locate the C/C++: Include Path setting
+* Click "Add item" and insert the path to the externals folder.
+* alternatively, search for @ext:ms-vscode.cpptools includePath in the settings search box and add the path to the externals folder.
+
 ## Resources 
 
 * https://nodejs.github.io/node-addon-examples/about/what
