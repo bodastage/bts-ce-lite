@@ -33,3 +33,19 @@ npx sequelize-cli db:seed:undo
 
 ```
 
+##  Native modules 
+
+### Verify required tools are installed on linux or mac
+```
+node --version
+npm --version
+python --version
+git --version
+cc --version
+make --version
+```
+
+## Resources 
+
+* https://nodejs.github.io/node-addon-examples/about/what
+* https://github.com/atiqg/Nodejs-Napi-Addon-Using-Cmake

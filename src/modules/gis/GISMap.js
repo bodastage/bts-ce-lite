@@ -1,8 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { 
-    withLeaflet,
+	useMap,
 	Map, 
+	MapContainer,
 	TileLayer, 
 	Popup, 
 	Polyline, 
@@ -50,10 +51,7 @@ import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
 import { renderToString } from 'react-dom/server'
-import { ReactLeafletSearch } from 'react-leaflet-search'
-
-// const { ipcRenderer} = window.require("electron");
-const WrappedSearch = withLeaflet(ReactLeafletSearch)
+import ReactLeafletSearch from 'react-leaflet-search'
 
 //Fix icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -541,7 +539,7 @@ class GISMap extends React.Component{
 
                     <ResizeSensor onResize={this.handleResize}>
 				
-						<Map 
+						<MapContainer 
 							ref='map' 
 							attributionControl={false}
 							center={center} 
@@ -555,7 +553,7 @@ class GISMap extends React.Component{
 							}]}
 							fullscreenControl
 						>
-							<WrappedSearch 
+							<ReactLeafletSearch 
 								zoom={12}
 								inputPlaceholder="Find a place"
 								position="topleft"/>
@@ -743,7 +741,7 @@ class GISMap extends React.Component{
 							   </Tab>          
 							</Sidebar>
 							
-						</Map>
+						</MapContainer>
                     </ResizeSensor>
                     </div>
                 </div>

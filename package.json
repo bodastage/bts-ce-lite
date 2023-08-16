@@ -111,7 +111,7 @@
     "i": "^0.3.6",
     "immutable": "^3.8.2",
     "js-xlsx": "^0.8.22",
-    "leaflet": "^1.3.3",
+    "leaflet": "^1.9.4",
     "leaflet-contextmenu": "^1.4.0",
     "leaflet-fullscreen": "^1.0.2",
     "leaflet-semicircle": "^2.0.2",
@@ -144,11 +144,11 @@
     "react-fontawesome": "^1.6.1",
     "react-grid-layout": "^0.16.6",
     "react-icons": "^4.10.1",
-    "react-leaflet": "^2.0.0",
+    "react-leaflet": "^4.2.1",
     "react-leaflet-control": "^2.1.1",
     "react-leaflet-fullscreen-control": "^0.0.4",
-    "react-leaflet-search": "^0.6.0",
-    "react-leaflet-semicircle": "^2.0.5",
+    "react-leaflet-search": "^2.0.1",
+    "react-leaflet-semicircle": "^3.0.3",
     "react-leaflet-sidetabs": "^1.0.1",
     "react-mosaic-component": "^2.1.0",
     "react-plotly.js": "^2.2.0",
@@ -178,7 +178,8 @@
     "workbox-webpack-plugin": "3.6.3",
     "xlsx": "^0.15.1",
     "xmldom": "^0.1.27",
-    "xpath": "^0.0.27"
+    "xpath": "^0.0.27",
+    "bulkcmparser": "file:./napi-addons/bulkcmparser"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",

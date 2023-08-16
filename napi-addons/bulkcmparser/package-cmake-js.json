@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-      "install": "node-gyp rebuild",
+      "install": "cmake-js compile",
       "start": "node index.js"
     },
     "author": "Bodastage Solutions",
