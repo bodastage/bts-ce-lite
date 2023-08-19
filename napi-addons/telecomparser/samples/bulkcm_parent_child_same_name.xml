@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bulkCmConfigDataFile xmlns="http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData" xmlns:en="http://www.3gpp.org/ftp/specs/archive/32_series/32.765#eutranNrm" xmlns:un="http://www.3gpp.org/ftp/specs/archive/32_series/32.765#utranNrm" xmlns:gn="http://www.3gpp.org/ftp/specs/archive/32_series/32.765#gsmNrm" xmlns:xn="http://www.3gpp.org/ftp/specs/archive/32_series/32.625#genericNrm" xmlns:zs="http://ZTESpecificAttributes#ZTESpecificAttributes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd" xmlns:bs="http://www.bodastage.com">
+    <fileHeader fileFormatVersion="0.1.0" vendorName="Bodastage Solutions"/>
+    <configData>
+        <xn:SubNetwork id="BS_NRM_ROOT">
+            <xn:SubNetwork id="101">
+                <xn:attributes>
+                    <xn:setOfMcc>999</xn:setOfMcc>
+                    <xn:userLabel>usrLabel</xn:userLabel>
+                    <xn:userDefinedNetworkType></xn:userDefinedNetworkType>
+                    <xn:dnPrefix>www.bodastage.com</xn:dnPrefix>
+                </xn:attributes>
+                <xn:meContext id="4698">
+                    <xn:attributes>
+                        <xn:meContextId>4698</xn:meContextId>
+                        <xn:dnPrefix>DC=www.bodastage.com</xn:dnPrefix>
+                    </xn:attributes>
+                    <xn:ManagedElement id="4698">
+                        <xn:attributes>
+                            <xn:locationName></xn:locationName>
+                            <xn:userDefinedState>2</xn:userDefinedState>
+                            <xn:vendorName>Bodastage Solutions</xn:vendorName>
+                            <xn:swVersion>0.0.0</xn:swVersion>
+                            <xn:managedElementType>SDR</xn:managedElementType>
+                            <xn:userLabel>Some Element Name</xn:userLabel>
+                        </xn:attributes>
+                        <xn:vsDataContainer id="Q0001">
+                            <xn:attributes>
+                                <xn:vsDataType>vsDataSomeMO</xn:vsDataType>
+                                <xn:vsDataFormatVersion>BodastageSpecificAttributes.0.0.0</xn:vsDataFormatVersion>
+                                <bs:vsDataSomeMO>
+                                    <!-- Test for parent and child with the same names. -->
+                                    <bs:SomeAttr>
+                                        <bs:SomeAttrChild1>Val1</bs:SomeAttrChild1>
+                                        <bs:SomeAttr>SomeAttrChildVal</bs:SomeAttr>
+                                        <bs:SomeAttr2>SomeAttrChildVal2</bs:SomeAttr2>
+                                    </bs:SomeAttr>
+                                    <bs:AnotherAttr>
+                                        <bs:AnotherChild1>1234</bs:AnotherChild1>
+                                        <bs:AnotherAttr>777</bs:AnotherAttr>
+                                    </bs:AnotherAttr>
+                                </bs:vsDataSomeMO>
+                            </xn:attributes>
+                        </xn:vsDataContainer>
+                    </xn:ManagedElement>
+                </xn:meContext>
+            </xn:SubNetwork>
+        </xn:SubNetwork>
+    </configData>
+    <fileFooter dateTime="2019-04-16T00:05:00+03:00"/>
+</bulkCmConfigDataFile>

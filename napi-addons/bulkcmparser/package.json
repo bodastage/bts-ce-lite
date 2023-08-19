@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
       "install": "node-gyp rebuild",
+      "install-debug": "node-gyp --debug configure rebuild",
       "start": "node index.js"
     },
     "author": "Bodastage Solutions",

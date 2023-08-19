@@ -1,0 +1,25 @@
+{
+    "name": "bulkcm-parser",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "install": "node-gyp rebuild",
+      "install-debug": "node-gyp --debug configure rebuild",
+      "start": "node index.js",
+      "test": "node test.js"
+    },
+    "author": "Bodastage Solutions",
+    "license": "Apache-2.0",
+    "gypfile": true,
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/bodastage/napi-bulkcm-parser.git"
+    },
+    "dependencies": {
+      "node-addon-api": "^7.0.0"
+    },
+    "devDependencies": {
+      "cmake-js": "^7.2.1"
+    }
+  }
