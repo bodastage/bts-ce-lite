@@ -52,6 +52,16 @@ make --version
 * Click "Add item" and insert the path to the externals folder.
 * alternatively, search for @ext:ms-vscode.cpptools includePath in the settings search box and add the path to the externals folder.
 
+
+## Installing libxml2 on macos
+
+```
+brew install automake autoconf libtool libxml2 pkg-config
+brew link libxml2; fi
+
+```
+
+
 ## Resources 
 
 * https://nodejs.github.io/node-addon-examples/about/what
