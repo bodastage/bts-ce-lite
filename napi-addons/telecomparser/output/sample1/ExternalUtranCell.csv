@@ -1,0 +1,2 @@
+FILENAME,DATETIME,SubNetwork_2_id,cId,lac,mcc,mnc,primaryCpichPower,primaryScramblingCode,rac,rncId,uarfcnDl,uarfcnUl,userLabel
+bulkcm.xml,2019-04-16T00:05:00+03:00,,6551,17734,214,1,320,283,"",134,10738,9788,xxxxxx

@@ -1,6 +1,11 @@
 ## Running native dependencies with cmake 
 * update install section in package.json with <code>cmake-js compile</code>
 
+## Running debug version
+```
+yarn run install-debug && yarn run test-debug
+```
+
 *libxml2 is required. Install it before running install
 
 ## signing gdb on macos 

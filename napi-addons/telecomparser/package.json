@@ -7,7 +7,8 @@
       "install": "node-gyp rebuild",
       "install-debug": "node-gyp --debug configure rebuild",
       "start": "node index.js",
-      "test": "node test.js"
+      "test": "node test.js",
+      "test-debug": "node test-debug.js"
     },
     "author": "Bodastage Solutions",
     "license": "Apache-2.0",

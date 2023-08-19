@@ -102,6 +102,7 @@ namespace bodastage{
         return (haystack.find(needle) != std::string::npos);
     }
 
+    //@TODO: use references instead of copying
     template <typename T> bool value_in_vector(std::vector<T> v, T needle){
         return std::find(v.begin(), v.end(), needle) != v.end();
     }

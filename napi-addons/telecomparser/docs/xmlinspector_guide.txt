@@ -1,0 +1,184 @@
+Introduction
+XmlInspector is a streaming XML parser written in C++. This project was born because I could not find any parser that meets my requirements:
+
+Simple - I like simplicity. Instead of reading tutorials how to configure parsing library I would like to just add some files into my project and forget about them. Instead of learning how to use a thousand of library classes I prefer to focus on my own projects.
+Cross-platform - Is "non-validating C++ XML parser" really needs more than just C++ standard library? I don't think so.
+Small - When I want to read a single XML file in my small C++ project, do I need to include a hundreds of files for parsing?
+Conform to XML standards - There are some parsers pretending to be extremely fast, but they cannot guarantee that every well-formed XML file will be parsed properly. Also invalid XML file could pass without error message, which is not acceptable for me.
+I think this project met these expectations, but first you should know two things:
+
+I tried to respect the XML recommendation and the Namespaces in XML recommendation except DOCTYPE  element. If XML document contains something like <!DOCTYPE doc...>, then all information from such element would be ignored. This XML parser doesn't parse any DTDs.
+XmlInspector uses few features from C++11 standard (char16_t, char32_t, std::u16string, std::u32string, std::uint_least64_t, std::unique_ptr  and strongly typed enumerations). Tested on GCC 4.7.2 and Clang 3.0-6.2 on Linux, Visual C++ 2012 and MinGW 4.7.2 on Windows.
+There are two most popular APIs for XML parsers:
+
+DOM - Tree-based parser that reads entire document into the tree structure.
+SAX - Event-based parser that operates on each piece of document sequentially.
+XmlInspector has similar idea to SAX, but instead of register callback functions and wait for events, you can read a next node from XML document anytime you need. In my opinion it's a more convenient way of parsing XML documents. For more information, search "StAX". Now let's parse some file:
+
+test.xml
+XML
+<?xml version="1.0"?>
+<shelter>
+    <!--Only 3 pets at this moment. It's the new shelter.-->
+    <pets>
+        <dog name="Rambo">Very aggressive dog, be careful.</dog>
+        <dog name="Pinky">2 years old dog with a short tail.</dog>
+        <cat name="Boris">Very lazy cat.</cat>
+    </pets>
+
+    <!--No pokemons yet.-->
+    <pokemons />
+</shelter>
+First you need to add 3 headers to your project:
+
+XmlInspector.hpp
+CharactersReader.hpp
+CharactersWriter.hpp
+Now you can read some elements like this:
+
+C++
+Shrink ▲   
+#include "XmlInspector.hpp"
+#include <iostream>
+#include <cstdlib>
+
+int main()
+{
+    Xml::Inspector<Xml::Encoding::Utf8Writer> inspector("test.xml");
+
+    while (inspector.Inspect())
+    {
+        switch (inspector.GetInspected())
+        {
+            case Xml::Inspected::StartTag:
+                std::cout << "StartTag name: " << inspector.GetName() << "\n";
+                break;
+            case Xml::Inspected::EndTag:
+                std::cout << "EndTag name: " << inspector.GetName() << "\n";
+                break;
+            case Xml::Inspected::EmptyElementTag:
+                std::cout << "EmptyElementTag name: " << inspector.GetName() << "\n";
+                break;
+            case Xml::Inspected::Text:
+                std::cout << "Text value: " << inspector.GetValue() << "\n";
+                break;
+            case Xml::Inspected::Comment:
+                std::cout << "Comment value: " << inspector.GetValue() << "\n";
+                break;
+            default:
+                // Ignore the rest of elements.
+                break;
+        }
+    }
+
+    if (inspector.GetErrorCode() != Xml::ErrorCode::None)
+    {
+        std::cout << "Error: " << inspector.GetErrorMessage() <<
+            " At row: " << inspector.GetRow() <<
+            ", column: " << inspector.GetColumn() << ".\n";
+    }
+
+    return EXIT_SUCCESS;
+}
+Result:
+
+StartTag name: shelter
+Comment value: Only 3 pets at this moment. It's the new shelter.
+StartTag name: pets
+StartTag name: dog
+Text value: Very aggressive dog, be careful.
+EndTag name: dog
+StartTag name: dog
+Text value: 2 years old dog with a short tail.
+EndTag name: dog
+StartTag name: cat
+Text value: Very lazy cat.
+EndTag name: cat
+EndTag name: pets
+Comment value: No pokemons yet.
+EmptyElementTag name: pokemons
+EndTag name: shelter
+Xml::Inspector is the main parser class. Xml::Encoding::Utf8Writer is the class chosen to write characters in UTF-8 encoding. It means that you will receive references to std::string. If you prefer for example UTF-16 encoding and std::u16string, you can write:
+
+C++
+Xml::Inspector<Xml::Encoding::Utf16Writer> inspector("test.xml");
+// ...
+const std::u16string& referenceToElementName = inspector.GetName();
+Xml::Inspector class has more constructors, for example you may want to parse XML document that is stored in memory:
+
+C++
+std::string doc = "<root />abc</root />";
+Xml::Inspector<Xml::Encoding::Utf16Writer> inspector(doc.begin(), doc.end());
+You can also parse more XML documents using a single Inspector object - there are Xml::Inspector::Reset methods with the same parameters as in constructors:
+
+C++
+Xml::Inspector<Xml::Encoding::Utf16Writer> inspector;
+inspector.Reset("test.xml");
+// ...
+std::string doc = "<root>abc</root>";
+inspector.Reset(doc.begin(), doc.end());
+Every call of Xml::Inspector::Inspect method tries to read exactly one element from document. When inspected element is for example StartTag, then Xml::Inspector::GetName method will provide the name of this element. If inspected element is for example ProcessingInstruction, then you will receive from Xml::Inspector::GetName method the target name of this processing instruction.
+
+Now let's print only dog names:
+
+C++
+Shrink ▲   
+#include "XmlInspector.hpp"
+#include <iostream>
+#include <cstdlib>
+
+int main()
+{
+    Xml::Inspector<Xml::Encoding::Utf8Writer> inspector("test.xml");
+
+    while (inspector.Inspect())
+    {
+        if ((inspector.GetInspected() == Xml::Inspected::StartTag ||
+            inspector.GetInspected() == Xml::Inspected::EmptyElementTag) &&
+            inspector.GetName() == "dog")
+        {
+            Xml::Inspector<Xml::Encoding::Utf8Writer>::SizeType i;
+            for (i = 0; i < inspector.GetAttributesCount(); ++i)
+            {
+                if (inspector.GetAttributeAt(i).Name == "name")
+                {
+                    std::cout << inspector.GetAttributeAt(i).Value << "\n";
+                    break;
+                }
+            }
+        }
+    }
+
+    if (inspector.GetErrorCode() != Xml::ErrorCode::None)
+    {
+        std::cout << "Error: " << inspector.GetErrorMessage() <<
+            " At row: " << inspector.GetRow() <<
+            ", column: " << inspector.GetColumn() << ".\n";
+    }
+
+    return EXIT_SUCCESS;
+}
+Result:
+
+Rambo
+Pinky
+As you see access to attribute names a bit differ from Xml::Inspector methods. Attribute is a simple structure with some strings and without any method.
+
+How it works
+XmlInspector doesn't load the entire XML document in memory. It allocates as much memory as it needs to walk through elements, so the size of the file is not important. You can have even less memory on your computer than XML document size.
+
+If some element needs one more string allocation, then the next element will not delete it, even if this string is not required now. Consider this file:
+
+XML
+<root name1="value1" name2="value2" name3="value3">
+    <aaa attr="abc" />
+    <bbb name1="value1" name2="value2" />
+</root>
+Root element needs to allocate space for three attributes. Element aaa  has only one attribute, so the two more attributes are not needed now. If element aaa  would delete those strings, then the next element bbb  would need to allocate space for attribute again. XmlInspector tries to reduce the number of allocations for next elements and documents. If you don't need Xml::Inspector object anymore, you can call Xml::Inspector::Clear method, or wait for destructor to free some space.
+
+Supported encodings
+Encoding sets supported by XmlInspector:
+
+UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32, UTF-32BE, UTF-32LE;
+ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5, ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16, TIS-620;
+windows-874, windows-1250, windows-1251, windows-1252, windows-1253, windows-1254, windows-1255, windows-1256, windows-1257, windows-1258.

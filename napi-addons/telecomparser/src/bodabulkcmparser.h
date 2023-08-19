@@ -127,7 +127,7 @@ namespace bodastage
          * @version 1.0.0
          * @since 1.0.0
          */
-        std::stack<string> xn_attr_rl_stack;
+        std::vector<string> xn_attr_rl_stack;
 
         /**
          * @brief -valued parameter separator.

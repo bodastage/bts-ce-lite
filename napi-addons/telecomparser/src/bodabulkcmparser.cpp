@@ -17,6 +17,9 @@ void bodastage::BodaBulkCmParser::on_start_document(Xml::Inspector<Xml::Encoding
 
 void bodastage::BodaBulkCmParser::on_empty_element(Xml::Inspector<Xml::Encoding::Utf8Writer> &inspector)
 {
+    spdlog::info("on_empty_element: {}", inspector.GetName());
+    on_start_element(inspector);
+    on_end_element(inspector);
 }
 
 void bodastage::BodaBulkCmParser::on_end_document(Xml::Inspector<Xml::Encoding::Utf8Writer> &inspector)
@@ -36,6 +39,8 @@ void bodastage::BodaBulkCmParser::on_end_document(Xml::Inspector<Xml::Encoding::
  */
 int bodastage::BodaBulkCmParser::get_xml_tag_occurences(string tag_name) {
     int tag_occurences = 0;
+
+    spdlog::info("get_xml_tag_occurences...LINE:{} tag_name: {}", __LINE__);
 
     for(auto tag : xml_tag_stack) {
 
@@ -59,7 +64,7 @@ void bodastage::BodaBulkCmParser::on_start_element(Xml::Inspector<Xml::Encoding:
     start_element_tag = qName;
     start_element_tag_prefix = prefix;
 
-
+    spdlog::info("on_start_element: {}, qName: {}, prefix: {} parser_state: {}", start_element, qName, prefix, (int)parser_state);
 
     if(qName == "fileFooter" && parser_state == EXTRACTING_PARAMETERS && inspector.HasAttributes()){
         Xml::Inspector<Xml::Encoding::Utf8Writer>::SizeType i;
@@ -94,7 +99,7 @@ void bodastage::BodaBulkCmParser::on_start_element(Xml::Inspector<Xml::Encoding:
 
         vs_data_type.clear();
         vs_data_type_stack.clear();
-        while (!vs_data_type_rl_stack.empty()) { vs_data_type_rl_stack.pop_back(); } 
+        vs_data_type_rl_stack.clear();
         return;
     }
 
@@ -169,7 +174,7 @@ void bodastage::BodaBulkCmParser::on_start_element(Xml::Inspector<Xml::Encoding:
     if (attr_marker == true && vs_data_type.empty()) {
         //LOGGER.info("attrMarker == true && vsDataType == null qName="+ qName);
         //Tracks hierachy of tags under xn:attributes.
-        xn_attr_rl_stack.push(qName);
+        xn_attr_rl_stack.push_back(qName);
 
         std::map<string, string> m;
         if(three_gpp_attr_stack.count(depth)){
@@ -245,7 +250,7 @@ string bodastage::BodaBulkCmParser::to_csv_format(string s) {
      * @since 1.0.0
      */
 void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
-
+    spdlog::info("process_3gpp_attributes...LINE:{} xml_tag_stack.size: {}", __LINE__, xml_tag_stack.size());
     string mo = xml_tag_stack.back(); // last element
 
     //Holds parameter-value map before printing
@@ -263,33 +268,41 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
     //Parent IDs
     for (int i = 0; i < (int)xml_tag_stack.size(); i++) {
         string parent_mo = xml_tag_stack.at(i);
+        spdlog::info("process_3gpp_attributes->parent_mo: {}", parent_mo);
 
         //The depth at each xml tag index is  index+1 
         int depth_key = i + 1;
 
         //Iterate through the XML attribute tags for the element.
-        if (xml_attr_stack.at(depth_key).empty()) {
+        if (xml_attr_stack.count(depth_key) == 0) {
             continue; //Skip null values
         }
+        spdlog::info("process_3gpp_attributes depth_key:{}", depth_key);
 
         std::map<string, string>::iterator mIter; 
+        std::map<string, string> _xml_attr_stack = xml_attr_stack.at(depth_key);
+        if(_xml_attr_stack.size()) continue;
 
-        for (mIter = xml_attr_stack.at(depth_key).begin(); mIter != xml_attr_stack.at(depth_key).end(); mIter++){
+        spdlog::info("process_3gpp_attributes _xml_attr_stack.size: {}", _xml_attr_stack.size()); 
+        for (mIter = _xml_attr_stack.begin(); mIter != _xml_attr_stack.end(); mIter++){
+            spdlog::info("process_3gpp_attributes->mIter");
             string p_name = parent_mo + "_" + mIter->first;
             string p_value = to_csv_format(mIter->second);
-
+            spdlog::info("process_3gpp_attributes->p_name: {}, p_value: {}", p_name, p_value);
             xml_tag_values.insert(std::pair<string, string>(p_name, p_value));
         }
     }
 
+    spdlog::info("process_3gpp_attributes---before if (!mo_three_gpp_attr_map.at(mo).empty()) {");
+
     //Some MOs dont have 3GPP attributes e.g. the fileHeader 
     //and the fileFooter
-    if (!mo_three_gpp_attr_map.at(mo).empty()) {
+    if ( mo_three_gpp_attr_map.count(mo) > 0 && !mo_three_gpp_attr_map.at(mo).empty()) {
         //Get 3GPP attributes for MO at the current depth
         std::vector<string> a_3gpp_atrr = mo_three_gpp_attr_map.at(mo);
         std::map<string, string> current_3gpp_attrs;
 
-        if (!three_gpp_attr_stack.empty() && !three_gpp_attr_stack.at(depth).empty()) {
+        if (three_gpp_attr_stack.count(depth) > 0 && !three_gpp_attr_stack.at(depth).empty()) {
             current_3gpp_attrs = three_gpp_attr_stack.at(depth);
         }
 
@@ -309,7 +322,7 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
                 a_value = xml_tag_values.at(a_attr);
             }
 
-            if (!current_3gpp_attrs.empty() && current_3gpp_attrs.count(a_attr)) {
+            if (current_3gpp_attrs.count(a_attr)) {
                 a_value = to_csv_format(current_3gpp_attrs.at(a_attr));
             }
 
@@ -342,13 +355,13 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
         string mo_file = output_directory + fs::path::preferred_separator + renamed_file_name + ".csv";
         try {
             output_3gpp_mo_pw_map.insert(std::pair<string, ofstream>(mo, ofstream(mo_file)));
-            output_3gpp_mo_pw_map.at(mo) << param_names;
+            output_3gpp_mo_pw_map.at(mo) << param_names << '\n';
         } catch (std::exception e) {
             spdlog::error(e.what());
         }
     }
 
-    output_3gpp_mo_pw_map.at(mo) << param_values;
+    output_3gpp_mo_pw_map.at(mo) << param_values << '\n';
 }
 
 /**
@@ -364,7 +377,7 @@ void bodastage::BodaBulkCmParser::save_three_gpp_attr_values(string mo) {
 
     //Some MOs dont have 3GPP attributes e.g. the fileHeader 
     //and the fileFooter
-    if (mo_three_gpp_attr_map.at(mo).empty()) {
+    if (mo_three_gpp_attr_map.count(mo) && mo_three_gpp_attr_map.at(mo).empty()) {
         //Get 3GPP attributes for MO at the current depth
         std::vector<string> a_3gpp_atrr = mo_three_gpp_attr_map.at(mo);
         std::map<string, string> current_3gpp_attrs;
@@ -374,7 +387,7 @@ void bodastage::BodaBulkCmParser::save_three_gpp_attr_values(string mo) {
 //                  current3GPPAttrs = threeGPPAttrStack.get(depth);
 //              }
 
-        if (!three_gpp_attr_stack.empty() && three_gpp_attr_stack.count(depth)) {
+        if (three_gpp_attr_stack.count(depth)) {
             current_3gpp_attrs = three_gpp_attr_stack.at(depth);
         }
 
@@ -391,7 +404,7 @@ void bodastage::BodaBulkCmParser::save_three_gpp_attr_values(string mo) {
 
             string a_value = "";
 
-            if (!current_3gpp_attrs.empty() && current_3gpp_attrs.count(a_attr)) {
+            if (current_3gpp_attrs.count(a_attr)) {
                 a_value = to_csv_format(current_3gpp_attrs.at(a_attr));
             } else {
                 //Only take the current Attri but maitain the order in 
@@ -410,8 +423,8 @@ void bodastage::BodaBulkCmParser::save_three_gpp_attr_values(string mo) {
  * @verison 2.0.0
  * @since 1.0.0
  */
-void bodastage::BodaBulkCmParser::process_vendor_attributes() {
-
+void bodastage::BodaBulkCmParser::process_vendor_attributes() { 
+    spdlog::info("process_vendor_attributes...LINE:{} ", __LINE__);
     //Skip if the mo is not in the parameterFile
     if (!parameter_file.empty() && mo_columns.count(vs_data_type) == 0) {
         return;
@@ -468,9 +481,11 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
     
     //Get the 3GPP attributes
     std::vector<string> _3gpp_attr;
-    if (!mo_three_gpp_attr_map.empty() && mo_three_gpp_attr_map.count(three_ggp_mo)){
+    if (mo_three_gpp_attr_map.count(three_ggp_mo)){
         _3gpp_attr = mo_three_gpp_attr_map.at(three_ggp_mo);
     }
+
+    spdlog::info("process_vendor_attributes---before  std::vector<string> columns;");
     
     //Make copy of the columns first i.e the vendor attributes
     std::vector<string> columns;
@@ -552,14 +567,17 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
             param_values = param_values + "," + p_value;
         }
     }
+
+    spdlog::info("process_vendor_attributes---before  string csv_file_name = vsDataType;");
     string csv_file_name = vs_data_type;
 
     //Remove vsData if we don't want to separate the 3GPP and vendor attributes
     if (separate_vendor_attributes == false) csv_file_name = bodastage::str_replace(csv_file_name, "vsData", "");
-
+    spdlog::info("process_vendor_attributes---before  if (outputVsDataTypePwMap.count(csv_file_name) > 0) {");
+    spdlog::info("output_vs_data_type_pw_map.count(csv_file_name): {}", output_vs_data_type_pw_map.count(csv_file_name));
     //Write the parameters and values to files.
-    if (!output_vs_data_type_pw_map.count(csv_file_name)) {
-
+    if (output_vs_data_type_pw_map.count(csv_file_name) == 0) {
+        spdlog::info("process_vendor_attributes--->  if (output_vs_data_type_pw_map.count(csv_file_name) > 0) {");
         string renamed_file_name = csv_file_name;
         if ( std::to_string(fs::path::preferred_separator) == "\\") {
             if (mo_to_file_name_map.count(csv_file_name)) renamed_file_name = mo_to_file_name_map.at(csv_file_name);
@@ -567,15 +585,18 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
 
         string mo_file = output_directory + fs::path::preferred_separator + renamed_file_name + ".csv";
         try {
-            output_3gpp_mo_pw_map.insert(std::pair<string, ofstream>(csv_file_name, ofstream(mo_file)));   //(csv_file_name, ofstream(mo_file));
-            output_3gpp_mo_pw_map.at(csv_file_name) << param_names;
+            output_vs_data_type_pw_map.insert(std::pair<string, ofstream>(csv_file_name, ofstream(mo_file)));   //(csv_file_name, ofstream(mo_file));
+            output_vs_data_type_pw_map.at(csv_file_name) << param_names << '\n';
         } catch (std::exception e) {
+            spdlog::info("process_vendor_attributes---exception");
             spdlog::error(e.what());
         }
 
     }
 
-    output_vs_data_type_pw_map.at(csv_file_name) << param_values;
+    output_vs_data_type_pw_map.at(csv_file_name) << param_values << '\n';;
+
+    spdlog::info("process_vendor_attributes---end");
 
 }
 
@@ -662,6 +683,9 @@ void bodastage::BodaBulkCmParser::on_end_element(Xml::Inspector<Xml::Encoding::U
     string qName = inspector.GetLocalName();
 
     start_element_tag = "";
+
+    //spdlog::debug("on_end_element: prefix: {}, qName: {}", prefix, qName);
+    spdlog::info("on_end_element: prefix: {}, qName: {}", prefix, qName);
 
     //E3:1 </xn:VsDataContainer>
     if (bodastage::str_contains(qName, "VsDataContainer")) {
@@ -789,7 +813,7 @@ void bodastage::BodaBulkCmParser::on_end_element(Xml::Inspector<Xml::Encoding::U
             attr_parent_child_map.erase(qName);
 
             //Remove the top most value from the stack.
-            xn_attr_rl_stack.pop();
+            xn_attr_rl_stack.pop_back();
 
             //Remove the parent from the threeGPPAttrStack so that we 
             //don't output data for it.
@@ -801,77 +825,83 @@ void bodastage::BodaBulkCmParser::on_end_element(Xml::Inspector<Xml::Encoding::U
         }
 
         //Handle parent child attributes. Get the child value
-        int xnAttrRlStackLen = xnAttrRlStack.size();
-        if (xnAttrRlStackLen > 1) {
-            String parentXnAttr
-                    = xnAttrRlStack.get(xnAttrRlStackLen - 2).toString();
-            newTag = parentXnAttr + parentChildAttrSeperator + qName;
+        int xn_attr_rl_stack_len = xn_attr_rl_stack.size();
+        if (xn_attr_rl_stack_len > 1) {
+            string parent_xn_attr
+                    = xn_attr_rl_stack.at(xn_attr_rl_stack_len - 2);
+            new_tag = parent_xn_attr + parent_child_attr_seperator + qName;
 
             //Store parent child map
-            attrParentChildMap.put(parentXnAttr, qName);
+            attr_parent_child_map.insert(std::pair<string, string>(parent_xn_attr, qName));
 
             //Remove the child tag from the 3gpp xnAttribute stack
-            Map<String, String> cMap = threeGPPAttrStack.get(depth);
-            if (cMap.containsKey(qName)) {
-                cMap.remove(qName);
-                threeGPPAttrStack.put(depth, cMap);
+            std::map<string, string> c_map = three_gpp_attr_stack.at(depth);
+            if (c_map.count(qName)) {
+                c_map.erase(qName);
+                three_gpp_attr_stack.insert(std::pair(depth, c_map));
             }
         }
 
-        Map<String, String> m = new LinkedHashMap<String, String>();
-        m = threeGPPAttrStack.get(depth);
+        std::map<string, string> m;
+        m = three_gpp_attr_stack.at(depth);
 
         //For multivaluted attributes , first check that the tag already 
         //exits.
-        if (m.containsKey(newTag) && m.get(newTag) != null) {
-            String oldValue = m.get(newTag);
-            String val = oldValue + multiValueSeparetor + newValue;
-            m.put(newTag, val);
+        if (m.count(new_tag) && m.at(new_tag).empty() == false) {
+            string old_value = m.at(new_tag);
+            string val = old_value + multi_value_separetor + new_value;
+            m[new_tag] = val;
         } else {
-            m.put(newTag, newValue);
+            m.insert(std::pair<string, string>(new_tag, new_value));
         }
 
-        threeGPPAttrStack.put(depth, m);
-        tagData = "";
-        xnAttrRlStack.pop();
+        three_gpp_attr_stack[depth] =  m;
+        tag_data = "";
+        xn_attr_rl_stack.pop_back();
         return;
     }
 
     //E3:6 
     //At this point, the remaining XML elements are 3GPP defined Managed 
     //Objects. 
-    if (xmlTagStack.contains(qName)) {
-        String theTag = qName;
+    if (bodastage::value_in_vector(xml_tag_stack, qName)) {
+        spdlog::info("on_end_element->E3:6: qName{} depth: {}", qName, depth);
+        string the_tag = qName;
 
         //@TODO: This occurences check does not appear to be of any use; test 
         // and remove if not needed.
-        int occurences = getXMLTagOccurences(qName);
+        int occurences = get_xml_tag_occurences(qName);
+        spdlog::info("on_end_element->E3:6: occurences: {}", occurences);
         if (occurences > 1) {
-            theTag = qName + "_" + occurences;
+            the_tag = qName + "_" + std::to_string(occurences);
         }
+        spdlog::info("on_end_element->E3:6: the_tag: {}", the_tag);
 
         //Extracting parameter value stage.
         //Printout values ifthere is no matching vsDataMO  and separateVsData is true
-        String vsDataMO = "vsData" + qName; //This create vsDataMO
-        if (parserState != ParserStates.EXTRACTING_PARAMETERS &&
-                (separateVendorAttributes == true ||
-                        (!moColumns.containsKey(vsDataMO) && separateVendorAttributes == false)
+        string vs_data_mo = "vsData" + qName; //This create vsDataMO
+        if (parser_state != EXTRACTING_PARAMETERS &&
+                (separate_vendor_attributes == true ||
+                        (mo_columns.count(vs_data_mo) == false && separate_vendor_attributes == false)
                 )
         ) {
-            process3GPPAttributes();
+            process_3gpp_attributes();
         }
 
-        threeGPPAttrValues.clear();
-        xmlTagStack.pop();
-        xmlAttrStack.remove(depth);
-        threeGPPAttrStack.remove(depth);
+        spdlog::info("on_end_element->E3:6: resetting three_gpp_attr_values, xml_tag_stack");
+        three_gpp_attr_values.clear();
+        xml_tag_stack.pop_back();
+        xml_attr_stack.erase(depth);
+        three_gpp_attr_stack.erase(depth);
         depth--;
+
+        spdlog::info("on_end_element->E3:6: qName: {}, depth: {}", qName, depth);
     }
-    //parentChildParameters.clear();
 
 }
 
 void bodastage::BodaBulkCmParser::on_characters(Xml::Inspector<Xml::Encoding::Utf8Writer> &inspector){
+    spdlog::info("on_characters: value: {}", inspector.GetValue());
     tag_data = inspector.GetValue();
 }
 
@@ -881,6 +911,7 @@ void bodastage::BodaBulkCmParser::on_comment(Xml::Inspector<Xml::Encoding::Utf8W
 
 
 void bodastage::BodaBulkCmParser::get_date_time(string input_filename) {
+    spdlog::info("get_date_time...LINE: {}", __LINE__);
     try {
 
         //base_file_name = bulk_cm_xml_file_basename = get_file_basename(input_filename);
@@ -889,15 +920,19 @@ void bodastage::BodaBulkCmParser::get_date_time(string input_filename) {
         while (inspector.Inspect()) {
             switch (inspector.GetInspected()) {
                 case Xml::Inspected::StartTag:
+                case Xml::Inspected::EmptyElementTag:
                     if (inspector.GetName() == "fileFooter") {
-                          Xml::Inspector<Xml::Encoding::Utf8Writer>::SizeType i;
-                          for (i = 0; i < inspector.GetAttributesCount(); ++i){
-                                spdlog::info("Attribute name: {}", inspector.GetAttributeAt(i).Name);
-                                spdlog::info("Attribute value: {}", inspector.GetAttributeAt(i).Value);
-                                if(inspector.GetAttributeAt(i).Name == "dateTime"){
-                                    date_time = inspector.GetAttributeAt(i).Value;
-                                }
-                          }
+                            spdlog::info("fileFooter {} attribute_count", inspector.GetAttributesCount());
+                            Xml::Inspector<Xml::Encoding::Utf8Writer>::SizeType i;
+                            for (i = 0; i < inspector.GetAttributesCount(); ++i){
+                                    spdlog::info("Attribute name: {}", inspector.GetAttributeAt(i).Name);
+                                    spdlog::info("Attribute value: {}", inspector.GetAttributeAt(i).Value);
+                                    if(inspector.GetAttributeAt(i).Name == "dateTime"){
+                                        date_time = inspector.GetAttributeAt(i).Value;
+                                        spdlog::info("End of get_date_time...LINE: {}", __LINE__);
+                                        return;
+                                    }
+                            }
                     }
                     break;
                 default:
@@ -906,9 +941,11 @@ void bodastage::BodaBulkCmParser::get_date_time(string input_filename) {
             }
         }
     
-    } catch (...) {
-
+    } catch (std::exception e) {
+        spdlog::error(e.what());
     }
+
+    spdlog::info("End of get_date_time...LINE: {}", __LINE__);
 }
 
 /**
@@ -951,7 +988,7 @@ void bodastage::BodaBulkCmParser::parse_file(string input_filename) {
     Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(input_filename);
     base_file_name = bulk_cm_xml_file_basename = bodastage::get_file_basename(input_filename);
 
-    spdlog::info("Parsing {} ...",  base_file_name);
+    spdlog::info("bodastage::BodaBulkCmParser::parse_file {} ...LINE: {}",  base_file_name, __LINE__);
 
     while (inspector.Inspect())
     {
@@ -1024,6 +1061,7 @@ void bodastage::BodaBulkCmParser::set_separate_vendor_attributes(bool separate) 
  * @since 1.1.0
  */
 void bodastage::BodaBulkCmParser::process_file_or_directory(){
+    spdlog::info("process_file_or_directory... LIN:{}", __LINE__);
     //this.dataFILe;
     fs::path path(data_source);
 
@@ -1318,12 +1356,13 @@ void bodastage::BodaBulkCmParser::set_output_directory(string dir_name) {
 
 
 void bodastage::BodaBulkCmParser::reset_variables() {
+    spdlog::info("Resetting variables...LINE:{}", __LINE__);
     //Reset variables
     vs_data_type.clear();
     vs_data_type_stack.clear();
     xml_attr_stack.clear();
-    while (!vs_data_type_rl_stack.empty()) { vs_data_type_rl_stack.pop_back();} 
-    while (!xml_tag_stack.empty()) { xml_tag_stack.pop_back();} 
+    xml_tag_stack.clear();
+    vs_data_type_rl_stack.clear();
     start_element_tag.clear();
     start_element_tag_prefix = "";
     attr_marker = false;

@@ -1,0 +1,2 @@
+FILENAME,DATETIME,SubNetwork_2_id,locationName,managedElementType,swVersion,userDefinedState,userLabel,vendorName
+bulkcm.xml,2019-04-16T00:05:00+03:00,,"",SDR,0.0.0,2,Some Element Name,Bodastage Solutions
