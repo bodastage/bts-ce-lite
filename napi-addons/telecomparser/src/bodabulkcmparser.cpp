@@ -225,6 +225,8 @@ string bodastage::BodaBulkCmParser::to_csv_format(string s) {
         csv_value = "\"" + s + "\"";
     }
 
+    //handle value with double quotes
+    //@todo: this solution only handles the first occurrence. we need to use a while loop
     if (s.find("\"") != string::npos) {
         csv_value = "\"" + s.replace(s.find("\""), 2, "\"\"") + "\"";
     }
