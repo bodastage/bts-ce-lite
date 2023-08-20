@@ -254,6 +254,14 @@ namespace bodastage
          * @brief A map of 3GPP attributes to the 3GPP MOs
          * 
          * The 3GPP attributes are not kept in the moColumns Map object.
+         * 
+         * <un:UtranCell>
+         *   <xn:attributes>
+         *     <un:rac>0</un:rac>
+         *     <un:lac>0</un:lac>
+         *     ...
+         *   </xn:attributes>
+         * </un:UtranCell>
          *
          * @since 1.0.0
          */
@@ -323,7 +331,7 @@ namespace bodastage
         /**
          * parameter selection file
          */
-        string parameter_file;
+        string parameter_file = "";
 
         /**
          * @brif This is used to mark when processing is still inside the children of a

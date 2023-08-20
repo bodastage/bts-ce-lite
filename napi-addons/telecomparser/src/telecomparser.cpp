@@ -16,6 +16,7 @@ int bodastage::parse_bulkcm(string input_file, string output_dir, string multiva
 
     parser.set_data_source(input_file);
     parser.set_output_directory(output_dir);
+    parser.set_separate_vendor_attributes(false);
     parser.parse();
    
     return 0;

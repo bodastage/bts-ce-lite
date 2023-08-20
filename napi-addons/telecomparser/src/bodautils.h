@@ -4,6 +4,7 @@
 #include <cctype>
 #include <functional>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 namespace fs = std::filesystem;
 
@@ -80,8 +81,11 @@ namespace bodastage{
 
     string tolower(string s){
         string s_tmp = s;
-        std::transform(s_tmp.begin(), s_tmp.end(), s_tmp.begin(), [](unsigned char c) { return std::toupper(c); });
-        return s;
+        //std::transform(s_tmp.begin(), s_tmp.end(), s_tmp.begin(), [](unsigned char c) { return std::tolower(c); });
+        //return s;
+        boost::algorithm::to_lower(s_tmp);
+
+        return s_tmp;
     }
 
     /**
@@ -89,6 +93,8 @@ namespace bodastage{
     */
     string str_replace(string haystack, string needle, string replacement){
         string s = haystack;
+
+        if(s.find(needle) == string::npos) return s;
 
         //@TODO: add while loop to replace all occurrences
         s.replace(s.find(needle), needle.length(), replacement);
