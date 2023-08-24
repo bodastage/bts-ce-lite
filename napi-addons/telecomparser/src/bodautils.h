@@ -5,6 +5,7 @@
 #include <functional>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -119,7 +120,7 @@ namespace bodastage{
      * @since 1.0.0
      */
     string get_file_basename(string filename) {
-        return fs::path(filename).filename();
+        return fs::path(filename).filename().string();
     }
 
 }
