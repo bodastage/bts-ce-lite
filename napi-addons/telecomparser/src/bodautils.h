@@ -25,9 +25,7 @@ limitations under the License.
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <locale>
-#include "bodautils.h"
 #include <filesystem>
-#include <regex>
 
 namespace fs = std::filesystem;
 
@@ -150,6 +148,15 @@ namespace bodastage {
     */
     string preg_match(std::string s);
 
+    /**
+     * @brief Convert wide string to string.
+    */
+    string wstr_to_str(wchar_t *wstr);
+
+    /**
+     * Return the separator for the current platform.
+    */
+    string get_sep();
 }
 
 #endif //__BODA_UTILS_H

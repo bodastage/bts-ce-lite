@@ -355,7 +355,7 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
             if (mo_to_file_name_map.count(mo)) renamed_file_name = mo_to_file_name_map.at(mo);
         }
 
-        string mo_file = output_directory + fs::path::preferred_separator + renamed_file_name + ".csv";
+        string mo_file = output_directory + std::to_string(fs::path::preferred_separator) + renamed_file_name + ".csv";
         try {
             output_3gpp_mo_pw_map.insert(std::pair<string, ofstream>(mo, ofstream(mo_file)));
             output_3gpp_mo_pw_map.at(mo) << param_names << '\n';
@@ -577,7 +577,7 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
             if (mo_to_file_name_map.count(csv_file_name)) renamed_file_name = mo_to_file_name_map.at(csv_file_name);
         }
 
-        string mo_file = output_directory + fs::path::preferred_separator + renamed_file_name + ".csv";
+        string mo_file = output_directory + std::to_string(fs::path::preferred_separator) + renamed_file_name + ".csv";
         try {
             output_vs_data_type_pw_map.insert(std::pair<string, ofstream>(csv_file_name, ofstream(mo_file)));   //(csv_file_name, ofstream(mo_file));
             output_vs_data_type_pw_map.at(csv_file_name) << param_names << '\n';

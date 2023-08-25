@@ -22,8 +22,6 @@ limitations under the License.
 #include "bodautils.h"
 //Logging
 #include "spdlog/spdlog.h"
-#include "spdlog/cfg/env.h"  // support for loading levels from the environment variable
-#include "spdlog/fmt/ostr.h" // support for user defined types
 
 using namespace std;
 
