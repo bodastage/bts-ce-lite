@@ -25,6 +25,7 @@ limitations under the License.
 #include <regex>
 #include "bodautils.h"
 #include "spdlog/spdlog.h"
+#include <typeinfo>
 
 namespace fs = std::filesystem;
 
@@ -201,4 +202,21 @@ string bodastage::preg_match(std::string s){
 
     //@todo: add implementation
     return s;
+}
+
+/**
+ * @brief Convert wide string to string.
+*/
+string bodastage::wstr_to_str(wchar_t *wstr){
+    std::wstring ws(wstr);
+    string str(ws.begin(), ws.end());
+    return str;
+}
+
+string bodastage::get_sep(){
+    if(typeid(fs::path::preferred_separator) == typeid(char)) //unix/ mac where preferred_separator is char
+        return  "/";
+    else if(typeid(fs::path::preferred_separator) == typeid(wchar_t)) //windows where preferred_separator is  wchar_t
+        return "\\";
+    return "";
 }

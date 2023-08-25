@@ -367,7 +367,7 @@ void bodastage::BodaHuaweiMMLParser::process_line(string line){
         //Add headers
         //If there is no parameterFile or if the parameter file exists and the mo is in the classNameAttrsMap
         if( moi_print_writers.count(class_name) == 0 ) {
-            string moi_file = output_directory + fs::path::preferred_separator + class_name + ".csv";
+            string moi_file = output_directory + bodastage::get_sep() + class_name + ".csv";
             moi_print_writers.insert(std::pair<string, ofstream>(class_name, ofstream(moi_file)));
             
             string p_name_str = "FILENAME,DATETIME,BSCID,BAM_VERSION,OMU_IP,MBSC MODE";
@@ -649,7 +649,7 @@ void bodastage::BodaHuaweiMMLParser::extact_parameter_and_values(string line, st
         
         //Add headers
         if(!moi_print_writers.count(print_writer_class_name)){
-            string moi_file = output_directory + fs::path::preferred_separator + print_writer_class_name + ".csv";
+            string moi_file = output_directory + bodastage::get_sep() + print_writer_class_name + ".csv";
             moi_print_writers.insert(std::pair<string, ofstream>(print_writer_class_name, ofstream(moi_file)));
             
             string p_name_str = "FILENAME,DATETIME,BSCID,BAM_VERSION,OMU_IP,MBSC MODE";

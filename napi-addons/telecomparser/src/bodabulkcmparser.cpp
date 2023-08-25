@@ -351,11 +351,11 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
         //Rename conflicting csv files on windows
         string renamed_file_name = mo;
         //@TODO: rename conflicting file names on windows since file names are case insensitive
-        if ( std::to_string(fs::path::preferred_separator) == "\\") {
+        if ( bodastage::get_sep() == "\\") {
             if (mo_to_file_name_map.count(mo)) renamed_file_name = mo_to_file_name_map.at(mo);
         }
 
-        string mo_file = output_directory + std::to_string(fs::path::preferred_separator) + renamed_file_name + ".csv";
+        string mo_file = output_directory + bodastage::get_sep() + renamed_file_name + ".csv";
         try {
             output_3gpp_mo_pw_map.insert(std::pair<string, ofstream>(mo, ofstream(mo_file)));
             output_3gpp_mo_pw_map.at(mo) << param_names << '\n';
@@ -569,15 +569,15 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
 
     //Remove vsData if we don't want to separate the 3GPP and vendor attributes
     if (separate_vendor_attributes == false) csv_file_name = bodastage::str_replace(csv_file_name, "vsData", "");
-
+    
     //Write the parameters and values to files.
     if (output_vs_data_type_pw_map.count(csv_file_name) == 0) {
         string renamed_file_name = csv_file_name;
-        if ( std::to_string(fs::path::preferred_separator) == "\\") {
+        if ( bodastage::get_sep() == "\\") { //windows
             if (mo_to_file_name_map.count(csv_file_name)) renamed_file_name = mo_to_file_name_map.at(csv_file_name);
         }
 
-        string mo_file = output_directory + std::to_string(fs::path::preferred_separator) + renamed_file_name + ".csv";
+        string mo_file = output_directory + bodastage::get_sep() + renamed_file_name + ".csv";
         try {
             output_vs_data_type_pw_map.insert(std::pair<string, ofstream>(csv_file_name, ofstream(mo_file)));   //(csv_file_name, ofstream(mo_file));
             output_vs_data_type_pw_map.at(csv_file_name) << param_names << '\n';

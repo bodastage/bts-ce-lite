@@ -5,6 +5,7 @@
 #include "XmlInspector/XmlInspector.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -25,6 +26,9 @@ int bodastage::parse_bulkcm(string input_file, string output_dir, string multiva
 int bodastage::parse_huaweimml(string input_file, string output_dir, string multivalue_sep, string meta_fields, string extract_parametes)
 {
     spdlog::info("Parsing huaweil MML file: {}", input_file);
+
+    // spdlog::info("fs::path::preferred_separator: {}", bodastage::wstr_to_str(fs::path::preferred_separator));
+    spdlog::info("typeid(fs::path::preferred_separator): {}", bodastage::get_sep());
 
     bodastage::BodaHuaweiMMLParser parser;
 
