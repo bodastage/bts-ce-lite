@@ -9,6 +9,6 @@ const path = require('path')
 // const outputFile2 = path.join(__dirname, 'output', 'sample2');
 // telecomparser.parse_bulkcm(inputFile2, outputFile2);
 
-const inputFile3 = path.join(__dirname, 'samples', 'bulkcm3.xml');
-const outputFile3 = path.join(__dirname, 'output', 'sample3');
+const inputFile3 = path.join(__dirname, 'samples', 'bulkcm', 'bulkcm3.xml');
+const outputFile3 = path.join(__dirname, 'output', 'bulkcm', 'sample3');
 telecomparser.parse_bulkcm(inputFile3, outputFile3);

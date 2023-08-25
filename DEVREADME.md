@@ -1,5 +1,12 @@
 # Development notes
 
+## Windows setup 
+* install windows build tools -- 2017+ preferred
+* install paython 3+ 
+* install nodejs 16+
+* clone the repo
+* con
+
 ## Setup
     - install dependencies: `npm install` or yarn install
     - Run web app: yarn run start 

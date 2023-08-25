@@ -1,0 +1,9 @@
+//****************MML script file****************
+//Export start time: 2050-22-23 75:68:11
+//Export Workstation IP address: 11.999.77.8
+//System BSCID: 999
+//For BAM version: V111R050ABCDEFGHIJKLMNOPQRSTUVWXYZ
+//MBSC Mode: UO
+//OMU IP: 99.999.9.99
+//***********************************************
+SET MONAME:PARAM1="VALUE ONE", PARAM2="VALUE2", PARAM3=NOT_SUPPORTED, PARAM4="Some string, with, commas";

@@ -24,6 +24,7 @@ limitations under the License.
 #include <chrono>
 #include "XmlInspector/XmlInspector.hpp"
 #include "spdlog/spdlog.h"
+#include "bodautils.h"
 
 //namespace fs = std::filesystem;
 
@@ -31,17 +32,6 @@ using namespace std;
 
 namespace bodastage
 {
-    enum ParserStates { 
-        
-        //managed object parser extraction stage 
-        EXTRACTING_PARAMETERS = 1, 
-        
-        //Parameter value extraction stage
-        EXTRACTING_VALUES = 2,
-
-        //parsing done
-        EXTRACTING_DONE = 3
-    };
 
     class BodaBulkCmParser
     {

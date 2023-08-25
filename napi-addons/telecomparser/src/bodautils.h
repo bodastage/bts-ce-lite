@@ -15,114 +15,108 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#ifndef __BODA_UTILS_H
+#define __BODA_UTILS_H
+
 #include <vector>
 #include <string>
 #include <cctype>
 #include <functional>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <locale>
+#include "bodautils.h"
+#include <filesystem>
+#include <regex>
 
 namespace fs = std::filesystem;
 
-namespace bodastage{
+using namespace std;
 
-    std::vector<std::string> split_str(
-        std::string str,
-        std::string delimeter)
-    {
-        std::vector<std::string> splittedStrings = {};
-        size_t pos = 0;
+namespace bodastage {
 
-        while ((pos = str.find(delimeter)) != std::string::npos)
-        {
-            std::string token = str.substr(0, pos);
-            if (token.length() > 0)
-                splittedStrings.push_back(token);
-            str.erase(0, pos + delimeter.length());
-        }
+    enum ParserStates { 
+        
+        //managed object parser extraction stage 
+        EXTRACTING_PARAMETERS = 1, 
+        
+        //Parameter value extraction stage
+        EXTRACTING_VALUES = 2,
 
-        if (str.length() > 0)
-            splittedStrings.push_back(str);
-        return splittedStrings;
+        //parsing done
+        EXTRACTING_DONE = 3
+    };
+
+    // trim from start (in place)
+    static inline void ltrim(std::string &s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        }));
     }
 
+    string ltrim_str(std::string ss);
 
-    bool file_is_readable(const fs::path& p)
-    {
-        std::error_code ec; // For noexcept overload usage.
-        auto perms = fs::status(p, ec).permissions();
-        if ((perms & fs::perms::owner_read) != fs::perms::none &&
-            (perms & fs::perms::group_read) != fs::perms::none &&
-            (perms & fs::perms::others_read) != fs::perms::none
-            )
-        {
-            return true;
-        }
-        return false;
+    // trim from end (in place)
+    static inline void rtrim(std::string &s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        }).base(), s.end());
     }
 
-    bool file_is_writable(const fs::path& p)
-    {
-        std::error_code ec; // For noexcept overload usage.
-        auto perms = fs::status(p, ec).permissions();
-        if ((perms & fs::perms::owner_write) != fs::perms::none &&
-            (perms & fs::perms::group_write) != fs::perms::none &&
-            (perms & fs::perms::others_write) != fs::perms::none
-            )
-        {
-            return true;
-        }
-        return false;
+    // trim from end (in place)
+    string rtrim_str(std::string ss);
+
+    // trim from both ends (in place)
+    void trim(std::string &s);
+
+    // trim from both ends (in place)
+    static inline string trim_str(std::string s) {
+        return ltrim_str(rtrim_str(s));
     }
 
-    bool is_directory(const fs::path& p){
-        std::error_code ec; 
-        if (fs::is_directory(p, ec)) return true;
-        return false;
+    // trim from start (copying)
+    static inline std::string ltrim_copy(std::string s) {
+        ltrim(s);
+        return s;
     }
 
-    bool is_regular_file(const fs::path& p){
-        std::error_code ec; 
-        if (fs::is_regular_file(p, ec)) return true;
-        return false;
+    // trim from end (copying)
+    static inline std::string rtrim_copy(std::string s) {
+        rtrim(s);
+        return s;
     }
 
-    bool starts_with(string s, string prefix){
-        return (s.rfind(prefix, 0) == 0);
+    // trim from both ends (copying)
+    static inline std::string trim_copy(std::string s) {
+        trim(s);
+        return s;
     }
 
-    bool ends_with(string s, string suffix){
-        return (s.rfind(suffix, s.length() - suffix.length()) == 0);
-    }
+    std::vector<std::string> split_str(std::string str, std::string delimeter);
 
-    string tolower(string s){
-        string s_tmp = s;
-        //std::transform(s_tmp.begin(), s_tmp.end(), s_tmp.begin(), [](unsigned char c) { return std::tolower(c); });
-        //return s;
-        boost::algorithm::to_lower(s_tmp);
+    bool file_is_readable(const fs::path& p);
 
-        return s_tmp;
-    }
+    bool file_is_writable(const fs::path& p);
+
+    bool is_directory(const fs::path& p);
+
+    bool is_regular_file(const fs::path& p);
+
+    bool starts_with(std::string s, string prefix);
+
+    bool ends_with(std::string s, string suffix);
+
+    string tolower(std::string s);
 
     /**
      * @brief Replace all occurrences of a string with another string.
     */
-    string str_replace(string haystack, string needle, string replacement){
-        string s = haystack;
-
-        if(s.find(needle) == string::npos) return s;
-
-        //@TODO: add while loop to replace all occurrences
-        s.replace(s.find(needle), needle.length(), replacement);
-        return s;
-    }
+    string str_replace(std::string haystack, string needle, string replacement);
 
     /**
      * @brief Check if a string contains another string.
     */
-    bool str_contains(string haystack, string needle){
-        return (haystack.find(needle) != std::string::npos);
-    }
+    bool str_contains(std::string haystack, string needle);
 
     //@TODO: use references instead of copying
     template <typename T> bool value_in_vector(std::vector<T> v, T needle){
@@ -134,8 +128,28 @@ namespace bodastage{
      *
      * @since 1.0.0
      */
-    string get_file_basename(string filename) {
-        return fs::path(filename).filename();
-    }
+    string get_file_basename(std::string filename);
+
+    /**
+     * @brief Take a string and replace based on regular expression.
+    */
+    string preg_replace(std::string s, string rgx, string replacement);
+
+    /**
+     * @brief Take a string and replace based on regular expression.
+    */
+    bool preg_match(std::string s, string rgx);
+
+    /**
+     * @brief Take a string and split it based on regular expression.
+    */
+    std::vector<std::string> preg_split(std::string &s, std::string rgx);
+
+    /**
+     * @brief Take a string and replace based on regular expression.
+    */
+    string preg_match(std::string s);
 
 }
+
+#endif //__BODA_UTILS_H

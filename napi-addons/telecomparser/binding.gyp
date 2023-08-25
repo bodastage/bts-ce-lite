@@ -5,8 +5,11 @@
       "sources": [
         "src/telecomparser.cpp",
         "src/bodabulkcmparser.cpp",
+        "src/bodahuaweimmlparser.cpp",
+        "src/bodautils.cpp",
         "src/bodabulkcmparser.h",
-        "src/bodautils.h"
+        "src/bodahuaweimmlparser.h",
+        "src/bodautils.h",
       ],
       'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")", "external"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],

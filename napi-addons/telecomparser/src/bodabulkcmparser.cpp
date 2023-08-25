@@ -17,9 +17,10 @@ limitations under the License.
 #include "bodabulkcmparser.h"
 #include <iostream>
 #include "fast-cpp-csv-parser/csv.h"
-#include "bodautils.h"
 #include "spdlog/spdlog.h"
 #include <regex>
+#include "bodautils.h"
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -68,12 +69,12 @@ int bodastage::BodaBulkCmParser::get_xml_tag_occurences(string tag_name) {
 
 
 void bodastage::BodaBulkCmParser::on_start_element(Xml::Inspector<Xml::Encoding::Utf8Writer> &inspector)
-{
+{  
 
     string start_element = inspector.GetName();
     string qName = inspector.GetLocalName();
     string prefix = inspector.GetPrefix();
-
+    
     start_element_tag = qName;
     start_element_tag_prefix = prefix;
 
@@ -686,7 +687,6 @@ void bodastage::BodaBulkCmParser::on_end_element(Xml::Inspector<Xml::Encoding::U
         depth--;
         return;
     }
-
     //We are at the end of </attributes> in 3GPP tag and VsDataContainer is the last tag in the xml tag stack
     if (qName == "attributes" && !bodastage::starts_with(bodastage::tolower(xml_tag_stack.back()), "vsdatacontainer")) {
         //Collect values for use when separateVsData is false
@@ -711,7 +711,6 @@ void bodastage::BodaBulkCmParser::on_end_element(Xml::Inspector<Xml::Encoding::U
         
         return;
     }
-
 
     //E3:3 xx:vsData<VendorSpecificDataType>
     //if (bodastage::starts_with(qName, "vsData") && !qName.equalsIgnoreCase("VsDataContainer")
@@ -878,7 +877,6 @@ void bodastage::BodaBulkCmParser::on_end_element(Xml::Inspector<Xml::Encoding::U
         xml_attr_stack.erase(depth);
         three_gpp_attr_stack.erase(depth);
         depth--;
-
     }
 }
 
@@ -957,7 +955,6 @@ void bodastage::BodaBulkCmParser::get_parameters_to_extract(string filename) {
  * @param input_filename
  */
 void bodastage::BodaBulkCmParser::parse_file(string input_filename) {
-
     Xml::Inspector<Xml::Encoding::Utf8Writer> inspector(input_filename);
     base_file_name = bulk_cm_xml_file_basename = bodastage::get_file_basename(input_filename);
 
@@ -1031,7 +1028,6 @@ void bodastage::BodaBulkCmParser::set_separate_vendor_attributes(bool separate) 
  * @since 1.1.0
  */
 void bodastage::BodaBulkCmParser::process_file_or_directory(){
-    //this.dataFILe;
     fs::path path(data_source);
 
     bool is_regular_executable_file = bodastage::is_regular_file(path) && bodastage::file_is_readable(path);

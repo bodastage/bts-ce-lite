@@ -8,7 +8,8 @@
       "install-debug": "node-gyp --debug configure rebuild",
       "start": "node index.js",
       "test": "node test.js",
-      "test-debug": "node-gyp --debug configure rebuild && node test-debug.js"
+      "test-debug": "node-gyp --debug configure rebuild && node test-debug.js",
+      "test-debug-huaweimml": "node-gyp --debug configure rebuild && node tests/test-debug-huaweimml.js"
     },
     "author": "Bodastage Solutions",
     "license": "Apache-2.0",
