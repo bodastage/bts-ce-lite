@@ -29,7 +29,7 @@
     "electron:mac": "npm run react:build && npx electron-builder build --mac",
     "release": "npm run react:build && npx electron-builder build",
     "release:all": "npm run react:build && npx electron-builder build -mwl -p always",
-    "release:mac": "npm run react:build && npx electron-builder build --mac -p always",
+    "release:mac": "npm run react:build && npx electron-builder build --mac -p always -c.extraMetadata.main=main.js",
     "release:linux": "npm run react:build && npx electron-builder build --linux -p always",
     "release:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l -p always"
   },
@@ -276,15 +276,16 @@
     "copyright": "Copyright © 2019 $npm_package_author_name",
     "files": [
       "./build/**/*",
-      "./src/electron-start.js",
-      "./background/**/*"
+      "./main.js",
+      "./preload.js",
+      "./backend/**/*"
     ],
     "extraResources": [
       "libraries",
       "db"
     ],
     "extraMetadata": {
-      "main": "./src/electron-start.js"
+      "main": "./main.js"
     },
     "dmg": {
       "icon": "build/icon.icns",

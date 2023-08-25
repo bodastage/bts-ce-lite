@@ -603,7 +603,7 @@ class CreateReport extends React.Component{
         this.columnDef = [];
         if( typeof this.props.fields === 'undefined'  ) return;
 
-        for(var key in this.props.fields){
+        for(let key in this.props.fields){
             let columnName = this.props.fields[key]
 			
 			//Cell Styles 
@@ -615,7 +615,7 @@ class CreateReport extends React.Component{
 			if(typeof this.tableStyles[columnName] !== 'undefined'){
 				const conditions = this.tableStyles[columnName].conditions;
 				const reportId = this.props.reportInfo !== null ? this.props.reportInfo.id : 'undefined';
-				for(var idx in conditions){
+				for(let idx in conditions){
 					const cond = conditions[idx];
 					
 					const className = generateStyleClass(reportId, columnName, idx);
@@ -966,7 +966,7 @@ class CreateReport extends React.Component{
 			let ky=0;
 			configureTable = [<b key={ky+"ab"}>Configure table</b>];
 			
-			for(var field in this.tableStyles){
+			for(let field in this.tableStyles){
 				const f = field;
 				const conditions = this.tableStyles[field].conditions;
 				ky += 1;
@@ -978,7 +978,7 @@ class CreateReport extends React.Component{
 				);
 				
 				
-				for(var i in conditions){
+				for(let i in conditions){
 					const cond = conditions[i];
 					const styleConditions = conditions[i].styleConditions || [];
 					

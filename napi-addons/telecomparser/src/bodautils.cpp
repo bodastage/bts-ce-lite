@@ -160,7 +160,7 @@ bool bodastage::str_contains(std::string haystack, string needle){
  * @since 1.0.0
  */
 string bodastage::get_file_basename(std::string filename) {
-    return fs::path(filename).filename();
+    return fs::path(filename).filename().u8string();
 }
 
 /**
@@ -191,7 +191,6 @@ std::vector<std::string> bodastage::preg_split(std::string &s, string rgx) {
           std::sregex_token_iterator(),
           std::back_inserter(_parts));
 
-    spdlog::info("");
     return _parts;
 }
 

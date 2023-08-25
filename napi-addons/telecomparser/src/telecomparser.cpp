@@ -14,7 +14,6 @@ int bodastage::parse_bulkcm(string input_file, string output_dir, string multiva
     spdlog::info("Parsing bulkcm file: {}", input_file);
 
     bodastage::BodaBulkCmParser parser;
-
     parser.set_data_source(input_file);
     parser.set_output_directory(output_dir);
     parser.set_separate_vendor_attributes(false);
@@ -27,11 +26,7 @@ int bodastage::parse_huaweimml(string input_file, string output_dir, string mult
 {
     spdlog::info("Parsing huaweil MML file: {}", input_file);
 
-    // spdlog::info("fs::path::preferred_separator: {}", bodastage::wstr_to_str(fs::path::preferred_separator));
-    spdlog::info("typeid(fs::path::preferred_separator): {}", bodastage::get_sep());
-
     bodastage::BodaHuaweiMMLParser parser;
-
     parser.set_data_source(input_file);
     parser.set_output_directory(output_dir);
     parser.parse();

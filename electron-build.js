@@ -6,16 +6,16 @@ const Platform = builder.Platform;
 builder.build({
     targets: Platform.WINDOWS.createTarget(),
     config: {
-    "appId": "com.bodastage.btscelite",
-    "productName": "BTS-CE-Lite",
-    "copyright": "Copyright © 2019 ${author}",
+    "appId": "com.bodastage.bodalite",
+    "productName": "Boda-Lite",
+    "copyright": "Copyright © 2023 ${author}",
     "files": [
       "./build/**/*",
-      "./src/electron-start.js",
+      "./main.js",
       "package.json"
     ],
 	"extraMetadata": {
-		"main": "./src/electron-start.js"
+		"main": "./main.js"
 	},
     "dmg": {
       "contents": [
