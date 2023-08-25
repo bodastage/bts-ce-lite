@@ -126,8 +126,11 @@ export default class ParameterLibrary extends React.Component {
 				that.filteredSortedQuery = filteredSortedQuery;
 				
 				//Count is the last row
-				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
-				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
+				const _countResult = await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`);
+				let count = _countResult !== false ? _countResult.rows[0].count : 0;
+
+				const _queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
+				let queryResult =  _queryResult !== false ? _queryResult : {rows:[]};
 				
 				params.successCallback(queryResult.rows, count); 
 			}

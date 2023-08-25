@@ -39,8 +39,8 @@ import {
 import { SemiCircle } from 'react-leaflet-semicircle';
 import 'react-leaflet-fullscreen-control'
 import { FaRss } from "react-icons/fa";
-import Control from 'react-leaflet-control';
-import { Sidebar, Tab } from 'react-leaflet-sidetabs';
+import Control from 'react-leaflet-custom-control';
+// import { Sidebar, Tab } from 'react-leaflet-sidetabs';
 import { 
 	FiChevronRight, 
 	FiList,
@@ -51,7 +51,7 @@ import 'leaflet-contextmenu'
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css'
 import 'leaflet.icon.glyph'
 import { renderToString } from 'react-dom/server'
-import ReactLeafletSearch from 'react-leaflet-search'
+// import ReactLeafletSearch from 'react-leaflet-search'
 
 //Fix icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -200,8 +200,8 @@ class GISMap extends React.Component{
 	}
 	
     componentDidMount () {
-		this.map = this.refs.map.leafletElement;
-        const map = this.refs.map.leafletElement;
+		// this.map = this.refs.map.leafletElement;
+        // const map = this.refs.map.leafletElement;
 		
 		//Update carrier colors
 		this.props.dispatch(gisFetchPlanFrequencies());
@@ -211,7 +211,9 @@ class GISMap extends React.Component{
         //it cannot determine the height value of an HTML element with 
         //display:none. This re-renders the map correctly after the tab is shown.
         setTimeout(function(){
-            map.invalidateSize();
+
+			//
+            // map.invalidateSize();
         },1000);
 		
 		
@@ -219,36 +221,36 @@ class GISMap extends React.Component{
 		
 		//Add context menu 
 		
-        this.map = null;
+        // this.map = null;
     }
     
     componentDidUpdate(){
-        const map = this.refs.map.leafletElement;
+        // const map = this.refs.map.leafletElement;
 		
-        map.invalidateSize();
+        // map.invalidateSize();
 		
 		//Disable disable dragging and zooming when working with the side panel
-		var div = L.DomUtil.get('gis_sidebar');
-		L.DomEvent.on(div, 'mouseover', function(){
-			map.dragging.disable();
-			map.touchZoom.disable();
-			map.doubleClickZoom.disable();
-			map.scrollWheelZoom.disable();
-		});
+		// var div = L.DomUtil.get('gis_sidebar');
+		// L.DomEvent.on(div, 'mouseover', function(){
+		// 	map.dragging.disable();
+		// 	map.touchZoom.disable();
+		// 	map.doubleClickZoom.disable();
+		// 	map.scrollWheelZoom.disable();
+		// });
 		
-		L.DomEvent.on(div, 'mouseout', function(){
-			map.dragging.enable();
-			map.touchZoom.enable();
-			map.doubleClickZoom.enable();
-			map.scrollWheelZoom.enable();
-		});
+		// L.DomEvent.on(div, 'mouseout', function(){
+		// 	map.dragging.enable();
+		// 	map.touchZoom.enable();
+		// 	map.doubleClickZoom.enable();
+		// 	map.scrollWheelZoom.enable();
+		// });
 		
 		//map.ContextMenu .removeAllItems();
     }
 	
 	centerMap(e){
-		const map = this.refs.map.leafletElement;
-		map.panTo(e.latlng);
+		// const map = this.refs.map.leafletElement;
+		// map.panTo(e.latlng);
 	}
 	
 	refreshMap(){
@@ -344,10 +346,9 @@ class GISMap extends React.Component{
 	
     handleResize(resizeEntries){
 
-        //this.setState({height: resizeEntries[0].contentRect.height})
-        const map = this.refs.map.leafletElement;
+        // const map = this.refs.map.leafletElement;
         setTimeout(function(){
-            map.invalidateSize();
+            // map.invalidateSize();
         },1);
     }
     
@@ -553,10 +554,12 @@ class GISMap extends React.Component{
 							}]}
 							fullscreenControl
 						>
-							<ReactLeafletSearch 
-								zoom={12}
-								inputPlaceholder="Find a place"
-								position="topleft"/>
+							{
+							// <ReactLeafletSearch 
+							// 	zoom={12}
+							// 	inputPlaceholder="Find a place"
+							// 	position="topleft"/>
+							}
 							
 							<TileLayer
 							  attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
@@ -567,180 +570,183 @@ class GISMap extends React.Component{
 							
 							{relationLines}
 
-							<Control position="topleft" >
+							<Control prepend position="topleft" >
 								<div className="leaflet-control-layers p-2">
 									<Icon icon="refresh" onClick={this.refreshMap}/>
 								</div>
 							</Control>
-							
-							<Sidebar
-							  id="gis_sidebar"
-							  position="right"
-							  collapsed={this.state.sideBarCollapsed}
-							  closeIcon={<FiChevronRight />}
-							  selected={this.state.selectedTab}
-							  onOpen={this.onSideBarOpen.bind(this)}
-							  onClose={this.onSideBarClose.bind(this)}
-							>
-							   <Tab id="gis_search" header="Filter" icon={<FiFilter />}>
-									<div className="mt-2">
-										<FormGroup
-											label=""
-											labelFor="search_network"
-										>
-											<InputGroup 
-												id="search_network" 
-												placeholder="Search network..." 
-												leftIcon="search" 
-												name="filterText"
-												type="text"
-												value={this.state.filterText} 
-												onChange={this.handleFilterTextChangeEvent}
-											/>
-										</FormGroup>
-										<div className="bp3-text-small bp3-text-muted font-italic">{this.state.filterText.length > 0 ? `Found ${displayCellCount} cells.` : "" }</div>
-										
-										<div>
-											<h6 className="horizontal-line">
-												<span className="horizontal-line-text">Technology</span>
-											</h6>
-											<Checkbox inline={true} checked={this.state.showGSMCells} name="showGSMCells" label="GSM" onChange={this.handleTechFilterCheckBox} />
-											<Checkbox inline={true} checked={this.state.showUMTSCells} name="showUMTSCells" label="UMTS" onChange={this.handleTechFilterCheckBox} />
-											<Checkbox inline={true} checked={this.state.showLTECells} name="showLTECells" label="LTE" onChange={this.handleTechFilterCheckBox} />
-											<Checkbox inline={true} checked={this.state.show5GCells} name="show5GCells" label="5G" onChange={this.handleTechFilterCheckBox} />
-										</div>
-										
-										<div>
-											<h6 className="horizontal-line">
-												<span className="horizontal-line-text">Environment</span>
-											</h6>
-											<Checkbox inline={true} checked={this.state.showPlanEnv} 
-												name="showPlanEnv" 
-												label="Plan" 
-												onChange={this.handleTechFilterCheckBox} 
-												disabled={true}
-											/>
-											<Checkbox 
-												inline={true} 
-												checked={this.state.showLiveEnv} 
-												name="showLiveEnv" 
-												label="Live" 
-												onChange={this.handleTechFilterCheckBox} 
-												disabled={true}
-											/>
-										</div>
-										
-									</div>
-							   </Tab>
-							   
-							   <Tab id="gis_data" header="Data" icon={<FiDatabase />}>
-									<div className="mt-2">
-										<div>
-											<h6 className="horizontal-line">
-												<span className="horizontal-line-text">Upload file</span>
-											</h6>
-											{ this.state.processingImport ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
-											{importStatusNotice}
-									
-											<FileInput disabled={this.state.processingImport} className={"mr-2 " + importFileEllipsis} text={this.state.importFile} onChange={this.onImportFileChange} />
-											<HTMLSelect 
-												disabled={this.state.processingImport} 
-												options={IMPORT_FILE_FORMAT} 
-												className="mt-2 mr-2" 
-												onChange={this.onImportFileFormatChange}
-											/>
-											<Switch  disabled={this.state.processingImport} checked={this.state.clearBeforeLoading} label="Delete before loading" onChange={this.handleClearSwitch}/>
-											<Button text="Upload" disabled={this.state.processingImport}  icon="upload" className="mt-2" onClick={this.importMapData}/>
-										</div>
-									</div>
-							   </Tab> 
-							   
-							   <Tab id="gis_properties" header="Properties" icon={<FiList />}>
-									<div className="mt-2">
-										<div>
-											<h6 className="horizontal-line">
-												<span className="horizontal-line-text">Radius</span>
-											</h6>
-												<div className="row">
-													<label htmlFor="gsm_radius" className="col-sm-2 col-form-label">GSM</label>
-													<div className="col-10">
-														<FormGroup
-															labelFor="gsm_radius"
-															inline={true}
-															className="mb-1"
-														>
-															<InputGroup 
-																id="gsm_radius" 
-																name="gsmRadius"
-																defaultValue={this.props.sectorRadius['gsm']}
-																onChange={this.handleRadiusChange}
-															/>
-														</FormGroup>
-													</div>
-												</div>
-												
-												<div className="row">
-													<label htmlFor="umts_radius" className="col-sm-2 col-form-label">UMTS</label>
-													<div className="col-10">
-														<FormGroup
-															labelFor="umts_radius"
-															inline={true}
-															className="mb-1"
-														>
-															<InputGroup 
-																id="umts_radius" 
-																name="umtsRadius"
-																defaultValue={this.props.sectorRadius['umts']}
-																onChange={this.handleRadiusChange}
-															/>
-														</FormGroup>
-													</div>
-												</div>
-												
-												<div className="row">
-													<label htmlFor="lte_radius" className="col-sm-2 col-form-label">LTE</label>
-													<div className="col-10">
-														<FormGroup
-															labelFor="lte_radius"
-															inline={true}
-															className="mb-1"
-														>
-															<InputGroup 
-																name="lteRadius"
-																id="lte_radius" 
-																defaultValue={this.props.sectorRadius['lte']} 
-																onChange={this.handleRadiusChange}/>
-														</FormGroup>
-													</div>
-												</div>
-										</div>
-										
-										<div>
-											<h6 className="horizontal-line">
-												<span className="horizontal-line-text">Carrier Colors</span>
-											</h6>
-											<div>
-											{Object.keys(this.props.carrierColors).map((v, i) => (
-												<div className="row">
-													<div className="col-3">{v}</div>
-													<div className="col-2">
-														<input 
-															type="color" 
-															name={v} 
-															value={this.props.carrierColors[v]} 
-															onChange={this.updateCarrierColor}/>
-													</div>
 
-												</div>
-											))}
-												
-											</div>
-										</div>
-										
-									</div>
-							   </Tab>          
-							</Sidebar>
+
+	{
 							
+							// <Sidebar
+							//   id="gis_sidebar"
+							//   position="right"
+							//   collapsed={this.state.sideBarCollapsed}
+							//   closeIcon={<FiChevronRight />}
+							//   selected={this.state.selectedTab}
+							//   onOpen={this.onSideBarOpen.bind(this)}
+							//   onClose={this.onSideBarClose.bind(this)}
+							// >
+							//    <Tab id="gis_search" header="Filter" icon={<FiFilter />}>
+							// 		<div className="mt-2">
+							// 			<FormGroup
+							// 				label=""
+							// 				labelFor="search_network"
+							// 			>
+							// 				<InputGroup 
+							// 					id="search_network" 
+							// 					placeholder="Search network..." 
+							// 					leftIcon="search" 
+							// 					name="filterText"
+							// 					type="text"
+							// 					value={this.state.filterText} 
+							// 					onChange={this.handleFilterTextChangeEvent}
+							// 				/>
+							// 			</FormGroup>
+							// 			<div className="bp3-text-small bp3-text-muted font-italic">{this.state.filterText.length > 0 ? `Found ${displayCellCount} cells.` : "" }</div>
+										
+							// 			<div>
+							// 				<h6 className="horizontal-line">
+							// 					<span className="horizontal-line-text">Technology</span>
+							// 				</h6>
+							// 				<Checkbox inline={true} checked={this.state.showGSMCells} name="showGSMCells" label="GSM" onChange={this.handleTechFilterCheckBox} />
+							// 				<Checkbox inline={true} checked={this.state.showUMTSCells} name="showUMTSCells" label="UMTS" onChange={this.handleTechFilterCheckBox} />
+							// 				<Checkbox inline={true} checked={this.state.showLTECells} name="showLTECells" label="LTE" onChange={this.handleTechFilterCheckBox} />
+							// 				<Checkbox inline={true} checked={this.state.show5GCells} name="show5GCells" label="5G" onChange={this.handleTechFilterCheckBox} />
+							// 			</div>
+										
+							// 			<div>
+							// 				<h6 className="horizontal-line">
+							// 					<span className="horizontal-line-text">Environment</span>
+							// 				</h6>
+							// 				<Checkbox inline={true} checked={this.state.showPlanEnv} 
+							// 					name="showPlanEnv" 
+							// 					label="Plan" 
+							// 					onChange={this.handleTechFilterCheckBox} 
+							// 					disabled={true}
+							// 				/>
+							// 				<Checkbox 
+							// 					inline={true} 
+							// 					checked={this.state.showLiveEnv} 
+							// 					name="showLiveEnv" 
+							// 					label="Live" 
+							// 					onChange={this.handleTechFilterCheckBox} 
+							// 					disabled={true}
+							// 				/>
+							// 			</div>
+										
+							// 		</div>
+							//    </Tab>
+							   
+							//    <Tab id="gis_data" header="Data" icon={<FiDatabase />}>
+							// 		<div className="mt-2">
+							// 			<div>
+							// 				<h6 className="horizontal-line">
+							// 					<span className="horizontal-line-text">Upload file</span>
+							// 				</h6>
+							// 				{ this.state.processingImport ? (<ProgressBar intent={Intent.PRIMARY} className="mt-1  mb-2"/>) : ""}
+							// 				{importStatusNotice}
+									
+							// 				<FileInput disabled={this.state.processingImport} className={"mr-2 " + importFileEllipsis} text={this.state.importFile} onChange={this.onImportFileChange} />
+							// 				<HTMLSelect 
+							// 					disabled={this.state.processingImport} 
+							// 					options={IMPORT_FILE_FORMAT} 
+							// 					className="mt-2 mr-2" 
+							// 					onChange={this.onImportFileFormatChange}
+							// 				/>
+							// 				<Switch  disabled={this.state.processingImport} checked={this.state.clearBeforeLoading} label="Delete before loading" onChange={this.handleClearSwitch}/>
+							// 				<Button text="Upload" disabled={this.state.processingImport}  icon="upload" className="mt-2" onClick={this.importMapData}/>
+							// 			</div>
+							// 		</div>
+							//    </Tab> 
+							   
+							//    <Tab id="gis_properties" header="Properties" icon={<FiList />}>
+							// 		<div className="mt-2">
+							// 			<div>
+							// 				<h6 className="horizontal-line">
+							// 					<span className="horizontal-line-text">Radius</span>
+							// 				</h6>
+							// 					<div className="row">
+							// 						<label htmlFor="gsm_radius" className="col-sm-2 col-form-label">GSM</label>
+							// 						<div className="col-10">
+							// 							<FormGroup
+							// 								labelFor="gsm_radius"
+							// 								inline={true}
+							// 								className="mb-1"
+							// 							>
+							// 								<InputGroup 
+							// 									id="gsm_radius" 
+							// 									name="gsmRadius"
+							// 									defaultValue={this.props.sectorRadius['gsm']}
+							// 									onChange={this.handleRadiusChange}
+							// 								/>
+							// 							</FormGroup>
+							// 						</div>
+							// 					</div>
+												
+							// 					<div className="row">
+							// 						<label htmlFor="umts_radius" className="col-sm-2 col-form-label">UMTS</label>
+							// 						<div className="col-10">
+							// 							<FormGroup
+							// 								labelFor="umts_radius"
+							// 								inline={true}
+							// 								className="mb-1"
+							// 							>
+							// 								<InputGroup 
+							// 									id="umts_radius" 
+							// 									name="umtsRadius"
+							// 									defaultValue={this.props.sectorRadius['umts']}
+							// 									onChange={this.handleRadiusChange}
+							// 								/>
+							// 							</FormGroup>
+							// 						</div>
+							// 					</div>
+												
+							// 					<div className="row">
+							// 						<label htmlFor="lte_radius" className="col-sm-2 col-form-label">LTE</label>
+							// 						<div className="col-10">
+							// 							<FormGroup
+							// 								labelFor="lte_radius"
+							// 								inline={true}
+							// 								className="mb-1"
+							// 							>
+							// 								<InputGroup 
+							// 									name="lteRadius"
+							// 									id="lte_radius" 
+							// 									defaultValue={this.props.sectorRadius['lte']} 
+							// 									onChange={this.handleRadiusChange}/>
+							// 							</FormGroup>
+							// 						</div>
+							// 					</div>
+							// 			</div>
+										
+							// 			<div>
+							// 				<h6 className="horizontal-line">
+							// 					<span className="horizontal-line-text">Carrier Colors</span>
+							// 				</h6>
+							// 				<div>
+							// 				{Object.keys(this.props.carrierColors).map((v, i) => (
+							// 					<div className="row">
+							// 						<div className="col-3">{v}</div>
+							// 						<div className="col-2">
+							// 							<input 
+							// 								type="color" 
+							// 								name={v} 
+							// 								value={this.props.carrierColors[v]} 
+							// 								onChange={this.updateCarrierColor}/>
+							// 						</div>
+
+							// 					</div>
+							// 				))}
+												
+							// 				</div>
+							// 			</div>
+										
+							// 		</div>
+							//    </Tab>          
+							// </Sidebar>
+	}
 						</MapContainer>
                     </ResizeSensor>
                     </div>

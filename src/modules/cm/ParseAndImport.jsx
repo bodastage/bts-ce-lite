@@ -78,22 +78,34 @@ class ParseAndImport extends React.Component {
 	/**
 	* Update the output folder state when the text field value changes
 	*/
-	onOutputFolderInputChange = (e) => {
-		if(typeof e.target.files !== 'object'){
-			this.setState({errorMessage: 'Error reading file', successMessage: null, infoMessage:null, processing: false})
-		}
-		this.setState({outputFolderText: e.target.files[0].path})
+	onOutputFolderInputChange = async (e) => {
+		e.preventDefault();
+		const result = await btslite_api.openDirectory();
+
+		if(result.filePaths.length > 0) this.setState({outputFolderText: result.filePaths[0]});
+		// if(typeof e.target.files !== 'object'){
+		// 	this.setState({errorMessage: 'Error reading file', successMessage: null, infoMessage:null, processing: false})
+		// }
+
+		// console.log('e.target.filese.target.filese.target.filese.target.files: ', e.target.files);
+		// this.setState({outputFolderText: e.target.files[0].path})
 	}
 	
 	/**
 	* Update the input folder state when the text field value changes
 	*/
-	onInputFileChange = (e) => {
-		if(typeof e.target.files !== 'object'){
-			this.setState({errorMessage: 'Error reading file', successMessage: null, infoMessage:null, processing: false})
-		}		
+	onInputFileChange = async (e) => {
+		e.preventDefault();
+		const result = await btslite_api.openDirectory();
+
+		if(result.filePaths.length > 0) this.setState({inputFileText: result.filePaths[0]});
+
+
+		// if(typeof e.target.files !== 'object'){
+		// 	this.setState({errorMessage: 'Error reading file', successMessage: null, infoMessage:null, processing: false})
+		// }		
 		
-		this.setState({inputFileText: e.target.files[0].path})
+		// this.setState({inputFileText: e.target.files[0].path})
 	}
 	
 	/**
@@ -197,7 +209,7 @@ class ParseAndImport extends React.Component {
 		this.setState({clearTables: !this.state.clearTables});
 	}
 	
-	processDumps = () => {
+	processDumps = async () => {
 		
 		//Save the input and output folders 
 		this.props.dispatch(saveCMParsingFolders(this.state.inputFileText, this.state.outputFolderText))
@@ -234,59 +246,16 @@ class ParseAndImport extends React.Component {
 			}
 
 		// ipcRenderer.send('parse-cm-request', 'parse_data', JSON.stringify(payload));
-		btslite_api.parseCmData(payload);
+		 const result = await btslite_api.parseCmData(payload);
 		btslite_api.addToLog(`[process_cm_dumps] Sending IPC message on channel parsr-cm-request to main process with payload: ${payload}`)
 		
-		//Wait for response
-		this.processFilesListener = (event, task, args) => {
-			
-			btslite_api.addToLog(`Received message from IPC channel "parse-cm-request with message ${args}"`)	
-			
-			const obj = JSON.parse(args)
-			
-			if(obj.status === 'success' && task === 'parse_data' && !this.state.loadIntoDB){
-				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false})			
-				// ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
-				this.processFilesListener = null;
-			}
-			
-			if(obj.status === 'success' && task === 'parse_data' &&  this.state.loadIntoDB){
-				this.setState({errorMessage: null, successMessage: null, infoMessage:obj.message, processing: true});	
-
-				const loadPayload = {
-					"dataType": this.state.currentDataType,
-					"vendor": this.state.currentVendor,
-					"format": this.state.currentFormat,
-					"csvFolder": this.state.outputFolderText,
-					"truncateTables": this.state.clearTables
-				}
-				//ipcRenderer.send('parse-cm-request', 'load_data', JSON.stringify(loadPayload))	
-				btslite_api.cmloadData(loadPayload);			
-			}
-			
-			if(obj.status === 'success' && task === 'load_data' && this.state.loadIntoDB){
-				this.setState({errorMessage: null, successMessage: obj.message, infoMessage:null, processing: false});		
-				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
-				this.processFilesListener = null;
-			}
-			
-			
-			
-			if(obj.status === 'error' && (task === 'load_data' || task === 'parse_data') ){
-				this.setState({errorMessage: obj.message.toString(), successMessage: null , infoMessage:null, processing: false});
-				ipcRenderer.removeListener("parse-cm-request", this.processFilesListener);
-				this.processFilesListener = null;
-			}
-			
-			if(obj.status === 'info' && (task === 'load_data' || task === 'parse_data') ){
-				this.setState({errorMessage: null, successMessage: null, infoMessage: obj.message})
-				
-			}
-
+		if(result.status === 'success'){
+			this.setState({errorMessage: null, successMessage: result.message, infoMessage:null, processing: false});
+		}else{
+			this.setState({errorMessage: result.message, successMessage: null, infoMessage:null, processing: false});
 		}
-		
-		//ipcRenderer.on('parse-cm-request', this.processFilesListener);
-		return;
+
+		//@todo: add loading into database 
 	}
 	
 	dismissErrorMessage = () => { this.setState({errorMessage: null})}
@@ -395,7 +364,10 @@ class ParseAndImport extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Input folder</label>
 						<div className="col-sm-8">
-						  <FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFileText} onInputChange={this.onInputFileChange} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
+						  <FileInput className={"form-control " + inputFolderEllipsis} text={this.state.inputFileText} 
+						  	onInputChange={this.onInputFileChange} 
+						  	onClick={this.onInputFileChange} 
+							inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.inputFileText)} disabled={this.state.processing}/>
@@ -405,7 +377,10 @@ class ParseAndImport extends React.Component {
 					  <div className="form-group row">
 						<label htmlFor="input_folder" className="col-sm-2 col-form-label">Output folder</label>
 						<div className="col-sm-8">
-						  <FileInput className={"form-control " + outputFolderEllipsis} text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} onInputChange={this.onOutputFolderInputChange} disabled={this.state.processing}/>
+						  <FileInput  className={"form-control " + outputFolderEllipsis} text={this.state.outputFolderText} inputProps={{webkitdirectory:"", mozdirectory:"", odirectory:"", directory:"", msdirectory:""}} 
+						  		//onInputChange={this.onOutputFolderInputChange} 
+								onClick={this.onOutputFolderInputChange}
+								disabled={this.state.processing}/>
 						</div>
 						<div className="col-sm-2">
 							<Button icon="folder-open" text="" minimal={true} onClick={(e) => this.launchFolderExplorer(this.state.outputFolderText)}/>

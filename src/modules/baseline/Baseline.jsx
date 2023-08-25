@@ -158,8 +158,11 @@ export default class Baseline extends React.Component {
 				that.filteredSortedQuery = filteredSortedQuery;
 				
 				//Count is the last row
-				let count = ( await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`) ).rows[0].count
-				let queryResult = await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
+				const _countQueryResult = await runQuery(`SELECT COUNT(1) as count FROM (${filteredSortedQuery}) t`);
+				let count = _countQueryResult !== false ? _countQueryResult.rows[0].count : 0;
+
+				const _qryResult =  await runQuery(`SELECT * FROM (${filteredSortedQuery}) t LIMIT ${length} offset ${offset}`);
+				let queryResult = _qryResult !== false ? _qryResult : {rows: []};
 				
 				params.successCallback(queryResult.rows, count); 
 			}

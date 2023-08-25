@@ -141,7 +141,10 @@ export function gisGetCells(){
 			btslite_api.addToLog(results.error, 'error');
 			return dispatch(gisShowError("Failed to retreive cells"));
 		}
-		
+
+		//@todo: handle case when there is an error
+		if(results === false ) return;
+
 		dispatch(gisConfirmCellsReceived(arrayToObject(results.rows, 'ci')));
 		dispatch(gisShowSuccess("Cells successfull retrieved"));
 	}
@@ -176,8 +179,10 @@ export function gisFetchPlanFrequencies(){
 			btslite_api.addToLog(results.error, 'error');
 			return dispatch(gisShowError("Failed to retreive neighbours"));
 		}
+
+		console.log(results);
 		
-		dispatch(gisUpdatePlanCarriers(results.rows.map(f => f.frequency)));
+		//dispatch(gisUpdatePlanCarriers(results.rows.map(f => f.frequency)));
 	}
 }
 
