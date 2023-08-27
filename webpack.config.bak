@@ -8,5 +8,5 @@ module.exports = {
             "fs": require.resolve("fs")
         }
     },
-    externals: ['pg', 'sqlite3', 'tedious', 'pg-hstore'],
+    externals: ['sqlite3', 'tedious', 'boda-telecomparser', 'umzug', 'sequelize'],
 }

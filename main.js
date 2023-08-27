@@ -23,13 +23,14 @@ function createWindow() {
 			contextIsolation: true,
 			webSecurity: false,
 			preload: path.join(__dirname, 'preload.js'),
-			nodeIntegrationInWorker: true
+			nodeIntegrationInWorker: true,
+			sandbox: false
 		}
 	})
 
 	// and load the index.html of the app.
 	const startUrl = process.env.ELECTRON_START_URL || url.format({
-		pathname: path.join(__dirname, '/../build/index.html'),
+		pathname: path.join(__dirname, '/build/index.html'),
 		protocol: 'file:',
 		slashes: true
 	});

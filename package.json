@@ -5,7 +5,7 @@
   "private": true,
   "homepage": "./",
   "scripts": {
-    "migrate": "./node_modules/.bin/node-pg-migrate",
+    "migrate": "npx sequelize-cli db:migrate",
     "electron": "electron .",
     "electron-dev-unix": "ELECTRON_ENV=dev ELECTRON_START_URL=http://localhost:3000 electron .",
     "electron-dev": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
@@ -29,9 +29,14 @@
     "electron:mac": "npm run react:build && npx electron-builder build --mac",
     "release": "npm run react:build && npx electron-builder build",
     "release:all": "npm run react:build && npx electron-builder build -mwl -p always",
-    "release:mac": "npm run react:build && npx electron-builder build --mac -p always -c.extraMetadata.main=main.js",
-    "release:linux": "npm run react:build && npx electron-builder build --linux -p always",
-    "release:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l -p always"
+    "release:mac": "npm run build && npm run react:build && npx electron-builder build --mac -p always -c.extraMetadata.main=main.js",
+    "release:linux": "npm run build && npm run react:build && npx electron-builder build --linux -p always",
+    "release:linux:arm": "npm run react:build && npx electron-builder build --linux --armv7l -p always",
+    "compile": "electron-webpack --config webpack.main.config.js",
+    "compile-main": "webpack --config webpack.main.config.js",
+    "build:main": "webpack --config webpack.main.config.js",
+    "build:preload": "webpack --config webpack.preload.config.js",
+    "build": "npm run build:main && npm run build:preload"
   },
   "main": "main.js",
   "repository": "https://github.com/bodastage/bts-ce-lite",
@@ -172,6 +177,7 @@
     "shell-path": "^2.1.0",
     "sqlite3": "^5.1.6",
     "terser-webpack-plugin": "1.2.2",
+    "umzug": "^3.3.1",
     "unzipper": "^0.10.0",
     "url-loader": "1.1.2",
     "url-search-params-polyfill": "^4.0.1",
@@ -207,6 +213,7 @@
     "electron": "25.3.2",
     "electron-builder": "^24.6.3",
     "electron-rebuild": "^1.8.4",
+    "electron-webpack": "^2.8.2",
     "enzyme": "^3.5.0",
     "enzyme-adapter-react-16": "^1.3.0",
     "eslint": "^8.46.0",
@@ -255,6 +262,7 @@
     "url": "^0.11.1",
     "url-polyfill": "^1.0.14",
     "webpack": "5.88.2",
+    "webpack-bundle-analyzer": "^4.9.0",
     "webpack-dev-server": "4.15.1",
     "webpack-manifest-plugin": "5.0.0"
   },
@@ -271,18 +279,21 @@
     ]
   },
   "build": {
+    "extends": null,
     "appId": "com.bodastage.bodalite",
     "productName": "Boda-Lite",
-    "copyright": "Copyright © 2019 $npm_package_author_name",
+    "copyright": "Copyright © 2023 $npm_package_author_name",
     "files": [
       "./build/**/*",
       "./main.js",
       "./preload.js",
-      "./backend/**/*"
+      "./backend/**/*",
+      "./node_modules",
+      "./package.json",
+      "./db/**/*"
     ],
     "extraResources": [
-      "libraries",
-      "db"
+      "./assets/**/*"
     ],
     "extraMetadata": {
       "main": "./main.js"
@@ -353,6 +364,12 @@
     "tls": false
   },
   "extraResources": [
-    "./node_modules/@electron/remote/**"
+    {
+      "from": "./node_modules/umzug/**/*",
+      "to": "./node_modules/umzug/**/*",
+      "filter": [
+        "**/*"
+      ]
+    }
   ]
 }
