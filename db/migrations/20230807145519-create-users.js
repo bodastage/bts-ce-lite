@@ -1,7 +1,12 @@
 'use strict';
+
+const { Sequelize } = require('sequelize');
+
+console.log(Sequelize );
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up({ context: queryInterface }) {
     const query = await queryInterface.createTable('users', {
       id: {
         allowNull: false,
@@ -38,6 +43,7 @@ module.exports = {
     });
 
     await queryInterface.bulkInsert('users', [{
+      id: 1,
       username: 'expert',
       last_name: 'Telecomhall',
       other_names: '',
@@ -49,7 +55,7 @@ module.exports = {
     }], { returning: true });
     
   },
-  async down(queryInterface, Sequelize) {
+  async down({ context: queryInterface }) {
     await queryInterface.dropTable('users');
   }
 };
