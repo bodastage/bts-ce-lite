@@ -15,7 +15,6 @@ platform telecommunication management desktop app.
 
 ## Built with 
 * [Electron](https://electronjs.org)
-* [PostgreSQL](https://www.postgresql.org/)
 * [ReactJs](https://reactjs.org/)
 * [SQLite3](https://www.sqlite.org/index.html)
 
