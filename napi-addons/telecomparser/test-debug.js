@@ -1,6 +1,8 @@
 const telecomparser = require('./index-debug.js')
 const path = require('path')
 
+console.log(telecomparser);
+
 // const inputFile = path.join(__dirname, 'samples', 'bulkcm.xml');
 // const outputFile = path.join(__dirname, 'output', 'sample1');
 // telecomparser.parse_bulkcm(inputFile, outputFile);

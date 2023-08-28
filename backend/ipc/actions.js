@@ -93,8 +93,8 @@ const ACTIONS = [
             console.log('cm.parse-cm-data', args);
                 const worker_script = path.join(__dirname, '..', 'workers/parse-cm-data.js');
                 result = await workerHelper.runWorkerScript(worker_script, args);
-
                 return result;
+
             console.log('cm.parse-cm-data');
             return true;
         }

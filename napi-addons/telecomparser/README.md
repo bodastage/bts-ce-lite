@@ -45,3 +45,7 @@ brew install libxml++@5
 * https://gitlab.gnome.org/GNOME/libxml2/
 * https://github.com/leethomason/tinyxml2
 * https://www.codesynthesis.com/projects/libstudxml/
+
+
+## Context aware native modules 
+* https://nodejs.github.io/node-addon-examples/special-topics/context-awareness/

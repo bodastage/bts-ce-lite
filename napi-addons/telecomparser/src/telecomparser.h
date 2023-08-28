@@ -20,10 +20,17 @@ limitations under the License.
 #include <fstream>
 #include <chrono>
 #include "bodautils.h"
-//Logging
 #include "spdlog/spdlog.h"
 
 using namespace std;
+
+class HelloJS : public Napi::Addon<HelloJS> {
+public:
+    HelloJS(Napi::Env env, Napi::Object exports);
+private:
+    Napi::Value say_hello(const Napi::CallbackInfo& info);
+};
+
 
 namespace bodastage
 {
@@ -67,7 +74,18 @@ namespace bodastage
     Napi::Boolean parse_huaweimml_wrapper(const Napi::CallbackInfo &info);
 
     // Export API
-    Napi::Object Init(Napi::Env env, Napi::Object exports);
+    // Napi::Object Init(Napi::Env env, Napi::Object exports);
 
-    NODE_API_MODULE(addon, Init)
 }
+
+class TelecomParser : public Napi::Addon<TelecomParser> {
+public:
+    TelecomParser(Napi::Env env, Napi::Object exports);
+private:
+    //bulkcm
+    Napi::Value parse_bulkcm(const Napi::CallbackInfo& info);
+
+    //huawei cfgmml
+    Napi::Value parse_huaweimml(const Napi::CallbackInfo& info);
+
+};

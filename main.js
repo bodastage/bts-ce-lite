@@ -8,6 +8,10 @@ const fs = require('fs');
 // in the main process:
 require('@electron/remote/main').initialize()
 
+
+//initialte ipc listeners
+require(path.join(__dirname, 'backend', 'ipc', 'init.js'));
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -68,9 +72,6 @@ function createWindow() {
 
 
 app.on('ready', () => {
-
-	//initialte ipc listeners
-	require(path.join(__dirname, 'backend', 'ipc', 'init.js'));
 
 
 	//Launch main renderer process

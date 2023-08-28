@@ -6,8 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <typeinfo>
-
-using namespace std;
+#include <napi.h>
 
 int bodastage::parse_bulkcm(string input_file, string output_dir, string multivalue_sep, string meta_fields, string extract_parametes, bool separate_vsdata)
 {
@@ -67,10 +66,22 @@ Napi::Boolean bodastage::parse_huaweimml_wrapper(const Napi::CallbackInfo &info)
 }
 
 
-Napi::Object bodastage::Init(Napi::Env env, Napi::Object exports)
-{
-    // export Napi function
-    exports.Set("parse_bulkcm", Napi::Function::New(env, bodastage::parse_bulkcm_wrapper));
-    exports.Set("parse_huaweimml", Napi::Function::New(env, bodastage::parse_huaweimml_wrapper));
-    return exports;
+TelecomParser::TelecomParser(Napi::Env env, Napi::Object exports) {
+    DefineAddon(exports, {
+        InstanceMethod("parse_bulkcm", &TelecomParser::parse_bulkcm),
+        InstanceMethod("parse_huaweimml", &TelecomParser::parse_huaweimml),
+    });
+
 }
+
+//bulkcm
+Napi::Value TelecomParser::parse_bulkcm(const Napi::CallbackInfo& info) {
+    return bodastage::parse_bulkcm_wrapper(info);
+}
+
+//huawei cfgmml
+Napi::Value TelecomParser::parse_huaweimml(const Napi::CallbackInfo& info) {
+    return bodastage::parse_huaweimml_wrapper(info);
+}
+
+NODE_API_ADDON(TelecomParser)

@@ -1,9 +1,9 @@
 const workerHelper = require('./worker-helper');
 const { workerData } = require('node:worker_threads');
-const telecomparser = require('boda-telecomparser');
 
 console.log('Running cm data parser....');
 console.log('workerData:', workerData);
+const telecomparser = require('boda-telecomparser');
 
 try{
     //bulkcm
@@ -28,3 +28,6 @@ try{
         message: 'Parsing failed. ' + e.getMessage()
     });
 }
+
+console.log('terminating worker thread...');
+process.exit(0);
