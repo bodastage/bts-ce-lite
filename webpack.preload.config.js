@@ -1,6 +1,9 @@
 const path = require("path");
+const TerserPlugin = require("terser-webpack-plugin");
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const config = {
+    mode: 'production',
     entry: {
         preload: "./preload.js",
     },

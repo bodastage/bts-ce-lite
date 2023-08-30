@@ -8,6 +8,12 @@ contextBridge.exposeInMainWorld('btslite_api', {
         return result
     },
 
+    //Run generic database queries
+    async submitCode(args) {
+        const result = await ipcRenderer.invoke('code.run', args)
+        return result
+    },
+
     //Run migrations
     async migrateUp() {
         const result = await ipcRenderer.invoke('db.migrate-up')

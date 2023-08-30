@@ -30,7 +30,7 @@ import { faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
 	faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle
 	,faAsterisk, faFileAlt,faFrown,faDatabase, faFileExcel, faFileCsv,
 	faBroadcastTower, faPencilRuler, faBook,faCloudUploadAlt,faTools,
-	faCandyCane,faHatWizard, faGlobe, faEllipsisH
+	faCandyCane,faHatWizard, faGlobe, faEllipsisH, faCode
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faLock, faAt, faSpinner, faHome, faPlug, faCog, faDownload,
@@ -41,7 +41,7 @@ faFolder, faFile, faStar, faChevronRight, faDotCircle, faFolderOpen,
 faLink, faClock, faRss, faChartLine, faSquare, faTable, faInfoCircle,
 faAsterisk, faFileAlt,faFrown, faDatabase, faFileExcel, faFileCsv,
 faBroadcastTower, faPencilRuler, faBook, faCloudUploadAlt, faTools, 
-faCandyCane, faHatWizard, faGlobe, faEllipsisH);
+faCandyCane, faHatWizard, faGlobe, faEllipsisH, faCode);
 
 const root = createRoot(document.getElementById('root'));
 root.render(

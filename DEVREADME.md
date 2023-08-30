@@ -66,10 +66,21 @@ make --version
 brew install automake autoconf libtool libxml2 pkg-config
 brew link libxml2; fi
 
+
+#extracting asar files
+npx asar extract app.asar wwww   
+
+const dbPath = path.join(app.getPath("userData"), "sample.db")
+
 ```
+
+
+
 
 
 ## Resources 
 
 * https://nodejs.github.io/node-addon-examples/about/what
 * https://github.com/atiqg/Nodejs-Napi-Addon-Using-Cmake
+* https://architecturenotes.co/datasette-simon-willison/
+* https://til.simonwillison.net/electron/python-inside-electron

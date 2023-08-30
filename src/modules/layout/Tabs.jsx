@@ -17,6 +17,7 @@ import Baseline from '../baseline/Baseline';
 import ParameterLibrary from '../telecomlib/ParameterLibrary';
 import CSVToExcelCombiner from '../utilities/CSVToExcelCombiner';
 import KMLGenerator from '../utilities/KMLGenerator';
+import PyEditor from '../pystudio/PyEditor';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Components = {
@@ -32,7 +33,8 @@ const Components = {
 	"Baseline": Baseline,
 	"ParameterLibrary": ParameterLibrary,
 	"CSVToExcelCombiner": CSVToExcelCombiner,
-	"KMLGenerator": KMLGenerator
+	"KMLGenerator": KMLGenerator,
+	"PyEditor": PyEditor
 };
 
 const Tabs = (props) =>  {
