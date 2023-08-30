@@ -209,7 +209,17 @@ class Dashboard extends React.Component {
                         </div>
 
                         <div className="col-md-2">
-
+                        <div className="icon-display">
+								<a 
+									title="Python Editor" 
+									href="#/#" 
+									onClick={this.addTab({
+										component: 'PyEditor',
+										title: 'Python Editor'
+									})}>
+									<FontAwesomeIcon icon="code"/>
+								</a></div>
+                            <div className="icon-label">Python Editor</div>
                         </div>
 
                         <div className="col-md-2">

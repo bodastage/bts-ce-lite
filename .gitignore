@@ -12,3 +12,4 @@ db/boda-lite.sqlite3
 boda-lite.sqlite.*
 
 **/.DS_Store
+python

@@ -25,6 +25,18 @@ const ACTIONS = [
             return db.migrateUp();
         }
     },
+    {
+        name: 'code.run',
+        handler: async(args) => {
+            console.log('code.run', args);
+            const worker_script = path.join(__dirname, '..', 'workers/python.js');
+            result = await workerHelper.runWorkerScript(worker_script, args);
+            return result;
+
+            console.log('code.run');
+            return true;
+        }
+    },
 
     {
         name: 'reports.create-category',
