@@ -1,10 +1,11 @@
 const path = require('path');
 const { shell, app, dialog } = require('electron');
-const db = require('../libs/db');
-const reports = require('../libs/reports');
-const excel = require('../libs/excel');
-const workerHelper = require('../workers/worker-helper');
-  
+const db = require(`../libs/db`);
+const reports = require(`../libs/reports`);
+const excel = require(`../libs/excel`);
+const workerHelper = require(`../workers/worker-helper`);
+const utils = require(`../libs/utils`);
+
 
 const ACTIONS = [
 
@@ -22,6 +23,10 @@ const ACTIONS = [
         name: 'db.migrate-up',
         handler: (args) => {
             console.log('db.migrate-up');
+
+            //create sqlite file if it does not exist
+            utils.createSQliteFile();
+
             return db.migrateUp();
         }
     },

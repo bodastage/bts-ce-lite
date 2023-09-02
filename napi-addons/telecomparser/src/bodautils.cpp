@@ -127,10 +127,13 @@ bool bodastage::ends_with(std::string s, string suffix){
 
 string bodastage::tolower(std::string s){
     string s_tmp = s;
-    //std::transform(s_tmp.begin(), s_tmp.end(), s_tmp.begin(), [](unsigned char c) { return std::tolower(c); });
-    //return s;
     boost::algorithm::to_lower(s_tmp);
+    return s_tmp;
+}
 
+string bodastage::toupper(std::string s){
+    string s_tmp = s;
+    boost::algorithm::to_upper(s_tmp);
     return s_tmp;
 }
 
@@ -218,4 +221,36 @@ string bodastage::get_sep(){
     else if(typeid(fs::path::preferred_separator) == typeid(wchar_t)) //windows where preferred_separator is  wchar_t
         return "\\";
     return "";
+}
+
+
+
+/**
+ * Process given string into a format acceptable for CSV format.
+ *
+ * @since 1.0.0
+ * @param s String
+ * @return String Formated version of input string
+ */
+string bodastage::to_csv_format(string s) {
+    string csv_value = s;
+
+    if (s.empty()) {
+        // csv_value = "\"\"";
+        csv_value = "";
+        return csv_value;
+    }
+
+    //Check if value contains comma
+    if(s.find(",") != string::npos ){
+        csv_value = "\"" + s + "\"";
+    }
+
+    //handle value with double quotes
+    //@todo: this solution only handles the first occurrence. we need to use a while loop
+    if (s.find("\"") != string::npos) {
+        csv_value = "\"" + s.replace(s.find("\""), 2, "\"\"") + "\"";
+    }
+
+    return csv_value;
 }

@@ -106,6 +106,8 @@ namespace bodastage {
 
     string tolower(std::string s);
 
+    string toupper(std::string s);
+
     /**
      * @brief Replace all occurrences of a string with another string.
     */
@@ -157,6 +159,9 @@ namespace bodastage {
      * Return the separator for the current platform.
     */
     string get_sep();
+
+
+    string to_csv_format(string s);
 }
 
 #endif //__BODA_UTILS_H

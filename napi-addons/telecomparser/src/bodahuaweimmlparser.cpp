@@ -463,7 +463,7 @@ void bodastage::BodaHuaweiMMLParser::process_line(string line){
                     string child_param = child_parameters.at(idx);
 
                     if(param_value_map.count(child_param)){
-                        string mv_value = to_csv_format(param_value_map.at(child_param));
+                        string mv_value = bodastage::to_csv_format(param_value_map.at(child_param));
                         p_value_str = p_value_str + "," + mv_value;
                     }else{
                         p_value_str += ",";
@@ -477,7 +477,7 @@ void bodastage::BodaHuaweiMMLParser::process_line(string line){
             if(attr_value_map.count(p_name)) { 
                 p_value = attr_value_map.at(p_name);
             }
-            p_value_str += ","+ to_csv_format(p_value);
+            p_value_str += ","+ bodastage::to_csv_format(p_value);
         }
         
         moi_print_writers.at(class_name) << p_value_str << endl;
@@ -803,7 +803,7 @@ void bodastage::BodaHuaweiMMLParser::extact_parameter_and_values(string line, st
                     for(int j = 0; j < (int)value_array.size(); j++){
                         string v = value_array[j];
                         std::vector<string> v_array = bodastage::split_str(v, "-");
-                        param_value_map.insert(std::pair<string, string>(v_array[0], to_csv_format(v_array[1])));
+                        param_value_map.insert(std::pair<string, string>(v_array[0], bodastage::to_csv_format(v_array[1])));
                     }
                     
                     //Get the child parameters 
@@ -813,7 +813,7 @@ void bodastage::BodaHuaweiMMLParser::extact_parameter_and_values(string line, st
                         
                         if(param_value_map.count(child_param)){
                             string mv_value = param_value_map.at(child_param);
-                            p_value_str = p_value_str + "," + to_csv_format(mv_value);
+                            p_value_str = p_value_str + "," + bodastage::to_csv_format(mv_value);
                         }else{
                             p_value_str += ",";
                         }
@@ -826,7 +826,7 @@ void bodastage::BodaHuaweiMMLParser::extact_parameter_and_values(string line, st
                 p_value = attr_value_map.at(p_name);
             }
             
-            p_value_str = p_value_str + "," + to_csv_format(p_value);
+            p_value_str = p_value_str + "," + bodastage::to_csv_format(p_value);
         }
         
         moi_print_writers.at(print_writer_class_name) << p_value_str << endl;
@@ -892,31 +892,31 @@ void bodastage::BodaHuaweiMMLParser::close_mo_pw_map() {
     moi_print_writers.clear();
 }
 
-    /**
-     * @brief Process given string into a format acceptable for CSV format.
-     *
-     * @since 1.0.0
-     * @param s string
-     * @return string Formated version of input string
-     */
-string bodastage::BodaHuaweiMMLParser::to_csv_format(string s) {
-    string csv_value = s;
+//     /**
+//      * @brief Process given string into a format acceptable for CSV format.
+//      *
+//      * @since 1.0.0
+//      * @param s string
+//      * @return string Formated version of input string
+//      */
+// string bodastage::BodaHuaweiMMLParser::to_csv_format(string s) {
+//     string csv_value = s;
 
-    //Strip start and end quotes
-    s = bodastage::preg_replace(s, "^\"|\"$", "");
+//     //Strip start and end quotes
+//     s = bodastage::preg_replace(s, "^\"|\"$", "");
     
-    //Check if value contains comma
-    if (bodastage::str_contains(s, ",")) {
-        csv_value = "\"" + s + "\"";
-    }
+//     //Check if value contains comma
+//     if (bodastage::str_contains(s, ",")) {
+//         csv_value = "\"" + s + "\"";
+//     }
 
     
-    if (bodastage::str_contains(s, "\"")) {
-        csv_value = "\"" + bodastage::str_replace(s, "\"", "\"\"") + "\"";
-    }
+//     if (bodastage::str_contains(s, "\"")) {
+//         csv_value = "\"" + bodastage::str_replace(s, "\"", "\"\"") + "\"";
+//     }
 
-    return csv_value;
-}
+//     return csv_value;
+// }
 
 /**
  * @brief Set the output directory.

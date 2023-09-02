@@ -74,6 +74,18 @@ const dbPath = path.join(app.getPath("userData"), "sample.db")
 
 ```
 
+## python
+
+```
+#installing packages from code 
+
+import pip;
+import requests;
+
+#pip.main(['install', 'requests'])
+pip.main(['list'])
+```
+
 
 
 
