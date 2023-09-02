@@ -11,9 +11,14 @@ try{
         telecomparser.parse_bulkcm(workerData.inputFolder, workerData.outputFolder);
     }
 
-    //mml
+    //huawei cfgmml
     if(workerData.format === 'CFGMML' && workerData.vendor === 'HUAWEI'){
         telecomparser.parse_huaweimml(workerData.inputFolder, workerData.outputFolder);
+    }
+
+    //huawei gexport mml
+    if(workerData.format === 'GEXPORT_XML' && workerData.vendor === 'HUAWEI'){
+        telecomparser.parse_huaweigexport(workerData.inputFolder, workerData.outputFolder);
     }
 
     //required to return results to main thread

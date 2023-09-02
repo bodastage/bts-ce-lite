@@ -389,7 +389,6 @@ namespace bodastage
     void collect_mo_parameters(string input_file, string output_directory);
     int get_xml_tag_occurences(string tag_name);
     void process_3gpp_attributes();
-    string to_csv_format(string s);
     void save_three_gpp_attr_values(string mo);
     void process_vendor_attributes();
     void update_three_gpp_attr_map();

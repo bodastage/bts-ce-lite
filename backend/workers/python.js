@@ -5,11 +5,22 @@ const cp = require("child_process");
 const util = require("util");
 const execFile = util.promisify(cp.execFile);
 const path = require('path');
+const process = require('process');
 
+
+console.log("0000000000000000000000000HHHHH:", ' __dirname:', __dirname);
+
+// const path_to_python =  process.env.ELECTRON_START_URL ? 
+// path.join(__dirname, '..', '..', "python", "bin", "python3.9") : 
+// path.join(process.resourcesPath, "python", "bin", "python3.9");
 
 const path_to_python =  process.env.ELECTRON_START_URL ? 
-path.join(__dirname, '..', '..', "python", "bin", "python3.9") : 
-path.join(process.resourcesPath, "python", "bin", "python3.9");
+path.join(__dirname, '..', '..', "python", "bin", "python3.9") :  //for dev
+path.join(__dirname, '..', '..', '..', "python", "bin", "python3.9") ; //for prod
+
+//const path_to_python =  path.join(__dirname, '..', '..', "python", "bin", "python3.9");
+
+console.log('path_to_python:', path_to_python);
 
 
 (async function() { 

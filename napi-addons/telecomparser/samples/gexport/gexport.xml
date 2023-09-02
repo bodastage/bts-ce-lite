@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bulkCmConfigDataFile>
+    <fileHeader/>
+    <configData>
+        <class name="BSC6900GSM">
+            <object technique="TECHNOLOGY" vendor="Huawei" version="VERSION">
+                <class name="GCELL_BSC6900GSM">
+                    <object>
+                        <parameter name="ACTSTATUS" value="ACTIVATED"/>
+                        <parameter name="ADMSTAT" value="UNLOCK"/>
+						<parameter name="BCC" value="6"/>
+                        <parameter name="BCCHNO" value="242"/>
+						<parameter name="CELLNAME" value="GBSBO-1"/>
+						<parameter name="CELLNO" value="19"/>
+                    </object>
+                    <object>
+                        <parameter name="ACTSTATUS" value="ACTIVATED"/>
+                        <parameter name="ADMSTAT" value="UNLOCK"/>
+						<parameter name="BCC" value="6"/>
+                        <parameter name="BCCHNO" value="242"/>
+						<parameter name="CELLNAME" value="GBSBO-D"/>
+						<parameter name="CELLNO" value="20"/>
+                    </object>
+				</class>
+                <class name="MONAME_BSC6900GSM">
+                    <object>
+                        <parameter name="PARAMETER1" value="VALUE1"/>
+                        <parameter name="PARAMETER2" value="VALUE2"/>
+						<parameter name="PARAMETER3" value="SWITCH1-VALUEX"/>
+                        <parameter name="PARAMETERN" value="VALUEN"/>
+                    </object>
+                    <object>
+                        <parameter name="PARAMETER1" value="VALUE1"/>
+                        <parameter name="pARAMETER2" value="VALUE2"/>
+						<parameter name="PARAMETER3" value="SWITCH1-VALUEA"/>
+                        <parameter name="PARAMETERN" value="VALUEN"/>
+                    </object>
+				</class>
+                <class name="moname_BSC6900GSM">
+                    <object>
+                        <parameter name="PARAMETER1" value="VALUE1"/>
+                        <parameter name="PARAMETER2" value="VALUE2"/>
+						<parameter name="PARAMETER3" value="SWITCH1-VALUEX"/>
+                        <parameter name="PARAMETERN" value="VALUEN"/>
+                    </object>
+				</class>
+                <class name="moname2_BSC6900GSM">
+                    <object>
+                        <parameter name="PARAMETER1" value="VALUE1"/>
+                        <parameter name="PARAMETER2" value="VALUE2"/>
+						<parameter name="PARAMETER3" value="SWITCH1-VALUEX"/>
+                        <parameter name="PARAMETERN" value="VALUEN"/>
+                    </object>
+				</class>
+                <class name="GCELLHOINTERRATLDB">
+                    <object>
+                        <parameter name="INTERRATSERVICE..." value="SERVICE-BASED"/>
+                        <parameter name="PARAMETER2" value="VALUE2"/>
+						<parameter name="PARAMETER3" value="SWITCH1-VALUEX"/>
+                        <parameter name="PARAMETERN" value="VALUEN"/>
+                    </object>
+				</class>
+                <class name="CAMGTCFG">
+                    <object>
+                        <parameter name="CELLCAALGOSWITCH" value="CADL2CCEXTSWITCH-1&amp;CADL3CCEXTSWITCH-0&amp;CADL3CCSWITCH-1&amp;CADL4CCSWITCH-0&amp;CADL5CCSWITCH-0&amp;CAENHAPERIODICCQIRPTSWITCH-0"/>
+                    </object>
+				</class>
+                <class name="CAMGTCFG">
+                    <object>
+                        <parameter name="CELLCAALGOSWITCH" value="cadl2CCEXTSWITCH-1&amp;CADL3CCEXTSWITCH-0&amp;CADL3CCSWITCH-1&amp;CADL4CCSWITCH-0&amp;CADL5CCSWITCH-0&amp;CAENHAPERIODICCQIRPTSWITCH-0"/>
+                    </object>
+				</class>
+			</object>
+		</class>
+    </configData>
+</bulkCmConfigDataFile>

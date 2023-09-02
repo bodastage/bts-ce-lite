@@ -221,38 +221,6 @@ void bodastage::BodaBulkCmParser::on_start_element(Xml::Inspector<Xml::Encoding:
         }
     }
 }
-
-/**
- * Process given string into a format acceptable for CSV format.
- *
- * @param s String
- * @return String Formated version of input string
- * @since 1.0.0
- */
-string bodastage::BodaBulkCmParser::to_csv_format(string s) {
-    string csv_value = s;
-
-    if (s.empty()) {
-        // csv_value = "\"\"";
-        csv_value = "";
-        return csv_value;
-    }
-
-    //Check if value contains comma
-    if(s.find(",") != string::npos ){
-        csv_value = "\"" + s + "\"";
-    }
-
-    //handle value with double quotes
-    //@todo: this solution only handles the first occurrence. we need to use a while loop
-    if (s.find("\"") != string::npos) {
-        csv_value = "\"" + s.replace(s.find("\""), 2, "\"\"") + "\"";
-    }
-
-    return csv_value;
-}
-
-
     /**
      * Returns 3GPP defined Managed Objects(MOs) and their attribute values.
      * This method is called at the end of processing 3GPP attributes.
@@ -293,7 +261,7 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
 
         for (mIter = _xml_attr_stack.begin(); mIter != _xml_attr_stack.end(); mIter++){
             string p_name = parent_mo + "_" + mIter->first;
-            string p_value = to_csv_format(mIter->second);
+            string p_value = bodastage::to_csv_format(mIter->second);
             xml_tag_values.insert(std::pair<string, string>(p_name, p_value));
         }
     }
@@ -326,7 +294,7 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
             }
 
             if (current_3gpp_attrs.count(a_attr)) {
-                a_value = to_csv_format(current_3gpp_attrs.at(a_attr));
+                a_value = bodastage::to_csv_format(current_3gpp_attrs.at(a_attr));
             }
 
             param_names = param_names + "," + a_attr;
@@ -337,7 +305,7 @@ void bodastage::BodaBulkCmParser::process_3gpp_attributes(){
         std::map<string, string>::iterator mIter; 
         for (mIter = xml_tag_values.begin(); mIter != xml_tag_values.end(); mIter++){
             string p_name = mIter->first;
-            string p_value = to_csv_format(mIter->second);
+            string p_value = bodastage::to_csv_format(mIter->second);
 
             param_names = param_names + "," + p_name;
             param_values = param_values + "," + p_value;
@@ -407,7 +375,7 @@ void bodastage::BodaBulkCmParser::save_three_gpp_attr_values(string mo) {
             string a_value = "";
 
             if (current_3gpp_attrs.count(a_attr)) {
-                a_value = to_csv_format(current_3gpp_attrs.at(a_attr));
+                a_value = bodastage::to_csv_format(current_3gpp_attrs.at(a_attr));
             } else {
                 //Only take the current Attri but maitain the order in 
                 //a3GPPAtrr i.e. moThreeGPPAttrMap
@@ -464,7 +432,7 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
         std::map<string, string>::iterator aIter; 
         for (aIter = xml_attr_stack.at(depth_key).begin(); aIter != xml_attr_stack.at(depth_key).end(); aIter++){
             string p_name = parent_mo + "_" + aIter->first;
-            string p_value = to_csv_format(aIter->second);
+            string p_value = bodastage::to_csv_format(aIter->second);
             parent_id_values.insert(std::pair<string, string>(p_name, p_value));
         }
     }
@@ -518,7 +486,7 @@ void bodastage::BodaBulkCmParser::process_vendor_attributes() {
 
         //
         if (vs_data_type_stack.count(p_name)) {
-            p_value = to_csv_format(vs_data_type_stack.at(p_name));
+            p_value = bodastage::to_csv_format(vs_data_type_stack.at(p_name));
         }
 
         //Handle parameters that exist in 3GGP attr list too i.e in moThreeGPPAttrMap
@@ -1031,7 +999,6 @@ void bodastage::BodaBulkCmParser::process_file_or_directory(){
     fs::path path(data_source);
 
     bool is_regular_executable_file = bodastage::is_regular_file(path) && bodastage::file_is_readable(path);
-
     bool is_readable_directory = bodastage::is_directory(path)  && bodastage::file_is_readable(path);
 
     if (is_regular_executable_file) {

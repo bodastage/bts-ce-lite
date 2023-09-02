@@ -7,6 +7,7 @@ const config = {
     entry: {
         main: "./main.js",
         preload: "./preload.js",
+        init: "./backend/ipc/init.js",
     },
     output: {
         path: path.resolve(__dirname, "dist"),
@@ -23,7 +24,10 @@ const config = {
         new BundleAnalyzerPlugin()
     ],
     module: {
-        rules: [{ test: /\.js$/, exclude: /node_modules/, use: "babel-loader" }]
+        // rules: [{ 
+        //     test: /\.js$/, 
+        //     exclude: /node_modules/, 
+        //     use: "babel-loader" }]
     },
     stats: {
         colors: true

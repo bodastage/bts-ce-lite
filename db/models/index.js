@@ -6,7 +6,13 @@ const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
+let config = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
+
+if (process.env.ELECTRON_START_URL === undefined) { //production
+  const {  app }  = require('electron');
+  config.storage = path.join(app.getPath("userData"), "boda-lite.sqlite");
+}
+
 const db = {};
 
 let sequelize;

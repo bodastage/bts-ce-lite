@@ -59,6 +59,19 @@ namespace bodastage
     int parse_huaweimml(string input_file, string output_dir, string multivalue_sep = ";", string meta_fields = "", string extract_parametes = "");
 
 
+    /**
+     * @brief parse input file or directory into output directory
+     * 
+     * @param input_file char* input file or directory
+     * @param output_dir char* output directory
+     * @param multivalue_sep char* multivalue separator. defailt is ";"
+     * @param meta_fields char* meta fields. FILENAME,DATETIME
+     * @param extract_parametes char* specify parameter to extract parameters. default is ""
+     * @param separate_vsdata bool separate vsdata. default is false
+    */
+    int parse_huaweigexport(string input_file, string output_dir, string multivalue_sep = ";", string meta_fields = "", string extract_parameters = "");
+
+
     // parse_bulkcm function wrapper
     /**
      * @brief
@@ -73,8 +86,12 @@ namespace bodastage
     */
     Napi::Boolean parse_huaweimml_wrapper(const Napi::CallbackInfo &info);
 
-    // Export API
-    // Napi::Object Init(Napi::Env env, Napi::Object exports);
+    // parse_huaweigexport function wrapper
+    /**
+     * @brief
+     * 
+    */
+    Napi::Boolean parse_huaweigexport_wrapper(const Napi::CallbackInfo &info);
 
 }
 
@@ -87,5 +104,8 @@ private:
 
     //huawei cfgmml
     Napi::Value parse_huaweimml(const Napi::CallbackInfo& info);
+
+    //Huawei GExport
+    Napi::Value parse_huaweigexport(const Napi::CallbackInfo& info);
 
 };

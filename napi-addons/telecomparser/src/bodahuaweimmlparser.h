@@ -283,8 +283,7 @@ namespace bodastage
             void parse();
             void set_parameter_file(string filename);
             void set_file_name(string filename );
-            void set_data_source(string data_source );
-            string to_csv_format(string s);
+            void set_data_source(string ds );
             void close_mo_pw_map();
             void print_execution_time();
             void set_output_directory(string directory_name);

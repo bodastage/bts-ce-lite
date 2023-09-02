@@ -6,10 +6,14 @@ const url = require('url');
 const fs = require('fs');
 
 // in the main process:
-require('@electron/remote/main').initialize()
+//require('@electron/remote/main').initialize()
 
 //initialte ipc listeners
-require(path.join(__dirname, 'backend', 'ipc', 'init.js'));
+const initListenerPath = path.join(__dirname, 'backend', 'ipc', 'init.js');
+require(initListenerPath);
+//require(`${initListenerPath}`);
+
+console.log('process.resourcesPath:', process.resourcesPath);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
