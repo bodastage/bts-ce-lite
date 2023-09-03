@@ -304,7 +304,8 @@
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
     "extraResources": [
-      "python/**/*"
+      "python/**/*",
+      "libraries"
     ],
     "extraMetadata": {
       "main": "./main.js"

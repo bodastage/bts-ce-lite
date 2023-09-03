@@ -7,7 +7,7 @@ const migrateUp = async () => {
     const umzug = new Umzug({
         migrations: {
           // indicates the folder containing the migration .js files
-          glob: path.join(__dirname, '..', '..', 'db', 'migrations', '*.js'),
+          glob: path.join(__dirname, '..', '..', 'db', 'migrations', '*.js').replace(/\\/g, '/'), // repleace for windows paths 
           // inject sequelize's QueryInterface in the migrations
           params: [
             sequelize.getQueryInterface(),
