@@ -14,8 +14,9 @@ isDev = process.env.ELECTRON_START_URL ? true : false;
 
 const createSQliteFile = () => {
     const dbPath = process.env.ELECTRON_START_URL ? 
-        path.join(__dirname, '..', '..', "db", "db.sqlite") : 
+        path.join(__dirname, '..', '..', "boda-lite.sqlite.dev") : 
         path.join(app.getPath("userData"), "boda-lite.sqlite");
+
     
     if (!fs.existsSync(dbPath)) {
         fs.writeFileSync(dbPath, "");
@@ -40,12 +41,5 @@ function findPython() {
 
 module.exports = { 
     findPython,
-    createSQliteFile,
-    getFileType,
-    winGunzipFile,
-    unCompressFile,
-    uncompressFolder,
-    cleanHuaweiGexportFiles,
-    cleanHuaweiMOTreeFiles,
-    cleanHuaweiGExportWithSed
+    createSQliteFile
  };
