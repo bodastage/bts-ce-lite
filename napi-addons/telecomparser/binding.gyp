@@ -8,6 +8,7 @@
         "src/bodahuaweimmlparser.cpp",
         "src/bodahuaweigexportparser.cpp",
         "src/bodautils.cpp",
+        "src/telecomparser.h",
         "src/bodabulkcmparser.h",
         "src/bodahuaweimmlparser.h",
         "src/bodahuaweigexportparser.h",

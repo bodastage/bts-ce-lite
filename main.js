@@ -1,9 +1,12 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const log = require('electron-log');
 const path = require('path');
 const url = require('url');
 const fs = require('fs');
+
+//hide menu 
+Menu.setApplicationMenu(null);
 
 // in the main process:
 //require('@electron/remote/main').initialize()
@@ -13,7 +16,7 @@ const initListenerPath = path.join(__dirname, 'backend', 'ipc', 'init.js');
 require(initListenerPath);
 //require(`${initListenerPath}`);
 
-console.log('process.resourcesPath:', process.resourcesPath);
+// console.log('process.resourcesPath:', process.resourcesPath);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -25,6 +28,7 @@ function createWindow() {
 	mainWindow = new BrowserWindow({
 		width: 900,
 		height: 600,
+		autoHideMenuBar: true,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: true,

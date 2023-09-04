@@ -133,7 +133,6 @@ void bodastage::BodaHuaweiGExportParser::process_file_or_directory() {
                     spdlog::info("Parsing {} ...",  base_file_name);
                 }
                 
-                spdlog::info("++++++++++++++++++++++++++++++++222");
                 spdlog::info("file: {}", entry.path().string());
                 parse_file(entry.path().string());
 
@@ -742,4 +741,8 @@ void bodastage::BodaHuaweiGExportParser::on_empty_element(Xml::Inspector<Xml::En
 {
     on_start_element(inspector);
     on_end_element(inspector);
+}
+
+void bodastage::BodaHuaweiGExportParser::on_comment(Xml::Inspector<Xml::Encoding::Utf8Writer> &inspector)
+{
 }
